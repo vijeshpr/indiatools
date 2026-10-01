@@ -44,7 +44,7 @@ export const PetrolVsDieselTool: React.FC = () => {
 - Diesel Premium Price: ₹${extraPriceDiesel.toLocaleString('en-IN')}
 - Breakeven Distance: ${result.breakevenKm.toLocaleString('en-IN')} km (${result.breakevenMonths} Months)
 - Recommendation: ${result.isDieselRecommended ? 'Diesel Recommended' : 'Petrol Recommended'}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

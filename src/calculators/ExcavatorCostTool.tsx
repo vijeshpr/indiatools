@@ -48,7 +48,7 @@ export const ExcavatorCostTool: React.FC = () => {
 --------------------------------------------------
 TOTAL BILLING EXPENSE: ₹${result.totalCost.toLocaleString('en-IN')}
 EFFECTIVE HOURLY RATE: ₹${result.effectiveHourlyCost}/hr
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

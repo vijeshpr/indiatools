@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Send, CheckCircle2, MessageSquare, Mail } from 'lucide-react'
 import { useToast } from '../components/common/Toast'
+import { useSEO } from '../hooks/useSEO'
 
 export const ContactPage: React.FC = () => {
   const [name, setName] = useState('')
@@ -10,10 +11,17 @@ export const ContactPage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false)
   const { showToast } = useToast()
 
+  useSEO({
+    title: 'Contact & Feedback – Tool Requests | IndiaTools',
+    description:
+      'Get in touch with the IndiaTools team. Request new tools, suggest state DISCOM tariff updates, or report calculation feedback.',
+    canonicalPath: '/contact',
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitted(true)
-    showToast('Feedback submitted! Thank you for supporting India Practical Tools.')
+    showToast('Feedback submitted! Thank you for supporting IndiaTools.')
   }
 
   return (
@@ -37,7 +45,7 @@ export const ContactPage: React.FC = () => {
               Message Received
             </h3>
             <p className="text-xs text-neutral-400 max-w-sm mx-auto">
-              Thank you for contributing to India Practical Tools. We review every suggestion to add new calculators.
+              Thank you for contributing to IndiaTools. We review every suggestion to add new calculators.
             </p>
             <button
               onClick={() => {

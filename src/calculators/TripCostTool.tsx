@@ -45,7 +45,7 @@ Travelers: ${travelers} | Fuel: ${results.fuelRequiredL} L (₹${results.fuelCos
 FASTag Tolls: ₹${results.tollsCost} | Parking/Misc: ₹${results.miscCost}
 - Grand Total Cost: ₹${results.totalCost.toLocaleString('en-IN')}
 - Cost Per Traveler: ₹${results.costPerPerson.toLocaleString('en-IN')}
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

@@ -43,7 +43,7 @@ export const EvVsPetrolTool: React.FC = () => {
 - Net Monthly Savings with EV: ₹${result.monthlySavingsWithEv.toLocaleString('en-IN')}
 - Annual Energy Savings: ₹${result.annualSavings.toLocaleString('en-IN')}
 - Breakeven Distance: ${result.breakevenKm.toLocaleString('en-IN')} km (~${result.breakevenYears} Years)
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

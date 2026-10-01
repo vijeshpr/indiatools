@@ -32,7 +32,7 @@ export const BrickCalculatorTool: React.FC = () => {
 - Estimated Material Cost: ₹${result.estimatedCostRs.toLocaleString('en-IN')}
 - Cement Mortar Required: ${result.cementBags} Bags (50kg)
 - Sand for Mortar: ${result.sandCft} cu.ft (~${result.sandBrass} Brass)
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

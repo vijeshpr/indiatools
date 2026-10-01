@@ -28,7 +28,7 @@ export const PercentageDiscountTool: React.FC = () => {
 --------------------------------------------------
 AFTER ${percentRate}% DISCOUNT: ₹${result.finalWithDiscount.toLocaleString('en-IN')} (Saved ₹${result.calculatedAmount.toLocaleString('en-IN')})
 AFTER ${percentRate}% MARKUP / TAX: ₹${result.finalWithAddition.toLocaleString('en-IN')}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

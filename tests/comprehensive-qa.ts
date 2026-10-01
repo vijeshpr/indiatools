@@ -60,7 +60,9 @@ TOOLS.forEach(tool => {
   assert(tool.assumptions.length > 0, 'Registry', `Assumptions: ${tool.slug}`)
   assert(tool.faqs.length > 0, 'Registry', `FAQs: ${tool.slug}`)
   assert(tool.seo.title.length > 5, 'Registry', `SEO Title: ${tool.slug}`)
-  assert(tool.seo.canonicalPath === `/tools/${tool.slug}`, 'Registry', `Canonical URL: ${tool.slug}`)
+  assert(tool.seo.title.endsWith('| IndiaTools'), 'Registry', `SEO Title Ends With Brand: ${tool.slug}`)
+  const expectedCanonical = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
+  assert(tool.seo.canonicalPath === expectedCanonical, 'Registry', `Canonical URL: ${tool.slug}`)
 
   // Check related slugs
   tool.relatedSlugs.forEach(rel => {
@@ -79,7 +81,7 @@ TOOLS.forEach(tool => {
 const sitemapPath = path.resolve('public/sitemap.xml')
 const sitemapContent = fs.readFileSync(sitemapPath, 'utf-8')
 TOOLS.forEach(tool => {
-  assert(sitemapContent.includes(`https://indiapracticaltools.com/tools/${tool.slug}`), 'Sitemap', `Sitemap Tool Entry: ${tool.slug}`)
+  assert(sitemapContent.includes(`https://indiatools-rho.vercel.app${tool.seo.canonicalPath}`), 'Sitemap', `Sitemap Tool Entry: ${tool.slug}`)
 })
 
 // ==========================================

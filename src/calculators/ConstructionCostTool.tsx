@@ -36,7 +36,7 @@ Total Area: ${results.totalBuiltUpAreaSqft} sq.ft (${floors} Floors) | Tier: ${q
 - Bricks: ~${results.materials.bricksCount.toLocaleString('en-IN')} Bricks (₹${results.materials.bricksCost.toLocaleString('en-IN')})
 - Flooring & Tiles: ₹${results.materials.flooringTilesCost.toLocaleString('en-IN')}
 - Labor & Supervision: ₹${results.materials.laborCost.toLocaleString('en-IN')}
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

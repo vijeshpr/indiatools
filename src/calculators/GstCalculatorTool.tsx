@@ -33,7 +33,7 @@ export const GstCalculatorTool: React.FC = () => {
 - Total GST Tax: ₹${result.gstAmount.toLocaleString('en-IN')}
 --------------------------------------------------
 TOTAL INVOICE AMOUNT: ₹${result.finalAmount.toLocaleString('en-IN')}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

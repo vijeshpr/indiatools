@@ -32,7 +32,7 @@ Career Gap Deducted: ${gapMonths} Months
 - Total Calendar Days: ${results.totalCalendarDays} Days
 - Approximate Working Days: ${results.totalWorkingDaysApprox} Days (5-day week)
 - Equivalent Months: ${results.effectiveMonths} Months
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

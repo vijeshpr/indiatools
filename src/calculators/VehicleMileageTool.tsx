@@ -29,7 +29,7 @@ Distance: ${distanceKm} km | Fuel: ${fuelLitres} L | Fuel Rate: ₹${fuelPrice}/
 - Running Cost: ₹${results.fuelCostPerKm} / km
 - Cost for 100 km: ₹${results.costPer100Km}
 - Rating: ${results.ratingLabel}
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

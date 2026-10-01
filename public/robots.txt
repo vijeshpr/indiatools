@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://indiapracticaltools.com/sitemap.xml
+Sitemap: https://indiatools-rho.vercel.app/sitemap.xml

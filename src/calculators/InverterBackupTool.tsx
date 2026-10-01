@@ -32,7 +32,7 @@ Connected Load: ${loadWatts} Watts | Battery: ${batteryAh}Ah (${batteryVoltage}V
 - Usable Stored Energy: ${results.usableWattHours} Watt-hours
 - Battery DC Draw: ${results.dcAmpsDraw} Amps
 - Assessment: ${results.recommendedUsage}
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

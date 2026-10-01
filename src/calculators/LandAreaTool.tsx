@@ -54,7 +54,7 @@ export const LandAreaTool: React.FC = () => {
 - Gunthas: ${results.guntha} Gunthas (1,089 sq.ft/guntha)
 - Grounds (Tamil Nadu): ${results.ground} Grounds (2,400 sq.ft/ground)
 - Square Meters: ${results.sqm} sq.m
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

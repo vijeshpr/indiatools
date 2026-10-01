@@ -29,7 +29,7 @@ USABLE RERA CARPET AREA: ${result.carpetAreaSqft} sq.ft
 BUILT-UP AREA (Plinth): ~${result.builtUpAreaSqft} sq.ft
 USABLE SPACE RATIO: ${result.usableSpaceRatioPct}% of purchased area
 Non-Usable Common Area (Lobbies, Staircase, Lifts): ${superBuiltUp - result.carpetAreaSqft} sq.ft
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

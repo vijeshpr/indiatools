@@ -29,7 +29,7 @@ export const WaterTankTool: React.FC = () => {
 - Recommended Split:
   - Overhead Tank (OHT): ${result.recommendedOhtCapacityLitres} Litres (Dimensions: ${result.ohtDimensionsFt})
   - Underground Sump: ${result.recommendedSumpCapacityLitres} Litres (Dimensions: ${result.sumpDimensionsFt})
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

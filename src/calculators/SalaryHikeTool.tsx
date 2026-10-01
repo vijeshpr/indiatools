@@ -30,7 +30,7 @@ Current CTC: ₹${currentCtc.toLocaleString('en-IN')} (₹${(currentCtc / 100000
 - Annual Absolute Increase: ₹${results.absoluteHikeAnnual.toLocaleString('en-IN')}
 - New Monthly Gross: ₹${results.monthlyGrossNew.toLocaleString('en-IN')} (+₹${results.monthlyGrossIncrease.toLocaleString('en-IN')})
 - Estimated In-Hand Take Home: ~₹${results.estimatedMonthlyInHandNew.toLocaleString('en-IN')}/mo (New Tax Regime)
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

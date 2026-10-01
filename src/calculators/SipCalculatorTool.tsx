@@ -32,7 +32,7 @@ TOTAL INVESTED CAPITAL: ₹${result.investedAmount.toLocaleString('en-IN')}
 ESTIMATED RETURNS (WEALTH GAIN): ₹${result.estimatedReturns.toLocaleString('en-IN')}
 TOTAL MATURITY VALUE: ₹${result.totalMaturityValue.toLocaleString('en-IN')}
 Wealth Growth Multiplier: ${(result.totalMaturityValue / Math.max(1, result.investedAmount)).toFixed(2)}×
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

@@ -3,8 +3,23 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Layers, Sparkles } from 'lucide-react'
 import { CATEGORIES, getToolsByCategory } from '../data/tools'
+import { useSEO } from '../hooks/useSEO'
 
 export const CategoriesOverviewPage: React.FC = () => {
+  useSEO({
+    title: 'Tool Categories – Browse Utilities by Sector | IndiaTools',
+    description:
+      'Explore practical tools categorized by Drive, Build, Power, Money, Land, Work, and Create. Designed for real-world Indian applications.',
+    canonicalPath: '/categories',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Tool Categories | IndiaTools',
+      description:
+        'Explore practical tools categorized by Drive, Build, Power, Money, Land, Work, and Create.',
+      url: 'https://indiatools-rho.vercel.app/categories',
+    },
+  })
   return (
     <div className="min-h-screen py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}

@@ -58,7 +58,7 @@ export const Navbar: React.FC = () => {
           <Link
             to="/"
             className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-lg p-1"
-            aria-label="India Practical Tools Homepage"
+            aria-label="IndiaTools Homepage"
           >
             {/* Custom geometric toolbox symbol */}
             <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-950 border border-neutral-700/80 shadow-md flex items-center justify-center overflow-hidden group-hover:border-amber-500/50 transition-colors">

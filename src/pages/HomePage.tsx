@@ -18,9 +18,17 @@ import {
   SectionTricolorDivider,
 } from '../components/animations/TricolorScrollRibbon'
 import { SearchModal } from '../components/common/SearchModal'
+import { useSEO } from '../hooks/useSEO'
 
 export const HomePage: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  useSEO({
+    title: 'IndiaTools – Practical Calculators & Useful Online Tools',
+    description:
+      'IndiaTools provides practical online calculators and useful tools for vehicle costs, construction, electricity, salary, land area, image resizing and everyday calculations.',
+    canonicalPath: '/',
+  })
 
   return (
     <div className="relative overflow-hidden">

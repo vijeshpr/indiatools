@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkles } from 'lucide-react'
 import { CATEGORIES, getToolsByCategory } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
+import { useSEO } from '../hooks/useSEO'
 
 export const CategoryPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId: string }>()
@@ -15,6 +16,28 @@ export const CategoryPage: React.FC = () => {
 
   const category = CATEGORIES[validCategory]
   const tools = getToolsByCategory(validCategory)
+
+  useSEO({
+    title: `${category.title} Tools & Calculators (${category.subtitle}) | IndiaTools`,
+    description: category.description,
+    canonicalPath: `/category/${category.id}`,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: `${category.title} Tools | IndiaTools`,
+      description: category.description,
+      url: `https://indiatools-rho.vercel.app/category/${category.id}`,
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListElement: tools.map((t, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: t.title,
+          url: `https://indiatools-rho.vercel.app${t.seo.canonicalPath}`,
+        })),
+      },
+    },
+  })
 
   return (
     <div className="min-h-screen py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

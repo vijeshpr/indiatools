@@ -29,7 +29,7 @@ export const LpgUsageTool: React.FC = () => {
 - Total Burner Cooking Capacity: ~${result.totalCookingHours} Hours
 - Daily Gas Cost: ₹${result.dailyCostRs} / day
 - Estimated Monthly Expense: ₹${result.monthlyExpenditureRs.toLocaleString('en-IN')} (at ₹${cylinderPrice}/cylinder)
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

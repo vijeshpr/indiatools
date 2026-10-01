@@ -32,7 +32,7 @@ Monthly Deductions:
 - Professional Tax: ₹${result.monthlyProfessionalTax.toLocaleString('en-IN')}
 - Monthly TDS Income Tax: ₹${result.monthlyTdsIncomeTax.toLocaleString('en-IN')}
 Total Annual Tax: ₹${result.totalAnnualTax.toLocaleString('en-IN')}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

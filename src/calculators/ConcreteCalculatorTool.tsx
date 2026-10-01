@@ -39,7 +39,7 @@ export const ConcreteCalculatorTool: React.FC = () => {
 - M-Sand: ${result.sandTonnes} Tonnes (${result.sandCft} cu.ft)
 - 20mm Aggregate: ${result.aggregateTonnes} Tonnes (${result.aggregateCft} cu.ft)
 - Water Required: ~${result.waterLitres} Litres
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

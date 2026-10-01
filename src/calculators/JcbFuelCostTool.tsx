@@ -48,7 +48,7 @@ Diesel Price: ₹${dieselPrice}/L at ${fuelLph} LPH
 - Daily Fuel Cost: ₹${results.dailyFuelCost.toLocaleString('en-IN')} (${results.dailyFuelLitres} Litres)
 - Monthly Fuel Cost: ₹${results.monthlyFuelCost.toLocaleString('en-IN')} (${results.monthlyFuelLitres} Litres)
 - Annual Fuel Burn: ₹${results.annualFuelCost.toLocaleString('en-IN')}
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

@@ -94,7 +94,7 @@ export const Photo100KBTool: React.FC = () => {
 - Output Dimensions: ${processedResult.width} × ${processedResult.height} px
 - Output Format: JPEG
 - Privacy: 100% Client-side in-browser (Zero server upload)
-Processed on India Practical Tools (https://indiapracticaltools.com)`
+Processed on IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

@@ -43,7 +43,7 @@ Cost Breakdown:
 - Consumables & Coolant: ₹${result.consumablesCost.toLocaleString('en-IN')}
 - Wheel Alignment & Balancing: ₹${result.wheelAlignmentCost.toLocaleString('en-IN')}
 Key Recommended Replacements: ${result.keyRecommendations.join(', ')}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

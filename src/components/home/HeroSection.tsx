@@ -122,7 +122,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900/90 dark:bg-neutral-900/90 light:bg-white border border-neutral-700/80 light:border-slate-300 shadow-xl backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
             <span className="text-xs font-mono font-bold tracking-wider uppercase text-neutral-200 light:text-slate-800">
-              India Practical Tools Platform
+              IndiaTools Platform
             </span>
             <span className="text-neutral-500">•</span>
             <span className="text-xs text-amber-400 font-semibold">40+ Precision Utilities</span>

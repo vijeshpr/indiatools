@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -16,6 +16,7 @@ import { FAQAccordion } from './FAQAccordion'
 import { useToast } from '../common/Toast'
 import { getToolBySlug } from '../../data/tools'
 import { ToolCard } from './ToolCard'
+import { useSEO } from '../../hooks/useSEO'
 
 interface ToolPageLayoutProps {
   tool: ToolDefinition
@@ -34,25 +35,78 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
 }) => {
   const { showToast } = useToast()
 
-  // SEO document title, canonical and metadata updates
-  useEffect(() => {
-    document.title = tool.seo.title
-    const metaDesc = document.querySelector('meta[name="description"]')
-    if (metaDesc) {
-      metaDesc.setAttribute('content', tool.seo.metaDescription)
-    }
+  // Construct JSON-LD Schema including WebApplication, BreadcrumbList, and FAQPage
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebApplication',
+        name: tool.title,
+        description: tool.detailedDescription || tool.description,
+        url: `https://indiatools-rho.vercel.app${tool.seo.canonicalPath}`,
+        applicationCategory: 'UtilityApplication',
+        operatingSystem: 'All',
+        browserRequirements: 'Requires JavaScript. Requires HTML5.',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'INR',
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://indiatools-rho.vercel.app/',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Tools',
+            item: 'https://indiatools-rho.vercel.app/tools',
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: tool.categoryLabel,
+            item: `https://indiatools-rho.vercel.app/category/${tool.category}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 4,
+            name: tool.shortTitle,
+            item: `https://indiatools-rho.vercel.app${tool.seo.canonicalPath}`,
+          },
+        ],
+      },
+      ...(tool.faqs && tool.faqs.length > 0
+        ? [
+            {
+              '@type': 'FAQPage',
+              mainEntity: tool.faqs.map((faq) => ({
+                '@type': 'Question',
+                name: faq.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: faq.answer,
+                },
+              })),
+            },
+          ]
+        : []),
+    ],
+  }
 
-    let canonical = document.querySelector('link[rel="canonical"]')
-    if (!canonical) {
-      canonical = document.createElement('link')
-      canonical.setAttribute('rel', 'canonical')
-      document.head.appendChild(canonical)
-    }
-    canonical.setAttribute('href', `https://indiapracticaltools.com${tool.seo.canonicalPath}`)
-
-    // Scroll to top upon navigation
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [tool])
+  // Hook handles title, meta description, canonical, OG, Twitter, and JSON-LD
+  useSEO({
+    title: tool.seo.title,
+    description: tool.seo.metaDescription,
+    canonicalPath: tool.seo.canonicalPath,
+    jsonLd,
+  })
 
   const handleShare = async () => {
     const url = window.location.href
@@ -90,43 +144,8 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
     .map((slug) => getToolBySlug(slug))
     .filter((t): t is ToolDefinition => !!t)
 
-  // Construct JSON-LD Schema
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'SoftwareApplication',
-        name: tool.title,
-        description: tool.detailedDescription,
-        applicationCategory: 'UtilityApplication',
-        operatingSystem: 'All',
-        offers: {
-          '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'INR',
-        },
-      },
-      {
-        '@type': 'FAQPage',
-        mainEntity: tool.faqs.map((faq) => ({
-          '@type': 'Question',
-          name: faq.question,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: faq.answer,
-          },
-        })),
-      },
-    ],
-  }
-
   return (
     <article className="min-h-screen pb-20">
-      {/* Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
 
       {/* Hero Header */}
       <div className="relative pt-6 pb-10 sm:pb-12 border-b border-neutral-800/80 light:border-slate-200/80 bg-neutral-900/30 light:bg-slate-50/50">

@@ -1,7 +1,13 @@
-import React from 'react'
 import { FileText, CheckCircle2 } from 'lucide-react'
+import { useSEO } from '../hooks/useSEO'
 
 export const TermsPage: React.FC = () => {
+  useSEO({
+    title: 'Terms of Service | IndiaTools',
+    description:
+      'Read the terms and conditions for using IndiaTools web applications and calculators.',
+    canonicalPath: '/terms',
+  })
   return (
     <div className="min-h-screen py-12 sm:py-20 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-center gap-3 mb-6">
@@ -22,7 +28,7 @@ export const TermsPage: React.FC = () => {
             Purpose & Educational Nature
           </h2>
           <p>
-            India Practical Tools provides computational estimates, conversion tools, and client-side photo processing utilities for informational and preparation purposes.
+            IndiaTools provides computational estimates, conversion tools, and client-side photo processing utilities for informational and preparation purposes.
           </p>
         </section>
 

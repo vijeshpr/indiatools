@@ -28,7 +28,7 @@ Input: ${acreVal} Acres
 - Bighas: ${results.bigha} Standard Bighas
 - Square Meters: ${results.sqm.toLocaleString('en-IN')} sq.m
 - Hectares: ${results.hectare} Hectares (2.471 acres/hectare)
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

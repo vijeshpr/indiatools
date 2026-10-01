@@ -3,7 +3,7 @@
 **Date:** October 1, 2026  
 **Application:** INDIA PRACTICAL TOOLS  
 **Tagline:** "Real-life problems. One simple toolbox."  
-**Platform URL:** `https://indiapracticaltools.com`  
+**Platform URL:** `https://indiatools-rho.vercel.app`  
 **Test Suite Status:** 1,095 Automated Checks Executed — **1,095 PASSED / 0 FAILED**  
 **Build Status:** `tsc -b && vite build` — **0 Errors / 0 Warnings**  
 **Final Status:** **PRODUCTION READY**
@@ -46,8 +46,8 @@ During our comprehensive QA pass across all 42 calculators, routes, components, 
    - **Verification:** Directly tested `/categories` and `/popular` in route automation suite: **PASSED**.
 
 3. **Incomplete XML Sitemap Domain & Route Mapping (`public/sitemap.xml`)**
-   - **Problem:** `public/sitemap.xml` used `https://example.com` and only indexed 18 legacy routes instead of all 42 tools and static pages.
-   - **Expected:** Canonical domain `https://indiapracticaltools.com` indexing all 50 public routes with priority metadata and daily/weekly changefreq.
+   - **Problem:** `public/sitemap.xml` used `https://indiatools-rho.vercel.app` and only indexed 18 legacy routes instead of all 42 tools and static pages.
+   - **Expected:** Canonical domain `https://indiatools-rho.vercel.app` indexing all 50 public routes with priority metadata and daily/weekly changefreq.
    - **Actual:** 24 tools and several core pages (`/popular`, `/categories`, `/privacy`, `/terms`) were absent from the sitemap.
    - **Fix:** Completely regenerated `public/sitemap.xml` with all 42 `/tools/[slug]` URLs, categories, static pages, and proper `lastmod` tags.
    - **Verification:** Automated URL validation confirmed 50 distinct `<loc>` entries matching the route registry.
@@ -77,7 +77,7 @@ During our comprehensive QA pass across all 42 calculators, routes, components, 
 ### 🔍 Low Priority / Polish Resolved
 7. **Unused Imports & Canonical Link Management**
    - **Problem:** Minor unused icon imports in `Navbar.tsx`, `Footer.tsx`, and `CementCalculatorTool.tsx`; dynamic canonical link tag was missing on initial HTML load.
-   - **Fix:** Removed all unused imports, added `<link rel="canonical" href="https://indiapracticaltools.com/" />` in `index.html`, and added dynamic canonical updater in `ToolPageLayout.tsx`.
+   - **Fix:** Removed all unused imports, added `<link rel="canonical" href="https://indiatools-rho.vercel.app/" />` in `index.html`, and added dynamic canonical updater in `ToolPageLayout.tsx`.
    - **Verification:** Clean `tsc -b && vite build` and `oxlint` with 0 errors.
 
 ---

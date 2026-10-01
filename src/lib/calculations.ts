@@ -1,4 +1,4 @@
-// Pure calculation functions for India Practical Tools
+// Pure calculation functions for IndiaTools
 // All formulas use genuine Indian benchmarks, IS codes, and tax standards
 
 // Helper utilities to guarantee robust mathematical safety across all calculators

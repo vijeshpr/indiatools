@@ -40,7 +40,7 @@ export const TileCalculatorTool: React.FC = () => {
 - Boxes Required: ${result.boxCount} Boxes (${result.tileCount} Tiles)
 - Tile Material Cost: ₹${result.estimatedCostRs.toLocaleString('en-IN')}
 - Adhesive / Mortar Bags: ~${result.adhesiveBags} Bags (20kg)
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

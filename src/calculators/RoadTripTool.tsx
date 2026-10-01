@@ -38,7 +38,7 @@ export const RoadTripTool: React.FC = () => {
 TOTAL OUTFLOW: ₹${result.totalCost.toLocaleString('en-IN')}
 PER PERSON SHARE: ₹${result.costPerPerson.toLocaleString('en-IN')} (${passengers} travellers)
 EFFECTIVE COST PER KM: ₹${result.costPerKm}/km
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

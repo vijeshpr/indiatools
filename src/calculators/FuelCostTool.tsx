@@ -29,7 +29,7 @@ Journey Distance: ${distanceKm} km | Mileage: ${mileageKmPerL} km/L | Fuel Price
 - Total Fuel Expense: ₹${results.totalCost.toLocaleString('en-IN')}
 - Cost per Km: ₹${results.costPerKm} / km
 - CO2 Emissions: ~${results.co2EmissionsKg} kg CO2
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

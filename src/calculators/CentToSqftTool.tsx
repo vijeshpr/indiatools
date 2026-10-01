@@ -41,7 +41,7 @@ Input: ${inputVal} ${fromUnit.toUpperCase()}
 - Gunthas: ${results.guntha} Gunthas
 - Grounds (TN): ${results.ground} Grounds
 - Bighas: ${results.bigha} Bighas
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

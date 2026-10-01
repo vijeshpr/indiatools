@@ -37,7 +37,7 @@ MONTHLY ELECTRICITY BILL: ₹${result.monthlyCostRs.toLocaleString('en-IN')}
 4-MONTH SUMMER SEASON BILL: ₹${result.summerSeasonCostRs.toLocaleString('en-IN')}
 Average Power Draw: ${result.averagePowerWatts} Watts
 ${starRating === 3 ? `Upgrade Tip: A 5-Star AC saves ~₹${result.fiveStarSavingsMonthly}/month in electricity!` : 'Optimal: 5-Star Inverter gives maximum efficiency!'}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

@@ -85,7 +85,7 @@ export const ImageToPdfTool: React.FC = () => {
 - Output File: documents-compiled.pdf (${sizeKb} KB)
 - Page Standard: ISO 216 A4 (595 × 842 pt)
 - Privacy Guarantee: 100% Client-side browser compiled (Zero cloud upload)
-Created via India Practical Tools (https://indiapracticaltools.com)`
+Created via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (
@@ -235,7 +235,7 @@ Created via India Practical Tools (https://indiapracticaltools.com)`
               <span>Strict Financial & Identity Privacy</span>
             </div>
             <p>
-              Unlike free online PDF conversion websites that upload your Aadhaar, bank statements, and sensitive tax files to untrusted third-party servers, India Practical Tools constructs the PDF binary entirely in your device memory.
+              Unlike free online PDF conversion websites that upload your Aadhaar, bank statements, and sensitive tax files to untrusted third-party servers, IndiaTools constructs the PDF binary entirely in your device memory.
             </p>
           </div>
         </div>

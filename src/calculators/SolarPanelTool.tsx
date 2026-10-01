@@ -32,7 +32,7 @@ Monthly Consumption: ${monthlyInput} ${isUnits ? 'Units' : '₹'}
 - PM Surya Ghar Govt Subsidy: ₹${results.pmSuryaGharSubsidyRs.toLocaleString('en-IN')}
 - Estimated Monthly Savings: ₹${results.monthlySavingsRs.toLocaleString('en-IN')}
 - 25-Year Cumulative Savings: ₹${results.twentyFiveYearSavingsRs.toLocaleString('en-IN')}
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

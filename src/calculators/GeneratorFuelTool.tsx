@@ -42,7 +42,7 @@ export const GeneratorFuelTool: React.FC = () => {
 TOTAL DIESEL COST: ₹${result.totalCost.toLocaleString('en-IN')} (at ₹${dieselPrice}/Litre)
 POWER GENERATED: ${result.totalUnitsKwh} kWh Units
 EFFECTIVE GENERATION COST: ₹${result.effectiveCostPerUnit} per kWh Unit
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

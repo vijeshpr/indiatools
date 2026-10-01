@@ -1,7 +1,13 @@
-import React from 'react'
 import { ShieldCheck, Lock, CheckCircle2 } from 'lucide-react'
+import { useSEO } from '../hooks/useSEO'
 
 export const PrivacyPage: React.FC = () => {
+  useSEO({
+    title: 'Privacy Policy – Zero Data Collection | IndiaTools',
+    description:
+      'Our privacy commitment: 100% client-side computing. Photos, files, and calculations never leave your browser.',
+    canonicalPath: '/privacy',
+  })
   return (
     <div className="min-h-screen py-12 sm:py-20 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-center gap-3 mb-6">
@@ -23,7 +29,7 @@ export const PrivacyPage: React.FC = () => {
             <span>100% Client-Side Computing Commitment</span>
           </h2>
           <p>
-            At India Practical Tools, we adhere to a strict client-side architecture. When you upload photos for 50KB compression, signature background whitening, or passport photo creation, the image processing is executed entirely in your browser memory via the HTML5 Canvas API.
+            At IndiaTools, we adhere to a strict client-side architecture. When you upload photos for 50KB compression, signature background whitening, or passport photo creation, the image processing is executed entirely in your browser memory via the HTML5 Canvas API.
           </p>
           <p className="font-semibold text-emerald-400">
             Your images and personal documents are never transmitted to our servers or stored anywhere.

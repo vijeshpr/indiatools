@@ -4,6 +4,7 @@ import { Search, Filter, Sparkles, Wrench } from 'lucide-react'
 import { TOOLS, CATEGORIES } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
+import { useSEO } from '../hooks/useSEO'
 
 interface ToolsCatalogPageProps {
   popularOnly?: boolean
@@ -12,6 +13,16 @@ interface ToolsCatalogPageProps {
 export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly = false }) => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+
+  useSEO({
+    title: popularOnly
+      ? 'Popular Tools & Calculators | IndiaTools'
+      : 'All Tools & Calculators – Free Online Toolbox | IndiaTools',
+    description: popularOnly
+      ? 'Discover the most popular Indian online calculators and image tools for vehicle mileage, JCB fuel, 50KB photos, and electricity bills.'
+      : 'Browse all 40+ practical online calculators and tools for vehicle costs, civil construction, power bills, salary tax, and image compression.',
+    canonicalPath: popularOnly ? '/popular' : '/tools',
+  })
 
   const filteredTools = useMemo(() => {
     return TOOLS.filter((tool) => {

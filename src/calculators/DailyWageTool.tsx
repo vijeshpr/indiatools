@@ -36,7 +36,7 @@ export const DailyWageTool: React.FC = () => {
 - Overtime Earnings: ₹${result.overtimeEarnings.toLocaleString('en-IN')} (${overtimeHours} OT hours)
 --------------------------------------------------
 TOTAL MONTHLY TAKE-HOME: ₹${result.totalTakeHome.toLocaleString('en-IN')}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

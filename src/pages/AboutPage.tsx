@@ -1,8 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { ShieldCheck, Cpu, Heart, CheckCircle2, ArrowRight } from 'lucide-react'
+import { useSEO } from '../hooks/useSEO'
 
 export const AboutPage: React.FC = () => {
+  useSEO({
+    title: 'About IndiaTools – Purpose & Philosophy | IndiaTools',
+    description:
+      'Learn about IndiaTools: our mission to provide practical, 100% private, client-side tools and accurate calculators calibrated for everyday Indian realities.',
+    canonicalPath: '/about',
+  })
   return (
     <div className="min-h-screen py-12 sm:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Title */}
@@ -14,7 +21,7 @@ export const AboutPage: React.FC = () => {
           Real-life problems. One simple toolbox.
         </h1>
         <p className="text-base sm:text-lg text-neutral-400 light:text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          India Practical Tools was built to replace cluttered, ad-ridden calculator websites with
+          IndiaTools was built to replace cluttered, ad-ridden calculator websites with
           a cinematic, private, and mathematically rigorous technological utility platform.
         </p>
       </div>
@@ -62,13 +69,13 @@ export const AboutPage: React.FC = () => {
         {/* Narrative Section */}
         <div className="p-8 rounded-3xl bg-neutral-900/40 light:bg-slate-50 border border-neutral-800 light:border-slate-200 space-y-4 text-sm text-neutral-300 light:text-slate-700 leading-relaxed">
           <h2 className="text-xl font-bold text-white light:text-slate-900">
-            Why India Practical Tools Exists
+            Why IndiaTools Exists
           </h2>
           <p>
             When an Indian homebuilder looks for construction material estimates, they shouldn't have to wade through spam blogs. When a government job aspirant needs a 50KB photo or 10KB signature for UPSC or SSC, they shouldn't have to upload sensitive biometric photos to unknown international servers.
           </p>
           <p>
-            India Practical Tools combines cinematic product craftsmanship, client-side privacy, and rigorous engineering logic into one seamless experience.
+            IndiaTools combines cinematic product craftsmanship, client-side privacy, and rigorous engineering logic into one seamless experience.
           </p>
         </div>
 

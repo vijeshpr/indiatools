@@ -31,7 +31,7 @@ export const FanCostTool: React.FC = () => {
 - Monthly Units: ${result.monthlyUnitsKwh} kWh (₹${result.monthlyCost.toLocaleString('en-IN')})
 - Annual Power Bill: ₹${result.annualCost.toLocaleString('en-IN')}
 ${fanType === 'regular_induction' ? `- Switching to BLDC Fans saves: ₹${result.savingsIfBldcAnnual.toLocaleString('en-IN')} per year (Breakeven in ~14 months)!` : '- You are already saving 65% on fan electricity using BLDC tech!'}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

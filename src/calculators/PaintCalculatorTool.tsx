@@ -37,7 +37,7 @@ export const PaintCalculatorTool: React.FC = () => {
 - Primer Base: ${result.primerLitres} Litres (1 coat)
 -------------------------------------------------
 TOTAL MATERIAL ESTIMATE: ₹${result.estimatedCostRs.toLocaleString('en-IN')}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

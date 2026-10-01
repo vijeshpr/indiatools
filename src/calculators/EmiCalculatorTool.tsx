@@ -32,7 +32,7 @@ MONTHLY EMI: ₹${result.monthlyEmi.toLocaleString('en-IN')}
 TOTAL INTEREST PAYABLE: ₹${result.totalInterest.toLocaleString('en-IN')}
 TOTAL PAYMENT (Principal + Interest): ₹${result.totalPayment.toLocaleString('en-IN')}
 Interest Share: ${result.interestRatioPercentage}% of Total Outflow
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

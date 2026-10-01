@@ -46,7 +46,7 @@ export const MonthlyVehicleRunningCostTool: React.FC = () => {
 TOTAL MONTHLY OUTFLOW: ₹${result.totalMonthlyCost.toLocaleString('en-IN')}
 TOTAL ANNUAL OUTFLOW: ₹${result.annualTotalCost.toLocaleString('en-IN')}
 EFFECTIVE COST PER KM: ₹${result.costPerKm}/km
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (

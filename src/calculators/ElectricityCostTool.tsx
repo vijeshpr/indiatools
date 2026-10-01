@@ -53,7 +53,7 @@ Rate Base: ₹${ratePerUnit}/unit (Progressive slab breakdown)
 - Estimated Monthly Bill: ₹${results.estimatedMonthlyBill.toLocaleString('en-IN')}
 - Estimated Annual Bill: ₹${results.estimatedAnnualBill.toLocaleString('en-IN')}
 - Carbon Footprint: ~${results.carbonFootprintKg} kg CO2 / month
-Calculated on India Practical Tools`
+Calculated on IndiaTools`
   }
 
   return (

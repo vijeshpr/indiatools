@@ -40,7 +40,7 @@ export const CementCalculatorTool: React.FC = () => {
 - Sand (M-Sand) Required: ${result.sandRequiredCft} cu.ft
 - Aggregate Required: ${result.aggregateRequiredCft} cu.ft
 - Estimated Cement Cost: ₹${result.estimatedCostRs.toLocaleString('en-IN')}
-Calculated via India Practical Tools (https://indiapracticaltools.com)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
   }
 
   return (
