@@ -5,12 +5,19 @@ import { TOOLS, CATEGORIES } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
 
-export const ToolsCatalogPage: React.FC = () => {
+interface ToolsCatalogPageProps {
+  popularOnly?: boolean
+}
+
+export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly = false }) => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   const filteredTools = useMemo(() => {
     return TOOLS.filter((tool) => {
+      if (popularOnly && !['Popular', 'Flagship', 'Govt Exam Special', 'Essential'].includes(tool.badge || '')) {
+        return false
+      }
       const matchesCat = selectedCategory === 'all' || tool.category === selectedCategory
       const q = searchQuery.toLowerCase().trim()
       const matchesSearch =
@@ -20,7 +27,7 @@ export const ToolsCatalogPage: React.FC = () => {
         tool.tags.some((t) => t.toLowerCase().includes(q))
       return matchesCat && matchesSearch
     })
-  }, [selectedCategory, searchQuery])
+  }, [selectedCategory, searchQuery, popularOnly])
 
   return (
     <div className="min-h-screen py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,13 +35,15 @@ export const ToolsCatalogPage: React.FC = () => {
       <div className="text-center max-w-3xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold uppercase mb-3">
           <Wrench className="w-3.5 h-3.5" />
-          <span>The Practical Toolbox</span>
+          <span>{popularOnly ? 'Top Rated Utilities' : 'The Practical Toolbox'}</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-black text-white light:text-slate-900 tracking-tight">
-          All Tools & Calculators
+          {popularOnly ? 'Popular Indian Tools' : 'All Tools & Calculators'}
         </h1>
         <p className="mt-2.5 text-sm sm:text-base text-neutral-400 light:text-slate-600">
-          Explore our suite of 15+ specialized utilities crafted for real-life Indian problems.
+          {popularOnly
+            ? 'The most frequently calculated utilities across automotive, construction, power, and exam documents.'
+            : 'Explore our suite of 40+ precision utilities crafted for real-life Indian problems.'}
         </p>
 
         {/* Filter Input */}

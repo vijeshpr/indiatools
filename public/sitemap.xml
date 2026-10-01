@@ -13,6 +13,42 @@
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://indiapracticaltools.com/popular</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://indiapracticaltools.com/categories</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://indiapracticaltools.com/about</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://indiapracticaltools.com/contact</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://indiapracticaltools.com/privacy</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://indiapracticaltools.com/terms</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
 
   <!-- Categories -->
   <url>
@@ -53,224 +89,224 @@
 
   <!-- DRIVE Tools -->
   <url>
-    <loc>https://indiapracticaltools.com/calculators/vehicle-mileage</loc>
+    <loc>https://indiapracticaltools.com/tools/vehicle-mileage</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/fuel-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/fuel-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/trip-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/trip-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/monthly-vehicle-running-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/monthly-vehicle-running-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/petrol-vs-diesel</loc>
+    <loc>https://indiapracticaltools.com/tools/petrol-vs-diesel</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/ev-vs-petrol</loc>
+    <loc>https://indiapracticaltools.com/tools/ev-vs-petrol</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/jcb-fuel-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/jcb-fuel-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/vehicle-service-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/vehicle-service-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/road-trip-planner</loc>
+    <loc>https://indiapracticaltools.com/tools/road-trip-planner</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
 
   <!-- BUILD Tools -->
   <url>
-    <loc>https://indiapracticaltools.com/calculators/cement-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/cement-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/concrete-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/concrete-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/brick-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/brick-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/tile-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/tile-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/paint-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/paint-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/construction-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/construction-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/excavator-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/excavator-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
 
   <!-- POWER Tools -->
   <url>
-    <loc>https://indiapracticaltools.com/calculators/electricity-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/electricity-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/ac-electricity-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/ac-electricity-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/fan-electricity-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/fan-electricity-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/inverter-backup</loc>
+    <loc>https://indiapracticaltools.com/tools/inverter-backup</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/solar-panel</loc>
+    <loc>https://indiapracticaltools.com/tools/solar-panel</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/water-tank-capacity</loc>
+    <loc>https://indiapracticaltools.com/tools/water-tank-capacity</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/lpg-usage</loc>
+    <loc>https://indiapracticaltools.com/tools/lpg-usage</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/generator-fuel-cost</loc>
+    <loc>https://indiapracticaltools.com/tools/generator-fuel-cost</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
 
   <!-- MONEY Tools -->
   <url>
-    <loc>https://indiapracticaltools.com/calculators/salary-hike</loc>
+    <loc>https://indiapracticaltools.com/tools/salary-hike</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/in-hand-salary</loc>
+    <loc>https://indiapracticaltools.com/tools/in-hand-salary</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/emi-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/emi-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/gst-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/gst-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/sip-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/sip-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/daily-wage</loc>
+    <loc>https://indiapracticaltools.com/tools/daily-wage</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/percentage-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/percentage-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.8</priority>
   </url>
 
   <!-- WORK Tools -->
   <url>
-    <loc>https://indiapracticaltools.com/calculators/experience-calculator</loc>
+    <loc>https://indiapracticaltools.com/tools/experience-calculator</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
 
   <!-- LAND Tools -->
   <url>
-    <loc>https://indiapracticaltools.com/calculators/cent-to-sqft</loc>
+    <loc>https://indiapracticaltools.com/tools/cent-to-sqft</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/acre-converter</loc>
+    <loc>https://indiapracticaltools.com/tools/acre-converter</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/carpet-area</loc>
+    <loc>https://indiapracticaltools.com/tools/carpet-area</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/land-area</loc>
+    <loc>https://indiapracticaltools.com/tools/land-area</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
 
   <!-- CREATE (Image & Document) Tools -->
   <url>
-    <loc>https://indiapracticaltools.com/calculators/50kb-photo</loc>
+    <loc>https://indiapracticaltools.com/tools/50kb-photo</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/100kb-photo</loc>
+    <loc>https://indiapracticaltools.com/tools/100kb-photo</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/exact-kb-compressor</loc>
+    <loc>https://indiapracticaltools.com/tools/exact-kb-compressor</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/signature-resizer</loc>
+    <loc>https://indiapracticaltools.com/tools/signature-resizer</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/passport-photo</loc>
+    <loc>https://indiapracticaltools.com/tools/passport-photo</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://indiapracticaltools.com/calculators/image-to-pdf</loc>
+    <loc>https://indiapracticaltools.com/tools/image-to-pdf</loc>
     <lastmod>2026-10-01</lastmod>
     <priority>0.9</priority>
   </url>

@@ -34,13 +34,21 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
 }) => {
   const { showToast } = useToast()
 
-  // SEO document title and metadata updates
+  // SEO document title, canonical and metadata updates
   useEffect(() => {
     document.title = tool.seo.title
     const metaDesc = document.querySelector('meta[name="description"]')
     if (metaDesc) {
       metaDesc.setAttribute('content', tool.seo.metaDescription)
     }
+
+    let canonical = document.querySelector('link[rel="canonical"]')
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.setAttribute('rel', 'canonical')
+      document.head.appendChild(canonical)
+    }
+    canonical.setAttribute('href', `https://indiapracticaltools.com${tool.seo.canonicalPath}`)
 
     // Scroll to top upon navigation
     window.scrollTo({ top: 0, behavior: 'smooth' })

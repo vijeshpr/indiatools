@@ -74,7 +74,7 @@ export const ContactPage: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ramesh@example.in"
+                placeholder="ramesh@email.com"
                 className="w-full bg-neutral-950 light:bg-slate-50 border border-neutral-700 light:border-slate-300 rounded-xl px-4 py-2.5 text-sm text-white light:text-slate-900 focus:outline-none focus:border-amber-500"
               />
             </div>

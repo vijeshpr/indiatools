@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { HardHat, Layers, CheckCircle2, IndianRupee } from 'lucide-react'
+import { HardHat, CheckCircle2 } from 'lucide-react'
 import { calculateCement, CementCalcResult } from '../lib/calculations'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'

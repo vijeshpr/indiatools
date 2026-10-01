@@ -7,13 +7,6 @@ import {
   X,
   Sparkles,
   Command,
-  Car,
-  HardHat,
-  Zap,
-  MapPin,
-  Briefcase,
-  FileImage,
-  ArrowUpRight,
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { SearchModal } from './SearchModal'

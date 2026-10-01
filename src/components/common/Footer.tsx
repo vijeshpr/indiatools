@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ShieldCheck, Zap, Heart, ArrowUp } from 'lucide-react'
-import { CATEGORIES, TOOLS } from '../../data/tools'
+import { ShieldCheck, ArrowUp } from 'lucide-react'
+import { CATEGORIES } from '../../data/tools'
 
 export const Footer: React.FC = () => {
   const scrollToTop = () => {

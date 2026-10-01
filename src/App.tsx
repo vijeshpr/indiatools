@@ -10,6 +10,7 @@ import { Footer } from './components/common/Footer'
 import { HomePage } from './pages/HomePage'
 import { ToolsCatalogPage } from './pages/ToolsCatalogPage'
 import { CategoryPage } from './pages/CategoryPage'
+import { CategoriesOverviewPage } from './pages/CategoriesOverviewPage'
 import { ToolDetailPage } from './pages/ToolDetailPage'
 import { AboutPage } from './pages/AboutPage'
 import { ContactPage } from './pages/ContactPage'
@@ -33,6 +34,8 @@ export function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/tools" element={<ToolsCatalogPage />} />
+                <Route path="/popular" element={<ToolsCatalogPage popularOnly={true} />} />
+                <Route path="/categories" element={<CategoriesOverviewPage />} />
                 <Route path="/category/:categoryId" element={<CategoryPage />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
