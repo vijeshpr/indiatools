@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import {
   Search,
   ArrowRight,
@@ -25,6 +25,18 @@ const ACTION_WORDS = ['Calculate.', 'Convert.', 'Plan.', 'Create.']
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
   const [activeWordIndex, setActiveWordIndex] = useState(0)
 
+  // Mouse-responsive lighting coordinates
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const smoothX = useSpring(mouseX, { damping: 25, stiffness: 120 })
+  const smoothY = useSpring(mouseY, { damping: 25, stiffness: 120 })
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    mouseX.set(e.clientX - rect.left)
+    mouseY.set(e.clientY - rect.top)
+  }
+
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveWordIndex((prev) => (prev + 1) % ACTION_WORDS.length)
@@ -33,7 +45,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
   }, [])
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col justify-center pt-8 pb-20 overflow-hidden">
+    <section
+      onMouseMove={handleMouseMove}
+      className="relative min-h-[90vh] flex flex-col justify-center pt-8 pb-20 overflow-hidden"
+    >
+      {/* Background Interactive Lighting Spotlight */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px opacity-40 blur-3xl transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(650px circle at ${smoothX}px ${smoothY}px, rgba(245, 158, 11, 0.12), rgba(249, 115, 22, 0.05), transparent 75%)`,
+        }}
+      />
+
       {/* Background Ambient Subtle Icons (Floating geometry) */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-25 dark:opacity-20 light:opacity-10">
         <motion.div
@@ -102,7 +125,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               India Practical Tools Platform
             </span>
             <span className="text-neutral-500">•</span>
-            <span className="text-xs text-amber-400 font-semibold">15+ Built-in Utilities</span>
+            <span className="text-xs text-amber-400 font-semibold">40+ Precision Utilities</span>
           </div>
         </motion.div>
 
@@ -147,7 +170,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
             className="text-base sm:text-xl text-neutral-400 light:text-slate-600 max-w-2xl mx-auto leading-relaxed pt-2"
           >
             Everything you need for everyday Indian life — automotive mileage, JCB machine fuel,
-            house construction, solar requirements, land units, and 50KB govt exam photos.
+            house construction, solar requirements, land units, salary in-hand, and 50KB govt exam photos.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -161,7 +184,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               to="/tools"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-neutral-950 font-extrabold text-base flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 group cursor-pointer"
             >
-              <span>Explore All 15+ Tools</span>
+              <span>Explore All 40+ Tools</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </Link>
 

@@ -7,7 +7,7 @@ import { ToolCard } from '../tools/ToolCard'
 import { ToolCategory } from '../../types'
 
 export const CategoryShowcase: React.FC = () => {
-  const categoryOrder: ToolCategory[] = ['drive', 'build', 'power', 'land', 'work', 'create']
+  const categoryOrder: ToolCategory[] = ['drive', 'build', 'power', 'money', 'land', 'work', 'create']
 
   return (
     <section className="py-20 relative">
@@ -30,7 +30,7 @@ export const CategoryShowcase: React.FC = () => {
                       className="text-xs font-mono uppercase tracking-widest font-bold"
                       style={{ color: category.accentColor }}
                     >
-                      Category {catIdx + 1} of 6 • {category.subtitle}
+                      Category {catIdx + 1} of {categoryOrder.length} • {category.subtitle}
                     </span>
                   </div>
 

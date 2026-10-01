@@ -1,4 +1,4 @@
-export type ToolCategory = 'drive' | 'build' | 'power' | 'land' | 'work' | 'create'
+export type ToolCategory = 'drive' | 'build' | 'power' | 'money' | 'land' | 'work' | 'create'
 
 export interface FAQItem {
   question: string

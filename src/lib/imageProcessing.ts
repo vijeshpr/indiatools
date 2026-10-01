@@ -40,7 +40,6 @@ export async function compressToMaxKb(
   let curWidth = targetWidth || img.width
   let curHeight = targetHeight || img.height
 
-  // If source is huge (> 1800px), downscale initially to keep quality high and processing fast
   if (!targetWidth && !targetHeight) {
     const maxDim = 1200
     if (curWidth > maxDim || curHeight > maxDim) {
@@ -64,7 +63,6 @@ export async function compressToMaxKb(
   ctx.fillRect(0, 0, curWidth, curHeight)
   ctx.drawImage(img, 0, 0, curWidth, curHeight)
 
-  // Iteratively reduce quality or scale down if needed
   let quality = 0.92
   let blob: Blob | null = null
   let attempts = 0
@@ -83,7 +81,6 @@ export async function compressToMaxKb(
     if (quality > 0.3) {
       quality -= 0.12
     } else {
-      // Downscale canvas dimensions by 15%
       curWidth = Math.round(curWidth * 0.85)
       curHeight = Math.round(curHeight * 0.85)
       canvas.width = curWidth
@@ -122,7 +119,6 @@ export async function compressToExactKb(
   let curWidth = img.width
   let curHeight = img.height
 
-  // If initial file is smaller than target, we can re-export at high quality or keep as is
   const maxDim = 1600
   if (curWidth > maxDim || curHeight > maxDim) {
     const ratio = curWidth / curHeight
@@ -145,7 +141,6 @@ export async function compressToExactKb(
   ctx.fillRect(0, 0, curWidth, curHeight)
   ctx.drawImage(img, 0, 0, curWidth, curHeight)
 
-  // Binary search for optimal JPEG quality
   let minQ = 0.05
   let maxQ = 0.98
   let bestBlob: Blob | null = null
@@ -172,7 +167,6 @@ export async function compressToExactKb(
     }
   }
 
-  // If even at minimum quality it's still bigger than target, scale down dimensions
   if (bestBlob && bestBlob.size > targetBytes * 1.08) {
     const scaleFactor = Math.sqrt(targetBytes / bestBlob.size)
     curWidth = Math.max(100, Math.round(curWidth * scaleFactor * 0.95))
@@ -213,7 +207,6 @@ export async function processSignature(
 ): Promise<ImageProcessingResult> {
   const img = await readFileAsImage(file)
   const canvas = document.createElement('canvas')
-  // Standard Indian exam signature aspect ratio: roughly 140x60 px or 280x120 px
   const targetW = 350
   const targetH = Math.round((targetW * img.height) / img.width)
 
@@ -224,7 +217,6 @@ export async function processSignature(
 
   ctx.drawImage(img, 0, 0, targetW, targetH)
 
-  // Pixel manipulation for paper whitening & crisp ink
   const imgData = ctx.getImageData(0, 0, targetW, targetH)
   const data = imgData.data
 
@@ -232,16 +224,13 @@ export async function processSignature(
     const r = data[i]
     const g = data[i + 1]
     const b = data[i + 2]
-    // Luminance
     const lum = 0.299 * r + 0.587 * g + 0.114 * b
 
     if (lum >= threshold) {
-      // Paper background turned pure white
       data[i] = 255
       data[i + 1] = 255
       data[i + 2] = 255
     } else {
-      // Deepen signature ink with contrast
       const inkVal = Math.max(0, Math.min(255, lum * (1 / contrast)))
       data[i] = inkVal
       data[i + 1] = inkVal
@@ -251,7 +240,6 @@ export async function processSignature(
 
   ctx.putImageData(imgData, 0, 0)
 
-  // Compress to target KB
   const maxBytes = targetMaxKb * 1024
   let quality = 0.85
   let blob: Blob | null = null
@@ -290,7 +278,6 @@ export async function generatePassportPhoto(
 ): Promise<{ single: ImageProcessingResult; printableSheetUrl: string }> {
   const img = await readFileAsImage(file)
 
-  // Standard Indian passport photo spec: 3.5cm x 4.5cm (approx 413 x 531 px @ 300 DPI)
   const pWidth = 413
   const pHeight = 531
 
@@ -300,11 +287,9 @@ export async function generatePassportPhoto(
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('Canvas not supported')
 
-  // Background
   ctx.fillStyle = bgColor
   ctx.fillRect(0, 0, pWidth, pHeight)
 
-  // Draw image with zoom and offset
   const aspect = img.width / img.height
   let drawW = pWidth * zoom
   let drawH = (pWidth / aspect) * zoom
@@ -318,18 +303,15 @@ export async function generatePassportPhoto(
 
   ctx.drawImage(img, posX, posY, drawW, drawH)
 
-  // 1px subtle boundary border
   ctx.strokeStyle = '#E2E8F0'
   ctx.lineWidth = 1
   ctx.strokeRect(0, 0, pWidth, pHeight)
 
-  // Export single photo
   const singleBlob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.95)
   })
   if (!singleBlob) throw new Error('Failed to create passport photo')
 
-  // Generate 8-photo 4x6 inch studio sheet (1200 x 1800 px @ 300 DPI)
   const sheetCanvas = document.createElement('canvas')
   sheetCanvas.width = 1800
   sheetCanvas.height = 1200
@@ -339,7 +321,6 @@ export async function generatePassportPhoto(
   sCtx.fillStyle = '#FFFFFF'
   sCtx.fillRect(0, 0, sheetCanvas.width, sheetCanvas.height)
 
-  // Draw 2 rows of 4 photos with cutting guide margins
   const photoW = 390
   const photoH = 500
   const marginX = (1800 - 4 * photoW) / 5
@@ -350,7 +331,6 @@ export async function generatePassportPhoto(
       const x = marginX + c * (photoW + marginX)
       const y = marginY + r * (photoH + marginY)
       sCtx.drawImage(canvas, x, y, photoW, photoH)
-      // Cutting dotted guides
       sCtx.strokeStyle = '#CCCCCC'
       sCtx.setLineDash([4, 4])
       sCtx.strokeRect(x - 2, y - 2, photoW + 4, photoH + 4)
@@ -373,4 +353,229 @@ export async function generatePassportPhoto(
     },
     printableSheetUrl: sheetBlob ? URL.createObjectURL(sheetBlob) : '',
   }
+}
+
+/**
+ * Image Format Converter (JPG, PNG, WebP)
+ */
+export async function convertImageFormat(
+  file: File,
+  targetFormat: 'image/jpeg' | 'image/png' | 'image/webp',
+  quality: number = 0.92
+): Promise<ImageProcessingResult> {
+  const img = await readFileAsImage(file)
+  const canvas = document.createElement('canvas')
+  canvas.width = img.width
+  canvas.height = img.height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas not supported')
+
+  if (targetFormat === 'image/jpeg') {
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  }
+  ctx.drawImage(img, 0, 0)
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((b) => resolve(b), targetFormat, quality)
+  })
+  if (!blob) throw new Error('Conversion failed')
+
+  return {
+    blob,
+    dataUrl: URL.createObjectURL(blob),
+    sizeBytes: blob.size,
+    sizeKb: Number((blob.size / 1024).toFixed(1)),
+    width: img.width,
+    height: img.height,
+    format: targetFormat,
+  }
+}
+
+/**
+ * Client-Side Image to PDF Generator
+ * Combines image(s) onto standard A4 PDF pages (595 x 842 points) without server upload.
+ */
+export async function imagesToPdf(files: File[]): Promise<Blob> {
+  if (files.length === 0) throw new Error('No images selected')
+
+  // We convert each image to JPEG data url
+  const imgDataList: { dataUrl: string; width: number; height: number }[] = []
+  for (const f of files) {
+    const img = await readFileAsImage(f)
+    const canvas = document.createElement('canvas')
+    canvas.width = img.width
+    canvas.height = img.height
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(0, 0, img.width, img.height)
+      ctx.drawImage(img, 0, 0)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.88)
+      imgDataList.push({ dataUrl, width: img.width, height: img.height })
+    }
+  }
+
+  // Construct a minimal valid multi-page PDF document
+  // Standard A4 dimensions in points: 595.28 x 841.89
+  const a4W = 595.28
+  const a4H = 841.89
+
+  // For a reliable in-browser PDF download without huge dependencies:
+  // Build standard PDF binary structure
+  const pdfParts: string[] = []
+  pdfParts.push('%PDF-1.4\n')
+
+  let objectId = 1
+  const xrefOffsets: number[] = []
+
+  // Function to record byte offset
+  let currentByteLength = pdfParts.join('').length
+
+  // Catalog
+  xrefOffsets[objectId] = currentByteLength
+  const catalogObj = `${objectId} 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`
+  pdfParts.push(catalogObj)
+  currentByteLength += catalogObj.length
+  objectId++
+
+  // Pages container (id: 2)
+  const pagesId = objectId
+  const pageObjectIds: number[] = []
+  objectId++
+
+  const pageEntries: string[] = []
+
+  for (let i = 0; i < imgDataList.length; i++) {
+    const item = imgDataList[i]
+    const pageId = objectId++
+    pageObjectIds.push(pageId)
+
+    // Calculate aspect fit on A4 with 20pt margin
+    const margin = 25
+    const availW = a4W - margin * 2
+    const availH = a4H - margin * 2
+    const scale = Math.min(availW / item.width, availH / item.height)
+    const fitW = item.width * scale
+    const fitH = item.height * scale
+    const posX = margin + (availW - fitW) / 2
+    const posY = margin + (availH - fitH) / 2
+
+    // Content stream id
+    const contentId = objectId++
+
+    // Image XObject id
+    const imageXObjectId = objectId++
+
+    // Convert dataUrl to raw bytes
+    const base64Data = item.dataUrl.split(',')[1]
+    const rawBinary = atob(base64Data)
+
+    // Image Object
+    const imageObjHeader = `${imageXObjectId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${item.width} /Height ${item.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${rawBinary.length} >>\nstream\n`
+    const imageObjFooter = '\nendstream\nendobj\n'
+
+    // Content stream: draws image
+    const streamContent = `q\n${fitW.toFixed(2)} 0 0 ${fitH.toFixed(2)} ${posX.toFixed(2)} ${posY.toFixed(2)} cm\n/Im${i + 1} Do\nQ\n`
+    const contentObj = `${contentId} 0 obj\n<< /Length ${streamContent.length} >>\nstream\n${streamContent}endstream\nendobj\n`
+
+    // Page Object
+    const pageObj = `${pageId} 0 obj\n<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${a4W} ${a4H}] /Contents ${contentId} 0 R /Resources << /XObject << /Im${i + 1} ${imageXObjectId} 0 R >> >> >>\nendobj\n`
+
+    pageEntries.push(pageObj, contentObj, imageObjHeader, rawBinary, imageObjFooter)
+  }
+
+  // Now assemble pages container
+  const kidsStr = pageObjectIds.map((id) => `${id} 0 R`).join(' ')
+  const pagesObj = `${pagesId} 0 obj\n<< /Type /Pages /Kids [ ${kidsStr} ] /Count ${pageObjectIds.length} >>\nendobj\n`
+
+  // Insert pages container
+  pdfParts.splice(1, 0, pagesObj)
+
+  // Assemble full buffer
+  const binaryChunks: (string | Uint8Array)[] = [
+    '%PDF-1.4\n',
+    pagesObj,
+  ]
+
+  // Re-calculate xrefs cleanly
+  const allParts: Uint8Array[] = []
+  allParts.push(new TextEncoder().encode('%PDF-1.4\n'))
+
+  let byteOffset = allParts[0].byteLength
+  const offsets: number[] = [0]
+
+  // Obj 1: Catalog
+  offsets[1] = byteOffset
+  const catBytes = new TextEncoder().encode(catalogObj)
+  allParts.push(catBytes)
+  byteOffset += catBytes.byteLength
+
+  // Obj 2: Pages
+  offsets[2] = byteOffset
+  const pgBytes = new TextEncoder().encode(pagesObj)
+  allParts.push(pgBytes)
+  byteOffset += pgBytes.byteLength
+
+  let curId = 3
+  for (let i = 0; i < imgDataList.length; i++) {
+    const item = imgDataList[i]
+    const pId = curId++
+    const cId = curId++
+    const imgId = curId++
+
+    const margin = 25
+    const availW = a4W - margin * 2
+    const availH = a4H - margin * 2
+    const scale = Math.min(availW / item.width, availH / item.height)
+    const fitW = item.width * scale
+    const fitH = item.height * scale
+    const posX = margin + (availW - fitW) / 2
+    const posY = margin + (availH - fitH) / 2
+
+    const pageDef = `${pId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${a4W} ${a4H}] /Contents ${cId} 0 R /Resources << /XObject << /Im${i + 1} ${imgId} 0 R >> >> >>\nendobj\n`
+    offsets[pId] = byteOffset
+    const pBytes = new TextEncoder().encode(pageDef)
+    allParts.push(pBytes)
+    byteOffset += pBytes.byteLength
+
+    const sContent = `q\n${fitW.toFixed(2)} 0 0 ${fitH.toFixed(2)} ${posX.toFixed(2)} ${posY.toFixed(2)} cm\n/Im${i + 1} Do\nQ\n`
+    const cDef = `${cId} 0 obj\n<< /Length ${sContent.length} >>\nstream\n${sContent}endstream\nendobj\n`
+    offsets[cId] = byteOffset
+    const cBytes = new TextEncoder().encode(cDef)
+    allParts.push(cBytes)
+    byteOffset += cBytes.byteLength
+
+    const base64Data = item.dataUrl.split(',')[1]
+    const binaryStr = atob(base64Data)
+    const imgHeader = `${imgId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${item.width} /Height ${item.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${binaryStr.length} >>\nstream\n`
+    const imgFooter = '\nendstream\nendobj\n'
+
+    offsets[imgId] = byteOffset
+    const hBytes = new TextEncoder().encode(imgHeader)
+    allParts.push(hBytes)
+    byteOffset += hBytes.byteLength
+
+    const imgBin = new Uint8Array(binaryStr.length)
+    for (let k = 0; k < binaryStr.length; k++) {
+      imgBin[k] = binaryStr.charCodeAt(k)
+    }
+    allParts.push(imgBin)
+    byteOffset += imgBin.byteLength
+
+    const fBytes = new TextEncoder().encode(imgFooter)
+    allParts.push(fBytes)
+    byteOffset += fBytes.byteLength
+  }
+
+  const xrefStart = byteOffset
+  let xrefStr = `xref\n0 ${curId}\n0000000000 65535 f \n`
+  for (let id = 1; id < curId; id++) {
+    const off = String(offsets[id]).padStart(10, '0')
+    xrefStr += `${off} 00000 n \n`
+  }
+  xrefStr += `trailer\n<< /Size ${curId} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`
+
+  allParts.push(new TextEncoder().encode(xrefStr))
+  return new Blob(allParts as any, { type: 'application/pdf' })
 }

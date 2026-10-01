@@ -13,6 +13,7 @@ import {
   FileImage,
   ChevronRight,
   Command,
+  IndianRupee,
 } from 'lucide-react'
 import { searchTools } from '../../data/tools'
 import { ToolDefinition, ToolCategory } from '../../types'
@@ -26,6 +27,7 @@ const CATEGORY_ICONS: Record<ToolCategory, React.ElementType> = {
   drive: Car,
   build: HardHat,
   power: Zap,
+  money: IndianRupee,
   land: MapPin,
   work: Briefcase,
   create: FileImage,
