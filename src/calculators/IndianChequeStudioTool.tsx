@@ -173,34 +173,67 @@ https://indiatools-rho.vercel.app/calculators/indian-cheque-studio`
     >
       {/* Print-specific style tag */}
       <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 8mm;
+        }
+
         @media print {
-          body * {
-            visibility: hidden;
+          html,
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            background: #FFFFFF !important;
+            color: #000000 !important;
           }
-          #cheque-printable-container, #cheque-printable-container * {
-            visibility: visible;
-          }
-          #cheque-printable-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 20px;
-            background: white !important;
-            color: black !important;
-          }
-          #cheque-printable-container #cheque-printable-area {
-            position: static !important;
-            transform: none !important;
-          }
-          .no-print {
+
+          /* Hide all screen UI from layout so they take 0 space */
+          header,
+          nav,
+          footer,
+          aside,
+          .no-print,
+          .cheque-screen-ui {
             display: none !important;
+          }
+
+          article,
+          main {
+            margin: 0 !important;
+            padding: 0 !important;
+            min-height: 0 !important;
+            max-width: 100% !important;
+            overflow: visible !important;
+          }
+
+          .cheque-print-sheet {
+            display: block !important;
+            visibility: visible !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: 690px !important;
+            margin: 0 auto !important;
+            padding: 2mm 0 0 0 !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          .cheque-print-sheet * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
       `}</style>
 
-      <div className="space-y-3.5 sm:space-y-4" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* ================= SCREEN INTERACTIVE UI (HIDDEN DURING PRINT) ================= */}
+      <div className="cheque-screen-ui no-print space-y-3.5 sm:space-y-4" dir={isRtl ? 'rtl' : 'ltr'}>
         {/* ================= STEPPER ================= */}
         <div className="no-print">
           <StudioStepper
@@ -476,37 +509,63 @@ https://indiatools-rho.vercel.app/calculators/indian-cheque-studio`
             )}
           </AnimatePresence>
         </div>
+      </div>
 
-        {/* ================= PRINTABLE SHEET CONTAINER (VISIBLE ONLY IN PRINT) ================= */}
-        <div id="cheque-printable-container" className="hidden print:block">
-          <div className="text-center pb-4 mb-4 border-b border-slate-300">
-            <h1 className="text-xl font-bold font-sans uppercase">
-              IndiaTools — Educational Cheque Reference Sheet
-            </h1>
-            <p className="text-xs text-slate-600 mt-1">
-              CTS-2010 Standard Demonstration • For Instructional Training & Educational Purpose Only
-            </p>
+      {/* ================= PRINTABLE SHEET CONTAINER (VISIBLE ONLY IN PRINT) ================= */}
+      <div id="cheque-printable-container" className="cheque-print-sheet hidden print:block">
+        <div className="text-center pb-2 mb-2 border-b-2 border-slate-300">
+          <h1 className="text-base sm:text-lg font-black font-sans uppercase tracking-tight text-slate-900">
+            IndiaTools — Educational Cheque Specimen
+          </h1>
+          <p className="text-[10px] text-slate-600 mt-0.5">
+            CTS-2010 Standard Demonstration • For Instructional Training & Educational Purpose Only
+          </p>
+        </div>
+
+        <div className="flex justify-center my-2">
+          <ChequePreview
+            data={formData}
+            bankId={selectedBankId}
+            paymentMode={selectedMode}
+            lang={selectedLang}
+            isPrint={true}
+          />
+        </div>
+
+        <div className="mt-3 border-t-2 border-slate-300 pt-2 text-[10.5px] font-sans text-slate-800">
+          <div className="flex items-center justify-between mb-1.5">
+            <h2 className="font-bold text-xs uppercase text-slate-950 tracking-wider">
+              CTS-2010 Cheque Writing Guidelines & Security Rules
+            </h2>
+            <span className="text-[10px] font-mono text-slate-500">
+              Verified Specimen • Non-Negotiable
+            </span>
           </div>
-
-          <div className="flex justify-center my-6">
-            <ChequePreview
-              data={formData}
-              bankId={selectedBankId}
-              paymentMode={selectedMode}
-              lang={selectedLang}
-              zoomLevel={1}
-            />
-          </div>
-
-          <div className="mt-8 border-t border-slate-300 pt-4 text-xs font-sans text-slate-700 space-y-2">
-            <h3 className="font-bold text-sm uppercase">Cheque Writing Guidelines & Security Rules:</h3>
-            <ul className="list-disc list-inside space-y-1 text-slate-600">
-              <li>Always cross the cheque as "A/C PAYEE ONLY" to avoid unauthorized counter cash encashment.</li>
-              <li>Write the payee's full legal name without abbreviations starting directly from the word "PAY".</li>
-              <li>Write the amount in words ending with "Only" or "मात्र" followed by a double line "//" to prevent fraudulent alterations.</li>
-              <li>Write the date accurately in DD-MM-YYYY format. Indian cheques are legally valid for exactly 3 months from date of issue.</li>
-              <li>Never sign over the MICR band or barcode area at the bottom. Ensure signature matches your bank specimen records.</li>
-            </ul>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-slate-700">
+            <div className="flex items-start gap-1">
+              <span className="font-bold text-slate-900">☑</span>
+              <span><strong>Crossing Mode:</strong> Always cross as "A/C PAYEE ONLY" to avoid unauthorized counter cash encashment.</span>
+            </div>
+            <div className="flex items-start gap-1">
+              <span className="font-bold text-slate-900">☑</span>
+              <span><strong>Payee Legal Name:</strong> Start directly from "PAY" without blank space to prevent name prefixing.</span>
+            </div>
+            <div className="flex items-start gap-1">
+              <span className="font-bold text-slate-900">☑</span>
+              <span><strong>Amount in Words:</strong> Conclude words with "Only" or "मात्र" followed by "//" to block alterations.</span>
+            </div>
+            <div className="flex items-start gap-1">
+              <span className="font-bold text-slate-900">☑</span>
+              <span><strong>Validity Period:</strong> Indian cheques are valid for exactly 3 months from the date of issue.</span>
+            </div>
+            <div className="flex items-start gap-1">
+              <span className="font-bold text-slate-900">☑</span>
+              <span><strong>CTS-2010 Safeguard:</strong> Never write or sign across the bottom 0.75-inch MICR band or barcode track.</span>
+            </div>
+            <div className="flex items-start gap-1">
+              <span className="font-bold text-slate-900">☑</span>
+              <span><strong>Specimen Notice:</strong> This document is a non-negotiable educational training simulation.</span>
+            </div>
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ export const Footer: React.FC = () => {
   }
 
   return (
-    <footer className="relative border-t border-neutral-800/80 bg-neutral-950 text-neutral-400 overflow-hidden">
+    <footer className="relative border-t border-neutral-800/80 bg-neutral-950 text-neutral-400 overflow-hidden no-print">
       {/* Tricolor subtle top accent line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-[#FF9933]/60 via-white/40 to-[#138808]/60" />
 

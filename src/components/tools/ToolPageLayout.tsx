@@ -152,11 +152,11 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
     .filter((t): t is ToolDefinition => !!t)
 
   return (
-    <article className="min-h-screen pb-20">
+    <article className="min-h-screen pb-20 print:min-h-0 print:pb-0 print:m-0 print:p-0">
 
       {/* Hero Header */}
       <div
-        className={`relative border-b border-neutral-800/80 light:border-slate-200/80 bg-neutral-900/30 light:bg-slate-50/50 ${
+        className={`relative border-b border-neutral-800/80 light:border-slate-200/80 bg-neutral-900/30 light:bg-slate-50/50 no-print ${
           compactHeader ? 'pt-3.5 pb-4 sm:pb-5' : 'pt-6 pb-10 sm:pb-12'
         }`}
       >
@@ -277,7 +277,7 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
 
       {/* Main Tool & Calculator Section */}
       <main
-        className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8 ${
+        className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8 print:p-0 print:m-0 print:max-w-none ${
           compactHeader ? 'mt-4 sm:mt-5' : 'mt-8'
         }`}
       >
@@ -285,7 +285,7 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
 
         {/* How It Works & Indian Formula Context */}
         <section
-          className={`rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800/90 light:border-slate-200 ${
+          className={`rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800/90 light:border-slate-200 no-print ${
             compactHeader ? 'mt-8 p-4 sm:p-5' : 'mt-14 p-6 sm:p-8'
           }`}
         >
@@ -315,7 +315,7 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
         </section>
 
         {/* Real Example Walkthrough */}
-        <section className="mt-6 p-6 sm:p-8 rounded-2xl bg-neutral-900/40 light:bg-slate-50/70 border border-neutral-800/80 light:border-slate-200">
+        <section className="mt-6 p-6 sm:p-8 rounded-2xl bg-neutral-900/40 light:bg-slate-50/70 border border-neutral-800/80 light:border-slate-200 no-print">
           <div className="flex items-center gap-2.5 mb-4">
             <Calculator className="w-5 h-5 text-emerald-400" />
             <h3 className="text-lg font-bold text-white light:text-slate-900">
@@ -359,11 +359,13 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
         </section>
 
         {/* FAQs */}
-        <FAQAccordion faqs={tool.faqs} />
+        <div className="no-print">
+          <FAQAccordion faqs={tool.faqs} />
+        </div>
 
         {/* Related Tools Recommendation */}
         {relatedTools.length > 0 && (
-          <section className="mt-14 pt-8 border-t border-neutral-800/80 light:border-slate-200">
+          <section className="mt-14 pt-8 border-t border-neutral-800/80 light:border-slate-200 no-print">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-xl font-bold text-white light:text-slate-900">

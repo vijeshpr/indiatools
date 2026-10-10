@@ -119,13 +119,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
           transition={{ duration: 0.6 }}
           className="flex justify-center mb-6"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900/90 dark:bg-neutral-900/90 light:bg-white border border-neutral-700/80 light:border-slate-300 shadow-xl backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-            <span className="text-xs font-mono font-bold tracking-wider uppercase text-neutral-200 light:text-slate-800">
-              IndiaTools Platform
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900/90 dark:bg-zinc-900/90 light:bg-white border border-white/10 light:border-slate-300 shadow-xl backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-neutral-200 light:text-slate-800">
+              BUILT FOR INDIA · PRACTICAL TOOLS
             </span>
             <span className="text-neutral-500">•</span>
-            <span className="text-xs text-amber-400 font-semibold">40+ Precision Utilities</span>
+            <span className="text-[11px] text-amber-400 font-semibold font-mono">43+ Precision Utilities</span>
           </div>
         </motion.div>
 
@@ -167,10 +167,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
-            className="text-base sm:text-xl text-neutral-400 light:text-slate-600 max-w-2xl mx-auto leading-relaxed pt-2"
+            className="text-base sm:text-lg text-neutral-400 light:text-slate-600 max-w-2xl mx-auto leading-relaxed pt-2"
           >
-            Everything you need for everyday Indian life — automotive mileage, JCB machine fuel,
-            house construction, solar requirements, land units, salary in-hand, and 50KB govt exam photos.
+            IndiaTools provides fast, 100% private online calculators and practical tools for vehicle mileage,
+            JCB fuel costs, house construction, electricity tariffs, land survey units, salary take-home, and educational cheque specimens.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -178,23 +178,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.5 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 pb-10"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 pb-8"
           >
             <Link
               to="/tools"
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-neutral-950 font-extrabold text-base flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 group cursor-pointer"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-neutral-950 font-extrabold text-base flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 group cursor-pointer"
             >
-              <span>Explore All 40+ Tools</span>
+              <span>Explore All 43 Tools</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </Link>
 
             <button
               onClick={onOpenSearch}
               type="button"
-              className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-neutral-900/90 light:bg-white text-white light:text-slate-900 border border-neutral-700 light:border-slate-300 font-bold text-base hover:border-amber-500/60 hover:bg-neutral-850 transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-zinc-900/90 light:bg-white text-white light:text-slate-900 border border-white/10 light:border-slate-300 font-bold text-base hover:border-amber-500/60 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
             >
               <Search className="w-4 h-4 text-amber-400" />
-              <span>Search a Tool</span>
+              <span>Search Tools</span>
               <kbd className="hidden sm:inline text-xs font-mono bg-neutral-800 light:bg-slate-100 text-neutral-400 px-2 py-0.5 rounded border border-neutral-700 light:border-slate-300 ml-1">
                 Ctrl K
               </kbd>

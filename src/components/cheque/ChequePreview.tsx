@@ -11,6 +11,7 @@ interface ChequePreviewProps {
   paymentMode: PaymentMode
   lang: SupportedLanguage
   zoomLevel?: number
+  isPrint?: boolean
 }
 
 export const ChequePreview: React.FC<ChequePreviewProps> = ({
@@ -19,6 +20,7 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
   paymentMode,
   lang,
   zoomLevel = 1,
+  isPrint = false,
 }) => {
   const bank = getBankById(bankId)
   const t = getTranslations(lang)
@@ -57,7 +59,7 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
   const [containerWidth, setContainerWidth] = useState<number>(780)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    if (isPrint || !containerRef.current) return
     const updateWidth = () => {
       if (containerRef.current) {
         const w = containerRef.current.clientWidth
@@ -76,34 +78,41 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
       window.addEventListener('resize', updateWidth)
       return () => window.removeEventListener('resize', updateWidth)
     }
-  }, [])
+  }, [isPrint])
 
   // Auto-fit scale factor based on container width (with padding allowance)
-  const fitScale = Math.min(1, Math.max(0.35, (containerWidth - 8) / 780))
+  const fitScale = isPrint ? 680 / 780 : Math.min(1, Math.max(0.35, (containerWidth - 8) / 780))
   // Effective scale combines auto container fit with user-specified zoom multiplier
-  const effectiveScale = Number((fitScale * (zoomLevel || 1)).toFixed(3))
-  const renderedWidth = Math.round(780 * effectiveScale)
-  const renderedHeight = Math.round(340 * effectiveScale)
+  const effectiveScale = isPrint ? Number((680 / 780).toFixed(4)) : Number((fitScale * (zoomLevel || 1)).toFixed(3))
+  const renderedWidth = isPrint ? 680 : Math.round(780 * effectiveScale)
+  const renderedHeight = isPrint ? 296 : Math.round(340 * effectiveScale)
 
   return (
-    <div ref={containerRef} className="w-full flex justify-center items-center overflow-x-auto py-1">
+    <div
+      ref={containerRef}
+      className={isPrint ? 'w-full flex justify-center items-center py-0' : 'w-full flex justify-center items-center overflow-x-auto py-1'}
+    >
       <div
         style={{
           width: `${renderedWidth}px`,
           height: `${renderedHeight}px`,
           minWidth: `${renderedWidth}px`,
         }}
-        className="relative shrink-0 transition-[width,height] duration-200 ease-out"
+        className={isPrint ? 'relative shrink-0 cheque-print-canvas' : 'relative shrink-0 transition-[width,height] duration-200 ease-out'}
       >
         {/* ================= ACTUAL CHEQUE CANVAS ================= */}
         <div
-          id="cheque-printable-area"
-          className="absolute top-0 left-0 rounded-lg border-2 border-slate-400/80 bg-[#F4F9F9] text-slate-900 shadow-xl overflow-hidden font-serif select-none transition-transform duration-200"
+          id={isPrint ? 'cheque-printable-area-print' : 'cheque-printable-area'}
+          className={`absolute top-0 left-0 rounded-lg border-2 border-slate-400/80 bg-[#F4F9F9] text-slate-900 shadow-xl overflow-hidden font-serif select-none ${
+            isPrint ? 'print-exact' : 'transition-transform duration-200'
+          }`}
           style={{
             width: '780px',
             height: '340px',
             transform: `scale(${effectiveScale})`,
             transformOrigin: 'top left',
+            WebkitPrintColorAdjust: 'exact',
+            printColorAdjust: 'exact',
             // Authentic security micro-pattern background
             backgroundImage: `
               radial-gradient(#d5e8ea 1px, transparent 1px),
@@ -115,8 +124,12 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
         >
           {/* Bank Top Branding Bar */}
           <div
-            className="h-2 w-full"
-            style={{ backgroundColor: bank.themeColor }}
+            className="h-2 w-full print-exact"
+            style={{
+              backgroundColor: bank.themeColor,
+              WebkitPrintColorAdjust: 'exact',
+              printColorAdjust: 'exact',
+            }}
           />
 
           {/* ================= WATERMARK LAYER (Prominent & Unmissable) ================= */}
@@ -136,29 +149,39 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
 
           {/* ================= ACCOUNT PAYEE CROSSING (TOP LEFT) ================= */}
           {paymentMode === 'account-payee' && (
-            <div className="absolute -top-3 -left-3 w-36 h-36 pointer-events-none z-30">
+            <div className="absolute -top-3 -left-3 w-36 h-36 pointer-events-none z-30 print-exact">
               {/* Parallel line 1 */}
-              <div className="absolute w-44 h-[2px] bg-slate-900 -rotate-45 top-10 -left-4" />
+              <div
+                className="absolute w-44 h-[2px] bg-slate-900 -rotate-45 top-10 -left-4 print-exact"
+                style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+              />
               {/* Text inside crossing */}
-              <div className="absolute -rotate-45 top-[46px] -left-1 text-[9px] font-sans font-black tracking-widest text-slate-900 uppercase bg-[#F4F9F9]/80 px-1">
+              <div
+                className="absolute -rotate-45 top-[46px] -left-1 text-[9px] font-sans font-black tracking-widest text-slate-900 uppercase bg-[#F4F9F9]/80 px-1 print-exact"
+                style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+              >
                 A/C PAYEE ONLY
               </div>
               {/* Parallel line 2 */}
-              <div className="absolute w-44 h-[2px] bg-slate-900 -rotate-45 top-16 -left-4" />
+              <div
+                className="absolute w-44 h-[2px] bg-slate-900 -rotate-45 top-16 -left-4 print-exact"
+                style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+              />
             </div>
           )}
 
           {/* Cash / Self / Bearer Corner Indicator Badge */}
           {paymentMode !== 'account-payee' && (
-            <div className="absolute top-3 left-4 z-20">
+            <div className="absolute top-3 left-4 z-20 print-exact">
               <span
-                className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border print-exact ${
                   paymentMode === 'cash'
                     ? 'bg-blue-100 text-blue-900 border-blue-400'
                     : paymentMode === 'self'
                     ? 'bg-emerald-100 text-emerald-900 border-emerald-400'
                     : 'bg-amber-100 text-amber-900 border-amber-400'
                 }`}
+                style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
               >
                 {paymentMode === 'cash' && 'OPEN CHEQUE (CASH)'}
                 {paymentMode === 'self' && 'SELF WITHDRAWAL'}
@@ -173,12 +196,12 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
             <div className="pl-6">
               <div className="flex items-center gap-2">
                 <span
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: bank.themeColor }}
+                  className="w-3 h-3 rounded-full shrink-0 print-exact"
+                  style={{ backgroundColor: bank.themeColor, WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
                 />
                 <h3
-                  className="text-lg font-black tracking-tight uppercase font-sans"
-                  style={{ color: bank.themeColor }}
+                  className="text-lg font-black tracking-tight uppercase font-sans print-exact"
+                  style={{ color: bank.themeColor, WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
                 >
                   {bank.name}
                 </h3>
@@ -196,16 +219,16 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
 
               {/* 8 Individual Square Digits */}
               <div className="flex items-center gap-0.5 font-mono text-sm font-bold text-slate-900">
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{d1}</div>
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{d2}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{d1}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{d2}</div>
                 <span className="w-1 text-center font-sans text-slate-400"></span>
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{m1}</div>
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{m2}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{m1}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{m2}</div>
                 <span className="w-1 text-center font-sans text-slate-400"></span>
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{y1}</div>
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{y2}</div>
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{y3}</div>
-                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm">{y4}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{y1}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{y2}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{y3}</div>
+                <div className="w-5 h-6 border border-slate-600 flex items-center justify-center bg-white/90 shadow-sm print-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{y4}</div>
               </div>
 
               <span className="text-[8px] font-sans text-slate-500 block mt-1 tracking-tighter">
@@ -267,7 +290,10 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
 
               {/* Rupee Amount Box */}
               <div className="flex items-center">
-                <div className="flex items-center border-2 border-slate-800 bg-white/95 rounded px-3 py-1.5 shadow-md">
+                <div
+                  className="flex items-center border-2 border-slate-800 bg-white/95 rounded px-3 py-1.5 shadow-md print-exact"
+                  style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+                >
                   <span className="text-lg font-black text-slate-900 font-sans mr-2">
                     ₹
                   </span>
@@ -298,7 +324,10 @@ export const ChequePreview: React.FC<ChequePreviewProps> = ({
           </div>
 
           {/* ================= BOTTOM EDUCATIONAL MICR BAND ================= */}
-          <div className="absolute bottom-0 inset-x-0 h-9 bg-white border-t border-slate-300 flex items-center justify-center font-mono text-[11px] tracking-[0.2em] text-slate-800 px-4">
+          <div
+            className="absolute bottom-0 inset-x-0 h-9 bg-white border-t border-slate-300 flex items-center justify-center font-mono text-[11px] tracking-[0.2em] text-slate-800 px-4 print-exact"
+            style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+          >
             <span className="text-slate-400 mr-2 text-[9px] font-sans font-bold">
               CTS SPECIMEN:
             </span>

@@ -21,7 +21,7 @@ export function App() {
     <ThemeProvider>
       <ToastProvider>
         <BrowserRouter>
-          <div className="relative min-h-screen flex flex-col bg-[#080A10] light:bg-[#F8FAFC] text-slate-100 light:text-slate-900 transition-colors duration-300 selection:bg-amber-500 selection:text-white">
+          <div className="relative min-h-screen flex flex-col bg-[#09090b] light:bg-[#F8FAFC] text-slate-100 light:text-slate-900 transition-colors duration-300 selection:bg-amber-500 selection:text-white">
             {/* Header Navigation */}
             <Navbar />
 
