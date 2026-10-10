@@ -33,30 +33,30 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   return (
     <div className="space-y-3.5 sm:space-y-4" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Step Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 sm:pb-3 border-b border-neutral-800 light:border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 sm:pb-3 border-b border-slate-200 dark:border-neutral-800">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center text-[11px] font-mono font-bold">
+            <span className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 flex items-center justify-center text-[11px] font-mono font-bold">
               01
             </span>
-            <h2 className="text-lg sm:text-xl font-black text-white light:text-slate-900 tracking-tight">
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
               {t.selectLanguageTitle}
             </h2>
           </div>
-          <p className="text-xs text-neutral-400 light:text-slate-600">
+          <p className="text-xs text-slate-600 dark:text-neutral-400">
             {t.selectLanguageSubtitle}
           </p>
         </div>
 
         {/* Search Input */}
         <div className="relative min-w-[200px] sm:w-64">
-          <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t.searchLanguagePlaceholder}
-            className="w-full bg-neutral-900/90 light:bg-slate-50 border border-neutral-800 light:border-slate-300 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white light:text-slate-900 focus:outline-none focus:border-amber-500 transition-colors shadow-inner"
+            className="w-full bg-slate-50 dark:bg-neutral-900/90 border border-slate-200 dark:border-neutral-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors shadow-inner"
           />
         </div>
       </div>
@@ -73,17 +73,17 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               onClick={() => onSelectLang(langItem.code)}
               className={`cursor-pointer relative p-3 rounded-xl border transition-all duration-200 flex flex-col justify-between ${
                 isSelected
-                  ? 'bg-amber-500/10 border-amber-500/70 shadow-md shadow-amber-500/10 ring-1 ring-amber-500/50'
-                  : 'bg-neutral-900/60 light:bg-white border-neutral-800/80 light:border-slate-200 hover:border-neutral-700 light:hover:border-slate-300 hover:bg-neutral-900 light:hover:bg-slate-50/80'
+                  ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-500 shadow-md shadow-amber-500/10 ring-1 ring-amber-500/50'
+                  : 'bg-white dark:bg-neutral-900/60 border-slate-200 dark:border-neutral-800/80 hover:border-slate-300 dark:hover:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-900'
               }`}
             >
               {/* Card Header */}
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 light:text-slate-500 block">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 block">
                     {langItem.script} Script {langItem.direction === 'rtl' ? '• RTL' : ''}
                   </span>
-                  <div className="text-lg sm:text-xl font-black text-white light:text-slate-900 mt-0.5 tracking-tight font-sans">
+                  <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight font-sans">
                     {langItem.nativeName}
                   </div>
                 </div>
@@ -91,8 +91,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 <div
                   className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
                     isSelected
-                      ? 'bg-amber-500 text-neutral-950 shadow-sm'
-                      : 'border border-neutral-700 light:border-slate-300 text-transparent'
+                      ? 'bg-amber-500 text-white dark:text-neutral-950 shadow-sm'
+                      : 'border border-slate-300 dark:border-neutral-700 text-transparent'
                   }`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 fill-current" />
@@ -100,11 +100,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               </div>
 
               {/* English Name & Sample Words */}
-              <div className="pt-1.5 border-t border-neutral-800/60 light:border-slate-100 flex items-center justify-between text-xs">
-                <span className="font-medium text-neutral-300 light:text-slate-700">
+              <div className="pt-1.5 border-t border-slate-100 dark:border-neutral-800/60 flex items-center justify-between text-xs">
+                <span className="font-medium text-slate-700 dark:text-neutral-300">
                   {langItem.name}
                 </span>
-                <span className="text-[10px] font-mono text-amber-400/90 font-medium bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                <span className="text-[10px] font-mono text-amber-700 dark:text-amber-400/90 font-medium bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-500/20">
                   {langItem.currencyPlural} {langItem.onlyWord}
                 </span>
               </div>
@@ -114,17 +114,17 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       </div>
 
       {filteredLanguages.length === 0 && (
-        <div className="py-8 text-center text-neutral-500 text-xs">
+        <div className="py-8 text-center text-slate-400 dark:text-neutral-500 text-xs">
           No matching Indian language found for "{search}". Try searching by English or native script name.
         </div>
       )}
 
       {/* Continue Action Button */}
-      <div className="flex items-center justify-between pt-3 border-t border-neutral-800 light:border-slate-200">
-        <div className="flex items-center gap-1.5 text-xs text-neutral-400">
-          <Globe className="w-3.5 h-3.5 text-amber-400" />
+      <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-neutral-800">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400">
+          <Globe className="w-3.5 h-3.5 text-amber-500" />
           <span>
-            Selected: <strong className="text-white light:text-slate-900">{LANGUAGES.find((l) => l.code === selectedLang)?.name} ({LANGUAGES.find((l) => l.code === selectedLang)?.nativeName})</strong>
+            Selected: <strong className="text-slate-900 dark:text-white">{LANGUAGES.find((l) => l.code === selectedLang)?.name} ({LANGUAGES.find((l) => l.code === selectedLang)?.nativeName})</strong>
           </span>
         </div>
 

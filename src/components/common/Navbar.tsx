@@ -5,8 +5,8 @@ import {
   Search,
   Menu,
   X,
-  Sparkles,
   Command,
+  ArrowRight,
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { SearchModal } from './SearchModal'
@@ -35,10 +35,10 @@ export const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false)
   }, [location.pathname])
 
-  // Track scroll position for header blur refinement
+  // Track scroll position for subtle shadow
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
+      setIsScrolled(window.scrollY > 15)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -47,31 +47,31 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 w-full transition-all duration-300 no-print ${
+        className={`sticky top-0 z-40 w-full transition-all duration-200 no-print ${
           isScrolled
-            ? 'bg-[#09090b]/85 dark:bg-[#09090b]/90 light:bg-white/90 backdrop-blur-xl border-b border-neutral-800/80 light:border-slate-200/80 shadow-lg shadow-black/5'
-            : 'bg-transparent border-b border-transparent'
+            ? 'bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm'
+            : 'bg-white/90 backdrop-blur-sm border-b border-slate-100'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
-          {/* Brand Logo */}
+          {/* Brand Logo & Wordmark */}
           <Link
             to="/"
-            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-lg p-1"
+            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-lg p-1"
             aria-label="IndiaTools Homepage"
           >
-            {/* Custom geometric toolbox symbol */}
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-950 border border-neutral-700/80 shadow-md flex items-center justify-center overflow-hidden group-hover:border-amber-500/50 transition-colors">
-              {/* Subtle tricolor edge accent */}
+            {/* Clean Brand Icon */}
+            <div className="relative w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-sm flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+              {/* Subtle tricolor top hairline */}
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
 
-              {/* Toolbox geometric icon */}
+              {/* Toolbox icon */}
               <svg
                 viewBox="0 0 24 24"
-                className="w-5 h-5 text-amber-400 group-hover:scale-105 transition-transform"
+                className="w-5 h-5 text-white"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
@@ -81,61 +81,78 @@ export const Navbar: React.FC = () => {
                 <path d="M7 12h3" />
                 <path d="M14 12h3" />
               </svg>
-
-              {/* Ashoka blue center precision dot */}
-              <div className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-[#000080] dark:bg-[#4B6BFB] ring-1 ring-white/50" />
             </div>
 
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold tracking-tight text-base sm:text-lg bg-clip-text text-transparent bg-gradient-to-r from-white via-neutral-100 to-neutral-300 dark:from-white dark:to-neutral-300 light:from-slate-900 light:to-slate-800">
-                  INDIA PRACTICAL
+                <span className="font-extrabold tracking-tight text-lg text-slate-900">
+                  India<span className="text-indigo-600">Tools</span>
                 </span>
-                <span className="font-mono text-xs px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold">
-                  TOOLS
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 font-bold uppercase">
+                  PRO
                 </span>
               </div>
-              <p className="hidden sm:block text-[11px] text-neutral-400 dark:text-neutral-400 light:text-slate-500 font-medium tracking-wide">
-                Real-life problems. One simple toolbox.
+              <p className="hidden sm:block text-[11px] text-slate-500 font-medium tracking-normal">
+                Everyday Indian Digital Toolbox
               </p>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             <Link
-              to="/tools"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                location.pathname === '/tools'
-                  ? 'text-amber-400 bg-amber-500/10'
-                  : 'text-neutral-300 dark:text-neutral-300 light:text-slate-700 hover:text-white dark:hover:text-white hover:bg-neutral-800/40'
+              to="/"
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                location.pathname === '/'
+                  ? 'text-indigo-600 bg-indigo-50/80'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              All Tools (15+)
+              Home
             </Link>
 
             <Link
-              to="/calculators/jcb-fuel-cost"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-300 dark:text-neutral-300 light:text-slate-700 hover:text-white dark:hover:text-white hover:bg-neutral-800/40 transition-colors flex items-center gap-1"
+              to="/tools"
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                location.pathname === '/tools'
+                  ? 'text-indigo-600 bg-indigo-50/80'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span>JCB Cost</span>
+              All Tools (43)
             </Link>
 
             <Link
-              to="/tools/50kb-photo"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-300 dark:text-neutral-300 light:text-slate-700 hover:text-white dark:hover:text-white hover:bg-neutral-800/40 transition-colors flex items-center gap-1"
+              to="/categories"
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                location.pathname === '/categories'
+                  ? 'text-indigo-600 bg-indigo-50/80'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-              <span>50KB Resizer</span>
+              Categories
+            </Link>
+
+            <Link
+              to="/calculators/indian-cheque-studio"
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                location.pathname === '/calculators/indian-cheque-studio'
+                  ? 'text-indigo-600 bg-indigo-50/80'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <span>Cheque Studio</span>
+              <span className="text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.2 rounded uppercase">
+                NEW
+              </span>
             </Link>
 
             <Link
               to="/about"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/about'
-                  ? 'text-amber-400 bg-amber-500/10'
-                  : 'text-neutral-300 dark:text-neutral-300 light:text-slate-700 hover:text-white dark:hover:text-white hover:bg-neutral-800/40'
+                  ? 'text-indigo-600 bg-indigo-50/80'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               About
@@ -144,29 +161,38 @@ export const Navbar: React.FC = () => {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-2.5">
-            {/* Spotlight Search Trigger */}
+            {/* Quick Search Button */}
             <button
               onClick={() => setIsSearchOpen(true)}
               type="button"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/80 dark:bg-neutral-900/90 light:bg-slate-100 border border-neutral-700/70 light:border-slate-300 text-neutral-300 dark:text-neutral-300 light:text-slate-700 hover:border-amber-500/50 hover:text-white transition-all text-sm group"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all text-sm group cursor-pointer"
               aria-label="Search tools"
             >
-              <Search className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline text-xs text-neutral-400 dark:text-neutral-400">Search</span>
-              <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] font-mono text-neutral-400 bg-neutral-800/80 dark:bg-neutral-800 light:bg-slate-200 px-1.5 py-0.5 rounded border border-neutral-700/60 light:border-slate-300">
+              <Search className="w-4 h-4 text-indigo-600 group-hover:scale-105 transition-transform" />
+              <span className="hidden sm:inline text-xs font-medium">Search</span>
+              <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] font-mono text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200 shadow-2xs">
                 <Command className="w-2.5 h-2.5" />
                 <span>K</span>
               </kbd>
             </button>
 
-            {/* Dark / Light Mode Toggle */}
+            {/* Primary Action Button */}
+            <Link
+              to="/tools"
+              className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm shadow-indigo-600/20 transition-all cursor-pointer"
+            >
+              <span>Explore 43 Tools</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+
+            {/* Light / Dark Mode Toggle */}
             <ThemeToggle />
 
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               type="button"
-              className="md:hidden p-2 rounded-xl text-neutral-300 hover:text-white bg-neutral-900/60 border border-neutral-800"
+              className="md:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 bg-slate-100 border border-slate-200"
               aria-label="Open navigation menu"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -181,58 +207,60 @@ export const Navbar: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-b border-neutral-800 bg-[#080A10]/95 backdrop-blur-2xl px-4 py-4 space-y-3"
+              className="md:hidden border-b border-slate-200 bg-white px-4 py-4 space-y-3 shadow-lg"
             >
               <div className="flex flex-col gap-1">
                 <Link
                   to="/"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-neutral-800"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-900 hover:bg-slate-100"
                 >
                   Home
                 </Link>
                 <Link
                   to="/tools"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-800"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 flex items-center justify-between"
                 >
-                  All 15+ Tools
+                  <span>All 43 Tools</span>
+                  <span className="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">43</span>
+                </Link>
+                <Link
+                  to="/calculators/indian-cheque-studio"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center justify-between"
+                >
+                  <span>🖋️ Indian Cheque Studio</span>
+                  <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-mono font-bold">13 Lang</span>
+                </Link>
+                <Link
+                  to="/categories"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
+                >
+                  Tool Categories
                 </Link>
                 <Link
                   to="/calculators/jcb-fuel-cost"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-amber-400 hover:bg-neutral-800 flex items-center justify-between"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 flex items-center justify-between"
                 >
                   <span>🚜 JCB Fuel Calculator</span>
-                  <span className="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">Flagship</span>
+                  <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">Flagship</span>
                 </Link>
                 <Link
                   to="/tools/50kb-photo"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-pink-400 hover:bg-neutral-800 flex items-center justify-between"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 flex items-center justify-between"
                 >
                   <span>📄 50KB Photo Resizer</span>
-                  <span className="text-[10px] bg-pink-500/20 text-pink-400 px-1.5 py-0.5 rounded">Govt Exam</span>
-                </Link>
-                <Link
-                  to="/calculators/solar-panel"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-800"
-                >
-                  ⚡ PM Surya Ghar Solar
-                </Link>
-                <Link
-                  to="/calculators/cent-to-sqft"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-800"
-                >
-                  📐 Cent ↔ Sq.ft Converter
+                  <span className="text-[10px] bg-pink-100 text-pink-800 px-1.5 py-0.5 rounded">Govt Exam</span>
                 </Link>
                 <Link
                   to="/about"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-800"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
                 >
                   About Platform
                 </Link>
               </div>
 
               {/* Categories list in mobile menu */}
-              <div className="pt-2 border-t border-neutral-800/80">
-                <p className="text-[11px] font-mono uppercase text-neutral-400 px-3 mb-1">
+              <div className="pt-2 border-t border-slate-200">
+                <p className="text-[11px] font-mono uppercase text-slate-400 px-3 mb-1">
                   Categories
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -240,7 +268,7 @@ export const Navbar: React.FC = () => {
                     <Link
                       key={cat.id}
                       to={`/category/${cat.id}`}
-                      className="flex items-center gap-2 p-2 rounded-lg text-xs text-neutral-300 hover:bg-neutral-800/60"
+                      className="flex items-center gap-2 p-2 rounded-lg text-xs text-slate-700 hover:bg-slate-100"
                     >
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.accentColor }} />
                       <span>{cat.title}</span>

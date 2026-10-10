@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Gauge, Zap, Compass, FileText, ArrowRight, ShieldCheck } from 'lucide-react'
 import { calculateMileage, calculateAcCost, convertLandArea } from '../../lib/calculations'
-import { convertAmountToWords, formatInr } from '../../lib/cheque/amountToWords'
+import { convertAmountToWords } from '../../lib/cheque/amountToWords'
 import { LANGUAGES } from '../../lib/cheque/languages'
 import { SupportedLanguage } from '../../lib/cheque/types'
 
@@ -62,65 +62,62 @@ export const LiveMiniCalculator: React.FC = () => {
   }, [])
 
   return (
-    <div className="relative p-6 sm:p-8 rounded-3xl bg-zinc-900/90 dark:bg-zinc-900/90 light:bg-white border border-white/10 light:border-slate-200 shadow-2xl shadow-black/40 overflow-hidden backdrop-blur-xl">
-      {/* Ambient background glow */}
-      <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-
+    <div className="relative p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden">
       {/* Header with Switcher Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 dark:border-white/10 light:border-slate-100">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-2xl overflow-x-auto scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab('mileage')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'mileage'
-                ? 'bg-orange-500/20 text-orange-400 border-orange-500/50 shadow-sm shadow-orange-500/10'
-                : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 text-neutral-400 hover:text-white'
+                ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/60'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Gauge className="w-3.5 h-3.5" />
+            <Gauge className="w-3.5 h-3.5 text-indigo-600" />
             <span>Vehicle Mileage</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('ac')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'ac'
-                ? 'bg-blue-500/20 text-blue-400 border-blue-500/50 shadow-sm shadow-blue-500/10'
-                : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 text-neutral-400 hover:text-white'
+                ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/60'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5 text-indigo-600" />
             <span>AC Power Cost</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('land')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'land'
-                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-sm shadow-emerald-500/10'
-                : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 text-neutral-400 hover:text-white'
+                ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/60'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Compass className="w-3.5 h-3.5" />
+            <Compass className="w-3.5 h-3.5 text-indigo-600" />
             <span>Cent ↔ Sq.ft</span>
           </button>
 
-          {/* New 4th Tab: Indian Cheque Studio */}
+          {/* 4th Tab: Indian Cheque Studio */}
           <button
             type="button"
             onClick={() => setActiveTab('cheque')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'cheque'
-                ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-sm shadow-amber-500/10'
-                : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 text-neutral-400 hover:text-white'
+                ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/60'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="w-3.5 h-3.5 text-indigo-600" />
             <span>Cheque Demo</span>
-            <span className="text-[9px] font-mono font-bold bg-amber-500/25 text-amber-300 px-1.5 py-0.2 rounded-full uppercase">
+            <span className="text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.2 rounded uppercase">
               13 Lang
             </span>
           </button>
@@ -136,95 +133,99 @@ export const LiveMiniCalculator: React.FC = () => {
               ? '/calculators/cent-to-sqft'
               : '/calculators/indian-cheque-studio'
           }
-          className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+          className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 self-start sm:self-auto cursor-pointer"
         >
           <span>{activeTab === 'cheque' ? 'Open Cheque Studio' : 'Open Full Tool'}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
-      {/* Dynamic Content */}
+      {/* Dynamic Tab Content */}
       <AnimatePresence mode="wait">
         {activeTab === 'mileage' && (
           <motion.div
             key="mileage"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6 items-center"
+            className="pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
           >
+            {/* Input sliders & values */}
             <div className="md:col-span-7 space-y-4">
               <div>
-                <div className="flex justify-between items-center text-xs text-neutral-300 light:text-slate-700 mb-1.5 font-medium">
+                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
                   <span>Distance Travelled</span>
-                  <span className="font-mono text-orange-400 font-bold">{distanceKm} km</span>
+                  <span className="font-mono text-indigo-600">{distanceKm} km</span>
                 </div>
                 <input
                   type="range"
                   min="50"
-                  max="900"
+                  max="1200"
                   step="5"
                   value={distanceKm}
-                  onChange={(e) => setDistanceKm(parseFloat(e.target.value))}
-                  className="w-full accent-orange-500 cursor-pointer"
+                  onChange={(e) => setDistanceKm(Number(e.target.value))}
+                  className="w-full accent-indigo-600 cursor-pointer"
                 />
               </div>
 
               <div>
-                <div className="flex justify-between items-center text-xs text-neutral-300 light:text-slate-700 mb-1.5 font-medium">
-                  <span>Fuel Consumed (Litres)</span>
-                  <span className="font-mono text-orange-400 font-bold">{fuelLitres} Litres</span>
+                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <span>Fuel Filled</span>
+                  <span className="font-mono text-indigo-600">{fuelLitres} Litres</span>
                 </div>
                 <input
                   type="range"
-                  min="3"
-                  max="60"
+                  min="5"
+                  max="80"
                   step="1"
                   value={fuelLitres}
-                  onChange={(e) => setFuelLitres(parseFloat(e.target.value))}
-                  className="w-full accent-orange-500 cursor-pointer"
+                  onChange={(e) => setFuelLitres(Number(e.target.value))}
+                  className="w-full accent-indigo-600 cursor-pointer"
                 />
               </div>
 
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-xs text-neutral-400">Fuel Rate:</span>
-                <div className="flex gap-2">
-                  {[90, 102, 106].map((rate) => (
-                    <button
-                      key={rate}
-                      type="button"
-                      onClick={() => setFuelPrice(rate)}
-                      className={`px-2.5 py-1 text-xs rounded-lg font-mono font-medium border transition-colors ${
-                        fuelPrice === rate
-                          ? 'bg-orange-500/20 text-orange-400 border-orange-500/50'
-                          : 'bg-neutral-800 text-neutral-300 border-neutral-700'
-                      }`}
-                    >
-                      ₹{rate}/L
-                    </button>
-                  ))}
+              <div>
+                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <span>Fuel Price</span>
+                  <span className="font-mono text-indigo-600">₹{fuelPrice} / L</span>
                 </div>
+                <input
+                  type="range"
+                  min="85"
+                  max="115"
+                  step="1"
+                  value={fuelPrice}
+                  onChange={(e) => setFuelPrice(Number(e.target.value))}
+                  className="w-full accent-indigo-600 cursor-pointer"
+                />
               </div>
             </div>
 
-            <div className="md:col-span-5 flex flex-col justify-center items-center text-center p-6 rounded-2xl bg-neutral-950/80 light:bg-slate-50 border border-neutral-800 light:border-slate-200">
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
-                Fuel Economy
-              </span>
-              <div className="text-4xl font-black font-mono tracking-tight text-white light:text-slate-900">
-                {mileageResult.mileageKmPerL}
-                <span className="text-lg text-neutral-400 font-normal"> km/L</span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-neutral-800/80 w-full flex items-center justify-around text-xs">
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">Cost / Km</span>
-                  <span className="font-mono text-amber-400 font-bold">₹{mileageResult.fuelCostPerKm}/km</span>
+            {/* Results Panel */}
+            <div className="md:col-span-5 p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex flex-col justify-between">
+              <div>
+                <span className="text-[11px] font-mono uppercase font-bold text-indigo-700 tracking-wider">
+                  Calculated Mileage
+                </span>
+                <div className="text-4xl font-black text-slate-900 mt-1">
+                  {mileageResult.mileageKmPerL.toFixed(1)}{' '}
+                  <span className="text-sm font-semibold text-slate-500">km/L</span>
                 </div>
-                <div className="w-px h-6 bg-neutral-800" />
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-indigo-100/80 flex items-center justify-between text-xs">
                 <div>
-                  <span className="text-neutral-500 block text-[10px]">Total Fuel Bill</span>
-                  <span className="font-mono text-white light:text-slate-900 font-bold">₹{Math.round(fuelLitres * fuelPrice)}</span>
+                  <span className="text-slate-500 block">Cost / km</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    ₹{mileageResult.costPerKm.toFixed(2)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Total Fuel</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    ₹{(fuelLitres * fuelPrice).toFixed(0)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -234,70 +235,75 @@ export const LiveMiniCalculator: React.FC = () => {
         {activeTab === 'ac' && (
           <motion.div
             key="ac"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6 items-center"
+            className="pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
           >
             <div className="md:col-span-7 space-y-4">
               <div>
-                <label className="block text-xs text-neutral-300 mb-1.5 font-medium">AC Capacity</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                  AC Tonnage Capacity
+                </label>
                 <div className="grid grid-cols-3 gap-2">
                   {([1, 1.5, 2] as const).map((t) => (
                     <button
                       key={t}
                       type="button"
                       onClick={() => setTonnage(t)}
-                      className={`py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                        tonnage === t ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        tonnage === t
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
-                      {t} Ton
+                      {t} Ton AC
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between items-center text-xs text-neutral-300 mb-1.5 font-medium">
-                  <span>Daily Run Time</span>
-                  <span className="font-mono text-blue-400 font-bold">{acHours} Hours/day</span>
+                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <span>Daily Usage</span>
+                  <span className="font-mono text-indigo-600">{acHours} Hours / day</span>
                 </div>
                 <input
                   type="range"
                   min="2"
-                  max="16"
+                  max="20"
                   step="1"
                   value={acHours}
-                  onChange={(e) => setAcHours(parseFloat(e.target.value))}
-                  className="w-full accent-blue-500 cursor-pointer"
+                  onChange={(e) => setAcHours(Number(e.target.value))}
+                  className="w-full accent-indigo-600 cursor-pointer"
                 />
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-neutral-400">
-                <span>Electricity Tariff:</span>
-                <span className="font-mono font-bold text-white">₹{unitTariff} / unit</span>
               </div>
             </div>
 
-            <div className="md:col-span-5 flex flex-col justify-center items-center text-center p-6 rounded-2xl bg-neutral-950/80 light:bg-slate-50 border border-neutral-800 light:border-slate-200">
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
-                Monthly AC Bill
-              </span>
-              <div className="text-4xl font-black font-mono tracking-tight text-white light:text-slate-900">
-                ₹{acResult.monthlyCostRs.toLocaleString('en-IN')}
-                <span className="text-sm text-neutral-400 font-normal"> / mo</span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-neutral-800/80 w-full flex items-center justify-around text-xs">
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">Daily Expense</span>
-                  <span className="font-mono text-blue-400 font-bold">₹{acResult.dailyCostRs}/day</span>
+            <div className="md:col-span-5 p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex flex-col justify-between">
+              <div>
+                <span className="text-[11px] font-mono uppercase font-bold text-indigo-700 tracking-wider">
+                  Monthly Power Cost
+                </span>
+                <div className="text-4xl font-black text-slate-900 mt-1">
+                  ₹{Math.round(acResult.monthlyCostRs)}{' '}
+                  <span className="text-sm font-semibold text-slate-500">/ mo</span>
                 </div>
-                <div className="w-px h-6 bg-neutral-800" />
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-indigo-100/80 flex items-center justify-between text-xs">
                 <div>
-                  <span className="text-neutral-500 block text-[10px]">Monthly Power</span>
-                  <span className="font-mono text-white light:text-slate-900 font-bold">{acResult.monthlyUnitsKwh} Units</span>
+                  <span className="text-slate-500 block">Daily Bill</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    ₹{acResult.dailyCostRs.toFixed(1)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Units (kWh)</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    {acResult.dailyUnitsKwh.toFixed(1)} u/day
+                  </span>
                 </div>
               </div>
             </div>
@@ -307,127 +313,117 @@ export const LiveMiniCalculator: React.FC = () => {
         {activeTab === 'land' && (
           <motion.div
             key="land"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6 items-center"
+            className="pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
           >
             <div className="md:col-span-7 space-y-4">
               <div>
-                <div className="flex justify-between items-center text-xs text-neutral-300 mb-1.5 font-medium">
-                  <span>Cent Measurement</span>
-                  <span className="font-mono text-emerald-400 font-bold">{centValue} Cents</span>
+                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <span>Land Measure in Cents (Cent)</span>
+                  <span className="font-mono text-indigo-600">{centValue} Cents</span>
                 </div>
                 <input
                   type="range"
-                  min="0.5"
-                  max="25"
+                  min="1"
+                  max="50"
                   step="0.5"
                   value={centValue}
-                  onChange={(e) => setCentValue(parseFloat(e.target.value))}
-                  className="w-full accent-emerald-500 cursor-pointer"
+                  onChange={(e) => setCentValue(Number(e.target.value))}
+                  className="w-full accent-indigo-600 cursor-pointer"
                 />
               </div>
 
-              <div className="flex gap-2">
-                {[3, 5, 8, 10, 20].map((c) => (
+              <div className="flex flex-wrap gap-2 text-xs">
+                {[3, 5, 5.5, 10, 20].map((quick) => (
                   <button
-                    key={c}
+                    key={quick}
                     type="button"
-                    onClick={() => setCentValue(c)}
-                    className={`flex-1 py-1 rounded-lg text-xs font-mono border transition-all ${
-                      centValue === c ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 font-bold' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
-                    }`}
+                    onClick={() => setCentValue(quick)}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-medium cursor-pointer"
                   >
-                    {c} Cents
+                    {quick} cent
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="md:col-span-5 flex flex-col justify-center items-center text-center p-6 rounded-2xl bg-neutral-950/80 light:bg-slate-50 border border-neutral-800 light:border-slate-200">
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
-                Square Feet Equivalent
-              </span>
-              <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white light:text-slate-900">
-                {landResult.sqft.toLocaleString('en-IN')}
-                <span className="text-sm text-neutral-400 font-normal"> sq.ft</span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-neutral-800/80 w-full flex items-center justify-around text-xs">
-                <div>
-                  <span className="text-neutral-500 block text-[10px]">In Acres</span>
-                  <span className="font-mono text-emerald-400 font-bold">{landResult.acre} Acres</span>
+            <div className="md:col-span-5 p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex flex-col justify-between">
+              <div>
+                <span className="text-[11px] font-mono uppercase font-bold text-indigo-700 tracking-wider">
+                  Square Feet Area
+                </span>
+                <div className="text-3xl sm:text-4xl font-black text-slate-900 mt-1">
+                  {Math.round(landResult.sqft).toLocaleString('en-IN')}{' '}
+                  <span className="text-sm font-semibold text-slate-500">Sq.ft</span>
                 </div>
-                <div className="w-px h-6 bg-neutral-800" />
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-indigo-100/80 flex items-center justify-between text-xs">
                 <div>
-                  <span className="text-neutral-500 block text-[10px]">In Gunthas</span>
-                  <span className="font-mono text-white light:text-slate-900 font-bold">{landResult.guntha} Gunthas</span>
+                  <span className="text-slate-500 block">Sq. Yards (Gaj)</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    {Math.round(landResult.sqft / 9).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Acres</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    {landResult.acre.toFixed(3)}
+                  </span>
                 </div>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* ================= TAB 4: CHEQUE DEMO SANDBOX ================= */}
+        {/* Tab 4: Cheque Studio Mini Demo */}
         {activeTab === 'cheque' && (
           <motion.div
             key="cheque"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-6 items-start"
+            className="pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
           >
-            {/* Left Column: Form Controls */}
+            {/* Left Column: Interactive Inputs */}
             <div className="lg:col-span-5 space-y-3.5">
-              {/* Payee Name Input */}
               <div>
-                <label className="block text-[11px] font-mono uppercase text-neutral-400 font-semibold mb-1">
-                  Payee / Beneficiary Name
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Payee Name
                 </label>
                 <input
                   type="text"
-                  maxLength={50}
                   value={chequePayee}
                   onChange={(e) => setChequePayee(e.target.value)}
                   placeholder="e.g. Ramesh Kumar"
-                  className="w-full bg-neutral-950/80 light:bg-slate-50 border border-neutral-800 light:border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-white light:text-slate-900 focus:outline-none focus:border-amber-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 outline-none transition-colors"
                 />
               </div>
 
-              {/* Rupee Amount Input */}
               <div>
-                <div className="flex justify-between items-center text-[11px] font-mono text-neutral-400 mb-1">
-                  <span className="uppercase font-semibold">Amount (₹)</span>
-                  <span className="text-emerald-400 font-bold">{formatInr(parsedChequeAmount)}</span>
-                </div>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 font-bold text-xs">
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    min="1"
-                    max="10000000"
-                    value={chequeAmount}
-                    onChange={(e) => setChequeAmount(e.target.value)}
-                    placeholder="50000"
-                    className="w-full bg-neutral-950/80 light:bg-slate-50 border border-neutral-800 light:border-slate-300 rounded-xl pl-7 pr-3 py-2 text-xs font-mono font-bold text-white light:text-slate-900 focus:outline-none focus:border-amber-500 transition-colors"
-                  />
-                </div>
-
-                {/* Quick Amount Chips */}
-                <div className="flex gap-1.5 mt-2 flex-wrap">
-                  {[10000, 25000, 50000, 100000, 500000].map((amt) => (
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Amount in Rupees (₹)
+                </label>
+                <input
+                  type="number"
+                  value={chequeAmount}
+                  onChange={(e) => setChequeAmount(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 outline-none transition-colors"
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {[5000, 25000, 50000, 100000].map((amt) => (
                     <button
                       key={amt}
                       type="button"
                       onClick={() => setChequeAmount(amt)}
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-mono border transition-all cursor-pointer ${
+                      className={`text-[11px] font-mono px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
                         parsedChequeAmount === amt
-                          ? 'bg-amber-500/20 border-amber-500/60 text-amber-300 font-bold'
-                          : 'bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white'
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                       }`}
                     >
                       ₹{amt.toLocaleString('en-IN')}
@@ -436,15 +432,14 @@ export const LiveMiniCalculator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Language Selector for Live Conversion */}
               <div>
-                <label className="block text-[11px] font-mono uppercase text-neutral-400 font-semibold mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   Convert Words in Indian Language (13 Scripts)
                 </label>
                 <select
                   value={chequeLang}
                   onChange={(e) => setChequeLang(e.target.value as SupportedLanguage)}
-                  className="w-full bg-neutral-950/80 light:bg-slate-50 border border-neutral-800 light:border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-white light:text-slate-900 focus:outline-none focus:border-amber-500 cursor-pointer"
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 outline-none transition-colors cursor-pointer"
                 >
                   {LANGUAGES.map((lang) => (
                     <option key={lang.code} value={lang.code}>
@@ -454,25 +449,26 @@ export const LiveMiniCalculator: React.FC = () => {
                 </select>
               </div>
 
-              {/* Security Pill Indicators */}
-              <div className="p-2.5 rounded-xl bg-neutral-950/60 border border-white/5 flex items-center justify-between text-[11px] text-neutral-400">
-                <div className="flex items-center gap-1 text-emerald-400">
-                  <ShieldCheck className="w-3.5 h-3.5" />
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs text-slate-600">
+                <div className="flex items-center gap-1.5 text-emerald-700 font-medium">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
                   <span>CTS-2010 Specimen</span>
                 </div>
-                <span className="font-mono text-amber-400 text-[10px]">A/C Payee Crossed</span>
+                <span className="font-mono text-indigo-700 font-semibold text-[11px]">
+                  A/C Payee Only
+                </span>
               </div>
             </div>
 
-            {/* Right Column: Mini CTS-2010 Demo Cheque Specimen */}
+            {/* Right Column: Specimen Preview */}
             <div className="lg:col-span-7 flex flex-col items-center">
-              <div className="w-full max-w-[540px] rounded-xl border border-slate-400/80 bg-[#F4F9F9] text-slate-900 shadow-xl overflow-hidden font-serif select-none relative p-3 sm:p-4 text-xs">
+              <div className="w-full max-w-[540px] rounded-xl border border-slate-300 bg-[#FAFBFB] text-slate-900 shadow-sm overflow-hidden font-serif select-none relative p-3 sm:p-4 text-xs">
                 {/* Bank Header Bar */}
                 <div className="absolute top-0 inset-x-0 h-1.5 bg-[#004B87]" />
 
-                {/* Prominent Diagonal Watermark */}
+                {/* Diagonal Watermark */}
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.14] select-none z-10">
-                  <span className="text-2xl sm:text-3xl font-black uppercase tracking-[0.25em] -rotate-12 text-slate-800 text-center leading-tight">
+                  <span className="text-xl sm:text-2xl font-black uppercase tracking-[0.25em] -rotate-12 text-slate-800 text-center leading-tight">
                     DEMO — NOT A VALID CHEQUE
                   </span>
                 </div>
@@ -497,7 +493,6 @@ export const LiveMiniCalculator: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* Date Grid */}
                   <div className="text-right">
                     <span className="text-[8px] font-sans font-bold text-slate-500 uppercase block mb-0.5">
                       DATE / दिनांक
@@ -506,7 +501,7 @@ export const LiveMiniCalculator: React.FC = () => {
                       {todayParts.map((char, idx) => (
                         <span
                           key={idx}
-                          className="w-3.5 h-4 border border-slate-500 flex items-center justify-center bg-white"
+                          className="w-3.5 h-4 border border-slate-400 flex items-center justify-center bg-white"
                         >
                           {char}
                         </span>
@@ -517,7 +512,7 @@ export const LiveMiniCalculator: React.FC = () => {
 
                 {/* Cheque Body: Payee */}
                 <div className="mt-2 space-y-2 font-sans text-[11px]">
-                  <div className="flex items-end gap-1.5 border-b border-dotted border-slate-600 pb-0.5">
+                  <div className="flex items-end gap-1.5 border-b border-dotted border-slate-400 pb-0.5">
                     <span className="font-bold text-slate-700 whitespace-nowrap text-[10px] font-serif">
                       PAY / अदा करें :
                     </span>
@@ -530,7 +525,7 @@ export const LiveMiniCalculator: React.FC = () => {
                   </div>
 
                   {/* Rupees in Words */}
-                  <div className="border-b border-dotted border-slate-600 pb-0.5">
+                  <div className="border-b border-dotted border-slate-400 pb-0.5">
                     <div className="flex items-start gap-1">
                       <span className="font-bold text-slate-700 whitespace-nowrap text-[10px] font-serif shrink-0">
                         RUPEES / रुपये :
@@ -541,17 +536,15 @@ export const LiveMiniCalculator: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* ₹ Numeric Box & Signature Row */}
+                  {/* ₹ Numeric Box & Signature */}
                   <div className="flex items-center justify-between pt-1">
-                    {/* Amount Box */}
-                    <div className="flex items-center border border-slate-800 bg-white rounded px-2.5 py-1 shadow-sm">
+                    <div className="flex items-center border border-slate-800 bg-white rounded px-2.5 py-1 shadow-2xs">
                       <span className="text-xs font-black text-slate-900 mr-1.5 font-sans">₹</span>
                       <span className="text-xs font-black font-mono text-slate-950">
                         {chequeWordsResult.formattedInr.replace('₹ ', '')} /-
                       </span>
                     </div>
 
-                    {/* Authorised Signatory */}
                     <div className="text-right">
                       <div className="text-[9px] font-bold text-slate-700 uppercase">
                         FOR PRIYA SHARMA
@@ -563,23 +556,23 @@ export const LiveMiniCalculator: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Bottom MICR Decorative Band */}
-                <div className="mt-2.5 pt-1 border-t border-slate-300 text-center font-mono text-[9px] text-slate-700 tracking-wider">
+                {/* Bottom MICR Strip */}
+                <div className="mt-2.5 pt-1 border-t border-slate-200 text-center font-mono text-[9px] text-slate-600 tracking-wider">
                   ⑈ 123456 ⑈ 560002015 ⑆ 000123 ⑈ 10 • CTS-2010 SPECIMEN
                 </div>
               </div>
 
-              {/* CTA link to Full Cheque Studio */}
-              <div className="mt-3 flex items-center justify-between w-full max-w-[540px] text-xs">
-                <span className="text-neutral-400 text-[11px]">
-                  Need 31 Indian banks, print export & validation?
+              {/* Action Button */}
+              <div className="mt-4 flex flex-col sm:flex-row items-center justify-between w-full max-w-[540px] gap-3">
+                <span className="text-slate-500 text-xs text-center sm:text-left">
+                  Includes 31 Indian banks, official IFSC codes & 1-click A4 PDF export.
                 </span>
                 <Link
                   to="/calculators/indian-cheque-studio"
-                  className="font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 group"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-indigo-600/20 transition-all shrink-0 cursor-pointer"
                 >
-                  <span>Open Full Cheque Studio</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  <span>Launch Cheque Studio</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { ArrowLeft, Sparkles } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { CATEGORIES, getToolsByCategory } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
@@ -44,16 +44,16 @@ export const CategoryPage: React.FC = () => {
       {/* Back button */}
       <Link
         to="/tools"
-        className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white mb-8 transition-colors font-mono"
+        className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 mb-8 transition-colors font-medium cursor-pointer"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         <span>Back to All Tools</span>
       </Link>
 
       {/* Category Hero Banner */}
-      <div className="p-8 sm:p-12 rounded-3xl bg-neutral-900/60 light:bg-white border border-neutral-800 light:border-slate-200 mb-12 relative overflow-hidden">
+      <div className="p-8 sm:p-12 rounded-3xl bg-white border border-slate-200/90 shadow-sm mb-12 relative overflow-hidden">
         <div
-          className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-20 pointer-events-none"
+          className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-10 pointer-events-none"
           style={{ backgroundColor: category.accentColor }}
         />
 
@@ -64,18 +64,21 @@ export const CategoryPage: React.FC = () => {
               style={{ backgroundColor: category.accentColor }}
             />
             <span
-              className="text-xs font-mono uppercase font-bold tracking-wider"
-              style={{ color: category.accentColor }}
+              className="text-xs font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded-md"
+              style={{
+                backgroundColor: `${category.accentColor}15`,
+                color: category.accentColor,
+              }}
             >
               {category.subtitle}
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white light:text-slate-900 tracking-tight">
-            {category.headline}
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            {category.title} Calculators
           </h1>
 
-          <p className="mt-3 text-sm sm:text-base text-neutral-400 light:text-slate-600 leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
             {category.description}
           </p>
         </div>
@@ -83,13 +86,13 @@ export const CategoryPage: React.FC = () => {
 
       {/* Tools List */}
       <div>
-        <h2 className="text-xl font-bold text-white light:text-slate-900 mb-6">
+        <h2 className="text-xl font-bold text-slate-900 mb-6">
           Tools in this Category ({tools.length})
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {tools.map((tool) => (
-            <ToolCard key={tool.id} tool={tool} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {tools.map((tool, idx) => (
+            <ToolCard key={tool.id} tool={tool} index={idx} />
           ))}
         </div>
       </div>

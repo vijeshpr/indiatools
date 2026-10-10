@@ -124,39 +124,39 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
             </div>
 
             {/* Sump vs OHT split */}
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-neutral-800 light:border-slate-100">
-              <div className="p-3.5 rounded-xl bg-neutral-950 light:bg-slate-50 border border-neutral-800">
-                <span className="text-[11px] text-neutral-400 block mb-1">Underground Sump</span>
-                <span className="text-lg font-bold font-mono text-white">
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-neutral-800">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-neutral-950 border border-slate-200 dark:border-neutral-800">
+                <span className="text-[11px] text-slate-500 dark:text-neutral-400 block mb-1">Underground Sump</span>
+                <span className="text-lg font-bold font-mono text-slate-900 dark:text-white">
                   {result.recommendedSumpCapacityLitres.toLocaleString('en-IN')} L
                 </span>
-                <span className="text-[11px] text-neutral-500 block mt-0.5">Municipal intake</span>
+                <span className="text-[11px] text-slate-400 dark:text-neutral-500 block mt-0.5">Municipal intake</span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-neutral-950 light:bg-slate-50 border border-neutral-800">
-                <span className="text-[11px] text-neutral-400 block mb-1">Overhead Tank</span>
-                <span className="text-lg font-bold font-mono text-cyan-400">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-neutral-950 border border-slate-200 dark:border-neutral-800">
+                <span className="text-[11px] text-slate-500 dark:text-neutral-400 block mb-1">Overhead Tank</span>
+                <span className="text-lg font-bold font-mono text-cyan-600 dark:text-cyan-400">
                   {result.recommendedOhtCapacityLitres.toLocaleString('en-IN')} L
                 </span>
-                <span className="text-[11px] text-neutral-500 block mt-0.5">Rooftop storage</span>
+                <span className="text-[11px] text-slate-400 dark:text-neutral-500 block mt-0.5">Rooftop storage</span>
               </div>
             </div>
 
-            <div className="mt-4 p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 text-xs space-y-1">
+            <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-neutral-950/80 border border-slate-200 dark:border-neutral-800 text-xs space-y-1">
               <div className="flex justify-between">
-                <span className="text-neutral-400 font-mono text-[11px]">OHT Dimensions:</span>
-                <span className="text-white font-mono">{result.ohtDimensionsFt}</span>
+                <span className="text-slate-500 dark:text-neutral-400 font-mono text-[11px]">OHT Dimensions:</span>
+                <span className="text-slate-800 dark:text-white font-mono">{result.ohtDimensionsFt}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-400 font-mono text-[11px]">Sump Dimensions:</span>
-                <span className="text-white font-mono">{result.sumpDimensionsFt}</span>
+                <span className="text-slate-500 dark:text-neutral-400 font-mono text-[11px]">Sump Dimensions:</span>
+                <span className="text-slate-800 dark:text-white font-mono">{result.sumpDimensionsFt}</span>
               </div>
             </div>
           </motion.div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800 light:border-slate-200 text-xs text-neutral-400 space-y-2">
-            <div className="flex items-center gap-1.5 text-neutral-200 font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-neutral-900/60 border border-slate-200 dark:border-neutral-800 text-xs text-slate-600 dark:text-neutral-400 space-y-2">
+            <div className="flex items-center gap-1.5 text-slate-800 dark:text-neutral-200 font-semibold">
+              <CheckCircle2 className="w-4 h-4 text-cyan-500" />
               <span>IS:1172 Benchmark</span>
             </div>
             <p>

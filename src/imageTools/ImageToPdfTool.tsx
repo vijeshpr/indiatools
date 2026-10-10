@@ -93,13 +93,13 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Inputs */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="p-6 sm:p-7 rounded-2xl bg-neutral-900/80 light:bg-white border border-neutral-800 light:border-slate-200 shadow-xl space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
-              <h2 className="text-base font-bold text-white light:text-slate-900 flex items-center gap-2">
+          <div className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-neutral-800 shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-neutral-800">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <FileText className="w-5 h-5 text-pink-500" />
                 <span>Add Document Images</span>
               </h2>
-              <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+              <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1 font-medium">
                 <ShieldCheck className="w-3.5 h-3.5" /> 100% Client Side
               </span>
             </div>
@@ -107,7 +107,7 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
             {/* Dropzone */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-neutral-700 light:border-slate-300 hover:border-pink-500/60 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-neutral-950/50 light:bg-slate-50 group"
+              className="border-2 border-dashed border-slate-300 dark:border-neutral-700 hover:border-pink-500 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100 dark:bg-neutral-950/50 group"
             >
               <input
                 ref={fileInputRef}
@@ -117,13 +117,13 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
                 onChange={handleFilesAdded}
                 className="hidden"
               />
-              <div className="w-14 h-14 rounded-2xl bg-pink-500/15 text-pink-400 border border-pink-500/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-pink-50 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400 border border-pink-200 dark:border-pink-500/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                 <Upload className="w-7 h-7" />
               </div>
-              <h3 className="font-bold text-white light:text-slate-900 text-base mb-1">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base mb-1">
                 {files.length > 0 ? 'Add More Pages / Photos' : 'Click to Upload Images or Drag & Drop'}
               </h3>
-              <p className="text-xs text-neutral-400 light:text-slate-500 max-w-xs mx-auto">
+              <p className="text-xs text-slate-500 dark:text-neutral-400 max-w-xs mx-auto">
                 Upload Aadhaar, PAN card, Marksheets, Certificates, or Receipts to merge into a single PDF.
               </p>
             </div>
@@ -131,7 +131,7 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
             {/* Uploaded List */}
             {files.length > 0 && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs text-neutral-400">
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-neutral-400">
                   <span>Selected Pages ({files.length}):</span>
                   <span>Will be ordered page 1 to {files.length}</span>
                 </div>
@@ -140,14 +140,14 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
                   {files.map((item, index) => (
                     <div
                       key={item.id}
-                      className="relative p-2 rounded-xl bg-neutral-950 border border-neutral-800 group"
+                      className="relative p-2 rounded-xl bg-slate-50 dark:bg-neutral-950 border border-slate-200 dark:border-neutral-800 group"
                     >
                       <img
                         src={item.preview}
                         alt={`Page ${index + 1}`}
                         className="w-full h-24 object-cover rounded-lg"
                       />
-                      <span className="absolute top-3 left-3 bg-neutral-900/90 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-neutral-700">
+                      <span className="absolute top-3 left-3 bg-slate-900/90 dark:bg-neutral-900/90 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-slate-700 dark:border-neutral-700">
                         Page {index + 1}
                       </span>
                       <button
@@ -179,14 +179,14 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
         <div className="lg:col-span-6 space-y-6">
           <motion.div
             layout
-            className="p-6 sm:p-8 rounded-3xl bg-neutral-900/90 light:bg-white border border-neutral-800 light:border-slate-200 shadow-2xl relative overflow-hidden"
+            className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-neutral-900/90 border border-slate-200 dark:border-neutral-800 shadow-sm relative overflow-hidden"
           >
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
-              <span className="text-xs font-mono font-bold tracking-wider uppercase text-neutral-400">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-neutral-800">
+              <span className="text-xs font-mono font-bold tracking-wider uppercase text-slate-500 dark:text-neutral-400">
                 Compiled Document
               </span>
               {generatedPdfBlob && (
-                <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20">
                   Ready to Download
                 </span>
               )}
@@ -194,15 +194,15 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
 
             {generatedPdfBlob ? (
               <div className="space-y-6 my-4">
-                <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800 text-center space-y-3">
-                  <div className="w-16 h-16 rounded-2xl bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center mx-auto">
+                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-neutral-950 border border-slate-200 dark:border-neutral-800 text-center space-y-3">
+                  <div className="w-16 h-16 rounded-2xl bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 border border-pink-200 dark:border-pink-500/30 flex items-center justify-center mx-auto">
                     <FileText className="w-8 h-8" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-white light:text-slate-900 text-lg">
+                    <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">
                       documents-compiled.pdf
                     </h3>
-                    <p className="text-xs text-neutral-400 font-mono mt-1">
+                    <p className="text-xs text-slate-500 dark:text-neutral-400 font-mono mt-1">
                       {files.length} Pages • {(generatedPdfBlob.size / 1024).toFixed(1)} KB • Standard A4 Format
                     </p>
                   </div>
@@ -211,14 +211,14 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
                 <button
                   type="button"
                   onClick={handleDownload}
-                  className="w-full py-4 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-pink-500/25 cursor-pointer text-base transition-all"
+                  className="w-full py-4 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-pink-500/20 cursor-pointer text-base transition-all"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Merged PDF</span>
                 </button>
               </div>
             ) : (
-              <div className="py-16 text-center text-neutral-500">
+              <div className="py-16 text-center text-slate-400 dark:text-neutral-500">
                 <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">
                   {files.length > 0
@@ -229,9 +229,9 @@ Created via IndiaTools (https://indiatools-rho.vercel.app)`
             )}
           </motion.div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800 light:border-slate-200 text-xs text-neutral-400 space-y-2">
-            <div className="flex items-center gap-1.5 text-neutral-200 font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-neutral-900/60 border border-slate-200 dark:border-neutral-800 text-xs text-slate-600 dark:text-neutral-400 space-y-2">
+            <div className="flex items-center gap-1.5 text-slate-800 dark:text-neutral-200 font-semibold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               <span>Strict Financial & Identity Privacy</span>
             </div>
             <p>

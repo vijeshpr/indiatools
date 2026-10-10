@@ -23,10 +23,10 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
   if (!faqs || faqs.length === 0) return null
 
   return (
-    <section className="mt-12 pt-8 border-t border-neutral-800/80 light:border-slate-200">
+    <section className="mt-12 pt-8 border-t border-slate-200 dark:border-neutral-800/80">
       <div className="flex items-center gap-2 mb-6">
-        <HelpCircle className="w-5 h-5 text-amber-400" />
-        <h2 className="text-xl sm:text-2xl font-bold text-white light:text-slate-900 tracking-tight">
+        <HelpCircle className="w-5 h-5 text-indigo-600 dark:text-amber-400" />
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
           {title}
         </h2>
       </div>
@@ -38,21 +38,21 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
           return (
             <div
               key={index}
-              className="rounded-xl border border-neutral-800/90 light:border-slate-200/90 bg-neutral-900/50 light:bg-white overflow-hidden transition-colors"
+              className="rounded-xl border border-slate-200 dark:border-neutral-800/90 bg-white dark:bg-neutral-900/50 overflow-hidden transition-colors shadow-sm"
             >
               <button
                 onClick={() => toggleFAQ(index)}
                 type="button"
-                className="w-full p-4 sm:p-5 flex items-center justify-between text-left gap-4 hover:bg-neutral-800/30 light:hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="w-full p-4 sm:p-5 flex items-center justify-between text-left gap-4 hover:bg-slate-50 dark:hover:bg-neutral-800/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 aria-expanded={isOpen}
               >
-                <span className="font-semibold text-sm sm:text-base text-neutral-100 light:text-slate-800">
+                <span className="font-semibold text-sm sm:text-base text-slate-900 dark:text-neutral-100">
                   {faq.question}
                 </span>
                 <motion.div
                   animate={{ rotate: isOpen ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
-                  className="shrink-0 text-neutral-400"
+                  className="shrink-0 text-slate-400 dark:text-neutral-400"
                 >
                   <ChevronDown className="w-5 h-5" />
                 </motion.div>
@@ -66,7 +66,7 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.25, ease: 'easeInOut' }}
                   >
-                    <div className="px-4 pb-5 sm:px-5 sm:pb-6 text-sm text-neutral-400 light:text-slate-600 leading-relaxed border-t border-neutral-800/50 light:border-slate-100 pt-3">
+                    <div className="px-4 pb-5 sm:px-5 sm:pb-6 text-sm text-slate-600 dark:text-neutral-400 leading-relaxed border-t border-slate-100 dark:border-neutral-800/50 pt-3">
                       {faq.answer}
                     </div>
                   </motion.div>

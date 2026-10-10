@@ -13,12 +13,12 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('ipt_theme') as Theme | null
+      const stored = localStorage.getItem('ipt_theme_v2') as Theme | null
       if (stored === 'dark' || stored === 'light') return stored
-      // Default to dark mode for cinematic SaaS experience
-      return 'dark'
+      // Default to light theme for clean, high-contrast fintech experience
+      return 'light'
     }
-    return 'dark'
+    return 'light'
   })
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.add('light')
       root.classList.remove('dark')
     }
-    localStorage.setItem('ipt_theme', theme)
+    localStorage.setItem('ipt_theme_v2', theme)
   }, [theme])
 
   const toggleTheme = () => {

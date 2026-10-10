@@ -102,13 +102,13 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Upload & Config Area */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="p-6 sm:p-7 rounded-2xl bg-neutral-900/80 light:bg-white border border-neutral-800 light:border-slate-200 shadow-xl space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
-              <h2 className="text-base font-bold text-white light:text-slate-900 flex items-center gap-2">
+          <div className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-neutral-800 shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-neutral-800">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-pink-500" />
                 <span>Upload & Resize Under 100KB</span>
               </h2>
-              <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+              <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1 font-medium">
                 <ShieldCheck className="w-3.5 h-3.5" /> 100% Private (Local)
               </span>
             </div>
@@ -116,7 +116,7 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
             {/* Dropzone */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-neutral-700 light:border-slate-300 hover:border-pink-500/60 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-neutral-950/50 light:bg-slate-50 group"
+              className="border-2 border-dashed border-slate-300 dark:border-neutral-700 hover:border-pink-500 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100 dark:bg-neutral-950/50 group"
             >
               <input
                 ref={fileInputRef}
@@ -125,20 +125,20 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <div className="w-14 h-14 rounded-2xl bg-pink-500/15 text-pink-400 border border-pink-500/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-pink-50 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400 border border-pink-200 dark:border-pink-500/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                 <Upload className="w-7 h-7" />
               </div>
-              <h3 className="font-bold text-white light:text-slate-900 text-base mb-1">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base mb-1">
                 {selectedFile ? 'Replace Photo' : 'Click to Upload or Drag & Drop'}
               </h3>
-              <p className="text-xs text-neutral-400 light:text-slate-500 max-w-xs mx-auto">
+              <p className="text-xs text-slate-500 dark:text-neutral-400 max-w-xs mx-auto">
                 Supports JPG, PNG, WEBP. Target: Strictly under 100KB for SSC, IBPS, Aadhaar, State PSC.
               </p>
             </div>
 
             {/* Presets */}
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 light:text-slate-600 mb-2">
+              <label className="block text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 mb-2 font-semibold">
                 Dimension Standards
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -147,12 +147,12 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
                   onClick={() => handlePresetChange('standard')}
                   className={`p-3 rounded-xl border text-left transition-all ${
                     dimensionPreset === 'standard'
-                      ? 'bg-pink-500/20 border-pink-500 text-white font-bold'
-                      : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 light:border-slate-200 text-neutral-400'
+                      ? 'bg-pink-50 dark:bg-pink-500/20 border-pink-300 dark:border-pink-500 text-pink-700 dark:text-white font-bold'
+                      : 'bg-white dark:bg-neutral-950 border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-neutral-400'
                   }`}
                 >
                   <span className="text-xs font-bold block">Standard</span>
-                  <span className="text-[10px] text-neutral-500">600×600 px</span>
+                  <span className="text-[10px] text-slate-400 dark:text-neutral-500">600×600 px</span>
                 </button>
 
                 <button
@@ -160,12 +160,12 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
                   onClick={() => handlePresetChange('ssc')}
                   className={`p-3 rounded-xl border text-left transition-all ${
                     dimensionPreset === 'ssc'
-                      ? 'bg-pink-500/20 border-pink-500 text-white font-bold'
-                      : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 light:border-slate-200 text-neutral-400'
+                      ? 'bg-pink-50 dark:bg-pink-500/20 border-pink-300 dark:border-pink-500 text-pink-700 dark:text-white font-bold'
+                      : 'bg-white dark:bg-neutral-950 border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-neutral-400'
                   }`}
                 >
                   <span className="text-xs font-bold block">SSC / IBPS</span>
-                  <span className="text-[10px] text-neutral-500">3.5 × 4.5 cm</span>
+                  <span className="text-[10px] text-slate-400 dark:text-neutral-500">3.5 × 4.5 cm</span>
                 </button>
 
                 <button
@@ -173,12 +173,12 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
                   onClick={() => handlePresetChange('original')}
                   className={`p-3 rounded-xl border text-left transition-all ${
                     dimensionPreset === 'original'
-                      ? 'bg-pink-500/20 border-pink-500 text-white font-bold'
-                      : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 light:border-slate-200 text-neutral-400'
+                      ? 'bg-pink-50 dark:bg-pink-500/20 border-pink-300 dark:border-pink-500 text-pink-700 dark:text-white font-bold'
+                      : 'bg-white dark:bg-neutral-950 border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-neutral-400'
                   }`}
                 >
                   <span className="text-xs font-bold block">Keep Aspect</span>
-                  <span className="text-[10px] text-neutral-500">Auto Scale</span>
+                  <span className="text-[10px] text-slate-400 dark:text-neutral-500">Auto Scale</span>
                 </button>
               </div>
             </div>
@@ -189,14 +189,14 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
         <div className="lg:col-span-6 space-y-6">
           <motion.div
             layout
-            className="p-6 sm:p-8 rounded-3xl bg-neutral-900/90 light:bg-white border border-neutral-800 light:border-slate-200 shadow-2xl relative overflow-hidden"
+            className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-neutral-900/90 border border-slate-200 dark:border-neutral-800 shadow-sm relative overflow-hidden"
           >
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
-              <span className="text-xs font-mono font-bold tracking-wider uppercase text-neutral-400">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-neutral-800">
+              <span className="text-xs font-mono font-bold tracking-wider uppercase text-slate-500 dark:text-neutral-400">
                 Optimized Result
               </span>
               {processedResult && (
-                <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20">
                   {processedResult.sizeKb} KB (Passes &lt;100KB)
                 </span>
               )}
@@ -204,25 +204,25 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
 
             {processedResult ? (
               <div className="space-y-6 my-4">
-                <div className="flex items-center justify-center p-4 bg-neutral-950 rounded-2xl border border-neutral-800">
+                <div className="flex items-center justify-center p-4 bg-slate-50 dark:bg-neutral-950 rounded-2xl border border-slate-200 dark:border-neutral-800">
                   <img
                     src={processedResult.dataUrl}
                     alt="Processed under 100KB"
-                    className="max-h-64 object-contain rounded-lg border border-neutral-700"
+                    className="max-h-64 object-contain rounded-lg border border-slate-200 dark:border-neutral-700 shadow-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3.5 rounded-xl bg-neutral-950 light:bg-slate-50 border border-neutral-800">
-                    <span className="text-[11px] text-neutral-400 block mb-0.5">Original File Size</span>
-                    <span className="text-xl font-bold font-mono text-white light:text-slate-900">
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-neutral-950 border border-slate-200 dark:border-neutral-800">
+                    <span className="text-[11px] text-slate-500 dark:text-neutral-400 block mb-0.5">Original File Size</span>
+                    <span className="text-xl font-bold font-mono text-slate-800 dark:text-white">
                       {originalSizeKb} KB
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-neutral-950 light:bg-slate-50 border border-neutral-800">
-                    <span className="text-[11px] text-emerald-400 font-semibold block mb-0.5">Compressed File Size</span>
-                    <span className="text-xl font-bold font-mono text-emerald-400">
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-neutral-950 border border-slate-200 dark:border-neutral-800">
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block mb-0.5">Compressed File Size</span>
+                    <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
                       {processedResult.sizeKb} KB
                     </span>
                   </div>
@@ -231,23 +231,23 @@ Processed on IndiaTools (https://indiatools-rho.vercel.app)`
                 <button
                   type="button"
                   onClick={handleDownload}
-                  className="w-full py-4 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-pink-500/25 cursor-pointer text-base transition-all"
+                  className="w-full py-4 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-pink-500/20 cursor-pointer text-base transition-all"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Photo ({processedResult.sizeKb} KB)</span>
                 </button>
               </div>
             ) : (
-              <div className="py-16 text-center text-neutral-500">
+              <div className="py-16 text-center text-slate-400 dark:text-neutral-500">
                 <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Upload a photo to see the live under-100KB preview and download.</p>
               </div>
             )}
           </motion.div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800 light:border-slate-200 text-xs text-neutral-400 space-y-2">
-            <div className="flex items-center gap-1.5 text-neutral-200 font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-neutral-900/60 border border-slate-200 dark:border-neutral-800 text-xs text-slate-600 dark:text-neutral-400 space-y-2">
+            <div className="flex items-center gap-1.5 text-slate-800 dark:text-neutral-200 font-semibold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               <span>Govt Portal Compliance</span>
             </div>
             <p>

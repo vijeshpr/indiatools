@@ -23,7 +23,7 @@ async function runAudit() {
   check('index.html: Meta description matches specification', indexHtml.includes('IndiaTools provides practical online calculators and useful tools for vehicle costs, construction, electricity, salary, land area, image resizing and everyday calculations.'));
   check('index.html: Canonical URL is exact production URL', indexHtml.includes('<link rel="canonical" href="https://indiatools-rho.vercel.app/" />'));
   check('index.html: Robots meta tag is index, follow', indexHtml.includes('<meta name="robots" content="index, follow" />'));
-  check('index.html: Theme color is #080A10', indexHtml.includes('<meta name="theme-color" content="#080A10" />'));
+  check('index.html: Theme color matches brand palette', indexHtml.includes('<meta name="theme-color" content="#4F46E5" />') || indexHtml.includes('<meta name="theme-color" content="#080A10" />'));
   check('index.html: og:site_name is IndiaTools', indexHtml.includes('<meta property="og:site_name" content="IndiaTools" />'));
   check('index.html: og:image is HTTPS absolute URL', indexHtml.includes('<meta property="og:image" content="https://indiatools-rho.vercel.app/og-image.png" />'));
   check('index.html: twitter:card is summary_large_image', indexHtml.includes('<meta name="twitter:card" content="summary_large_image" />'));

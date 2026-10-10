@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
-import { Search, Filter, Sparkles, Wrench } from 'lucide-react'
+import { Search, Wrench } from 'lucide-react'
 import { TOOLS, CATEGORIES } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
@@ -43,29 +42,29 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
   return (
     <div className="min-h-screen py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold uppercase mb-3">
+      <div className="text-center max-w-3xl mx-auto mb-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-mono font-bold uppercase mb-3">
           <Wrench className="w-3.5 h-3.5" />
           <span>{popularOnly ? 'Top Rated Utilities' : 'The Practical Toolbox'}</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black text-white light:text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
           {popularOnly ? 'Popular Indian Tools' : 'All Tools & Calculators'}
         </h1>
-        <p className="mt-2.5 text-sm sm:text-base text-neutral-400 light:text-slate-600">
+        <p className="mt-2.5 text-sm sm:text-base text-slate-600">
           {popularOnly
             ? 'The most frequently calculated utilities across automotive, construction, power, and exam documents.'
-            : 'Explore our suite of 40+ precision utilities crafted for real-life Indian problems.'}
+            : 'Explore our complete suite of 43 precision utilities crafted for real-life Indian problems.'}
         </p>
 
-        {/* Filter Input */}
-        <div className="mt-8 relative max-w-md mx-auto">
-          <Search className="w-4 h-4 text-amber-500 absolute left-4 top-3.5" />
+        {/* Filter Search Input */}
+        <div className="mt-6 relative max-w-md mx-auto">
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search mileage, JCB, 50KB photo, cent, solar..."
-            className="w-full bg-neutral-900 light:bg-white border border-neutral-700 light:border-slate-300 rounded-2xl pl-11 pr-4 py-3 text-sm text-white light:text-slate-900 focus:outline-none focus:border-amber-500 shadow-xl"
+            className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 shadow-sm"
           />
         </div>
       </div>
@@ -74,10 +73,10 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
       <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
         <button
           onClick={() => setSelectedCategory('all')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             selectedCategory === 'all'
-              ? 'bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20'
-              : 'bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800'
+              ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+              : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
           }`}
         >
           All Tools ({TOOLS.length})
@@ -87,10 +86,10 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
               selectedCategory === cat.id
-                ? 'bg-neutral-800 text-white border-amber-500'
-                : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white'
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-600/20'
+                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
             }`}
           >
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.accentColor }} />
@@ -101,20 +100,20 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
 
       {/* Tools Grid */}
       {filteredTools.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTools.map((tool) => (
-            <ToolCard key={tool.id} tool={tool} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {filteredTools.map((tool, idx) => (
+            <ToolCard key={tool.id} tool={tool} index={idx} />
           ))}
         </div>
       ) : (
-        <div className="py-20 text-center text-neutral-400">
+        <div className="py-20 text-center text-slate-500">
           <p className="text-base font-semibold">No tools found matching "{searchQuery}"</p>
           <button
             onClick={() => {
               setSearchQuery('')
               setSelectedCategory('all')
             }}
-            className="mt-3 text-xs text-amber-400 underline font-semibold"
+            className="mt-3 text-xs text-indigo-600 underline font-semibold cursor-pointer"
           >
             Reset Filters
           </button>

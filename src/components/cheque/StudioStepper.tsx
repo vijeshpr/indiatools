@@ -38,7 +38,7 @@ export const StudioStepper: React.FC<StudioStepperProps> = ({
   return (
     <nav
       aria-label="Studio Progress"
-      className="w-full bg-neutral-900/80 light:bg-white/90 backdrop-blur-md border border-neutral-800 light:border-slate-200 rounded-xl p-2 sm:p-2.5 shadow-lg mb-3 sm:mb-4"
+      className="w-full bg-white/95 dark:bg-neutral-900/80 backdrop-blur-md border border-slate-200 dark:border-neutral-800 rounded-xl p-2 sm:p-2.5 shadow-sm mb-3 sm:mb-4"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       <div className="flex items-center justify-between gap-1 sm:gap-2">
@@ -57,10 +57,10 @@ export const StudioStepper: React.FC<StudioStepperProps> = ({
                 onClick={() => onStepClick(step.id)}
                 className={`group flex items-center gap-1.5 sm:gap-2.5 p-1 sm:px-2.5 sm:py-1.5 rounded-lg transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
                   isCurrent
-                    ? 'bg-amber-500/15 border border-amber-500/40 text-amber-400 font-semibold shadow-sm'
+                    ? 'bg-amber-500/10 border border-amber-500/40 text-amber-700 dark:text-amber-400 font-semibold shadow-xs'
                     : isCompleted
-                    ? 'hover:bg-neutral-800/60 light:hover:bg-slate-100 text-neutral-300 light:text-slate-700'
-                    : 'text-neutral-500 light:text-slate-400 hover:text-neutral-300'
+                    ? 'hover:bg-slate-100 dark:hover:bg-neutral-800/60 text-slate-700 dark:text-neutral-300'
+                    : 'text-slate-400 dark:text-neutral-500 hover:text-slate-700 dark:hover:text-neutral-300'
                 }`}
                 title={`${title} - ${desc}`}
               >
@@ -68,10 +68,10 @@ export const StudioStepper: React.FC<StudioStepperProps> = ({
                 <div
                   className={`w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center text-xs font-mono font-bold shrink-0 transition-transform group-hover:scale-105 ${
                     isCurrent
-                      ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/30'
+                      ? 'bg-amber-500 text-white dark:text-neutral-950 shadow-md shadow-amber-500/30'
                       : isCompleted
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-neutral-800 light:bg-slate-200 text-neutral-400 light:text-slate-500'
+                      ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
+                      : 'bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-400'
                   }`}
                 >
                   {isCompleted && !isCurrent ? (
@@ -83,16 +83,16 @@ export const StudioStepper: React.FC<StudioStepperProps> = ({
 
                 {/* Text Label (Hidden on small mobile for compact responsiveness) */}
                 <div className="hidden md:block">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 light:text-slate-500 leading-none mb-0.5">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 leading-none mb-0.5">
                     0{step.id}
                   </div>
                   <div
                     className={`text-xs font-medium leading-none truncate max-w-[90px] lg:max-w-[120px] ${
                       isCurrent
-                        ? 'text-amber-300 font-bold'
+                        ? 'text-amber-700 dark:text-amber-300 font-bold'
                         : isCompleted
-                        ? 'text-neutral-200 light:text-slate-800'
-                        : 'text-neutral-400 light:text-slate-500'
+                        ? 'text-slate-800 dark:text-neutral-200'
+                        : 'text-slate-500 dark:text-neutral-400'
                     }`}
                   >
                     {title}
@@ -109,7 +109,7 @@ export const StudioStepper: React.FC<StudioStepperProps> = ({
                         ? 'bg-emerald-500/50'
                         : currentStep === step.id
                         ? 'bg-amber-500/40'
-                        : 'bg-neutral-800 light:bg-slate-200'
+                        : 'bg-slate-200 dark:bg-neutral-800'
                     }`}
                   />
                 </div>

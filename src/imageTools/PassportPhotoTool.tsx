@@ -100,13 +100,13 @@ export const PassportPhotoTool: React.FC = () => {
     <ToolPageLayout tool={tool} onReset={handleReset}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Inputs */}
-        <div className="lg:col-span-6 p-6 sm:p-7 rounded-2xl bg-neutral-900/80 light:bg-white border border-neutral-800 light:border-slate-200 shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
-            <h2 className="text-base font-bold text-white light:text-slate-900 flex items-center gap-2">
+        <div className="lg:col-span-6 p-6 sm:p-7 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-neutral-800 shadow-sm space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-neutral-800">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <UserCheck className="w-5 h-5 text-pink-500" />
               <span>Studio Alignment & Backdrop</span>
             </h2>
-            <div className="flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono">
+            <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded-full font-mono font-medium">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>100% In-Browser</span>
             </div>
@@ -123,34 +123,34 @@ export const PassportPhotoTool: React.FC = () => {
           {!selectedFile ? (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-neutral-700 hover:border-pink-500/60 rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all bg-neutral-950/40 hover:bg-neutral-950/80 group"
+              className="border-2 border-dashed border-slate-300 dark:border-neutral-700 hover:border-pink-500 rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all bg-slate-50 hover:bg-slate-100 dark:bg-neutral-950/40 dark:hover:bg-neutral-950/80 group"
             >
-              <div className="w-14 h-14 rounded-2xl bg-pink-500/10 text-pink-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-pink-50 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                 <Upload className="w-7 h-7" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
                 Upload Front-Facing Portrait
               </h3>
-              <p className="text-xs text-neutral-400 max-w-xs mx-auto">
+              <p className="text-xs text-slate-500 dark:text-neutral-400 max-w-xs mx-auto">
                 Select any clear front portrait or selfie. We crop to official 3.5cm × 4.5cm Indian passport dimensions.
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-950 border border-neutral-800">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-neutral-950 border border-slate-200 dark:border-neutral-800">
                 <div className="flex items-center gap-3 truncate">
-                  <div className="w-10 h-10 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0">
                     <FileCheck className="w-5 h-5" />
                   </div>
                   <div className="truncate">
-                    <p className="text-sm font-semibold text-white truncate">{selectedFile.name}</p>
-                    <span className="text-xs text-neutral-400">Original: {originalSizeKb} KB</span>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{selectedFile.name}</p>
+                    <span className="text-xs text-slate-500 dark:text-neutral-400">Original: {originalSizeKb} KB</span>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3 py-1.5 text-xs rounded-lg bg-neutral-800 text-neutral-300 hover:text-white shrink-0"
+                  className="px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white shrink-0 font-medium"
                 >
                   Change
                 </button>
@@ -158,7 +158,7 @@ export const PassportPhotoTool: React.FC = () => {
 
               {/* Background Color Picker */}
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold mb-2">
+                <label className="block text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold mb-2">
                   Studio Background Color
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -169,17 +169,17 @@ export const PassportPhotoTool: React.FC = () => {
                       onClick={() => handleBgChange(bg.color)}
                       className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-colors ${
                         bgColor === bg.color
-                          ? 'bg-neutral-800 border-pink-500 text-white'
-                          : 'bg-neutral-950 border-neutral-800 text-neutral-300 hover:bg-neutral-850'
+                          ? 'bg-pink-50 border-pink-400 text-pink-700 dark:bg-neutral-800 dark:border-pink-500 dark:text-white font-semibold'
+                          : 'bg-white dark:bg-neutral-950 border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-300 hover:bg-slate-50 dark:hover:bg-neutral-850'
                       }`}
                     >
                       <span
-                        className="w-5 h-5 rounded-full border border-neutral-600 shrink-0"
+                        className="w-5 h-5 rounded-full border border-slate-300 dark:border-neutral-600 shrink-0"
                         style={{ backgroundColor: bg.color }}
                       />
                       <div className="min-w-0">
                         <span className="text-xs font-semibold block truncate">{bg.name}</span>
-                        <span className="text-[10px] text-neutral-400 block truncate">{bg.desc}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-neutral-400 block truncate">{bg.desc}</span>
                       </div>
                     </button>
                   ))}
@@ -189,11 +189,11 @@ export const PassportPhotoTool: React.FC = () => {
               {/* Face Zoom & Framing Slider */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold flex items-center gap-1.5">
-                    <ZoomIn className="w-3.5 h-3.5 text-pink-400" />
+                  <label className="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold flex items-center gap-1.5">
+                    <ZoomIn className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
                     <span>Framing & Face Zoom</span>
                   </label>
-                  <span className="text-xs text-pink-400 font-mono font-bold">{zoom.toFixed(2)}x</span>
+                  <span className="text-xs text-pink-600 dark:text-pink-400 font-mono font-bold">{zoom.toFixed(2)}x</span>
                 </div>
                 <input
                   type="range"
@@ -204,15 +204,15 @@ export const PassportPhotoTool: React.FC = () => {
                   onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
                   className="w-full accent-pink-500 cursor-pointer"
                 />
-                <p className="text-[11px] text-neutral-400 mt-1">
+                <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-1">
                   Indian passport rule: Face must cover 70% to 80% of the vertical frame.
                 </p>
               </div>
             </div>
           )}
 
-          <div className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 text-xs text-neutral-400 space-y-1">
-            <span className="font-bold text-neutral-300 block">Ministry of External Affairs Standard:</span>
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-neutral-950/60 border border-slate-200 dark:border-neutral-800 text-xs text-slate-600 dark:text-neutral-400 space-y-1">
+            <span className="font-bold text-slate-800 dark:text-neutral-300 block">Ministry of External Affairs Standard:</span>
             <p>• Dimensions: <strong>3.5 cm × 4.5 cm (35 mm × 45 mm)</strong></p>
             <p>• Plain white background, neutral face, eyes open, no shadows or head coverings (except religious)</p>
           </div>
@@ -222,17 +222,17 @@ export const PassportPhotoTool: React.FC = () => {
         <div className="lg:col-span-6 space-y-4">
           <motion.div
             layout
-            className="p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-pink-950/30 border border-pink-500/30 shadow-2xl relative overflow-hidden"
+            className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-neutral-900 dark:via-neutral-900 dark:to-pink-950/30 border border-slate-200 dark:border-pink-500/30 shadow-sm relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 dark:bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-mono uppercase tracking-wider text-pink-400 font-semibold flex items-center gap-1.5">
+              <span className="text-xs font-mono uppercase tracking-wider text-pink-600 dark:text-pink-400 font-semibold flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
                 <span>35×45mm Passport Photo</span>
               </span>
               {singleResult && (
-                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Ready for Passport & Visa</span>
                 </span>
@@ -242,22 +242,22 @@ export const PassportPhotoTool: React.FC = () => {
             {isProcessing ? (
               <div className="py-20 text-center space-y-3">
                 <div className="w-10 h-10 border-2 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-sm text-neutral-300">Cropping to 35×45mm & building printable 4×6 sheet...</p>
+                <p className="text-sm text-slate-600 dark:text-neutral-300">Cropping to 35×45mm & building printable 4×6 sheet...</p>
               </div>
             ) : singleResult ? (
               <div>
                 {/* Photo Preview & Sheet Preview */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 p-5 bg-neutral-950 rounded-xl border border-neutral-800 mb-6">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 p-5 bg-slate-50 dark:bg-neutral-950 rounded-xl border border-slate-200 dark:border-neutral-800 mb-6">
                   {/* Single Photo */}
                   <div className="text-center">
-                    <div className="p-1.5 bg-white rounded-lg shadow-lg border border-neutral-600 inline-block">
+                    <div className="p-1.5 bg-white rounded-lg shadow-md border border-slate-200 dark:border-neutral-600 inline-block">
                       <img
                         src={singleResult.dataUrl}
                         alt="35x45mm Passport Photo"
                         className="w-32 h-40 object-cover rounded"
                       />
                     </div>
-                    <span className="text-[11px] font-mono text-neutral-400 block mt-1.5">
+                    <span className="text-[11px] font-mono text-slate-600 dark:text-neutral-400 block mt-1.5 font-medium">
                       Single (35 × 45 mm)
                     </span>
                   </div>
@@ -265,14 +265,14 @@ export const PassportPhotoTool: React.FC = () => {
                   {/* 8-Photo 4x6 Sheet Thumbnail */}
                   {printableSheetUrl && (
                     <div className="text-center">
-                      <div className="p-1.5 bg-white rounded-lg shadow-lg border border-neutral-600 inline-block">
+                      <div className="p-1.5 bg-white rounded-lg shadow-md border border-slate-200 dark:border-neutral-600 inline-block">
                         <img
                           src={printableSheetUrl}
                           alt="8-Photo 4x6 Sheet"
                           className="w-44 h-30 object-contain rounded"
                         />
                       </div>
-                      <span className="text-[11px] font-mono text-amber-400 block mt-1.5 font-bold">
+                      <span className="text-[11px] font-mono text-indigo-600 dark:text-amber-400 block mt-1.5 font-bold">
                         8-Photo 4×6" Print Sheet
                       </span>
                     </div>
@@ -284,9 +284,9 @@ export const PassportPhotoTool: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleDownloadSingle}
-                    className="py-3 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-bold text-xs flex items-center justify-center gap-2 border border-neutral-700 transition-colors cursor-pointer"
+                    className="py-3 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-slate-900 dark:text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 dark:border-neutral-700 transition-colors cursor-pointer"
                   >
-                    <Download className="w-4 h-4 text-pink-400" />
+                    <Download className="w-4 h-4 text-pink-600 dark:text-pink-400" />
                     <span>Download Single (35×45mm)</span>
                   </button>
 
@@ -301,8 +301,8 @@ export const PassportPhotoTool: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="py-20 text-center text-neutral-400">
-                <UserCheck className="w-12 h-12 mx-auto mb-2 text-neutral-600" />
+              <div className="py-20 text-center text-slate-400 dark:text-neutral-400">
+                <UserCheck className="w-12 h-12 mx-auto mb-2 text-slate-300 dark:text-neutral-600" />
                 <p className="text-sm">Upload portrait on the left to generate passport photos</p>
               </div>
             )}
