@@ -19,6 +19,14 @@ export function useSEO({
   ogImage = `${BASE_URL}/og-image.png`,
   jsonLd,
 }: UseSEOProps) {
+  // Route change scroll-to-top (only fires when navigating between routes, never on input change)
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [canonicalPath])
+
+  // Serialized jsonLd string to avoid object reference re-renders
+  const jsonLdSerialized = jsonLd ? JSON.stringify(jsonLd) : ''
+
   useEffect(() => {
     // 1. Document title
     document.title = title
@@ -68,19 +76,16 @@ export function useSEO({
 
     // 6. JSON-LD Structured Data
     let scriptEl = document.getElementById('page-jsonld') as HTMLScriptElement | null
-    if (jsonLd) {
+    if (jsonLdSerialized) {
       if (!scriptEl) {
         scriptEl = document.createElement('script')
         scriptEl.id = 'page-jsonld'
         scriptEl.type = 'application/ld+json'
         document.head.appendChild(scriptEl)
       }
-      scriptEl.textContent = JSON.stringify(jsonLd)
+      scriptEl.textContent = jsonLdSerialized
     } else if (scriptEl) {
       scriptEl.remove()
     }
-
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [title, description, canonicalPath, ogType, ogImage, jsonLd])
+  }, [title, description, canonicalPath, ogType, ogImage, jsonLdSerialized])
 }

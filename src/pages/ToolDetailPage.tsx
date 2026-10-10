@@ -41,6 +41,7 @@ import { SipCalculatorTool } from '../calculators/SipCalculatorTool'
 import { DailyWageTool } from '../calculators/DailyWageTool'
 import { PercentageDiscountTool } from '../calculators/PercentageDiscountTool'
 import { ExperienceTool } from '../calculators/ExperienceTool'
+import { IndianChequeStudioTool } from '../calculators/IndianChequeStudioTool'
 
 // Land & Survey Calculators
 import { CentToSqftTool } from '../calculators/CentToSqftTool'
@@ -96,6 +97,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'daily-wage': DailyWageTool,
   'percentage-calculator': PercentageDiscountTool,
   'experience-calculator': ExperienceTool,
+  'indian-cheque-studio': IndianChequeStudioTool,
 
   // Land & Survey
   'cent-to-sqft': CentToSqftTool,

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -24,6 +24,8 @@ interface ToolPageLayoutProps {
   onReset?: () => void
   onCopyResult?: () => string
   customResultSummary?: string
+  compactHeader?: boolean
+  maxWidthClass?: string
 }
 
 export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
@@ -32,73 +34,78 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
   onReset,
   onCopyResult,
   customResultSummary,
+  compactHeader = false,
+  maxWidthClass = 'max-w-5xl',
 }) => {
   const { showToast } = useToast()
 
-  // Construct JSON-LD Schema including WebApplication, BreadcrumbList, and FAQPage
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebApplication',
-        name: tool.title,
-        description: tool.detailedDescription || tool.description,
-        url: `https://indiatools-rho.vercel.app${tool.seo.canonicalPath}`,
-        applicationCategory: 'UtilityApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript. Requires HTML5.',
-        offers: {
-          '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'INR',
+  // Construct JSON-LD Schema including WebApplication, BreadcrumbList, and FAQPage (memoized to prevent re-renders on keystroke)
+  const jsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebApplication',
+          name: tool.title,
+          description: tool.detailedDescription || tool.description,
+          url: `https://indiatools-rho.vercel.app${tool.seo.canonicalPath}`,
+          applicationCategory: 'UtilityApplication',
+          operatingSystem: 'All',
+          browserRequirements: 'Requires JavaScript. Requires HTML5.',
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'INR',
+          },
         },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: 'https://indiatools-rho.vercel.app/',
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Tools',
-            item: 'https://indiatools-rho.vercel.app/tools',
-          },
-          {
-            '@type': 'ListItem',
-            position: 3,
-            name: tool.categoryLabel,
-            item: `https://indiatools-rho.vercel.app/category/${tool.category}`,
-          },
-          {
-            '@type': 'ListItem',
-            position: 4,
-            name: tool.shortTitle,
-            item: `https://indiatools-rho.vercel.app${tool.seo.canonicalPath}`,
-          },
-        ],
-      },
-      ...(tool.faqs && tool.faqs.length > 0
-        ? [
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
             {
-              '@type': 'FAQPage',
-              mainEntity: tool.faqs.map((faq) => ({
-                '@type': 'Question',
-                name: faq.question,
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: faq.answer,
-                },
-              })),
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://indiatools-rho.vercel.app/',
             },
-          ]
-        : []),
-    ],
-  }
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Tools',
+              item: 'https://indiatools-rho.vercel.app/tools',
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: tool.categoryLabel,
+              item: `https://indiatools-rho.vercel.app/category/${tool.category}`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 4,
+              name: tool.shortTitle,
+              item: `https://indiatools-rho.vercel.app${tool.seo.canonicalPath}`,
+            },
+          ],
+        },
+        ...(tool.faqs && tool.faqs.length > 0
+          ? [
+              {
+                '@type': 'FAQPage',
+                mainEntity: tool.faqs.map((faq) => ({
+                  '@type': 'Question',
+                  name: faq.question,
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: faq.answer,
+                  },
+                })),
+              },
+            ]
+          : []),
+      ],
+    }),
+    [tool]
+  )
 
   // Hook handles title, meta description, canonical, OG, Twitter, and JSON-LD
   useSEO({
@@ -148,10 +155,19 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
     <article className="min-h-screen pb-20">
 
       {/* Hero Header */}
-      <div className="relative pt-6 pb-10 sm:pb-12 border-b border-neutral-800/80 light:border-slate-200/80 bg-neutral-900/30 light:bg-slate-50/50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div
+        className={`relative border-b border-neutral-800/80 light:border-slate-200/80 bg-neutral-900/30 light:bg-slate-50/50 ${
+          compactHeader ? 'pt-3.5 pb-4 sm:pb-5' : 'pt-6 pb-10 sm:pb-12'
+        }`}
+      >
+        <div className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8`}>
           {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-neutral-400 mb-6">
+          <nav
+            aria-label="Breadcrumb"
+            className={`flex items-center gap-1.5 text-xs text-neutral-400 ${
+              compactHeader ? 'mb-2 sm:mb-2.5' : 'mb-6'
+            }`}
+          >
             <Link to="/" className="hover:text-amber-400 transition-colors">
               Home
             </Link>
@@ -172,9 +188,13 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
             </span>
           </nav>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div
+            className={`flex flex-col md:flex-row md:items-center justify-between ${
+              compactHeader ? 'gap-3' : 'gap-6'
+            }`}
+          >
             <div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className={`flex items-center gap-2 ${compactHeader ? 'mb-1.5' : 'mb-3'}`}>
                 <span
                   className="text-xs font-mono uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border"
                   style={{
@@ -198,11 +218,21 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
                 </div>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-white light:text-slate-900 tracking-tight leading-tight">
+              <h1
+                className={`font-extrabold text-white light:text-slate-900 tracking-tight leading-tight ${
+                  compactHeader ? 'text-xl sm:text-2xl lg:text-3xl' : 'text-2xl sm:text-4xl'
+                }`}
+              >
                 {tool.title}
               </h1>
 
-              <p className="mt-2.5 text-sm sm:text-base text-neutral-400 light:text-slate-600 max-w-3xl leading-relaxed">
+              <p
+                className={`text-neutral-400 light:text-slate-600 max-w-3xl leading-relaxed ${
+                  compactHeader
+                    ? 'mt-1 text-xs sm:text-sm line-clamp-2 md:line-clamp-none'
+                    : 'mt-2.5 text-sm sm:text-base'
+                }`}
+              >
                 {tool.detailedDescription}
               </p>
             </div>
@@ -246,11 +276,19 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
       </div>
 
       {/* Main Tool & Calculator Section */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <main
+        className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8 ${
+          compactHeader ? 'mt-4 sm:mt-5' : 'mt-8'
+        }`}
+      >
         {children}
 
         {/* How It Works & Indian Formula Context */}
-        <section className="mt-14 p-6 sm:p-8 rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800/90 light:border-slate-200">
+        <section
+          className={`rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800/90 light:border-slate-200 ${
+            compactHeader ? 'mt-8 p-4 sm:p-5' : 'mt-14 p-6 sm:p-8'
+          }`}
+        >
           <div className="flex items-center gap-2.5 mb-4">
             <BookOpen className="w-5 h-5 text-amber-400" />
             <h2 className="text-lg sm:text-xl font-bold text-white light:text-slate-900 tracking-tight">

@@ -2,7 +2,6 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './components/common/Toast'
-import { TricolorCursor } from './components/common/TricolorCursor'
 import { Navbar } from './components/common/Navbar'
 import { Footer } from './components/common/Footer'
 
@@ -23,9 +22,6 @@ export function App() {
       <ToastProvider>
         <BrowserRouter>
           <div className="relative min-h-screen flex flex-col bg-[#080A10] light:bg-[#F8FAFC] text-slate-100 light:text-slate-900 transition-colors duration-300 selection:bg-amber-500 selection:text-white">
-            {/* Animated Indian Tricolor Floating Cursor Follower */}
-            <TricolorCursor />
-
             {/* Header Navigation */}
             <Navbar />
 

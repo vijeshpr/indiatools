@@ -43,7 +43,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#8B5CF6',
     gradient: 'from-purple-500/20 via-indigo-500/10 to-transparent',
     icon: 'IndianRupee',
-    toolCount: 6,
+    toolCount: 8,
   },
   land: {
     id: 'land',
@@ -1649,6 +1649,78 @@ export const TOOLS: ToolDefinition[] = [
       canonicalPath: "/calculators/percentage-calculator",
     },
     type: 'calculator',
+  },
+  {
+    id: 'indian-cheque-studio',
+    slug: 'indian-cheque-studio',
+    title: 'Indian Cheque Studio – Fill & Preview in Indian Languages | IndiaTools',
+    shortTitle: 'Indian Cheque Studio',
+    category: 'money',
+    categoryLabel: 'Money',
+    description: 'Learn how to fill an Indian cheque with an interactive educational preview, Indian rupee amount-to-words conversion, multiple languages, and payment-type guidance.',
+    detailedDescription: 'Interactive Indian cheque filling simulator and educational studio. Practice filling cheques with CTS-2010 compliance, convert numbers to words in 13 Indian languages, choose from 30+ Indian banks, and understand Account Payee crossing security.',
+    iconName: 'FileSignature',
+    badge: 'New',
+    color: '#8B5CF6',
+    tags: ['Cheque', 'Bank Cheque', 'Amount in Words', 'Account Payee', 'CTS-2010', 'Banking'],
+    searchKeywords: [
+      'indian cheque studio',
+      'how to fill cheque in india',
+      'cheque fill online',
+      'cheque amount in words hindi english',
+      'account payee crossing cheque',
+      'sbi cheque sample',
+      'hdfc cheque format',
+      'cheque date validity india'
+    ],
+    formulaExplanation: 'Indian Numbering System: 1,00,00,000 = 1 Crore, 1,00,00,000 = 1 Crore, 1,00,000 = 1 Lakh, 1,000 = 1 Thousand. Rupee amount is converted into grammatical words with "Rupees Only" / "मात्र" suffix. Cheque dates are valid for exactly 3 calendar months from the issue date.',
+    assumptions: [
+      'Educational demonstration compliant with RBI CTS-2010 layout guidelines.',
+      'Contains prominent "DEMO — NOT A VALID CHEQUE" watermark to prevent misuse.',
+      'Actual cheque clearing requires verified signatures matching drawee bank records.',
+      'High-value transactions (₹50,000+) are subject to Positive Pay system verification.'
+    ],
+    exampleCalculation: {
+      title: 'Educational Business Payment Cheque',
+      inputs: {
+        'Payee': 'ABC Technologies Pvt Ltd',
+        'Amount': '₹1,25,750.00',
+        'Bank': 'State Bank of India',
+        'Crossing': 'Account Payee (A/C Payee Only)'
+      },
+      outputs: {
+        'Amount in Words': 'One Lakh Twenty-Five Thousand Seven Hundred Fifty Rupees Only',
+        'Validity': '3 Months from Cheque Date',
+        'Clearing Method': 'Direct Account Credit (No Cash Encashment)'
+      },
+      explanation: 'The cheque is crossed with parallel lines on top left marking "A/C PAYEE ONLY", preventing over-the-counter encashment. The amount in words ends with "//" to prevent tampering.'
+    },
+    faqs: [
+      {
+        question: 'What is the difference between Account Payee and Bearer cheque in India?',
+        answer: 'An Account Payee cheque has two parallel transverse lines drawn on the top-left corner with "A/C PAYEE ONLY". The money can only be credited directly to the named payee bank account. A Bearer cheque has no crossing, and anyone holding the cheque can cash it over the counter, carrying high risk.'
+      },
+      {
+        question: 'What is the legal validity period of an Indian bank cheque?',
+        answer: 'As per Reserve Bank of India (RBI) regulations, all Indian cheques are valid for exactly 3 months from the date written on the cheque. After 3 months, it becomes a "Stale Cheque" and cannot be cleared by banks.'
+      },
+      {
+        question: 'Why should amount in words end with "Only" or "मात्र" and double slashes "//"?',
+        answer: 'Ending the amount in words with "Only" (or "मात्र" in Hindi) and adding double lines or slashes prevents fraudulent additions of words like "Thousand" or "Lakh" after your written amount.'
+      },
+      {
+        question: 'What is the RBI Positive Pay mechanism for cheques?',
+        answer: 'Positive Pay is an anti-fraud measure introduced by RBI for cheques above ₹50,000. The issuer reconfirms key details (date, payee name, amount, account number) via mobile banking or SMS before the cheque is presented for clearing.'
+      }
+    ],
+    relatedSlugs: ['in-hand-salary', 'emi-calculator', 'gst-calculator', 'sip-calculator'],
+    seo: {
+      title: 'Indian Cheque Studio – Fill & Preview in Indian Languages | IndiaTools',
+      metaDescription: 'Learn how to fill an Indian cheque with an interactive educational preview, Indian rupee amount-to-words conversion, multiple languages, and payment-type guidance.',
+      keywords: ['indian cheque studio', 'how to fill cheque india', 'cheque amount in words', 'account payee cheque format', 'cts 2010 cheque preview'],
+      canonicalPath: '/calculators/indian-cheque-studio'
+    },
+    type: 'calculator'
   },
 ]
 

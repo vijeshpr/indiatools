@@ -4,7 +4,7 @@
 **Tagline**: *Real-life problems. One simple toolbox.*  
 **Production URL**: `https://indiatools-rho.vercel.app/`  
 **Audit Date**: October 2026  
-**Build & Test Status**: **100% PASS** (849 QA tests passed, 288 security checks passed, 37/37 SEO audits passed)
+**Build & Test Status**: **100% PASS** (866 QA tests passed, 91 Cheque Studio tests passed, 288 security checks passed, 37/37 SEO audits passed)
 
 ---
 
@@ -72,7 +72,7 @@ An audit was performed across all `.ts`, `.tsx`, `.html`, `.xml`, `.json`, and `
 
 ---
 
-## 5. Tool-Page SEO (All 42 Tools)
+## 5. Tool-Page SEO (All 43 Tools)
 
 Every tool has unique metadata ending with `| IndiaTools` and verified routing canonicals:
 
@@ -96,11 +96,17 @@ Every tool has unique metadata ending with `| IndiaTools` and verified routing c
    * **Canonical**: `https://indiatools-rho.vercel.app/calculators/cent-to-sqft`
    * **Status**: **Verified & Exact Match**
 
+4. **Indian Cheque Studio (`/calculators/indian-cheque-studio`)**
+   * **Title**: `Indian Cheque Studio – Practice & Preview Cheque Writing Online | IndiaTools`
+   * **Description**: `Learn how to fill and write Indian bank cheques correctly across 13 Indian languages with CTS-2010 cheque preview, Account Payee markings, and amount in words.`
+   * **Canonical**: `https://indiatools-rho.vercel.app/calculators/indian-cheque-studio`
+   * **Status**: **Verified & Exact Match**
+
 ### Full Tool Coverage Verification
-* **42 of 42** tool titles end with `| IndiaTools`
-* **42 of 42** tool titles are globally unique
-* **42 of 42** tool descriptions are unique, benefit-driven, and non-generic
-* **42 of 42** tools feature an `<h1>` tag matching intent, calculation logic, example walkthrough, FAQ accordion, and related tool cards.
+* **43 of 43** tool titles end with `| IndiaTools`
+* **43 of 43** tool titles are globally unique
+* **43 of 43** tool descriptions are unique, benefit-driven, and non-generic
+* **43 of 43** tools feature an `<h1>` tag matching intent, calculation logic, example walkthrough, FAQ accordion, and related tool cards.
 
 ---
 

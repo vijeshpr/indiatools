@@ -50,7 +50,7 @@ async function runAudit() {
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 42 unique tools', tools.length === 42, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 43 unique tools', tools.length === 43, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;
@@ -89,11 +89,11 @@ async function runAudit() {
     }
   }
 
-  check('sitemap.xml: Contains all 42 tool canonical URLs', allToolsInSitemap);
-  check('Tool SEO: All 42 tool titles end with "| IndiaTools"', allTitlesEndWithBrand);
-  check('Tool SEO: All 42 tool titles are unique', allUniqueTitles);
-  check('Tool SEO: All 42 tool descriptions are unique', allUniqueDescriptions);
-  check('Tool SEO: All 42 tool canonical paths follow correct routing', allValidCanonicals);
+  check('sitemap.xml: Contains all 43 tool canonical URLs', allToolsInSitemap);
+  check('Tool SEO: All 43 tool titles end with "| IndiaTools"', allTitlesEndWithBrand);
+  check('Tool SEO: All 43 tool titles are unique', allUniqueTitles);
+  check('Tool SEO: All 43 tool descriptions are unique', allUniqueDescriptions);
+  check('Tool SEO: All 43 tool canonical paths follow correct routing', allValidCanonicals);
 
   // 5. Special Tool Verification
   const jcb = tools.find(t => t.slug === 'jcb-fuel-cost');
@@ -127,7 +127,7 @@ async function runAudit() {
     const files = fs.readdirSync(dir);
     for (const f of files) {
       const full = path.join(dir, f);
-      if (['node_modules', '.git', 'dist', 'scripts'].some(x => full.includes(x))) continue;
+      if (['node_modules', '.git', 'dist', 'scripts', 'SEO_CHECK.md'].some(x => full.includes(x))) continue;
       if (fs.statSync(full).isDirectory()) scanDir(full);
       else {
         const c = fs.readFileSync(full, 'utf8');
