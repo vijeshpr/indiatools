@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://indiatools-rho.vercel.app/</loc>
     <lastmod>2026-10-10</lastmod>
@@ -322,7 +322,261 @@
     <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio</loc>
     <lastmod>2026-10-10</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/calculators/indian-cheque-studio/ur" />
   </url>
   <url>
     <loc>https://indiatools-rho.vercel.app/about</loc>

@@ -1,6 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle2 } from 'lucide-react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import {
+  CheckCircle2,
+  BookOpen,
+  AlertTriangle,
+  HelpCircle,
+  Languages,
+  ChevronDown,
+  ShieldCheck,
+  Tag,
+} from 'lucide-react'
 import {
   SupportedLanguage,
   PaymentMode,
@@ -22,20 +32,44 @@ import { ChequeDetailsForm } from '../components/cheque/ChequeDetailsForm'
 import { ChequePreview } from '../components/cheque/ChequePreview'
 import { PreviewToolbar } from '../components/cheque/PreviewToolbar'
 import { useToast } from '../components/common/Toast'
+import {
+  getChequeSeoData,
+  getAllChequeHreflangs,
+  CHEQUE_SEO_LANGUAGES,
+} from '../data/chequeSeoData'
 
 export const IndianChequeStudioTool: React.FC = () => {
   const tool = getToolBySlug('indian-cheque-studio')!
   const { showToast } = useToast()
+  const { langCode } = useParams<{ langCode?: string }>()
+  const navigate = useNavigate()
 
-  // 1. Language state (persisted locally)
+  // Validate langCode if provided in URL
+  const validLangFromUrl: SupportedLanguage | null =
+    langCode && (langCode in CHEQUE_SEO_LANGUAGES)
+      ? (langCode as SupportedLanguage)
+      : null
+
+  // 1. Language state: URL param has highest precedence, then saved preference, fallback 'en'
   const [selectedLang, setSelectedLang] = useState<SupportedLanguage>(() => {
+    if (validLangFromUrl) return validLangFromUrl
     try {
-      const saved = localStorage.getItem('india_cheque_lang')
-      return (saved as SupportedLanguage) || 'en'
-    } catch {
-      return 'en'
-    }
+      const saved = localStorage.getItem('india_cheque_lang') as SupportedLanguage
+      if (saved && (saved in CHEQUE_SEO_LANGUAGES)) return saved
+    } catch {}
+    return 'en'
   })
+
+  // Synchronize when route URL changes (e.g. browser back/forward or clicking language links)
+  useEffect(() => {
+    if (validLangFromUrl) {
+      if (validLangFromUrl !== selectedLang) {
+        setSelectedLang(validLangFromUrl)
+      }
+    } else if (!langCode && selectedLang !== 'en') {
+      setSelectedLang('en')
+    }
+  }, [validLangFromUrl, langCode])
 
   // 2. Step state (1: Language, 2: Bank, 3: Mode, 4: Details, 5: Preview)
   const [currentStep, setCurrentStep] = useState<number>(1)
@@ -60,13 +94,25 @@ export const IndianChequeStudioTool: React.FC = () => {
   // 5. User zoom multiplier for the cheque canvas (1.0 = 100% container fit)
   const [zoomLevel, setZoomLevel] = useState<number>(1)
 
-  // Persist language
+  // FAQ Accordion interactive state
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
+
+  // Persist language and navigate to corresponding localized route
   const handleLanguageChange = (lang: SupportedLanguage) => {
     setSelectedLang(lang)
     try {
       localStorage.setItem('india_cheque_lang', lang)
     } catch {
       // Ignore storage errors
+    }
+
+    const targetPath =
+      lang === 'en'
+        ? '/calculators/indian-cheque-studio'
+        : `/calculators/indian-cheque-studio/${lang}`
+
+    if (window.location.pathname !== targetPath) {
+      navigate(targetPath)
     }
   }
 
@@ -163,6 +209,71 @@ https://indiatools-rho.vercel.app/calculators/indian-cheque-studio`
   const activeBank = getBankById(selectedBankId)
   const activeMode = getPaymentModeInfo(selectedMode, selectedLang)
 
+  const seoData = getChequeSeoData(selectedLang)
+  const allHreflangs = getAllChequeHreflangs()
+
+  // Dynamic JSON-LD structured data for WebApplication, BreadcrumbList, and FAQPage
+  const customJsonLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebApplication',
+        name: seoData.title,
+        description: seoData.description,
+        url: seoData.canonicalUrl,
+        applicationCategory: 'FinancialApplication',
+        operatingSystem: 'All',
+        browserRequirements: 'Requires JavaScript. Requires HTML5.',
+        inLanguage: seoData.localeCode,
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'INR',
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://indiatools-rho.vercel.app/',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Calculators',
+            item: 'https://indiatools-rho.vercel.app/tools',
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: 'Salary & Money',
+            item: 'https://indiatools-rho.vercel.app/category/money',
+          },
+          {
+            '@type': 'ListItem',
+            position: 4,
+            name: seoData.h1,
+            item: seoData.canonicalUrl,
+          },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: seoData.faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.answer,
+          },
+        })),
+      },
+    ],
+  }), [seoData])
+
   return (
     <ToolPageLayout
       tool={tool}
@@ -170,6 +281,15 @@ https://indiatools-rho.vercel.app/calculators/indian-cheque-studio`
       onCopyResult={getResultSummary}
       compactHeader={true}
       maxWidthClass="max-w-6xl xl:max-w-7xl"
+      customTitle={seoData.title}
+      customDescription={seoData.description}
+      customH1={seoData.h1}
+      customSubtitle={seoData.subtitle}
+      customCanonicalPath={seoData.slugPath}
+      hreflangs={allHreflangs}
+      customJsonLd={customJsonLd}
+      hideDefaultGuide={true}
+      hideDefaultFaqs={true}
     >
       {/* Print-specific style tag */}
       <style>{`
@@ -509,6 +629,245 @@ https://indiatools-rho.vercel.app/calculators/indian-cheque-studio`
             )}
           </AnimatePresence>
         </div>
+
+        {/* ================= 1. STEP-BY-STEP CHEQUE GUIDE (CTS-2010 STANDARD) ================= */}
+        <section className="p-4 sm:p-6 lg:p-7 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-neutral-800 shadow-xl space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-neutral-800/80">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                  {seoData.headings.guideTitle}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
+                  CTS-2010 Standard Banking Rules • {seoData.langName} ({seoData.nativeName})
+                </p>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 self-start sm:self-auto">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>RBI CTS-2010 Compliant</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {seoData.guideSteps.map((step) => {
+              const labelBadge =
+                step.stepNumber === 1 ? seoData.headings.dateLabel :
+                step.stepNumber === 2 ? seoData.headings.payeeLabel :
+                step.stepNumber === 3 ? seoData.headings.amountWordsLabel :
+                step.stepNumber === 4 ? seoData.headings.amountNumbersLabel :
+                step.stepNumber === 5 ? seoData.headings.crossingLabel :
+                seoData.headings.signatureLabel
+
+              return (
+                <div
+                  key={step.stepNumber}
+                  className="p-4 rounded-xl bg-slate-50 dark:bg-neutral-950/60 border border-slate-200/80 dark:border-neutral-800/70 flex flex-col justify-between hover:border-amber-500/40 transition-colors"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        Step 0{step.stepNumber}
+                      </span>
+                      <span className="text-[10.5px] font-medium text-slate-500 dark:text-neutral-400 truncate max-w-[170px]">
+                        {labelBadge}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-1.5 leading-snug">
+                      {step.title}
+                    </h3>
+                    <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed mb-3">
+                      {step.instruction}
+                    </p>
+                  </div>
+                  {step.tip && (
+                    <div className="pt-2 border-t border-slate-200/60 dark:border-neutral-800/60 text-[11px] text-amber-700 dark:text-amber-400/90 italic">
+                      💡 {step.tip}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* ================= 2. 5 CRITICAL MISTAKES TO AVOID ================= */}
+        <section className="p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-rose-50/70 via-white to-white dark:from-rose-950/20 dark:via-neutral-900/80 dark:to-neutral-900/80 border border-rose-200 dark:border-rose-500/20 shadow-xl space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 dark:text-rose-400 shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                {seoData.headings.mistakesTitle}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
+                Avoid cheque bounce penalties, clearing rejection, or fraud risk
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            {seoData.commonMistakes.map((mistake, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-neutral-950/50 border border-rose-100 dark:border-rose-900/20"
+              >
+                <span className="text-rose-500 dark:text-rose-400 font-bold text-sm shrink-0 mt-0.5">✕</span>
+                <p className="text-xs text-slate-700 dark:text-neutral-300 leading-relaxed">
+                  {mistake}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= 3. LOCALIZED FAQ ACCORDION ================= */}
+        <section className="p-4 sm:p-6 lg:p-7 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-neutral-800 shadow-xl space-y-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-neutral-800/80">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+              <HelpCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                {seoData.headings.faqTitle}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
+                Frequently asked questions verified against Reserve Bank of India clearing guidelines
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2.5 pt-1">
+            {seoData.faqs.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx
+              return (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-slate-200/80 dark:border-neutral-800/70 overflow-hidden bg-slate-50/50 dark:bg-neutral-950/40 transition-colors"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full flex items-center justify-between p-4 text-left gap-4 hover:bg-slate-100/60 dark:hover:bg-neutral-800/30 transition-colors cursor-pointer"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                      {faq.question}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-500 dark:text-neutral-400 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-amber-500 dark:text-amber-400' : ''
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="p-4 pt-1 text-xs text-slate-600 dark:text-neutral-300 leading-relaxed border-t border-slate-200/50 dark:border-neutral-800/50 bg-white dark:bg-neutral-950/60">
+                          {faq.answer}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* ================= 4. ALL 13 LANGUAGES CRAWLABLE NAVIGATION ================= */}
+        <section className="p-4 sm:p-6 lg:p-7 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-neutral-800 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-neutral-800/80">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <Languages className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                  {seoData.headings.languagesTitle}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
+                  Complete bilingual cheque writing formats across 13 Indian languages
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-mono text-slate-500 dark:text-neutral-400">
+              13 Languages Supported
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+            {Object.values(CHEQUE_SEO_LANGUAGES).map((item) => {
+              const isActive = selectedLang === item.lang
+              const linkPath = item.slugPath
+
+              return (
+                <Link
+                  key={item.lang}
+                  to={linkPath}
+                  onClick={() => handleLanguageChange(item.lang)}
+                  className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                    isActive
+                      ? 'bg-amber-500/15 border-amber-500 text-slate-900 dark:text-white shadow-sm shadow-amber-500/10 ring-1 ring-amber-500/50'
+                      : 'bg-slate-50 dark:bg-neutral-950/40 border-slate-200/80 dark:border-neutral-800/80 text-slate-700 dark:text-neutral-300 hover:border-amber-500/40 hover:bg-slate-100/60 dark:hover:bg-neutral-800/40'
+                  }`}
+                  hrefLang={item.localeCode}
+                >
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="font-bold text-sm text-slate-900 dark:text-white">
+                      {item.nativeName}
+                    </span>
+                    {isActive && (
+                      <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 shrink-0" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between gap-1 text-[10.5px] text-slate-500 dark:text-neutral-400">
+                    <span>{item.langName}</span>
+                    <span className="font-mono text-[9px] uppercase px-1 py-0.5 rounded bg-slate-200 dark:bg-neutral-800">
+                      {item.script}
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* ================= 5. POPULAR SEARCH PHRASES & TRANSLITERATIONS ================= */}
+        <section className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-neutral-950/40 border border-slate-200 dark:border-neutral-800/70 shadow-sm space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-neutral-400">
+            <Tag className="w-3.5 h-3.5 text-amber-500" />
+            <span>Search Queries & Regional Phrases ({seoData.langName})</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {seoData.searchIntents.map((intent, idx) => (
+              <span
+                key={`intent-${idx}`}
+                className="px-2.5 py-1 rounded-lg text-xs bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-300"
+              >
+                {intent}
+              </span>
+            ))}
+            {seoData.keywords.slice(0, 6).map((kw, idx) => (
+              <span
+                key={`kw-${idx}`}
+                className="px-2.5 py-1 rounded-lg text-xs font-mono bg-white/80 dark:bg-neutral-900/60 border border-slate-200/60 dark:border-neutral-800/60 text-slate-500 dark:text-neutral-400"
+              >
+                {kw}
+              </span>
+            ))}
+          </div>
+        </section>
       </div>
 
       {/* ================= PRINTABLE SHEET CONTAINER (VISIBLE ONLY IN PRINT) ================= */}

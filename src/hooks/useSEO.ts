@@ -7,6 +7,7 @@ export interface UseSEOProps {
   ogType?: string
   ogImage?: string
   jsonLd?: Record<string, any>
+  hreflangs?: Array<{ lang: string; href: string }>
 }
 
 const BASE_URL = 'https://indiatools-rho.vercel.app'
@@ -18,6 +19,7 @@ export function useSEO({
   ogType = 'website',
   ogImage = `${BASE_URL}/og-image.png`,
   jsonLd,
+  hreflangs,
 }: UseSEOProps) {
   // Route change scroll-to-top (only fires when navigating between routes, never on input change)
   useEffect(() => {
@@ -26,6 +28,7 @@ export function useSEO({
 
   // Serialized jsonLd string to avoid object reference re-renders
   const jsonLdSerialized = jsonLd ? JSON.stringify(jsonLd) : ''
+  const hreflangsSerialized = hreflangs ? JSON.stringify(hreflangs) : ''
 
   useEffect(() => {
     // 1. Document title
@@ -87,5 +90,25 @@ export function useSEO({
     } else if (scriptEl) {
       scriptEl.remove()
     }
-  }, [title, description, canonicalPath, ogType, ogImage, jsonLdSerialized])
+
+    // 7. Hreflang alternate link tags
+    const existingHreflangs = document.querySelectorAll('link[rel="alternate"][data-seo-hreflang="true"]')
+    existingHreflangs.forEach((el) => el.remove())
+
+    if (hreflangs && hreflangs.length > 0) {
+      hreflangs.forEach(({ lang, href }) => {
+        const linkEl = document.createElement('link')
+        linkEl.setAttribute('rel', 'alternate')
+        linkEl.setAttribute('hreflang', lang)
+        linkEl.setAttribute('href', href)
+        linkEl.setAttribute('data-seo-hreflang', 'true')
+        document.head.appendChild(linkEl)
+      })
+    }
+
+    return () => {
+      const cleanupHreflangs = document.querySelectorAll('link[rel="alternate"][data-seo-hreflang="true"]')
+      cleanupHreflangs.forEach((el) => el.remove())
+    }
+  }, [title, description, canonicalPath, ogType, ogImage, jsonLdSerialized, hreflangsSerialized])
 }

@@ -37,7 +37,7 @@ async function runAudit() {
 
   // 3. Sitemap.xml Audit
   const sitemapXml = fs.readFileSync('public/sitemap.xml', 'utf8');
-  check('sitemap.xml: Valid XML header and urlset', sitemapXml.startsWith('<?xml version="1.0" encoding="UTF-8"?>') && sitemapXml.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
+  check('sitemap.xml: Valid XML header and urlset', sitemapXml.startsWith('<?xml version="1.0" encoding="UTF-8"?>') && sitemapXml.includes('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'));
   check('sitemap.xml: Contains homepage', sitemapXml.includes('<loc>https://indiatools-rho.vercel.app/</loc>'));
   check('sitemap.xml: Contains /tools', sitemapXml.includes('<loc>https://indiatools-rho.vercel.app/tools</loc>'));
   check('sitemap.xml: Contains /popular', sitemapXml.includes('<loc>https://indiatools-rho.vercel.app/popular</loc>'));
@@ -46,6 +46,76 @@ async function runAudit() {
   check('sitemap.xml: Contains /contact', sitemapXml.includes('<loc>https://indiatools-rho.vercel.app/contact</loc>'));
   check('sitemap.xml: Contains /privacy', sitemapXml.includes('<loc>https://indiatools-rho.vercel.app/privacy</loc>'));
   check('sitemap.xml: Contains /terms', sitemapXml.includes('<loc>https://indiatools-rho.vercel.app/terms</loc>'));
+
+  // 3b. Multilingual Cheque Studio Sitemaps & Hreflang Audit
+  const chequeLanguages = [
+    { code: 'en', locale: 'en-IN', path: '/calculators/indian-cheque-studio' },
+    { code: 'hi', locale: 'hi-IN', path: '/calculators/indian-cheque-studio/hi' },
+    { code: 'ml', locale: 'ml-IN', path: '/calculators/indian-cheque-studio/ml' },
+    { code: 'ta', locale: 'ta-IN', path: '/calculators/indian-cheque-studio/ta' },
+    { code: 'te', locale: 'te-IN', path: '/calculators/indian-cheque-studio/te' },
+    { code: 'kn', locale: 'kn-IN', path: '/calculators/indian-cheque-studio/kn' },
+    { code: 'bn', locale: 'bn-IN', path: '/calculators/indian-cheque-studio/bn' },
+    { code: 'mr', locale: 'mr-IN', path: '/calculators/indian-cheque-studio/mr' },
+    { code: 'gu', locale: 'gu-IN', path: '/calculators/indian-cheque-studio/gu' },
+    { code: 'pa', locale: 'pa-IN', path: '/calculators/indian-cheque-studio/pa' },
+    { code: 'or', locale: 'or-IN', path: '/calculators/indian-cheque-studio/or' },
+    { code: 'as', locale: 'as-IN', path: '/calculators/indian-cheque-studio/as' },
+    { code: 'ur', locale: 'ur-IN', path: '/calculators/indian-cheque-studio/ur' },
+  ];
+
+  let allChequeLangsInSitemap = true;
+  for (const c of chequeLanguages) {
+    if (!sitemapXml.includes(`https://indiatools-rho.vercel.app${c.path}`)) {
+      allChequeLangsInSitemap = false;
+      console.error(`Missing Cheque Studio localized URL in sitemap: ${c.path}`);
+    }
+  }
+  check('sitemap.xml: Contains all 13 Cheque Studio language URLs', allChequeLangsInSitemap);
+
+  let allHreflangsInSitemap = true;
+  for (const c of chequeLanguages) {
+    if (!sitemapXml.includes(`hreflang="${c.locale}"`)) {
+      allHreflangsInSitemap = false;
+      console.error(`Missing hreflang="${c.locale}" in sitemap.xml`);
+    }
+  }
+  if (!sitemapXml.includes('hreflang="x-default"')) {
+    allHreflangsInSitemap = false;
+  }
+  check('sitemap.xml: Contains reciprocal xhtml:link hreflang tags for all 13 languages + x-default', allHreflangsInSitemap);
+
+  // 3c. Cheque SEO Dataset Audit (13 languages)
+  const chequeSeoModule = await import('../src/data/chequeSeoData.ts');
+  const chequeSeoLanguages = chequeSeoModule.CHEQUE_SEO_LANGUAGES;
+  const langKeys = Object.keys(chequeSeoLanguages);
+  check('Cheque SEO Dataset: Exactly 13 languages configured', langKeys.length === 13, `Found ${langKeys.length}`);
+
+  let allChequeFieldsComplete = true;
+  for (const key of langKeys) {
+    const item = chequeSeoLanguages[key];
+    if (!item.title || !item.description || !item.h1 || !item.subtitle || !item.localeCode || !item.canonicalUrl) {
+      allChequeFieldsComplete = false;
+      console.error(`Missing core SEO fields in language: ${key}`);
+    }
+    if (!Array.isArray(item.guideSteps) || item.guideSteps.length !== 6) {
+      allChequeFieldsComplete = false;
+      console.error(`Guide steps count is not 6 in language: ${key}`);
+    }
+    if (!Array.isArray(item.faqs) || item.faqs.length !== 5) {
+      allChequeFieldsComplete = false;
+      console.error(`FAQs count is not 5 in language: ${key}`);
+    }
+    if (!Array.isArray(item.commonMistakes) || item.commonMistakes.length !== 5) {
+      allChequeFieldsComplete = false;
+      console.error(`Common mistakes count is not 5 in language: ${key}`);
+    }
+    if (!item.headings.dateLabel || !item.headings.payeeLabel || !item.headings.amountWordsLabel || !item.headings.amountNumbersLabel || !item.headings.crossingLabel || !item.headings.signatureLabel) {
+      allChequeFieldsComplete = false;
+      console.error(`Missing localized labels in language: ${key}`);
+    }
+  }
+  check('Cheque SEO Dataset: All 13 languages contain complete localized Titles, Descriptions, H1s, 6-Step Guides, 5 FAQs, and 5 Mistakes', allChequeFieldsComplete);
 
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');

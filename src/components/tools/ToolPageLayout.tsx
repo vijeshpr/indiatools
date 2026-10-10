@@ -25,6 +25,15 @@ interface ToolPageLayoutProps {
   customResultSummary?: string
   compactHeader?: boolean
   maxWidthClass?: string
+  customTitle?: string
+  customDescription?: string
+  customH1?: string
+  customSubtitle?: string
+  customCanonicalPath?: string
+  hreflangs?: Array<{ lang: string; href: string }>
+  customJsonLd?: Record<string, any>
+  hideDefaultGuide?: boolean
+  hideDefaultFaqs?: boolean
 }
 
 export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
@@ -35,6 +44,15 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
   customResultSummary,
   compactHeader = false,
   maxWidthClass = 'max-w-5xl',
+  customTitle,
+  customDescription,
+  customH1,
+  customSubtitle,
+  customCanonicalPath,
+  hreflangs,
+  customJsonLd,
+  hideDefaultGuide = false,
+  hideDefaultFaqs = false,
 }) => {
   const { showToast } = useToast()
 
@@ -107,10 +125,11 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
   )
 
   useSEO({
-    title: tool.seo.title,
-    description: tool.seo.metaDescription,
-    canonicalPath: tool.seo.canonicalPath,
-    jsonLd,
+    title: customTitle || tool.seo.title,
+    description: customDescription || tool.seo.metaDescription,
+    canonicalPath: customCanonicalPath || tool.seo.canonicalPath,
+    jsonLd: customJsonLd || jsonLd,
+    hreflangs,
   })
 
   const handleShare = async () => {
@@ -218,7 +237,7 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
                   compactHeader ? 'text-xl sm:text-2xl lg:text-3xl' : 'text-2xl sm:text-4xl'
                 }`}
               >
-                {tool.title}
+                {customH1 || tool.title}
               </h1>
 
               <p
@@ -228,7 +247,7 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
                     : 'mt-2.5 text-sm sm:text-base'
                 }`}
               >
-                {tool.detailedDescription}
+                {customSubtitle || tool.detailedDescription}
               </p>
             </div>
 
@@ -278,85 +297,91 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
       >
         {children}
 
-        {/* How It Works & Indian Formula Context */}
-        <section
-          className={`rounded-2xl bg-white border border-slate-200/90 shadow-2xs no-print ${
-            compactHeader ? 'mt-8 p-4 sm:p-5' : 'mt-14 p-6 sm:p-8'
-          }`}
-        >
-          <div className="flex items-center gap-2.5 mb-4">
-            <BookOpen className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-              How It Works & Calculation Logic
-            </h2>
-          </div>
-
-          <p className="text-sm text-slate-800 leading-relaxed font-mono bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-            {tool.formulaExplanation}
-          </p>
-
-          {tool.assumptions.length > 0 && (
-            <div className="mt-4">
-              <h4 className="text-xs uppercase font-mono tracking-wider text-slate-500 font-bold mb-2">
-                Standards & Assumptions:
-              </h4>
-              <ul className="list-disc list-inside space-y-1 text-xs text-slate-600">
-                {tool.assumptions.map((assump, idx) => (
-                  <li key={idx}>{assump}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-
-        {/* Real Example Walkthrough */}
-        <section className="mt-6 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-2xs no-print">
-          <div className="flex items-center gap-2.5 mb-4">
-            <Calculator className="w-5 h-5 text-emerald-600" />
-            <h3 className="text-lg font-bold text-slate-900">
-              Practical Example: {tool.exampleCalculation.title}
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-xs font-mono uppercase text-slate-500 block mb-2 font-bold">
-                Inputs:
-              </span>
-              <div className="space-y-1 text-sm text-slate-700">
-                {Object.entries(tool.exampleCalculation.inputs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between">
-                    <span className="text-slate-500">{k}:</span>
-                    <span className="font-semibold text-slate-900">{v}</span>
-                  </div>
-                ))}
+        {!hideDefaultGuide && (
+          <>
+            {/* How It Works & Indian Formula Context */}
+            <section
+              className={`rounded-2xl bg-white border border-slate-200/90 shadow-2xs no-print ${
+                compactHeader ? 'mt-8 p-4 sm:p-5' : 'mt-14 p-6 sm:p-8'
+              }`}
+            >
+              <div className="flex items-center gap-2.5 mb-4">
+                <BookOpen className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                  How It Works & Calculation Logic
+                </h2>
               </div>
-            </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-xs font-mono uppercase text-indigo-600 block mb-2 font-bold">
-                Outputs:
-              </span>
-              <div className="space-y-1 text-sm text-slate-700">
-                {Object.entries(tool.exampleCalculation.outputs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between">
-                    <span className="text-slate-500">{k}:</span>
-                    <span className="font-semibold text-emerald-700">{v}</span>
-                  </div>
-                ))}
+              <p className="text-sm text-slate-800 leading-relaxed font-mono bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                {tool.formulaExplanation}
+              </p>
+
+              {tool.assumptions.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-xs uppercase font-mono tracking-wider text-slate-500 font-bold mb-2">
+                    Standards & Assumptions:
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1 text-xs text-slate-600">
+                    {tool.assumptions.map((assump, idx) => (
+                      <li key={idx}>{assump}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+
+            {/* Real Example Walkthrough */}
+            <section className="mt-6 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-2xs no-print">
+              <div className="flex items-center gap-2.5 mb-4">
+                <Calculator className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-lg font-bold text-slate-900">
+                  Practical Example: {tool.exampleCalculation.title}
+                </h3>
               </div>
-            </div>
-          </div>
 
-          <p className="text-xs text-slate-600 leading-relaxed italic">
-            "{tool.exampleCalculation.explanation}"
-          </p>
-        </section>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-xs font-mono uppercase text-slate-500 block mb-2 font-bold">
+                    Inputs:
+                  </span>
+                  <div className="space-y-1 text-sm text-slate-700">
+                    {Object.entries(tool.exampleCalculation.inputs).map(([k, v]) => (
+                      <div key={k} className="flex justify-between">
+                        <span className="text-slate-500">{k}:</span>
+                        <span className="font-semibold text-slate-900">{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-xs font-mono uppercase text-indigo-600 block mb-2 font-bold">
+                    Outputs:
+                  </span>
+                  <div className="space-y-1 text-sm text-slate-700">
+                    {Object.entries(tool.exampleCalculation.outputs).map(([k, v]) => (
+                      <div key={k} className="flex justify-between">
+                        <span className="text-slate-500">{k}:</span>
+                        <span className="font-semibold text-emerald-700">{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed italic">
+                "{tool.exampleCalculation.explanation}"
+              </p>
+            </section>
+          </>
+        )}
 
         {/* FAQs */}
-        <div className="no-print">
-          <FAQAccordion faqs={tool.faqs} />
-        </div>
+        {!hideDefaultFaqs && (
+          <div className="no-print">
+            <FAQAccordion faqs={tool.faqs} />
+          </div>
+        )}
 
         {/* Related Tools Recommendation */}
         {relatedTools.length > 0 && (

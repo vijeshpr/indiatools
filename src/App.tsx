@@ -15,6 +15,7 @@ import { AboutPage } from './pages/AboutPage'
 import { ContactPage } from './pages/ContactPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { TermsPage } from './pages/TermsPage'
+import { IndianChequeStudioTool } from './calculators/IndianChequeStudioTool'
 
 export function App() {
   return (
@@ -44,6 +45,10 @@ export function App() {
                 <Route path="/popular" element={<ToolsCatalogPage popularOnly={true} />} />
                 <Route path="/categories" element={<CategoriesOverviewPage />} />
                 <Route path="/category/:categoryId" element={<CategoryPage />} />
+                <Route path="/calculators/indian-cheque-studio" element={<IndianChequeStudioTool />} />
+                <Route path="/calculators/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
+                <Route path="/tools/indian-cheque-studio" element={<IndianChequeStudioTool />} />
+                <Route path="/tools/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />
