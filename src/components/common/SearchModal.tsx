@@ -123,11 +123,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-10"
+            className="relative w-full max-w-2xl bg-white dark:bg-[#131B2E] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-10"
           >
             {/* Search Input Bar */}
-            <div className="flex items-center px-4 py-3.5 border-b border-slate-200 bg-white">
-              <Search className="w-5 h-5 text-indigo-600 mr-3 shrink-0" />
+            <div className="flex items-center px-4 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131B2E]">
+              <Search className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-3 shrink-0" />
               <div className="relative flex-1">
                 <input
                   ref={inputRef}
@@ -138,18 +138,18 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                     setSelectedIndex(0)
                   }}
                   placeholder={`e.g. "${SEARCH_PROMPTS[placeholderIndex]}"`}
-                  className="w-full bg-transparent text-slate-900 placeholder-slate-400 focus:outline-none text-base sm:text-lg"
+                  className="w-full bg-transparent text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-base sm:text-lg"
                 />
               </div>
               {query ? (
                 <button
                   onClick={() => setQuery('')}
-                  className="p-1 rounded-md text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               ) : (
-                <div className="hidden sm:flex items-center gap-1 text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                <div className="hidden sm:flex items-center gap-1 text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
                   <Command className="w-3 h-3" />
                   <span>ESC</span>
                 </div>
@@ -157,7 +157,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
             </div>
 
             {/* Results List */}
-            <div className="max-h-[60vh] overflow-y-auto p-2 divide-y divide-slate-100">
+            <div className="max-h-[60vh] overflow-y-auto p-2 divide-y divide-slate-100 dark:divide-slate-800/60">
               {results.length > 0 ? (
                 results.map((tool, idx) => {
                   const Icon = CATEGORY_ICONS[tool.category] || ArrowRight
@@ -170,8 +170,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                       onMouseEnter={() => setSelectedIndex(idx)}
                       className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-indigo-50 border border-indigo-200 text-slate-900'
-                          : 'hover:bg-slate-50 text-slate-700 border border-transparent'
+                          ? 'bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-slate-900 dark:text-white'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-transparent'
                       }`}
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
@@ -187,34 +187,34 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-sm sm:text-base truncate text-slate-900">
+                            <h4 className="font-semibold text-sm sm:text-base truncate text-slate-900 dark:text-white">
                               {tool.title}
                             </h4>
                             {tool.badge && (
-                              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">
+                              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
                                 {tool.badge}
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
                             {tool.description}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 pl-3 shrink-0">
-                        <span className="hidden sm:inline text-[11px] text-slate-400 uppercase tracking-wider font-mono">
+                        <span className="hidden sm:inline text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">
                           {tool.categoryLabel}
                         </span>
-                        <ChevronRight className={`w-4 h-4 ${isSelected ? 'text-indigo-600 translate-x-0.5' : 'text-slate-400'} transition-transform`} />
+                        <ChevronRight className={`w-4 h-4 ${isSelected ? 'text-indigo-600 dark:text-indigo-400 translate-x-0.5' : 'text-slate-400 dark:text-slate-600'} transition-transform`} />
                       </div>
                     </div>
                   )
                 })
               ) : (
-                <div className="py-12 text-center text-slate-500">
+                <div className="py-12 text-center text-slate-500 dark:text-slate-400">
                   <p className="text-base font-medium">No tools found matching "{query}"</p>
-                  <p className="text-xs mt-1 text-slate-400">
+                  <p className="text-xs mt-1 text-slate-400 dark:text-slate-500">
                     Try searching for mileage, JCB, electricity, cent, photo, or cheque
                   </p>
                 </div>
@@ -222,12 +222,12 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
             </div>
 
             {/* Modal Footer Hints */}
-            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+            <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-3">
                 <span>↑↓ Navigate</span>
                 <span>↵ Open</span>
               </div>
-              <span className="font-mono text-slate-500">{results.length} Tools Ready</span>
+              <span className="font-mono text-slate-500 dark:text-slate-400">{results.length} Tools Ready</span>
             </div>
           </motion.div>
         </div>

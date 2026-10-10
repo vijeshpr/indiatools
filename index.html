@@ -70,8 +70,31 @@
       ]
     }
     </script>
+    <!-- Early theme initialization to prevent flash and ensure sync -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('ipt_theme_v2');
+          var theme = stored;
+          if (!theme || (theme !== 'dark' && theme !== 'light')) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#0B0F19');
+          } else {
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#4F46E5');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-[#F7F8FC] text-[#111827] antialiased selection:bg-indigo-600 selection:text-white">
+  <body class="bg-[#F7F8FC] dark:bg-[#0B0F19] text-[#111827] dark:text-slate-100 antialiased selection:bg-indigo-600 selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

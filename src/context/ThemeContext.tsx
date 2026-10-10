@@ -15,7 +15,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('ipt_theme_v2') as Theme | null
       if (stored === 'dark' || stored === 'light') return stored
-      // Default to light theme for clean, high-contrast fintech experience
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+      }
       return 'light'
     }
     return 'light'
@@ -26,11 +28,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (theme === 'dark') {
       root.classList.add('dark')
       root.classList.remove('light')
+      const meta = document.querySelector('meta[name="theme-color"]')
+      if (meta) meta.setAttribute('content', '#0B0F19')
     } else {
       root.classList.add('light')
       root.classList.remove('dark')
+      const meta = document.querySelector('meta[name="theme-color"]')
+      if (meta) meta.setAttribute('content', '#4F46E5')
     }
-    localStorage.setItem('ipt_theme_v2', theme)
+    try {
+      localStorage.setItem('ipt_theme_v2', theme)
+    } catch (e) {}
   }, [theme])
 
   const toggleTheme = () => {

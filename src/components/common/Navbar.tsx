@@ -49,11 +49,11 @@ export const Navbar: React.FC = () => {
       <header
         className={`sticky top-0 z-40 w-full transition-all duration-200 no-print ${
           isScrolled
-            ? 'bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm'
-            : 'bg-white/90 backdrop-blur-sm border-b border-slate-100'
+            ? 'bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-black/20'
+            : 'bg-white/90 dark:bg-[#0F172A]/85 backdrop-blur-sm border-b border-slate-100 dark:border-slate-800/80'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand Logo & Wordmark */}
           <Link
             to="/"
@@ -85,14 +85,14 @@ export const Navbar: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold tracking-tight text-lg text-slate-900">
-                  India<span className="text-indigo-600">Tools</span>
+                <span className="font-extrabold tracking-tight text-lg text-slate-900 dark:text-white">
+                  India<span className="text-indigo-600 dark:text-indigo-400">Tools</span>
                 </span>
-                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 font-bold uppercase">
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800 font-bold uppercase">
                   PRO
                 </span>
               </div>
-              <p className="hidden sm:block text-[11px] text-slate-500 font-medium tracking-normal">
+              <p className="hidden sm:block text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-normal">
                 Everyday Indian Digital Toolbox
               </p>
             </div>
@@ -104,8 +104,8 @@ export const Navbar: React.FC = () => {
               to="/"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/'
-                  ? 'text-indigo-600 bg-indigo-50/80'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               Home
@@ -115,8 +115,8 @@ export const Navbar: React.FC = () => {
               to="/tools"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/tools'
-                  ? 'text-indigo-600 bg-indigo-50/80'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               All Tools (43)
@@ -126,8 +126,8 @@ export const Navbar: React.FC = () => {
               to="/categories"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/categories'
-                  ? 'text-indigo-600 bg-indigo-50/80'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               Categories
@@ -137,12 +137,12 @@ export const Navbar: React.FC = () => {
               to="/calculators/indian-cheque-studio"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                 location.pathname === '/calculators/indian-cheque-studio'
-                  ? 'text-indigo-600 bg-indigo-50/80'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <span>Cheque Studio</span>
-              <span className="text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.2 rounded uppercase">
+              <span className="text-[10px] font-mono font-bold bg-indigo-100 dark:bg-indigo-900/80 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.2 rounded uppercase">
                 NEW
               </span>
             </Link>
@@ -151,8 +151,8 @@ export const Navbar: React.FC = () => {
               to="/about"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/about'
-                  ? 'text-indigo-600 bg-indigo-50/80'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               About
@@ -165,12 +165,12 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setIsSearchOpen(true)}
               type="button"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all text-sm group cursor-pointer"
+              className="flex items-center gap-2 p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all text-sm group cursor-pointer"
               aria-label="Search tools"
             >
-              <Search className="w-4 h-4 text-indigo-600 group-hover:scale-105 transition-transform" />
+              <Search className="w-5 h-5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition-transform" />
               <span className="hidden sm:inline text-xs font-medium">Search</span>
-              <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] font-mono text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200 shadow-2xs">
+              <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-2xs">
                 <Command className="w-2.5 h-2.5" />
                 <span>K</span>
               </kbd>
@@ -192,7 +192,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               type="button"
-              className="md:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 bg-slate-100 border border-slate-200"
+              className="md:hidden p-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer"
               aria-label="Open navigation menu"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -207,60 +207,60 @@ export const Navbar: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-b border-slate-200 bg-white px-4 py-4 space-y-3 shadow-lg"
+              className="md:hidden border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] px-4 py-4 space-y-3 shadow-lg"
             >
               <div className="flex flex-col gap-1">
                 <Link
                   to="/"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-900 hover:bg-slate-100"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                   Home
                 </Link>
                 <Link
                   to="/tools"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 flex items-center justify-between"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
                 >
                   <span>All 43 Tools</span>
-                  <span className="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">43</span>
+                  <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded">43</span>
                 </Link>
                 <Link
                   to="/calculators/indian-cheque-studio"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center justify-between"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 flex items-center justify-between"
                 >
                   <span>🖋️ Indian Cheque Studio</span>
                   <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-mono font-bold">13 Lang</span>
                 </Link>
                 <Link
                   to="/categories"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                   Tool Categories
                 </Link>
                 <Link
                   to="/calculators/jcb-fuel-cost"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 flex items-center justify-between"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
                 >
                   <span>🚜 JCB Fuel Calculator</span>
-                  <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">Flagship</span>
+                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded">Flagship</span>
                 </Link>
                 <Link
                   to="/tools/50kb-photo"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 flex items-center justify-between"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
                 >
                   <span>📄 50KB Photo Resizer</span>
-                  <span className="text-[10px] bg-pink-100 text-pink-800 px-1.5 py-0.5 rounded">Govt Exam</span>
+                  <span className="text-[10px] bg-pink-100 dark:bg-pink-950 text-pink-800 dark:text-pink-300 px-1.5 py-0.5 rounded">Govt Exam</span>
                 </Link>
                 <Link
                   to="/about"
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                   About Platform
                 </Link>
               </div>
 
               {/* Categories list in mobile menu */}
-              <div className="pt-2 border-t border-slate-200">
-                <p className="text-[11px] font-mono uppercase text-slate-400 px-3 mb-1">
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                <p className="text-[11px] font-mono uppercase text-slate-400 dark:text-slate-500 px-3 mb-1">
                   Categories
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -268,7 +268,7 @@ export const Navbar: React.FC = () => {
                     <Link
                       key={cat.id}
                       to={`/category/${cat.id}`}
-                      className="flex items-center gap-2 p-2 rounded-lg text-xs text-slate-700 hover:bg-slate-100"
+                      className="flex items-center gap-2 p-2 rounded-lg text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.accentColor }} />
                       <span>{cat.title}</span>
