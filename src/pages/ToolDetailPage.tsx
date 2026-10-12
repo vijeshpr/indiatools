@@ -56,6 +56,7 @@ import { ExactKBTool } from '../imageTools/ExactKBTool'
 import { SignatureResizerTool } from '../imageTools/SignatureResizerTool'
 import { PassportPhotoTool } from '../imageTools/PassportPhotoTool'
 import { ImageToPdfTool } from '../imageTools/ImageToPdfTool'
+import { QrCodeGeneratorTool } from '../imageTools/QrCodeGeneratorTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -112,6 +113,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'signature-resizer': SignatureResizerTool,
   'passport-photo': PassportPhotoTool,
   'image-to-pdf': ImageToPdfTool,
+  'qr-code-generator': QrCodeGeneratorTool,
 }
 
 export const ToolDetailPage: React.FC = () => {

@@ -22,14 +22,14 @@ export function App() {
     <ThemeProvider>
       <ToastProvider>
         <BrowserRouter>
-          <div className="relative min-h-screen flex flex-col bg-[#F7F8FC] dark:bg-[#0B0F19] text-[#111827] dark:text-slate-100 transition-colors duration-200 selection:bg-indigo-600 selection:text-white overflow-x-hidden w-full max-w-full">
-            {/* Subtle Decorative Background with Pale Indigo/Teal Shapes & Dot Matrix */}
+          <div className="relative min-h-screen flex flex-col bg-[#F7F8FC] dark:bg-[#080D1A] text-[#111827] dark:text-slate-100 transition-colors duration-200 selection:bg-indigo-600 selection:text-white overflow-x-hidden w-full max-w-full">
+            {/* Ambient Radial Gradient Mesh Lighting & Tech Grid */}
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none no-print" aria-hidden="true">
-              <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/15 rounded-full blur-[140px]" />
-              <div className="absolute top-20 -right-32 w-[550px] h-[550px] bg-teal-500/4 dark:bg-teal-500/10 rounded-full blur-[140px]" />
-              <div className="absolute top-[45%] -left-32 w-[500px] h-[500px] bg-indigo-500/4 dark:bg-indigo-500/10 rounded-full blur-[150px]" />
-              <div className="absolute bottom-20 right-10 w-[600px] h-[600px] bg-amber-500/3 dark:bg-amber-500/6 rounded-full blur-[160px]" />
-              <div className="absolute inset-0 bg-[radial-gradient(#4f46e50d_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px]" />
+              <div className="absolute -top-32 -left-32 w-[650px] h-[650px] bg-indigo-500/10 dark:bg-indigo-600/20 rounded-full blur-[140px]" />
+              <div className="absolute top-20 -right-32 w-[600px] h-[600px] bg-teal-500/8 dark:bg-cyan-500/15 rounded-full blur-[140px]" />
+              <div className="absolute top-[45%] -left-32 w-[550px] h-[550px] bg-indigo-500/6 dark:bg-indigo-500/15 rounded-full blur-[150px]" />
+              <div className="absolute bottom-20 right-10 w-[650px] h-[650px] bg-amber-500/6 dark:bg-amber-500/12 rounded-full blur-[160px]" />
+              <div className="absolute inset-0 bg-[radial-gradient(#4f46e50f_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff0d_1px,transparent_1px)] [background-size:24px_24px]" />
             </div>
 
             {/* Header Navigation */}
@@ -49,6 +49,7 @@ export function App() {
                 <Route path="/calculators/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
                 <Route path="/tools/indian-cheque-studio" element={<IndianChequeStudioTool />} />
                 <Route path="/tools/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
+                <Route path="/qr-code-generator" element={<Navigate to="/calculators/qr-code-generator" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

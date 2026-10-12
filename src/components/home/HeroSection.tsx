@@ -78,6 +78,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
         >
           {/* ================= LEFT COLUMN: HEADING, DESCRIPTION, SEARCH & CTAS ================= */}
           <div className="lg:col-span-7 xl:col-span-8 text-center lg:text-left space-y-4 sm:space-y-5">
+            {/* Featured Cheque Studio Spotlight Pill */}
+            <motion.div variants={itemVariants} className="flex justify-center lg:justify-start">
+              <Link
+                to="/calculators/indian-cheque-studio"
+                className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-emerald-500/10 hover:from-amber-500/20 hover:via-indigo-500/20 hover:to-emerald-500/20 border border-amber-500/30 dark:border-amber-400/30 text-slate-800 dark:text-zinc-200 shadow-xs transition-all cursor-pointer"
+              >
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-2xs">
+                  FEATURED
+                </span>
+                <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  Indian Cheque Studio (13 Languages & CTS-2010 Specimen)
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-amber-500" />
+              </Link>
+            </motion.div>
+
             {/* Eyebrow Pill */}
             <motion.div variants={itemVariants} className="flex justify-center lg:justify-start">
               <div className="inline-flex max-w-full flex-wrap justify-center lg:justify-start items-center gap-1.5 sm:gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/80 dark:border-indigo-800/80 shadow-xs">

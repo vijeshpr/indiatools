@@ -120,7 +120,7 @@ async function runAudit() {
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 43 unique tools', tools.length === 43, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 44 unique tools', tools.length === 44, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;
@@ -159,11 +159,11 @@ async function runAudit() {
     }
   }
 
-  check('sitemap.xml: Contains all 43 tool canonical URLs', allToolsInSitemap);
-  check('Tool SEO: All 43 tool titles end with "| IndiaTools"', allTitlesEndWithBrand);
-  check('Tool SEO: All 43 tool titles are unique', allUniqueTitles);
-  check('Tool SEO: All 43 tool descriptions are unique', allUniqueDescriptions);
-  check('Tool SEO: All 43 tool canonical paths follow correct routing', allValidCanonicals);
+  check(`sitemap.xml: Contains all ${tools.length} tool canonical URLs`, allToolsInSitemap);
+  check(`Tool SEO: All ${tools.length} tool titles end with "| IndiaTools"`, allTitlesEndWithBrand);
+  check(`Tool SEO: All ${tools.length} tool titles are unique`, allUniqueTitles);
+  check(`Tool SEO: All ${tools.length} tool descriptions are unique`, allUniqueDescriptions);
+  check(`Tool SEO: All ${tools.length} tool canonical paths follow correct routing`, allValidCanonicals);
 
   // 5. Special Tool Verification
   const jcb = tools.find(t => t.slug === 'jcb-fuel-cost');

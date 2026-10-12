@@ -17,6 +17,7 @@
     "framer-motion": "^13.4.6",
     "lucide-react": "^1.49.0",
     "postcss": "^8.5.28",
+    "qr-code-styling": "^1.9.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4",

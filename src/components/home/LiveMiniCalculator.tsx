@@ -8,7 +8,7 @@ import { LANGUAGES } from '../../lib/cheque/languages'
 import { SupportedLanguage } from '../../lib/cheque/types'
 
 export const LiveMiniCalculator: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'mileage' | 'ac' | 'land' | 'cheque'>('mileage')
+  const [activeTab, setActiveTab] = useState<'cheque' | 'mileage' | 'ac' | 'land'>('cheque')
 
   // Tab 1: Mileage
   const [distanceKm, setDistanceKm] = useState<number>(465)
@@ -66,10 +66,27 @@ export const LiveMiniCalculator: React.FC = () => {
       {/* Header with Switcher Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl overflow-x-auto scrollbar-none">
+          {/* Primary Featured Tab: Indian Cheque Studio */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('cheque')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'cheque'
+                ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 shadow-xs border border-amber-500/40'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-500" />
+            <span>Indian Cheque Studio</span>
+            <span className="text-[10px] font-mono font-bold bg-amber-500 text-slate-950 px-1.5 py-0.2 rounded uppercase">
+              13 Lang
+            </span>
+          </button>
+
           <button
             type="button"
             onClick={() => setActiveTab('mileage')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               activeTab === 'mileage'
                 ? 'bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs border border-slate-200/60 dark:border-slate-700'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -82,7 +99,7 @@ export const LiveMiniCalculator: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('ac')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               activeTab === 'ac'
                 ? 'bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs border border-slate-200/60 dark:border-slate-700'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -95,7 +112,7 @@ export const LiveMiniCalculator: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('land')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               activeTab === 'land'
                 ? 'bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs border border-slate-200/60 dark:border-slate-700'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -103,23 +120,6 @@ export const LiveMiniCalculator: React.FC = () => {
           >
             <Compass className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>Cent ↔ Sq.ft</span>
-          </button>
-
-          {/* 4th Tab: Indian Cheque Studio */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('cheque')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'cheque'
-                ? 'bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs border border-slate-200/60 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span>Cheque Demo</span>
-            <span className="text-[10px] font-mono font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.2 rounded uppercase">
-              13 Lang
-            </span>
           </button>
         </div>
 

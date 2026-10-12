@@ -55,42 +55,47 @@ export const CategoryShowcase: React.FC = () => {
               className="relative"
             >
               {/* Category Header */}
-              <div className="relative mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+              <div className="relative mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/10">
+                {/* Luminous Accent Border Line */}
+                <div
+                  className="absolute -bottom-px left-0 h-[2px] w-32 rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${category.accentColor}, transparent)`,
+                  }}
+                />
+
                 <div className="flex items-start gap-3 sm:gap-4">
                   {/* Category Animated Mascot Icon Badge */}
-                  <div className="hidden sm:flex items-center justify-center p-2 rounded-2xl bg-white dark:bg-[#131B2E] border border-slate-200/90 dark:border-slate-800 shadow-2xs shrink-0">
+                  <div className="hidden sm:flex items-center justify-center p-2 rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-slate-200/90 dark:border-white/10 shadow-xs shrink-0">
                     {renderHeaderMascot(catKey)}
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: category.accentColor }}
-                      />
-                      <span
-                        className="text-[11px] font-mono uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-md"
+                        className="text-[10px] font-mono uppercase tracking-widest font-black px-2.5 py-0.5 rounded-full border shadow-2xs"
                         style={{
-                          backgroundColor: `${category.accentColor}15`,
+                          background: `linear-gradient(135deg, ${category.accentColor}25, ${category.accentColor}08)`,
                           color: category.accentColor,
+                          borderColor: `${category.accentColor}40`,
                         }}
                       >
-                        {category.subtitle}
+                        {category.headline || category.title.toUpperCase()}
                       </span>
-                      <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
+                      <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 font-semibold">
                         CATEGORY 0{catIdx + 1} • {tools.length} UTILITIES
                       </span>
                     </div>
 
-                    <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
                       <span>{category.title}</span>
-                      <span className="text-slate-300 dark:text-slate-700 font-light">/</span>
-                      <span className="text-slate-500 dark:text-slate-400 font-semibold text-lg sm:text-2xl">
+                      <span className="text-slate-300 dark:text-zinc-700 font-light">/</span>
+                      <span className="bg-gradient-to-r from-slate-700 to-slate-500 dark:from-zinc-200 dark:to-zinc-400 bg-clip-text text-transparent font-extrabold text-lg sm:text-2xl">
                         {category.subtitle}
                       </span>
                     </h2>
 
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
                       {category.description}
                     </p>
                   </div>

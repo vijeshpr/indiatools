@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 6,
+    toolCount: 7,
   },
 }
 
@@ -1719,6 +1719,82 @@ export const TOOLS: ToolDefinition[] = [
       metaDescription: 'Learn how to fill an Indian cheque with an interactive educational preview, Indian rupee amount-to-words conversion, multiple languages, and payment-type guidance.',
       keywords: ['indian cheque studio', 'how to fill cheque india', 'cheque amount in words', 'account payee cheque format', 'cts 2010 cheque preview'],
       canonicalPath: '/calculators/indian-cheque-studio'
+    },
+    type: 'calculator'
+  },
+
+  {
+    id: 'qr-code-generator',
+    slug: 'qr-code-generator',
+    title: 'UPI QR Code Generator with Shop Logo & Printable Stand Poster (A5 / A4) | IndiaTools',
+    shortTitle: 'UPI QR & Shop Poster',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Free online UPI QR Code and Merchant Counter Stand Poster maker. Create custom GPay, PhonePe, and Paytm payment QR codes with your shop logo, UPI ID, and print A5/A4 counter standees directly for free.',
+    detailedDescription: 'Generate custom QR codes with shop logos, gradients, and unique dot shapes for UPI payments, website URLs, WhatsApp chat, Wi-Fi networks, and plain text. Includes a dedicated Merchant Poster Mode for printing A5 acrylic counter standees and A4 shop wall posters with instant settlement guarantees.',
+    iconName: 'QrCode',
+    badge: 'Popular',
+    color: '#4F46E5',
+    tags: ['QR Code', 'UPI QR', 'Merchant Standee', 'Shop Poster', 'Printable A5', 'Vector SVG', 'Private'],
+    searchKeywords: [
+      'upi qr code generator with logo',
+      'gpay phonepe qr code stand print',
+      'shop qr code poster a4 printable',
+      'merchant payment qr standee maker',
+      'free custom qr code generator with logo india',
+      'upi payment scanner printable template',
+      'custom upi qr code with business name',
+      'counter qr stand print free online'
+    ],
+    formulaExplanation: 'QR (Quick Response) codes encode alphanumeric payloads using 2D Reed-Solomon error correction matrices. Error correction levels: L (7%), M (15%), Q (25%), and H (30%) allow readable recovery even with embedded logo overlays.',
+    assumptions: [
+      '100% client-side rendering via SVG and HTML5 Canvas with zero backend server tracking or data storage.',
+      'UPI deep link format conforms strictly to NPCI standards (upi://pay?pa=...&pn=...&cu=INR).'
+    ],
+    exampleCalculation: {
+      title: 'Merchant Standee UPI Payment QR Generation',
+      inputs: {
+        'Payee VPA': 'merchant@okaxis',
+        'Payee Name': 'Sharma General Store',
+        'Print Format': 'A5 Counter Stand (Half A4 Sheet)',
+        'Accepted Apps': 'GPay, PhonePe, Paytm, BHIM'
+      },
+      outputs: {
+        'Encoded Payload': 'upi://pay?pa=merchant%40okaxis&pn=Sharma+General+Store&cu=INR',
+        'Error Correction': 'Level Q (25% redundancy buffer)',
+        'Print Quality': 'Vibrant exact color print with A5 cutting guides'
+      },
+      explanation: 'Generates a secure, scannable UPI QR counter standee that opens directly in Google Pay, PhonePe, Paytm, or BHIM apps.'
+    },
+    faqs: [
+      {
+        question: 'Can I use this QR code to accept payments from GPay, PhonePe, and Paytm?',
+        answer: 'Yes, standard UPI QR codes generated with a valid VPA/UPI ID work seamlessly across all Indian UPI apps including Google Pay, PhonePe, Paytm, BHIM, and Cred.'
+      },
+      {
+        question: 'How do I print the QR stand for my shop counter?',
+        answer: 'Select "Merchant Poster Mode", enter your shop name and UPI ID, choose "A5 Counter Stand", and click Print. You can laminate the printout or place it in an acrylic standee.'
+      },
+      {
+        question: 'Is my payment data or UPI ID stored on any server?',
+        answer: 'No, 100% of the QR code generation happens inside your browser. No personal data or transaction information is sent to or stored on any server.'
+      }
+    ],
+    relatedSlugs: ['50kb-photo', 'image-to-pdf', 'exact-kb-compressor', 'passport-photo'],
+    seo: {
+      title: 'UPI QR Code Generator with Shop Logo & Printable Stand Poster (A5 / A4) | IndiaTools',
+      metaDescription: 'Free online UPI QR Code and Merchant Counter Stand Poster maker. Create custom GPay, PhonePe, and Paytm payment QR codes with your shop logo, UPI ID, and print A5/A4 counter standees directly for free.',
+      keywords: [
+        'upi qr code generator with logo',
+        'gpay phonepe qr code stand print',
+        'shop qr code poster a4 printable',
+        'merchant payment qr standee maker',
+        'free custom qr code generator with logo india',
+        'upi payment scanner printable template',
+        'custom upi qr code with business name',
+        'counter qr stand print free online'
+      ],
+      canonicalPath: '/calculators/qr-code-generator'
     },
     type: 'calculator'
   },
