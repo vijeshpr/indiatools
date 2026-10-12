@@ -301,6 +301,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://indiatools-rho.vercel.app/tools/pixelcraft</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/tools/clearcut-ai</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://indiatools-rho.vercel.app/calculators/road-trip-planner</loc>
     <lastmod>2026-10-10</lastmod>
     <changefreq>weekly</changefreq>

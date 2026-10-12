@@ -9,6 +9,9 @@ import {
   CheckCircle2,
   ShieldCheck,
   Languages,
+  QrCode,
+  Store,
+  Sparkles,
 } from 'lucide-react'
 import { HeroSection } from '../components/home/HeroSection'
 import { CategoryShowcase } from '../components/home/CategoryShowcase'
@@ -209,6 +212,146 @@ export const HomePage: React.FC = () => {
                 {/* Bottom MICR Strip */}
                 <div className="mt-2 pt-1 border-t border-slate-200 text-center font-mono text-[8px] text-slate-600 tracking-wider">
                   ⑈ 123456 ⑈ 560002015 ⑆ 000123 ⑈ 10
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ================= FEATURED NEW TOOL SPOTLIGHT: UPI QR CODE & SHOP STANDEE POSTER ================= */}
+      <motion.section
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.5 }}
+        className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
+        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-[#131B2E] dark:via-[#0F172A] dark:to-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/50 shadow-sm dark:shadow-black/20 relative overflow-hidden group">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-500/10 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+            {/* Left Column: Context & Benefits */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-mono uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800 flex items-center gap-1">
+                  <QrCode className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>★ NEW CREATE TOOL</span>
+                </span>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-emerald-500" />
+                  <span>PRINT READY</span>
+                </span>
+                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  A4 / A5 STANDEE
+                </span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                UPI QR Code Generator with Logo
+                <span className="block text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                  & Printable Merchant Counter Stand Posters
+                </span>
+              </h2>
+
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+                Create high-resolution payment QR codes for Google Pay, PhonePe, and Paytm with your custom shop logo,
+                fixed or open payment amounts, and transaction notes. Print authentic counter standee cards (A5 acrylic)
+                or shop wall posters (A4) directly from your browser with zero registration.
+              </p>
+
+              {/* Supported QR Types Chips */}
+              <div className="pt-2">
+                <span className="text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 block mb-1.5 font-bold">
+                  Supported QR Formats:
+                </span>
+                <div className="flex flex-wrap gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                  {['UPI Payment Deep Link', 'Shop Logo Overlay', 'Website URL', 'WhatsApp Chat', 'Wi-Fi Auto-Connect', 'SVG Vector Export', 'Printable A5/A4 Standee'].map((badge) => (
+                    <span key={badge} className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium shadow-2xs">
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-3 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/calculators/qr-code-generator"
+                  className="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center gap-2 shadow-md shadow-indigo-600/20 transition-all cursor-pointer group"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>Create UPI QR & Poster</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                  100% Client-Side • Instant Vector SVG & PNG
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column: Visual Merchant Standee Preview Card */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="w-full max-w-[280px] sm:max-w-[310px] rounded-3xl border-2 border-indigo-200 dark:border-indigo-800/80 bg-white dark:bg-slate-900 shadow-xl overflow-hidden text-center p-5 space-y-4 select-none relative group hover:scale-[1.02] transition-transform">
+                {/* Header Tag */}
+                <div className="flex items-center justify-center gap-1.5 py-1 px-3 rounded-full bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">
+                  <Store className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>MERCHANT STANDEE SPECIMEN</span>
+                </div>
+
+                <div className="space-y-0.5">
+                  <h4 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+                    ANAND GENERAL STORE
+                  </h4>
+                  <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                    Scan to pay with any UPI App
+                  </p>
+                </div>
+
+                {/* QR Code Graphic Box */}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 inline-block shadow-inner">
+                  <div className="w-36 h-36 bg-white rounded-xl p-2 flex items-center justify-center relative border border-slate-200">
+                    {/* Simulated Clean QR Code Graphic */}
+                    <div className="w-full h-full relative grid grid-cols-6 grid-rows-6 gap-1 p-1 bg-white">
+                      {/* Top-Left Finder */}
+                      <div className="col-span-2 row-span-2 border-2 border-slate-900 p-0.5 flex items-center justify-center">
+                        <div className="w-full h-full bg-slate-900" />
+                      </div>
+                      {/* Top-Right Finder */}
+                      <div className="col-start-5 col-span-2 row-span-2 border-2 border-slate-900 p-0.5 flex items-center justify-center">
+                        <div className="w-full h-full bg-slate-900" />
+                      </div>
+                      {/* Bottom-Left Finder */}
+                      <div className="col-span-2 row-start-5 row-span-2 border-2 border-slate-900 p-0.5 flex items-center justify-center">
+                        <div className="w-full h-full bg-slate-900" />
+                      </div>
+                      {/* Random Data Dots */}
+                      <div className="col-start-3 row-start-1 bg-slate-800 rounded-xs" />
+                      <div className="col-start-4 row-start-2 bg-slate-800 rounded-xs" />
+                      <div className="col-start-3 row-start-3 bg-slate-800 rounded-xs" />
+                      <div className="col-start-4 row-start-4 bg-slate-800 rounded-xs" />
+                      <div className="col-start-5 row-start-4 bg-slate-800 rounded-xs" />
+                      <div className="col-start-6 row-start-3 bg-slate-800 rounded-xs" />
+                      <div className="col-start-4 row-start-6 bg-slate-800 rounded-xs" />
+                      {/* Center Shop / UPI Badge */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white font-black text-[9px] flex items-center justify-center shadow-md border-2 border-white">
+                          UPI
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Accepted Payment Apps Badges */}
+                <div className="pt-1 flex items-center justify-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">GPay</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">PhonePe</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Paytm</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">BHIM</span>
                 </div>
               </div>
             </div>

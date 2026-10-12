@@ -43,6 +43,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
   const totalCategories = Object.keys(CATEGORIES).length // Exactly 7
 
   const quickPills = [
+    { label: 'UPI QR & Stand Poster', path: '/calculators/qr-code-generator', tag: 'New' },
     { label: 'JCB Fuel Cost', path: '/calculators/jcb-fuel-cost', tag: 'Flagship' },
     { label: 'Indian Cheque Studio', path: '/calculators/indian-cheque-studio', tag: '13 Languages' },
     { label: '50KB Photo Resizer', path: '/tools/50kb-photo', tag: 'Govt Exam' },
@@ -138,8 +139,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
                 </div>
 
                 <span className="text-slate-400 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 text-xs sm:text-base px-3 text-left flex-1 min-w-0 truncate select-none">
-                  <span className="sm:hidden">Search 43 tools (JCB, cheque, 50kb)...</span>
-                  <span className="hidden sm:inline">Search 43 tools (e.g. JCB diesel, cheque, cent to sqft, 50kb photo)...</span>
+                  <span className="sm:hidden">Search 44 tools (QR, JCB, cheque, 50kb)...</span>
+                  <span className="hidden sm:inline">Search 44 tools (e.g. UPI QR code, JCB diesel, cheque, cent to sqft)...</span>
                 </span>
 
                 <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono text-xs border border-slate-200 dark:border-slate-700 mr-1 shrink-0">

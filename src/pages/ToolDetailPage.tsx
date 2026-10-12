@@ -57,6 +57,8 @@ import { SignatureResizerTool } from '../imageTools/SignatureResizerTool'
 import { PassportPhotoTool } from '../imageTools/PassportPhotoTool'
 import { ImageToPdfTool } from '../imageTools/ImageToPdfTool'
 import { QrCodeGeneratorTool } from '../imageTools/QrCodeGeneratorTool'
+import { PixelCraftTool } from '../imageTools/PixelCraftTool'
+import { ClearCutTool } from '../imageTools/ClearCutTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -114,6 +116,8 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'passport-photo': PassportPhotoTool,
   'image-to-pdf': ImageToPdfTool,
   'qr-code-generator': QrCodeGeneratorTool,
+  'pixelcraft': PixelCraftTool,
+  'clearcut-ai': ClearCutTool,
 }
 
 export const ToolDetailPage: React.FC = () => {

@@ -1653,7 +1653,7 @@ export const TOOLS: ToolDefinition[] = [
   {
     id: 'indian-cheque-studio',
     slug: 'indian-cheque-studio',
-    title: 'Indian Cheque Studio – Fill & Preview in Indian Languages | IndiaTools',
+    title: 'Indian Cheque Studio – Fill & Preview in Indian Languages',
     shortTitle: 'Indian Cheque Studio',
     category: 'money',
     categoryLabel: 'Money',
@@ -1726,7 +1726,7 @@ export const TOOLS: ToolDefinition[] = [
   {
     id: 'qr-code-generator',
     slug: 'qr-code-generator',
-    title: 'UPI QR Code Generator with Shop Logo & Printable Stand Poster (A5 / A4) | IndiaTools',
+    title: 'UPI QR Code Generator with Shop Logo & Printable Stand Poster (A5 / A4)',
     shortTitle: 'UPI QR & Shop Poster',
     category: 'create',
     categoryLabel: 'Create',
@@ -1798,6 +1798,102 @@ export const TOOLS: ToolDefinition[] = [
     },
     type: 'calculator'
   },
+  {
+    id: 'pixelcraft',
+    slug: 'pixelcraft',
+    title: 'PixelCraft – Mini Photo Studio & Canvas Editor',
+    shortTitle: 'PixelCraft Photo Studio',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Crop, rotate, resize, filter, and convert photos privately using client-side HTML5 Canvas. Zero cloud uploads.',
+    detailedDescription: 'PixelCraft brings an essential photo studio directly to your browser. Crop to custom or standard ratios, resize by exact pixels or percentage, rotate smoothly, fine-tune brightness, contrast, and saturation, and export to JPG, PNG, or WebP with adjustable compression.',
+    iconName: 'Image',
+    badge: 'Popular',
+    color: '#6366F1',
+    tags: ['Photo Studio', 'Canvas Editor', 'Crop Image', 'Resize Photo', 'Format Converter', 'Private'],
+    searchKeywords: [
+      'pixelcraft photo editor',
+      'online canvas photo editor',
+      'crop rotate resize photo online',
+      'browser image editor no upload',
+      'jpg png webp converter free',
+      'photo filters brightness contrast online'
+    ],
+    formulaExplanation: 'Canvas 2D bicubic interpolation and CSS filter matrix composition. File conversion uses native browser Canvas.toBlob() encoding.',
+    assumptions: ['100% in-browser processing using HTML5 Canvas API.'],
+    exampleCalculation: {
+      title: 'Studio Portrait Cropping & WebP Conversion',
+      inputs: { 'Source': '4000 × 3000 JPG (4.2 MB)', 'Action': 'Crop 1:1, Brightness +10%, Convert to WebP' },
+      outputs: { 'Result': '1200 × 1200 WebP (140 KB)', 'Quality': 'Sharp, 96% size reduction' },
+      explanation: 'Optimizes high-resolution camera photos for web and social profiles in seconds.'
+    },
+    faqs: [
+      {
+        question: 'Are my photos uploaded to any server or cloud database?',
+        answer: 'No. PixelCraft works 100% locally in your web browser using HTML5 Canvas. Your photos never leave your device.'
+      },
+      {
+        question: 'Which formats are supported for editing and conversion?',
+        answer: 'You can open JPG, PNG, WebP, AVIF, and BMP images, and export clean files in JPG, PNG, or WebP formats.'
+      }
+    ],
+    relatedSlugs: ['50kb-photo', 'exact-kb-compressor', 'clearcut-ai', 'qr-code-generator'],
+    seo: {
+      title: 'PixelCraft – Mini Photo Studio & Canvas Editor | IndiaTools',
+      metaDescription: 'Edit, crop, resize, rotate, and convert photos online with zero cloud uploads. 100% private in-browser canvas photo studio.',
+      keywords: ['photo studio online', 'pixelcraft', 'crop photo online', 'resize image canvas', 'convert jpg to webp'],
+      canonicalPath: '/tools/pixelcraft'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'clearcut-ai',
+    slug: 'clearcut-ai',
+    title: 'ClearCut AI – Free In-Browser Background Remover',
+    shortTitle: 'ClearCut AI BG Remover',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Remove image backgrounds automatically with local AI neural networks. Export transparent PNGs with custom background colors.',
+    detailedDescription: 'ClearCut AI uses browser-based neural network models to separate subjects from backgrounds in one click. Features transparent PNG export, custom background colors, and an interactive before/after comparison slider with 100% privacy.',
+    iconName: 'Scissors',
+    badge: 'Popular',
+    color: '#06B6D4',
+    tags: ['Background Remover', 'AI Matting', 'Transparent PNG', 'Photo Cutout', 'WebGPU', 'Private'],
+    searchKeywords: [
+      'background remover ai free',
+      'remove background online browser',
+      'transparent png maker india',
+      'ai photo cutout no signup',
+      'clearcut ai background removal',
+      'modnet browser matting'
+    ],
+    formulaExplanation: 'Neural portrait matting computes alpha probability masks over image tensors to separate foreground pixels cleanly.',
+    assumptions: ['Local neural network inference running directly inside your browser.'],
+    exampleCalculation: {
+      title: 'E-commerce Product / Portrait Cutout',
+      inputs: { 'Photo': 'Portrait with cluttered room background' },
+      outputs: { 'Result': 'Isolated subject with transparent alpha matte or pure white studio background' },
+      explanation: 'Generates commercial-grade transparent PNG assets without sending photos to cloud APIs.'
+    },
+    faqs: [
+      {
+        question: 'Does ClearCut AI send my personal photos to an external AI server?',
+        answer: 'No. ClearCut AI runs inference locally on your device via client-side WebAssembly / WebGPU. Your images remain strictly on your machine.'
+      },
+      {
+        question: 'Can I replace the removed background with white or custom colors?',
+        answer: 'Yes! You can export a pure transparent PNG or select from studio background color presets (white, black, navy, studio blue, or any custom hex color).'
+      }
+    ],
+    relatedSlugs: ['pixelcraft', '50kb-photo', 'signature-resizer', 'passport-photo'],
+    seo: {
+      title: 'ClearCut AI – Free In-Browser Background Remover | IndiaTools',
+      metaDescription: 'Remove image backgrounds locally with in-browser AI. Download transparent PNGs or replace backgrounds with studio colors privately.',
+      keywords: ['remove background ai', 'clearcut ai', 'transparent png maker', 'background remover online free', 'in browser ai matting'],
+      canonicalPath: '/tools/clearcut-ai'
+    },
+    type: 'image-tool'
+  }
 ]
 
 export function getToolBySlug(slug: string): ToolDefinition | undefined {
