@@ -4,12 +4,14 @@ import { TOOLS, CATEGORIES } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
 import { useSEO } from '../hooks/useSEO'
+import { useI18n } from '../i18n/I18nContext'
 
 interface ToolsCatalogPageProps {
   popularOnly?: boolean
 }
 
 export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly = false }) => {
+  const { t } = useI18n()
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -45,15 +47,15 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
       <div className="text-center max-w-3xl mx-auto mb-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-mono font-bold uppercase mb-3">
           <Wrench className="w-3.5 h-3.5" />
-          <span>{popularOnly ? 'Top Rated Utilities' : 'The Practical Toolbox'}</span>
+          <span>{popularOnly ? 'Top Rated Utilities' : t('hero.eyebrow', 'The Practical Toolbox')}</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-          {popularOnly ? 'Popular Indian Tools' : 'All Tools & Calculators'}
+          {popularOnly ? 'Popular Indian Tools' : t('nav.allTools', 'All Tools & Calculators')}
         </h1>
         <p className="mt-2.5 text-sm sm:text-base text-slate-600">
           {popularOnly
             ? 'The most frequently calculated utilities across automotive, construction, power, and exam documents.'
-            : 'Explore our complete suite of 43 precision utilities crafted for real-life Indian problems.'}
+            : t('hero.description', 'Explore our complete suite of precision utilities crafted for real-life Indian problems.')}
         </p>
 
         {/* Filter Search Input */}
@@ -63,7 +65,7 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search mileage, JCB, 50KB photo, cent, solar..."
+            placeholder={t('hero.searchPlaceholder', 'Search mileage, JCB, 50KB photo, cent, solar...')}
             className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 shadow-sm"
           />
         </div>
@@ -79,7 +81,7 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
               : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
           }`}
         >
-          All Tools ({TOOLS.length})
+          {t('cat.all', 'All Tools')} ({TOOLS.length})
         </button>
 
         {Object.values(CATEGORIES).map((cat) => (
@@ -93,7 +95,7 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({ popularOnly 
             }`}
           >
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.accentColor }} />
-            <span>{cat.title}</span>
+            <span>{t(`cat.${cat.id}.title`, cat.title)}</span>
           </button>
         ))}
       </div>

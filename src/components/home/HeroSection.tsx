@@ -13,6 +13,7 @@ import {
 import { LiveMiniCalculator } from './LiveMiniCalculator'
 import { TOOLS, CATEGORIES } from '../../data/tools'
 import { AiHeroMascot } from '../mascot/AiHeroMascot'
+import { useI18n } from '../../i18n/I18nContext'
 
 interface HeroSectionProps {
   onOpenSearch: () => void
@@ -39,6 +40,7 @@ const itemVariants: Variants = {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
+  const { t } = useI18n()
   const totalTools = TOOLS.length // Exactly 43
   const totalCategories = Object.keys(CATEGORIES).length // Exactly 7
 
@@ -86,10 +88,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
                 className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-emerald-500/10 hover:from-amber-500/20 hover:via-indigo-500/20 hover:to-emerald-500/20 border border-amber-500/30 dark:border-amber-400/30 text-slate-800 dark:text-zinc-200 shadow-xs transition-all cursor-pointer"
               >
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-2xs">
-                  FEATURED
+                  {t('hero.featured', 'FEATURED')}
                 </span>
                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                  Indian Cheque Studio (13 Languages & CTS-2010 Specimen)
+                  {t('hero.featuredCheque', 'Indian Cheque Studio (13 Languages & CTS-2010 Specimen)')}
                 </span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-amber-500" />
               </Link>
@@ -100,11 +102,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               <div className="inline-flex max-w-full flex-wrap justify-center lg:justify-start items-center gap-1.5 sm:gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/80 dark:border-indigo-800/80 shadow-xs">
                 <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse shrink-0" />
                 <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-wider uppercase text-indigo-900 dark:text-indigo-300">
-                  INDIA'S EVERYDAY DIGITAL TOOLBOX
+                  {t('hero.eyebrow', "INDIA'S EVERYDAY DIGITAL TOOLBOX")}
                 </span>
                 <span className="text-indigo-300 dark:text-indigo-700 hidden sm:inline">•</span>
                 <span className="text-[10px] sm:text-[11px] text-indigo-700 dark:text-indigo-400 font-semibold font-mono">
-                  {totalTools} Precision Utilities
+                  {totalTools} {t('hero.precisionUtilities', 'Precision Utilities')}
                 </span>
               </div>
             </motion.div>
@@ -114,9 +116,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               variants={itemVariants}
               className="text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-slate-900 dark:text-white break-words"
             >
-              Smart tools for real-life calculations.
+              {t('hero.titleLine1', 'Smart tools for real-life calculations.')}
               <span className="block text-indigo-600 dark:text-indigo-400 mt-1.5 text-xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-                Built specifically for India.
+                {t('hero.titleLine2', 'Built specifically for India.')}
               </span>
             </motion.h1>
 
@@ -124,8 +126,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               variants={itemVariants}
               className="text-sm sm:text-base lg:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
             >
-              Calculate, compare, convert and plan with practical tools built for everyday Indian needs.
-              Free to use, fast to access, and designed for your phone or desktop.
+              {t('hero.description', 'Calculate, compare, convert and plan with practical tools built for everyday Indian needs. Free to use, fast to access, and designed for your phone or desktop.')}
             </motion.p>
 
             {/* Large Interactive Search Field */}
@@ -139,8 +140,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
                 </div>
 
                 <span className="text-slate-400 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 text-xs sm:text-base px-3 text-left flex-1 min-w-0 truncate select-none">
-                  <span className="sm:hidden">Search 44 tools (QR, JCB, cheque, 50kb)...</span>
-                  <span className="hidden sm:inline">Search 44 tools (e.g. UPI QR code, JCB diesel, cheque, cent to sqft)...</span>
+                  <span className="sm:hidden">{t('hero.searchPlaceholderMobile', 'Search tools (QR, JCB, cheque, 50kb)...')}</span>
+                  <span className="hidden sm:inline">{t('hero.searchPlaceholder', 'Search tools (e.g. UPI QR code, JCB diesel, cheque, cent to sqft)...')}</span>
                 </span>
 
                 <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono text-xs border border-slate-200 dark:border-slate-700 mr-1 shrink-0">
@@ -150,7 +151,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
 
               {/* Quick Suggestion Chips */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-1.5 pt-3 text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 mr-1">Popular:</span>
+                <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 mr-1">{t('hero.popular', 'Popular:')}</span>
                 {quickPills.map((pill) => (
                   <motion.div
                     key={pill.label}
@@ -180,7 +181,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
                 to="/tools"
                 className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition-all cursor-pointer group"
               >
-                <span>Explore All {totalTools} Tools</span>
+                <span>{t('hero.exploreButton', `Explore All ${totalTools} Tools`)}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
 
@@ -188,7 +189,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
                 href="#live-calculator-section"
                 className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white dark:bg-[#131B2E] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold text-base flex items-center justify-center gap-2 shadow-sm transition-all"
               >
-                <span>Try Live Calculators</span>
+                <span>{t('hero.tryLiveButton', 'Try Live Calculators')}</span>
               </a>
             </motion.div>
           </div>
@@ -208,7 +209,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
 
               {/* Accessible Minimalist Label */}
               <p className="mt-2 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium max-w-[210px] leading-snug">
-                Your friendly interactive companion for everyday Indian math.
+                {t('hero.companionTagline', 'Your friendly interactive companion for everyday Indian math.')}
               </p>
             </div>
           </motion.div>
@@ -231,7 +232,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
             </div>
             <div className="min-w-0">
               <div className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate">{totalTools} Tools</div>
-              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">Everyday Precision</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">{t('hero.precisionUtilities', 'Precision Utilities')}</div>
             </div>
           </motion.div>
 
@@ -244,7 +245,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               <Layers className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate">{totalCategories} Categories</div>
+              <div className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate">{totalCategories} {t('hero.badgeCategories', 'Categories')}</div>
               <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">Drive, Build, Money...</div>
             </div>
           </motion.div>
@@ -258,8 +259,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate">100% Private</div>
-              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">Zero Cloud Uploads</div>
+              <div className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate">{t('hero.badgePrivate', '100% Private')}</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">{t('hero.badgePrivateSub', 'Zero Cloud Uploads')}</div>
             </div>
           </motion.div>
 
@@ -272,8 +273,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenSearch }) => {
               <Languages className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate">13 Languages</div>
-              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">Indian Cheque Words</div>
+              <div className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate">{t('hero.badgeLanguages', '13 Languages')}</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">{t('hero.badgeLanguagesSub', 'Indian Cheque Words')}</div>
             </div>
           </motion.div>
         </motion.div>

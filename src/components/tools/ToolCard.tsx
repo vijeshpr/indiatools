@@ -20,6 +20,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { ToolDefinition } from '../../types'
+import { useI18n } from '../../i18n/I18nContext'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Gauge: Car,
@@ -46,6 +47,7 @@ interface ToolCardProps {
 }
 
 export const ToolCard: React.FC<ToolCardProps> = ({ tool, index = 0 }) => {
+  const { t } = useI18n()
   const IconComponent = ICON_MAP[tool.iconName] || ArrowRight
   const path = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
 
@@ -102,14 +104,14 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, index = 0 }) => {
       {/* Footer / CTA Link */}
       <div className="pt-3.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
         <span className="text-[10px] font-medium font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded-md">
-          {tool.categoryLabel}
+          {t(`cat.${tool.category}.title`, tool.categoryLabel)}
         </span>
 
         <Link
           to={path}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors focus:outline-none focus-visible:underline"
         >
-          <span>Use Tool</span>
+          <span>{t('tool.useTool', 'Use Tool')}</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>

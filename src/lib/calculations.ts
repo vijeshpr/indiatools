@@ -1937,3 +1937,345 @@ export function calculateRoadTrip(
     costPerPerson,
   })
 }
+
+// ==================== BOREWELL SUBMERSIBLE PUMP & PIPE SIZING ====================
+
+export interface BorewellPumpInput {
+  borewellDepthM: number
+  pumpDepthM: number
+  waterLevelM: number
+  drawdownM: number
+  tankHeightM: number
+  deliveryLengthM: number
+  flowLpm: number
+  pipeInternalDiameterMm: number
+  pipeMaterial: 'upvc' | 'hdpe' | 'gi'
+  bendsCount: number
+  valvesCount: number
+  fittingsAllowancePct: number
+  pumpEfficiencyPct: number
+  motorEfficiencyPct: number
+  headPerStageM: number
+  tariffInr: number
+  supplyPhase: 1 | 3
+  supplyVoltageV: number
+  cableLengthM: number
+  cableConductor: 'copper' | 'aluminium'
+}
+
+export interface PipeOptionEvaluation {
+  nominalLabel: string
+  internalDiameterMm: number
+  velocityMs: number
+  frictionLossM: number
+  isRecommended: boolean
+  status: 'optimal' | 'acceptable' | 'high-friction' | 'excessive-velocity'
+  statusNote: string
+}
+
+export interface BorewellPumpResult {
+  pumpingWaterLevelM: number
+  staticLiftM: number
+  pipeFrictionHeadM: number
+  fittingsLossM: number
+  outletPressureHeadM: number
+  totalDynamicHeadM: number
+  totalDynamicHeadFt: number
+  waterHp: number
+  requiredMotorHp: number
+  recommendedMotorHp: number | null
+  standardRatingsHp: number[]
+  estimatedStages: number
+  pipeVelocityMs: number
+  pipeEvaluations: PipeOptionEvaluation[]
+  recommendedPipeLabel: string
+  tankFillTimeMinutes: number
+  powerInputKw: number
+  energyPer1000LitreKwh: number
+  electricityCostPer1000LitreInr: number
+  currentAmps: number
+  recommendedCableSqmm: number | null
+  cableVoltageDropPct: number
+  submergenceM: number
+  warnings: string[]
+  feasibility: 'feasible' | 'warning' | 'infeasible'
+}
+
+export const STANDARD_PUMP_HP_RATINGS = [0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 7.5]
+
+export const STANDARD_DELIVERY_PIPES = [
+  { label: '25 mm (1")', defaultIdMm: 25 },
+  { label: '32 mm (1¼")', defaultIdMm: 32 },
+  { label: '40 mm (1½")', defaultIdMm: 40 },
+  { label: '50 mm (2")', defaultIdMm: 50 },
+]
+
+export function calculateBorewellPump(input: BorewellPumpInput): BorewellPumpResult {
+  const borewellDepthM = safeNum(input.borewellDepthM, 0, 1000, 60)
+  const pumpDepthM = safeNum(input.pumpDepthM, 0, 1000, 50)
+  const waterLevelM = safeNum(input.waterLevelM, 0, 1000, 25)
+  const drawdownM = safeNum(input.drawdownM, 0, 500, 10)
+  const tankHeightM = safeNum(input.tankHeightM, 0, 200, 10)
+  const deliveryLengthM = safeNum(input.deliveryLengthM, 0, 5000, 15)
+  const flowLpm = safeNum(input.flowLpm, 1, 2000, 50)
+  const userPipeIdMm = safeNum(input.pipeInternalDiameterMm, 10, 200, 32)
+  const pumpEff = safeNum(input.pumpEfficiencyPct, 10, 95, 55) / 100
+  const motorEff = safeNum(input.motorEfficiencyPct, 20, 98, 75) / 100
+  const headPerStage = safeNum(input.headPerStageM, 2, 40, 6)
+  const tariffInr = safeNum(input.tariffInr, 0, 50, 6)
+  const supplyPhase = input.supplyPhase === 3 ? 3 : 1
+  const supplyVoltage = safeNum(input.supplyVoltageV, 100, 600, supplyPhase === 3 ? 415 : 230)
+  const cableLengthM = safeNum(input.cableLengthM, 0, 1000, pumpDepthM + 10)
+  const isCopper = input.cableConductor !== 'aluminium'
+
+  const warnings: string[] = []
+
+  // 1. Water level & Submergence
+  const pumpingWaterLevelM = Number((waterLevelM + drawdownM).toFixed(1))
+  const submergenceM = Number((pumpDepthM - pumpingWaterLevelM).toFixed(1))
+
+  if (pumpDepthM > borewellDepthM) {
+    warnings.push('Pump installation depth exceeds total borewell depth.')
+  }
+  if (waterLevelM > borewellDepthM) {
+    warnings.push('Static water level cannot be deeper than the total borewell depth.')
+  }
+  if (submergenceM < 0) {
+    warnings.push('Pump is dry-running! Pumping water level with drawdown drops below the pump.')
+  } else if (submergenceM < 3) {
+    warnings.push(`Low pump submergence (${submergenceM}m). At least 3–5m water column above the pump is recommended to prevent vortexing and air intake.`)
+  }
+
+  // 2. Head components
+  // Lift is from the pumping water level below ground up to the overhead tank inlet above ground
+  const staticLiftM = Number((pumpingWaterLevelM + tankHeightM).toFixed(2))
+
+  // Total pipe run = vertical rise inside borewell from pump + above ground lift + horizontal run
+  // Note: Delivery pipe runs from the pump up to the surface and to the tank
+  const totalPipeLengthM = pumpDepthM + tankHeightM + deliveryLengthM
+
+  // Roughness coefficient C for Hazen-Williams
+  const cCoeff = input.pipeMaterial === 'gi' ? 110 : input.pipeMaterial === 'hdpe' ? 135 : 145 // uPVC default 145
+
+  // Flow in m³/s
+  const flowM3s = flowLpm / 60000
+
+  // Friction loss calculation function (Hazen-Williams)
+  const calcFrictionLoss = (lengthM: number, dMm: number): number => {
+    if (dMm <= 0 || flowLpm <= 0) return 0
+    const dM = dMm / 1000
+    // h_f = 10.67 * L * Q^1.852 / (C^1.852 * D^4.87)
+    const numerator = 10.67 * lengthM * Math.pow(flowM3s, 1.852)
+    const denominator = Math.pow(cCoeff, 1.852) * Math.pow(dM, 4.87)
+    return denominator > 0 ? numerator / denominator : 0
+  }
+
+  // Velocity calculation function: v = Q / A
+  const calcVelocity = (dMm: number): number => {
+    if (dMm <= 0) return 0
+    const dM = dMm / 1000
+    const area = Math.PI * Math.pow(dM / 2, 2)
+    return area > 0 ? flowM3s / area : 0
+  }
+
+  const pipeFrictionHeadM = Number(calcFrictionLoss(totalPipeLengthM, userPipeIdMm).toFixed(2))
+
+  // Fitting losses: either fitting-specific coefficients or percentage
+  // Loss coefficient K: 90 deg bend ~ 0.75, non-return/check valve ~ 2.5, gate valve ~ 0.2
+  const userBends = safeNum(input.bendsCount, 0, 50, 3)
+  const userValves = safeNum(input.valvesCount, 0, 20, 2)
+  const userVelocity = calcVelocity(userPipeIdMm)
+  const velocityHeadM = Math.pow(userVelocity, 2) / (2 * 9.81)
+
+  let fittingsLossM = 0
+  if (userBends > 0 || userValves > 0) {
+    const kTotal = userBends * 0.75 + userValves * 2.5
+    fittingsLossM = Number((kTotal * velocityHeadM).toFixed(2))
+  } else {
+    // Fallback to allowance pct
+    const allowance = safeNum(input.fittingsAllowancePct, 0, 30, 10) / 100
+    fittingsLossM = Number((pipeFrictionHeadM * allowance).toFixed(2))
+  }
+
+  // Standard residual pressure required at tank delivery pipe spout (~0.3 bar / 3m head)
+  const outletPressureHeadM = 3.0
+
+  // Total Dynamic Head (TDH)
+  const totalDynamicHeadM = Number(
+    Math.max(1, staticLiftM + pipeFrictionHeadM + fittingsLossM + outletPressureHeadM).toFixed(2)
+  )
+  const totalDynamicHeadFt = Number((totalDynamicHeadM * 3.28084).toFixed(1))
+
+  // 3. Hydraulic Power (Water HP) and Motor HP
+  // Water HP = Flow (LPM) × TDH (m) / 4500
+  const waterHp = Number(((flowLpm * totalDynamicHeadM) / 4500).toFixed(3))
+
+  // Motor HP = Water HP / (Pump Eff × Motor Eff)
+  const combinedEff = pumpEff * motorEff
+  const requiredMotorHp = Number((combinedEff > 0 ? waterHp / combinedEff : 0).toFixed(2))
+
+  // Find next standard nominal rating
+  let recommendedMotorHp: number | null = null
+  for (const rating of STANDARD_PUMP_HP_RATINGS) {
+    if (rating >= requiredMotorHp) {
+      recommendedMotorHp = rating
+      break
+    }
+  }
+
+  if (!recommendedMotorHp && requiredMotorHp > 7.5) {
+    warnings.push(
+      `Required motor rating (${requiredMotorHp} HP) exceeds standard residential domestic ratings (0.75 to 7.5 HP). A heavy commercial / multi-stage agricultural pump with verified curve is required.`
+    )
+  }
+
+  // 4. Pump Stages Estimation
+  const estimatedStages = Math.max(1, Math.ceil(totalDynamicHeadM / headPerStage))
+
+  // 5. Pipe Velocity & Evaluation
+  const pipeVelocityMs = Number(userVelocity.toFixed(2))
+  if (pipeVelocityMs > 2.2) {
+    warnings.push(
+      `High water velocity in selected pipe (${pipeVelocityMs} m/s). Velocities above 2.0 m/s cause heavy friction loss, hydraulic noise, and water hammer risk. Consider a 32mm or 40mm pipe.`
+    )
+  } else if (pipeVelocityMs < 0.5 && flowLpm > 10) {
+    warnings.push(
+      `Low water velocity (${pipeVelocityMs} m/s). Pipe might be oversized, increasing initial cost without flow benefit.`
+    )
+  }
+
+  const pipeEvaluations: PipeOptionEvaluation[] = STANDARD_DELIVERY_PIPES.map((p) => {
+    const v = Number(calcVelocity(p.defaultIdMm).toFixed(2))
+    const hf = Number(calcFrictionLoss(totalPipeLengthM, p.defaultIdMm).toFixed(1))
+    let status: 'optimal' | 'acceptable' | 'high-friction' | 'excessive-velocity' = 'optimal'
+    let statusNote = 'Balanced flow and optimal friction'
+
+    if (v > 2.4) {
+      status = 'excessive-velocity'
+      statusNote = 'Velocity exceeds safe threshold (>2.4 m/s)'
+    } else if (v > 1.8) {
+      status = 'high-friction'
+      statusNote = 'High velocity and substantial friction head'
+    } else if (v < 0.6) {
+      status = 'acceptable'
+      statusNote = 'Very low friction, slightly oversized for flow'
+    }
+
+    return {
+      nominalLabel: p.label,
+      internalDiameterMm: p.defaultIdMm,
+      velocityMs: v,
+      frictionLossM: hf,
+      isRecommended: false,
+      status,
+      statusNote,
+    }
+  })
+
+  // Select recommended pipe (smallest with velocity <= 1.8 m/s, or <= 2.2 m/s if none <= 1.8)
+  let bestPipeIndex = pipeEvaluations.findIndex((p) => p.velocityMs <= 1.8 && p.velocityMs >= 0.6)
+  if (bestPipeIndex === -1) {
+    bestPipeIndex = pipeEvaluations.findIndex((p) => p.velocityMs <= 2.2)
+  }
+  if (bestPipeIndex === -1) {
+    bestPipeIndex = pipeEvaluations.length - 1
+  }
+  if (bestPipeIndex >= 0 && bestPipeIndex < pipeEvaluations.length) {
+    pipeEvaluations[bestPipeIndex].isRecommended = true
+  }
+  const recommendedPipeLabel = pipeEvaluations[bestPipeIndex]?.nominalLabel || '32 mm (1¼")'
+
+  // 6. Tank Filling Time & Electricity Cost
+  // 1000 Litres fill time
+  const tankFillTimeMinutes = Number((1000 / flowLpm).toFixed(1))
+
+  // Motor electrical power consumption in kW:
+  // Using selected recommended HP (or calculated HP if beyond range)
+  const effectiveHp = recommendedMotorHp || requiredMotorHp
+  // 1 HP = 0.7457 kW mechanical output.
+  // Electrical input kW = (HP * 0.746) / motorEff
+  const powerInputKw = Number(((effectiveHp * 0.7457) / motorEff).toFixed(2))
+
+  // Energy consumed to fill 1000 Litres (kWh):
+  const hoursFor1000L = tankFillTimeMinutes / 60
+  const energyPer1000LitreKwh = Number((powerInputKw * hoursFor1000L).toFixed(3))
+  const electricityCostPer1000LitreInr = Number((energyPer1000LitreKwh * tariffInr).toFixed(2))
+
+  // 7. Cable Assessment
+  // Current I = Power(W) / (V * pf) for 1-phase; Power(W) / (sqrt(3) * V * pf) for 3-phase
+  // Assume power factor ~ 0.85
+  const powerWatts = powerInputKw * 1000
+  let currentAmps = 0
+  if (supplyPhase === 3) {
+    currentAmps = Number((powerWatts / (Math.sqrt(3) * supplyVoltage * 0.85)).toFixed(1))
+  } else {
+    currentAmps = Number((powerWatts / (supplyVoltage * 0.85)).toFixed(1))
+  }
+
+  // Resistivity rho (Ohm*mm²/m): Copper ~ 0.0175, Aluminium ~ 0.0285
+  const rho = isCopper ? 0.0175 : 0.0285
+
+  // Standard submersible cable cross-sections (mm²)
+  const standardCableSizes = [1.5, 2.5, 4.0, 6.0, 10.0, 16.0]
+  let recommendedCableSqmm: number | null = null
+  let cableVoltageDropPct = 0
+
+  for (const sqmm of standardCableSizes) {
+    // Loop resistance R = (2 * L * rho) / A for single phase; (sqrt(3) * L * rho) / A for 3 phase
+    const mult = supplyPhase === 3 ? Math.sqrt(3) : 2
+    const resistance = (mult * cableLengthM * rho) / sqmm
+    const vDrop = currentAmps * resistance
+    const vDropPct = (vDrop / supplyVoltage) * 100
+    if (vDropPct <= 3.5) {
+      recommendedCableSqmm = sqmm
+      cableVoltageDropPct = Number(vDropPct.toFixed(2))
+      break
+    }
+  }
+
+  if (!recommendedCableSqmm) {
+    recommendedCableSqmm = 16.0
+    const mult = supplyPhase === 3 ? Math.sqrt(3) : 2
+    cableVoltageDropPct = Number((((currentAmps * (mult * cableLengthM * rho) / 16.0) / supplyVoltage) * 100).toFixed(2))
+    warnings.push(
+      `High voltage drop (${cableVoltageDropPct}%) on the ${cableLengthM}m cable run. Consider a heavier 16mm²+ copper conductor or reducing cable run to prevent motor low-voltage starting failure.`
+    )
+  }
+
+  // Feasibility status
+  let feasibility: 'feasible' | 'warning' | 'infeasible' = 'feasible'
+  if (submergenceM < 0 || requiredMotorHp > 12) {
+    feasibility = 'infeasible'
+  } else if (warnings.length > 0) {
+    feasibility = 'warning'
+  }
+
+  return ensureFinite({
+    pumpingWaterLevelM,
+    staticLiftM,
+    pipeFrictionHeadM,
+    fittingsLossM,
+    outletPressureHeadM,
+    totalDynamicHeadM,
+    totalDynamicHeadFt,
+    waterHp,
+    requiredMotorHp,
+    recommendedMotorHp,
+    standardRatingsHp: STANDARD_PUMP_HP_RATINGS,
+    estimatedStages,
+    pipeVelocityMs,
+    pipeEvaluations,
+    recommendedPipeLabel,
+    tankFillTimeMinutes,
+    powerInputKw,
+    energyPer1000LitreKwh,
+    electricityCostPer1000LitreInr,
+    currentAmps,
+    recommendedCableSqmm,
+    cableVoltageDropPct,
+    submergenceM,
+    warnings,
+    feasibility,
+  })
+}
+

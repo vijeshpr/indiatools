@@ -10,9 +10,12 @@ import {
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { SearchModal } from './SearchModal'
+import { LanguageSelector } from './LanguageSelector'
 import { CATEGORIES } from '../../data/tools'
+import { useI18n } from '../../i18n/I18nContext'
 
 export const Navbar: React.FC = () => {
+  const { t } = useI18n()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -108,7 +111,7 @@ export const Navbar: React.FC = () => {
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              Home
+              {t('nav.home', 'Home')}
             </Link>
 
             <Link
@@ -119,7 +122,7 @@ export const Navbar: React.FC = () => {
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              All Tools (43)
+              {t('nav.allTools', 'All Tools')}
             </Link>
 
             <Link
@@ -130,7 +133,7 @@ export const Navbar: React.FC = () => {
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              Categories
+              {t('nav.categories', 'Categories')}
             </Link>
 
             <Link
@@ -141,7 +144,7 @@ export const Navbar: React.FC = () => {
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              <span>Cheque Studio</span>
+              <span>{t('nav.chequeStudio', 'Cheque Studio')}</span>
               <span className="text-[10px] font-mono font-bold bg-indigo-100 dark:bg-indigo-900/80 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.2 rounded uppercase">
                 NEW
               </span>
@@ -155,7 +158,7 @@ export const Navbar: React.FC = () => {
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              About
+              {t('nav.about', 'About')}
             </Link>
           </nav>
 
@@ -169,7 +172,7 @@ export const Navbar: React.FC = () => {
               aria-label="Search tools"
             >
               <Search className="w-5 h-5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition-transform" />
-              <span className="hidden sm:inline text-xs font-medium">Search</span>
+              <span className="hidden sm:inline text-xs font-medium">{t('nav.search', 'Search')}</span>
               <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-2xs">
                 <Command className="w-2.5 h-2.5" />
                 <span>K</span>
@@ -181,9 +184,12 @@ export const Navbar: React.FC = () => {
               to="/tools"
               className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm shadow-indigo-600/20 transition-all cursor-pointer"
             >
-              <span>Explore 43 Tools</span>
+              <span>{t('nav.exploreTools', 'Explore Tools')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
+
+            {/* Language Selector */}
+            <LanguageSelector compact={true} />
 
             {/* Light / Dark Mode Toggle */}
             <ThemeToggle />
@@ -214,27 +220,27 @@ export const Navbar: React.FC = () => {
                   to="/"
                   className="px-3 py-2 rounded-lg text-sm font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
-                  Home
+                  {t('nav.home', 'Home')}
                 </Link>
                 <Link
                   to="/tools"
                   className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
                 >
-                  <span>All 43 Tools</span>
+                  <span>{t('nav.allTools', 'All Tools')}</span>
                   <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded">43</span>
                 </Link>
                 <Link
                   to="/calculators/indian-cheque-studio"
                   className="px-3 py-2 rounded-lg text-sm font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 flex items-center justify-between"
                 >
-                  <span>🖋️ Indian Cheque Studio</span>
+                  <span>🖋️ {t('nav.chequeStudio', 'Indian Cheque Studio')}</span>
                   <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-mono font-bold">13 Lang</span>
                 </Link>
                 <Link
                   to="/categories"
                   className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
-                  Tool Categories
+                  {t('nav.categories', 'Categories')}
                 </Link>
                 <Link
                   to="/calculators/jcb-fuel-cost"
@@ -254,14 +260,14 @@ export const Navbar: React.FC = () => {
                   to="/about"
                   className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
-                  About Platform
+                  {t('nav.about', 'About')}
                 </Link>
               </div>
 
               {/* Categories list in mobile menu */}
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
                 <p className="text-[11px] font-mono uppercase text-slate-400 dark:text-slate-500 px-3 mb-1">
-                  Categories
+                  {t('nav.categories', 'Categories')}
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
                   {Object.values(CATEGORIES).map((cat) => (
@@ -271,7 +277,7 @@ export const Navbar: React.FC = () => {
                       className="flex items-center gap-2 p-2 rounded-lg text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.accentColor }} />
-                      <span>{cat.title}</span>
+                      <span>{t(`cat.${cat.id}.title`, cat.title)}</span>
                     </Link>
                   ))}
                 </div>

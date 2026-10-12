@@ -1,19 +1,27 @@
 import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Wrench, Gauge, ShieldCheck, CheckCircle2, IndianRupee } from 'lucide-react'
+import { Wrench, ShieldCheck } from 'lucide-react'
 import { calculateVehicleServiceCost, VehicleServiceResult } from '../lib/calculations'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
-
-const VEHICLE_TYPES = [
-  { id: 'bike' as const, label: '2-Wheeler / Bike', icon: '🏍️' },
-  { id: 'hatchback' as const, label: 'Hatchback', icon: '🚗' },
-  { id: 'sedan' as const, label: 'Sedan', icon: '🚘' },
-  { id: 'suv' as const, label: 'Mid / Full SUV', icon: '🚙' },
-]
+import { useI18n } from '../i18n/I18nContext'
+import { useToolTranslations } from '../i18n/toolTranslations'
+import { VehicleServiceCostUI } from '../i18n/tools/vehicleServiceCostI18n'
 
 export const VehicleServiceCostTool: React.FC = () => {
   const tool = getToolBySlug('vehicle-service-cost')!
+  const { locale } = useI18n()
+  const { meta, ui, formulaExplanation, assumptions, example, faqs } = useToolTranslations<VehicleServiceCostUI>(
+    'vehicle-service-cost',
+    locale
+  )
+
+  const vehicleTypes = useMemo(() => [
+    { id: 'bike' as const, label: ui.bikeLabel, icon: '🏍️' },
+    { id: 'hatchback' as const, label: ui.hatchbackLabel, icon: '🚗' },
+    { id: 'sedan' as const, label: ui.sedanLabel, icon: '🚘' },
+    { id: 'suv' as const, label: ui.suvLabel, icon: '🚙' },
+  ], [ui])
 
   const [vehicleType, setVehicleType] = useState<'bike' | 'hatchback' | 'sedan' | 'suv'>('hatchback')
   const [odometerKm, setOdometerKm] = useState<number>(35000)
@@ -30,44 +38,67 @@ export const VehicleServiceCostTool: React.FC = () => {
   }
 
   const getResultSummary = () => {
-    return `Vehicle Periodic Service Budget Planner:
-- Vehicle Segment: ${vehicleType.toUpperCase()}
-- Current Odometer: ${odometerKm.toLocaleString('en-IN')} km
-- Service Level: ${serviceType.toUpperCase()} Periodic Service (Every ${result.serviceIntervalKm.toLocaleString('en-IN')} km)
+    return `${ui.resultSummaryTitle}
+- ${ui.vehicleSegmentText}: ${vehicleType.toUpperCase()}
+- ${ui.currentOdometerText}: ${odometerKm.toLocaleString('en-IN')} km
+- ${ui.serviceLevelText}: ${serviceType.toUpperCase()} (${ui.everyKmInterval.replace('{km}', result.serviceIntervalKm.toLocaleString('en-IN'))})
 --------------------------------------------------
-ESTIMATED SERVICE BILL: ₹${result.estimatedTotal.toLocaleString('en-IN')}
-Cost Breakdown:
-- Engine Oil: ₹${result.engineOilCost.toLocaleString('en-IN')}
-- Oil/Air/AC Filters: ₹${result.filterCost.toLocaleString('en-IN')}
-- Labor & Workshop GST: ₹${result.laborCost.toLocaleString('en-IN')}
-- Consumables & Coolant: ₹${result.consumablesCost.toLocaleString('en-IN')}
-- Wheel Alignment & Balancing: ₹${result.wheelAlignmentCost.toLocaleString('en-IN')}
-Key Recommended Replacements: ${result.keyRecommendations.join(', ')}
-Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
+${ui.estimatedBillText}: ₹${result.estimatedTotal.toLocaleString('en-IN')}
+${ui.costBreakdownText}:
+- ${ui.engineOilText}: ₹${result.engineOilCost.toLocaleString('en-IN')}
+- ${ui.filtersText}: ₹${result.filterCost.toLocaleString('en-IN')}
+- ${ui.laborText}: ₹${result.laborCost.toLocaleString('en-IN')}
+- ${ui.consumablesText}: ₹${result.consumablesCost.toLocaleString('en-IN')}
+- ${ui.wheelAlignmentText}: ₹${result.wheelAlignmentCost.toLocaleString('en-IN')}
+${ui.recommendationsText}: ${result.keyRecommendations.join(', ')}
+${ui.calculatedOn}`
   }
 
+  const localizedTool = useMemo(() => {
+    return {
+      ...tool,
+      title: meta.title,
+      detailedDescription: meta.subtitle,
+      formulaExplanation: formulaExplanation || tool.formulaExplanation,
+      assumptions: assumptions || tool.assumptions,
+      exampleCalculation: example ? {
+        title: example.title,
+        inputs: example.inputs,
+        outputs: example.outputs,
+        explanation: example.explanation,
+      } : tool.exampleCalculation,
+      faqs: faqs && faqs.length > 0 ? faqs : tool.faqs,
+    }
+  }, [tool, meta, formulaExplanation, assumptions, example, faqs])
+
   return (
-    <ToolPageLayout tool={tool} onReset={handleReset} onCopyResult={getResultSummary}>
+    <ToolPageLayout
+      tool={localizedTool}
+      onReset={handleReset}
+      onCopyResult={getResultSummary}
+      customH1={meta.h1}
+      customSubtitle={meta.subtitle}
+    >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Inputs */}
         <div className="lg:col-span-6 p-6 sm:p-7 rounded-2xl bg-neutral-900/80 light:bg-white border border-neutral-800 light:border-slate-200 shadow-xl space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
             <h2 className="text-base font-bold text-white light:text-slate-900 flex items-center gap-2">
               <Wrench className="w-5 h-5 text-orange-500" />
-              <span>Vehicle & Odometer Details</span>
+              <span>{ui.vehicleDetails}</span>
             </h2>
             <span className="text-xs font-mono text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-              Indian Workshop Slabs
+              {ui.workshopSlabs}
             </span>
           </div>
 
           {/* Vehicle Type Picker */}
           <div>
             <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 light:text-slate-600 mb-2">
-              Select Vehicle Segment
+              {ui.selectSegment}
             </label>
             <div className="grid grid-cols-2 gap-2">
-              {VEHICLE_TYPES.map((t) => (
+              {vehicleTypes.map((t) => (
                 <button
                   key={t.id}
                   type="button"
@@ -88,7 +119,7 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
           {/* Current Odometer */}
           <div>
             <div className="flex justify-between items-center text-xs text-neutral-300 light:text-slate-700 mb-1.5 font-medium">
-              <span>Current Odometer Reading</span>
+              <span>{ui.currentOdometer}</span>
               <span className="font-mono text-orange-400 font-bold">{odometerKm.toLocaleString('en-IN')} km</span>
             </div>
             <input
@@ -105,7 +136,7 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
           {/* Service Type Selection */}
           <div>
             <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 light:text-slate-600 mb-2">
-              Scheduled Service Level
+              {ui.scheduledServiceLevel}
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -117,8 +148,8 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
                     : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 text-neutral-400'
                 }`}
               >
-                <span className="text-sm block font-bold text-white light:text-slate-900">Minor Service</span>
-                <span className="text-[11px] text-neutral-500">Engine oil, oil filter & basic check</span>
+                <span className="text-sm block font-bold text-white light:text-slate-900">{ui.minorService}</span>
+                <span className="text-[11px] text-neutral-500">{ui.minorServiceDesc}</span>
               </button>
 
               <button
@@ -130,8 +161,8 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
                     : 'bg-neutral-950 light:bg-slate-50 border-neutral-800 text-neutral-400'
                 }`}
               >
-                <span className="text-sm block font-bold text-white light:text-slate-900">Major Service</span>
-                <span className="text-[11px] text-neutral-500">All filters, fluids & wheel alignment</span>
+                <span className="text-sm block font-bold text-white light:text-slate-900">{ui.majorService}</span>
+                <span className="text-[11px] text-neutral-500">{ui.majorServiceDesc}</span>
               </button>
             </div>
           </div>
@@ -145,10 +176,10 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
           >
             <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
               <span className="text-xs font-mono font-bold tracking-wider uppercase text-neutral-400">
-                Estimated Workshop Invoice
+                {ui.estimatedInvoice}
               </span>
               <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                Every {result.serviceIntervalKm.toLocaleString('en-IN')} km
+                {ui.everyKmInterval.replace('{km}', result.serviceIntervalKm.toLocaleString('en-IN'))}
               </span>
             </div>
 
@@ -157,28 +188,28 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
                 ₹{result.estimatedTotal.toLocaleString('en-IN')}
               </div>
               <p className="text-xs text-neutral-400 mt-2">
-                Classification: <span className="font-bold text-amber-400 uppercase tracking-wide font-mono">{serviceType} Service</span>
+                {ui.classification} <span className="font-bold text-amber-400 uppercase tracking-wide font-mono">{serviceType} Service</span>
               </p>
             </div>
 
             <div className="space-y-3 pt-4 border-t border-neutral-800 light:border-slate-100">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-neutral-300">Engine Oil (Synthetic / Semi-Synthetic)</span>
+                <span className="text-neutral-300">{ui.engineOilItem}</span>
                 <span className="font-mono font-bold text-white">₹{result.engineOilCost.toLocaleString('en-IN')}</span>
               </div>
 
               <div className="flex justify-between items-center text-xs">
-                <span className="text-neutral-300">Replacement Filters (Oil, Air, Cabin)</span>
+                <span className="text-neutral-300">{ui.filtersItem}</span>
                 <span className="font-mono font-bold text-white">₹{result.filterCost.toLocaleString('en-IN')}</span>
               </div>
 
               <div className="flex justify-between items-center text-xs">
-                <span className="text-neutral-300">Labor Charges + 18% GST</span>
+                <span className="text-neutral-300">{ui.laborGstItem}</span>
                 <span className="font-mono font-bold text-amber-400">₹{result.laborCost.toLocaleString('en-IN')}</span>
               </div>
 
               <div className="flex justify-between items-center text-xs">
-                <span className="text-neutral-300">Wheel Alignment & Balancing</span>
+                <span className="text-neutral-300">{ui.alignmentItem}</span>
                 <span className="font-mono font-bold text-white">₹{result.wheelAlignmentCost.toLocaleString('en-IN')}</span>
               </div>
             </div>
@@ -186,7 +217,7 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
             {/* Checklist of parts */}
             <div className="mt-5 pt-4 border-t border-neutral-800 light:border-slate-100">
               <span className="text-xs font-mono text-neutral-400 uppercase block mb-2">
-                Mandatory Check & Replace Items:
+                {ui.mandatoryItems}
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {result.keyRecommendations.map((part: string, idx: number) => (
@@ -204,10 +235,10 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app)`
           <div className="p-5 rounded-2xl bg-neutral-900/60 light:bg-slate-50 border border-neutral-800 light:border-slate-200 text-xs text-neutral-400 space-y-2">
             <div className="flex items-center gap-1.5 text-neutral-200 font-semibold">
               <ShieldCheck className="w-4 h-4 text-orange-400" />
-              <span>Workshop Tip</span>
+              <span>{ui.workshopTipTitle}</span>
             </div>
             <p>
-              Always decline unnecessary dealership add-ons like Engine Decarbonizing (₹2,500), Nitrogen inflation (₹300), and AC Sanitization sprays (₹1,500). Sticking strictly to the owner manual checklist saves 25% on invoice cost.
+              {ui.workshopTipDesc}
             </p>
           </div>
         </div>

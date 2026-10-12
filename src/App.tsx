@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './components/common/Toast'
+import { I18nProvider } from './i18n/I18nContext'
 import { Navbar } from './components/common/Navbar'
 import { Footer } from './components/common/Footer'
 
@@ -16,11 +17,13 @@ import { ContactPage } from './pages/ContactPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { TermsPage } from './pages/TermsPage'
 import { IndianChequeStudioTool } from './calculators/IndianChequeStudioTool'
+import { GoldExchangeCalculatorTool } from './calculators/GoldExchangeCalculatorTool'
 
 export function App() {
   return (
     <ThemeProvider>
-      <ToastProvider>
+      <I18nProvider>
+        <ToastProvider>
         <BrowserRouter>
           <div className="relative min-h-screen flex flex-col bg-[#F7F8FC] dark:bg-[#080D1A] text-[#111827] dark:text-slate-100 transition-colors duration-200 selection:bg-indigo-600 selection:text-white overflow-x-hidden w-full max-w-full">
             {/* Ambient Radial Gradient Mesh Lighting & Tech Grid */}
@@ -49,6 +52,12 @@ export function App() {
                 <Route path="/calculators/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
                 <Route path="/tools/indian-cheque-studio" element={<IndianChequeStudioTool />} />
                 <Route path="/tools/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
+                <Route path="/tools/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
+                <Route path="/calculators/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
+                <Route path="/:langCode/tools/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
+                <Route path="/:langCode/calculators/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
+                <Route path="/:langCode/tools/:slug" element={<ToolDetailPage />} />
+                <Route path="/:langCode/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/qr-code-generator" element={<Navigate to="/calculators/qr-code-generator" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
@@ -67,6 +76,7 @@ export function App() {
           </div>
         </BrowserRouter>
       </ToastProvider>
+      </I18nProvider>
     </ThemeProvider>
   )
 }

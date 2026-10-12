@@ -32,7 +32,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#3B82F6',
     gradient: 'from-blue-500/20 via-cyan-500/10 to-transparent',
     icon: 'Zap',
-    toolCount: 8,
+    toolCount: 9,
   },
   money: {
     id: 'money',
@@ -43,7 +43,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#8B5CF6',
     gradient: 'from-purple-500/20 via-indigo-500/10 to-transparent',
     icon: 'IndianRupee',
-    toolCount: 8,
+    toolCount: 9,
   },
   land: {
     id: 'land',
@@ -70,13 +70,13 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
   create: {
     id: 'create',
     title: 'Create',
-    subtitle: 'Photo & Documents',
+    subtitle: 'AI, Photo & Developer Tools',
     headline: 'CREATE.',
-    description: '100% private in-browser image optimization for UPSC, SSC, Banking, Passport photos, and Image-to-PDF generation.',
+    description: '100% private in-browser AI token & API cost calculators, image optimization for UPSC, SSC, Banking, Passport photos, and Image-to-PDF generation.',
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 7,
+    toolCount: 9,
   },
 }
 
@@ -941,6 +941,68 @@ export const TOOLS: ToolDefinition[] = [
     },
     type: 'calculator',
   },
+  {
+    id: 'borewell-pump-calculator',
+    slug: 'borewell-pump-calculator',
+    title: 'Borewell Submersible Pump HP Calculator & Pipe Sizing',
+    shortTitle: 'Borewell Pump Calculator',
+    category: 'power',
+    categoryLabel: 'Power',
+    description: 'Calculate required submersible pump motor HP, total dynamic head (TDH), delivery pipe size, tank filling time and electricity cost for your borewell.',
+    detailedDescription: 'Engineering tool to estimate borewell submersible pump motor HP, total dynamic head (TDH), delivery pipe sizing, water velocity, and 1,000L tank filling cost. Accounts for pumping water level, drawdown, overhead tank elevation, and pipe friction using the Hazen-Williams equation.',
+    iconName: 'Droplet',
+    badge: 'New',
+    color: '#06B6D4',
+    tags: ['Borewell Pump', 'Submersible Motor', 'Pump HP', 'Pipe Sizing', 'TDH Calculator', 'Water Tank'],
+    searchKeywords: [
+      'borewell pump hp calculator india',
+      'submersible motor hp selection for borewell',
+      'borewell depth to pump hp chart',
+      'water pump stage and head calculator',
+      'submersible delivery pipe size selector',
+      '1000 litre tank filling time calculator'
+    ],
+    formulaExplanation: 'TDH (m) = Pumping Water Level + Tank Elevation + Pipe Friction Head (Hazen-Williams) + Fittings Loss + Residual Outlet Head (3m). Water HP = Flow (LPM) × TDH (m) ÷ 4500. Required Motor HP = Water HP ÷ (Pump Eff × Motor Eff).',
+    assumptions: [
+      'Pump is submerged below dynamic pumping water level; pump hanging depth is used to evaluate submergence rather than lift head.',
+      'Pipe friction calculated via the Hazen-Williams formula using actual pipe internal diameter.'
+    ],
+    exampleCalculation: {
+      title: 'Residential Borewell (200 ft / 60 m)',
+      inputs: { 'Borewell Depth': '200 ft (60 m)', 'Pumping Level': '110 ft (33.5 m)', 'Tank Height': '35 ft (10.7 m)', 'Desired Flow': '50 LPM' },
+      outputs: { 'Total Dynamic Head': '51.5 m (169 ft)', 'Hydraulic Power': '0.57 Water HP', 'Recommended Motor': '1.5 HP Submersible', 'Delivery Pipe': '32 mm (1¼")', 'Filling Time (1,000L)': '20 Mins' },
+      explanation: 'With 50 LPM flow and 51.5 m TDH, hydraulic power is 0.57 HP. Factoring in 55% pump efficiency and 75% motor efficiency, a 1.5 HP submersible pump is optimal.'
+    },
+    faqs: [
+      {
+        question: 'What are the most common causes of borewell submersible pump motor overheating or burnout?',
+        answer: 'The primary culprits are low water submergence (causing dry running or cavitation), frequent low-voltage fluctuations below 190V, undersized power cables causing high voltage drop, sandy or silty water eroding impellers, and single-phasing on 3-phase connections.'
+      },
+      {
+        question: 'Why do submersible cable sizing and voltage drop matter so much?',
+        answer: 'Submersible motors are situated hundreds of feet underground. Long cable runs with undersized conductors produce substantial voltage drop (exceeding 3–5%), starving the motor of starting torque and elevating winding operating current, which rapidly cooks the winding insulation.'
+      },
+      {
+        question: 'How do pump stages relate to total dynamic head (TDH)?',
+        answer: 'Each stage consists of a matched impeller and diffuser bowl that adds a specific head increment (typically 5 to 7 metres per stage depending on impeller geometry and RPM). Dividing your Total Dynamic Head by the head-per-stage yield indicates how many stages your pump requires.'
+      }
+    ],
+    relatedSlugs: ['water-tank-capacity', 'electricity-cost', 'solar-panel', 'inverter-backup'],
+    seo: {
+      title: 'Borewell Submersible Pump HP Calculator & Pipe Sizing | IndiaTools',
+      metaDescription: 'Estimate submersible pump HP for your borewell and overhead tank. Calculate total dynamic head, delivery pipe size, water flow, tank filling time and electricity usage.',
+      keywords: [
+        'borewell pump hp calculator india',
+        'submersible motor hp selection for borewell',
+        'borewell depth to pump hp chart',
+        'water pump stage and head calculator',
+        'submersible delivery pipe size selector',
+        '1000 litre tank filling time calculator'
+      ],
+      canonicalPath: '/calculators/borewell-pump-calculator'
+    },
+    type: 'calculator'
+  },
 
   // ==================== MONEY ====================
   {
@@ -1722,6 +1784,68 @@ export const TOOLS: ToolDefinition[] = [
     },
     type: 'calculator'
   },
+  {
+    id: 'gold-exchange-calculator',
+    slug: 'gold-exchange-calculator',
+    title: 'Gold Exchange & Jewellery Bill Calculator India',
+    shortTitle: 'Gold Bill Calculator',
+    category: 'money',
+    categoryLabel: 'Money',
+    description: 'Calculate old gold exchange value, jewellery making charges, wastage, and 3% GST. Compare jeweller quotations side by side before buying.',
+    detailedDescription: 'Transparent Indian gold jewellery billing and old gold exchange value calculator. Estimate pure gold content across 24K, 22K (916), 18K (750), melting deductions, making charges (% or ₹/g), wastage (Value Addition), 3% GST, and compare two jeweller quotations side by side.',
+    iconName: 'Coins',
+    badge: 'Popular',
+    color: '#EAB308',
+    tags: ['Gold Exchange', 'Jewellery Bill', '916 Hallmark', 'Making Charges', 'Wastage', '3% GST', 'Old Gold Value'],
+    searchKeywords: [
+      'gold exchange calculator india',
+      'old gold exchange value calculator',
+      'jewellery bill calculator with gst',
+      'gold making charges and wastage calculator',
+      '916 gold bill verification',
+      'compare gold jewellery quotations'
+    ],
+    formulaExplanation: 'Old Gold Value = (Gross Wt − Stone Wt) × (Purity ÷ 24) × 24K Rate × (1 − Melting Deduction). New Jewellery Bill = Net Wt × Purity Rate + Making Charges + Wastage + Stones + BIS Hallmark − Discount + 3% GST.',
+    assumptions: [
+      'Old gold purity is normalized to 24K equivalent fine gold before melting deduction.',
+      'GST is calculated at 3% on the net taxable purchase value in compliance with Indian tax rules.'
+    ],
+    exampleCalculation: {
+      title: 'Exchange 16.5g Old 22K Gold for 24g New Ornament',
+      inputs: { '22K Gold Rate': '₹7,250 / g', 'Old Gold Gross': '16.5g (0.5g stone)', 'New Ornament': '24.0g (12% Making Charge)', 'GST': '3%' },
+      outputs: { 'Old Gold Value': '₹1,14,840', 'New Ornament Invoice': '₹2,00,996', 'Net Cash Payable': '₹86,156' },
+      explanation: 'Net 16g old 22K gold yields ₹1,14,840. New 24g ornament total invoice is ₹2,00,996 with making charges and 3% GST. You pay the net difference of ₹86,156.'
+    },
+    faqs: [
+      {
+        question: 'How is the exchange value of old gold calculated in India?',
+        answer: 'Old gold value = (Gross Weight − Stone/Bead Weight) × (Jewellery Purity ÷ 24) × 24K Gold Rate − Melting/Refining Deduction. Reputed BIS hallmarked jewellers typically deduct 0% to 2% for hallmark exchange.'
+      },
+      {
+        question: 'What is the difference between Making Charges and Wastage (VA)?',
+        answer: 'Making charges represent the artisan craftsmanship fee (labour). Wastage (often termed Value Addition or VA) accounted for microscopic gold loss during melting and polishing. Today, many branded jewellers combine them into a single percentage.'
+      },
+      {
+        question: 'How is GST applied on gold jewellery purchases and exchanges in India?',
+        answer: 'In India, GST on gold jewellery is 3% applied on the total taxable value (metal value + making charges + wastage + stones). If you exchange old gold, the old gold value is deducted from the final payable amount.'
+      }
+    ],
+    relatedSlugs: ['gst-calculator', 'in-hand-salary', 'emi-calculator', 'sip-calculator'],
+    seo: {
+      title: 'Gold Exchange & Jewellery Bill Calculator India | IndiaTools',
+      metaDescription: 'Calculate old gold exchange value, jewellery making charges, wastage, and 3% GST. Compare jeweller quotations side by side before buying.',
+      keywords: [
+        'gold exchange calculator india',
+        'old gold exchange value calculator',
+        'jewellery bill calculator with gst',
+        'gold making charges and wastage calculator',
+        '916 gold bill verification',
+        'compare gold jewellery quotations'
+      ],
+      canonicalPath: '/calculators/gold-exchange-calculator'
+    },
+    type: 'calculator'
+  },
 
   {
     id: 'qr-code-generator',
@@ -1893,6 +2017,163 @@ export const TOOLS: ToolDefinition[] = [
       canonicalPath: '/tools/clearcut-ai'
     },
     type: 'image-tool'
+  },
+  {
+    id: 'ai-token-calculator',
+    slug: 'ai-token-calculator',
+    title: 'AI Token & API Cost Calculator',
+    shortTitle: 'AI Token Calculator',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Estimate prompt tokens and calculate API costs across OpenAI, Google Gemini, Anthropic Claude, and DeepSeek in USD and INR.',
+    detailedDescription: 'Real-time client-side AI token counter and LLM API pricing comparison engine. Estimate prompt and completion tokens with Unicode-aware heuristics for English and Indian languages, test prompt caching savings, and project per-request, daily, and monthly API bills in USD ($) and INR (₹).',
+    iconName: 'Cpu',
+    badge: 'Popular',
+    color: '#06B6D4',
+    tags: ['AI Tokens', 'API Pricing', 'LLM Cost', 'OpenAI', 'Gemini', 'Claude', 'DeepSeek', 'Prompt Caching'],
+    searchKeywords: [
+      'ai token calculator',
+      'llm api cost calculator',
+      'openai token counter',
+      'claude 3.5 sonnet api pricing',
+      'gemini api cost per token',
+      'deepseek api price inr',
+      'calculate prompt tokens'
+    ],
+    formulaExplanation: 'Input Cost = (Input Tokens ÷ 1,000,000) × Input Price Per 1M. Output Cost = (Output Tokens ÷ 1,000,000) × Output Price Per 1M. Request Cost = Input Cost + Output Cost. Monthly Expense = Request Cost × Daily Calls × 30.',
+    assumptions: [
+      'Unicode-aware heuristic estimation calibrated for Byte-Pair Encoding (BPE / tiktoken / SentencePiece).',
+      'Exchange rate conversion uses reference assumption (₹85/USD) for local budgeting.',
+      'Pricing excludes local GST and provider-specific custom enterprise volume discounts.'
+    ],
+    exampleCalculation: {
+      title: 'Customer Support Bot (1,000 calls/day)',
+      inputs: {
+        'Prompt Length': '250 Input Tokens',
+        'Response Length': '300 Output Tokens',
+        'Model': 'OpenAI GPT-4o mini ($0.15/$0.60 per 1M)',
+        'Volume': '1,000 calls/day'
+      },
+      outputs: {
+        'Cost Per Request': '$0.000218 (₹0.0185)',
+        'Daily Expense': '$0.218 (₹18.53)',
+        'Monthly Expense': '$6.53 (₹555 / month)'
+      },
+      explanation: 'Running 1,000 daily queries with GPT-4o mini totals ~550,000 tokens daily, projecting to only ~$6.53 (₹555) per month.'
+    },
+    faqs: [
+      {
+        question: 'How do tokens correlate to words and characters?',
+        answer: 'In standard English text, 1 token is approximately 4 characters or 0.75 words. For Indian languages (Malayalam, Hindi, Tamil, Telugu, Kannada), characters tokenize at roughly 1.5 to 2.0 characters per token due to Unicode multi-byte representations.'
+      },
+      {
+        question: 'Does this calculator upload my prompt text to any cloud server or AI API?',
+        answer: 'No. All text parsing, character counting, and token estimations execute 100% locally in your browser. Zero data is transmitted to any server.'
+      },
+      {
+        question: 'What is Prompt Caching and how does it reduce LLM API bills?',
+        answer: 'Prompt caching allows providers (Anthropic, OpenAI, DeepSeek, Google) to reuse previously compiled prompt prefixes (such as system instructions or documentation). Cache hits typically receive a 50% to 90% discount on input token rates.'
+      },
+      {
+        question: 'Are reasoning tokens billed differently in models like OpenAI o1 or DeepSeek R1?',
+        answer: 'In reasoning models (like OpenAI o1, o3-mini, and DeepSeek-R1), tokens generated during the internal chain-of-thought process are billed at the standard output token rate, even if hidden from final completions.'
+      }
+    ],
+    relatedSlugs: ['pixelcraft', 'clearcut-ai', 'qr-code-generator', 'in-hand-salary'],
+    seo: {
+      title: 'AI Token & API Cost Calculator – Compare GPT, Gemini, Claude & DeepSeek | IndiaTools',
+      metaDescription: 'Estimate AI tokens and compare API costs across OpenAI, Gemini, Claude and DeepSeek. Calculate prompt, output, daily and monthly costs in USD and INR with a free client-side calculator.',
+      keywords: [
+        'ai token calculator',
+        'llm api pricing calculator',
+        'gpt 4o token cost',
+        'claude 3.5 sonnet cost',
+        'gemini api pricing inr',
+        'deepseek api cost calculator'
+      ],
+      canonicalPath: '/calculators/ai-token-calculator'
+    },
+    type: 'calculator'
+  },
+  // ==================== ODDLY SATISFYING & ZEN RELAXATION GAME ====================
+  {
+    id: 'satisfying-relax-game',
+    slug: 'satisfying-relax-game',
+    title: 'Oddly Satisfying Zen Game Online – Bubble Wrap Popper & Sand Slicer | IndiaTools',
+    shortTitle: 'Satisfying Zen Game',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Instant stress relief and sensory relaxation sandbox featuring infinite bubble wrap popping, kinetic sand carving, and soothing fluid wave ripples. 100% private, client-side Web Audio synthesis.',
+    detailedDescription: 'Calming interactive relaxation and sensory focus sandbox with infinite bubble wrap popping, tactile kinetic sand carving, and harmonic fluid ripples. Powered by client-side Web Audio synthesis and hardware-accelerated HTML5 Canvas physics.',
+    iconName: 'Sparkles',
+    badge: 'Popular',
+    color: '#10B981',
+    formulaExplanation: 'Interactive client-side physics calculated via requestAnimationFrame and synthesized sound generation via the Web Audio API without remote audio network requests.',
+    assumptions: [
+      'Purely recreational leisure and sensory focus sandbox; not intended as medical therapy.',
+      'Audio synthesis operates via Web Audio API; user interaction initializes audio context.',
+      'Canvas render loop dynamically adjusts to device pixel ratio for smooth performance.'
+    ],
+    tags: [
+      'Zen Game',
+      'Oddly Satisfying',
+      'Bubble Wrap',
+      'Kinetic Sand',
+      'Stress Relief',
+      'Physics Sandbox',
+      'ASMR Sound'
+    ],
+    searchKeywords: [
+      'oddly satisfying game online',
+      'bubble wrap popper online free',
+      'kinetic sand cutting game',
+      'stress relief physics sandbox',
+      'fluid simulation zen game',
+      'asmr relaxing game mobile',
+      'free satisfying games no download'
+    ],
+    exampleCalculation: {
+      title: 'Sensory Relaxation & Stress Relief Session',
+      inputs: {
+        'Selected Mode': 'Bubble Wrap Popper / Kinetic Sand / Fluid Wave',
+        'Audio Synthesizer': 'Client-side Web Audio (ASMR Pop & Sand Slice)',
+        'Visual Palette': 'Neon Glow or Liquid Gold'
+      },
+      outputs: {
+        'Data / Privacy': '100% Client-Side & Zero Network Telemetry',
+        'Pop & Slice Response': 'Instant zero-latency acoustic playback'
+      },
+      explanation: 'Crafted for sensory focus and recreational leisure with synthesized Web Audio frequencies, responsive multitouch canvas physics, and zero external network tracking.'
+    },
+    faqs: [
+      {
+        question: 'How do the bubble wrap popping and ASMR audio effects work?',
+        answer: 'All audio is synthesized locally in real time using the browser Web Audio API—no MP3 or WAV files are downloaded. The bubble wrap generates crisp harmonic snaps and low body resonance alongside subtle mobile haptic vibrations.'
+      },
+      {
+        question: 'Does this relaxation physics sandbox require downloading any software or app?',
+        answer: 'No. The sandbox runs 100% in your browser using hardware-accelerated HTML5 Canvas and responsive touch events on any modern smartphone, tablet, or desktop computer.'
+      },
+      {
+        question: 'Is this game private and does it consume mobile internet data?',
+        answer: 'Completely private. Once the page is loaded, the physics simulator and audio synthesizer run entirely client-side without transmitting any gameplay or sensory data over the internet.'
+      }
+    ],
+    relatedSlugs: ['ai-token-calculator', 'pixelcraft', 'clearcut-ai', 'qr-code-generator'],
+    seo: {
+      title: 'Oddly Satisfying Zen Game Online – Bubble Wrap Popper & Sand Slicer | IndiaTools',
+      metaDescription: 'Play our free oddly satisfying zen game online with infinite bubble wrap popping, tactile kinetic sand carving, and glowing fluid ripples. 100% client-side Web Audio stress relief.',
+      keywords: [
+        'oddly satisfying game online',
+        'bubble wrap popper online free',
+        'kinetic sand cutting game',
+        'stress relief physics sandbox',
+        'fluid simulation zen game',
+        'relaxing mini game client side'
+      ],
+      canonicalPath: '/calculators/satisfying-relax-game'
+    },
+    type: 'calculator'
   }
 ]
 

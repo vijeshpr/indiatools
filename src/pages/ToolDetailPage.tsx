@@ -31,6 +31,7 @@ import { SolarPanelTool } from '../calculators/SolarPanelTool'
 import { WaterTankTool } from '../calculators/WaterTankTool'
 import { LpgUsageTool } from '../calculators/LpgUsageTool'
 import { GeneratorFuelTool } from '../calculators/GeneratorFuelTool'
+import { BorewellPumpCalculatorTool } from '../calculators/BorewellPumpCalculatorTool'
 
 // Salary & Money Calculators
 import { SalaryHikeTool } from '../calculators/SalaryHikeTool'
@@ -42,6 +43,7 @@ import { DailyWageTool } from '../calculators/DailyWageTool'
 import { PercentageDiscountTool } from '../calculators/PercentageDiscountTool'
 import { ExperienceTool } from '../calculators/ExperienceTool'
 import { IndianChequeStudioTool } from '../calculators/IndianChequeStudioTool'
+import { GoldExchangeCalculatorTool } from '../calculators/GoldExchangeCalculatorTool'
 
 // Land & Survey Calculators
 import { CentToSqftTool } from '../calculators/CentToSqftTool'
@@ -59,6 +61,8 @@ import { ImageToPdfTool } from '../imageTools/ImageToPdfTool'
 import { QrCodeGeneratorTool } from '../imageTools/QrCodeGeneratorTool'
 import { PixelCraftTool } from '../imageTools/PixelCraftTool'
 import { ClearCutTool } from '../imageTools/ClearCutTool'
+import { AiTokenCalculatorTool } from '../calculators/AiTokenCalculatorTool'
+import { SatisfyingRelaxGameTool } from '../components/tools/SatisfyingRelaxGameTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -90,6 +94,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'water-tank-capacity': WaterTankTool,
   'lpg-usage': LpgUsageTool,
   'generator-fuel-cost': GeneratorFuelTool,
+  'borewell-pump-calculator': BorewellPumpCalculatorTool,
 
   // Salary & Money
   'salary-hike': SalaryHikeTool,
@@ -101,6 +106,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'percentage-calculator': PercentageDiscountTool,
   'experience-calculator': ExperienceTool,
   'indian-cheque-studio': IndianChequeStudioTool,
+  'gold-exchange-calculator': GoldExchangeCalculatorTool,
 
   // Land & Survey
   'cent-to-sqft': CentToSqftTool,
@@ -118,10 +124,24 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'qr-code-generator': QrCodeGeneratorTool,
   'pixelcraft': PixelCraftTool,
   'clearcut-ai': ClearCutTool,
+  'ai-token-calculator': AiTokenCalculatorTool,
+  'satisfying-relax-game': SatisfyingRelaxGameTool,
 }
 
+import { useI18n } from '../i18n/I18nContext'
+import { isValidLocale } from '../i18n/locales'
+
 export const ToolDetailPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>()
+  const { slug, langCode } = useParams<{ slug: string; langCode?: string }>()
+  const { locale, setLocale } = useI18n()
+
+  // Sync route locale if present in URL parameter (e.g. /:langCode/calculators/:slug)
+  React.useEffect(() => {
+    if (langCode && isValidLocale(langCode) && langCode !== locale) {
+      setLocale(langCode)
+    }
+  }, [langCode, locale, setLocale])
+
   if (!slug) return <Navigate to="/tools" replace />
 
   const tool = getToolBySlug(slug)

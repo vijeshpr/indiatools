@@ -4,9 +4,17 @@ import { Gauge, Fuel, IndianRupee, Sparkles, CheckCircle2 } from 'lucide-react'
 import { calculateMileage, MileageResult } from '../lib/calculations'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
+import { useI18n } from '../i18n/I18nContext'
+import { useToolTranslations } from '../i18n/toolTranslations'
+import { VehicleMileageUI } from '../i18n/tools/vehicleMileageI18n'
 
 export const VehicleMileageTool: React.FC = () => {
   const tool = getToolBySlug('vehicle-mileage')!
+  const { locale } = useI18n()
+  const { meta, ui, formulaExplanation, assumptions, example, faqs } = useToolTranslations<VehicleMileageUI>(
+    'vehicle-mileage',
+    locale
+  )
 
   const [distanceKm, setDistanceKm] = useState<number>(450)
   const [fuelLitres, setFuelLitres] = useState<number>(25)
@@ -16,6 +24,14 @@ export const VehicleMileageTool: React.FC = () => {
     return calculateMileage(distanceKm, fuelLitres, fuelPrice)
   }, [distanceKm, fuelLitres, fuelPrice])
 
+  const localizedRating = useMemo(() => {
+    if (distanceKm <= 0 || fuelLitres <= 0) return ui.invalidInputsRating
+    if (results.rating === 'exceptional') return ui.exceptionalRating
+    if (results.rating === 'good') return ui.goodRating
+    if (results.rating === 'moderate') return ui.moderateRating
+    return ui.heavyRating
+  }, [results.rating, distanceKm, fuelLitres, ui])
+
   const handleReset = () => {
     setDistanceKm(450)
     setFuelLitres(25)
@@ -23,27 +39,51 @@ export const VehicleMileageTool: React.FC = () => {
   }
 
   const getResultSummary = () => {
-    return `Vehicle Mileage Result:
-Distance: ${distanceKm} km | Fuel: ${fuelLitres} L | Fuel Rate: ₹${fuelPrice}/L
-- Mileage: ${results.mileageKmPerL} km/L
-- Running Cost: ₹${results.fuelCostPerKm} / km
-- Cost for 100 km: ₹${results.costPer100Km}
-- Rating: ${results.ratingLabel}
-Calculated on IndiaTools`
+    return `${ui.resultSummaryTitle}
+${ui.distanceTraveled}: ${distanceKm} km | ${ui.fuelRefilled}: ${fuelLitres} L | ${ui.currentFuelPrice}: ₹${fuelPrice}/L
+- ${ui.calculatedMileage}: ${results.mileageKmPerL} km/L
+- ${ui.runningCostText} ₹${results.fuelCostPerKm} / km
+- ${ui.costFor100KmText} ₹${results.costPer100Km}
+- ${ui.ratingText} ${localizedRating}
+${ui.calculatedOn}`
   }
 
+  // Create customized tool definition with localized metadata & content
+  const localizedTool = useMemo(() => {
+    return {
+      ...tool,
+      title: meta.title,
+      detailedDescription: meta.subtitle,
+      formulaExplanation: formulaExplanation || tool.formulaExplanation,
+      assumptions: assumptions || tool.assumptions,
+      exampleCalculation: example ? {
+        title: example.title,
+        inputs: example.inputs,
+        outputs: example.outputs,
+        explanation: example.explanation,
+      } : tool.exampleCalculation,
+      faqs: faqs || tool.faqs,
+    }
+  }, [tool, meta, formulaExplanation, assumptions, example, faqs])
+
   return (
-    <ToolPageLayout tool={tool} onReset={handleReset} onCopyResult={getResultSummary}>
+    <ToolPageLayout
+      tool={localizedTool}
+      customH1={meta.h1}
+      customSubtitle={meta.subtitle}
+      onReset={handleReset}
+      onCopyResult={getResultSummary}
+    >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Inputs Card */}
         <div className="lg:col-span-6 p-6 sm:p-7 rounded-2xl bg-neutral-900/80 light:bg-white border border-neutral-800 light:border-slate-200 shadow-xl space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-neutral-800 light:border-slate-100">
             <h2 className="text-base font-bold text-white light:text-slate-900 flex items-center gap-2">
               <Gauge className="w-5 h-5 text-orange-500" />
-              <span>Trip & Refueling Data</span>
+              <span>{ui.tripRefuelingData}</span>
             </h2>
             <span className="text-xs font-mono text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-              Tank-to-Tank Method
+              {ui.tankToTankMethod}
             </span>
           </div>
 
@@ -51,7 +91,7 @@ Calculated on IndiaTools`
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs font-mono uppercase tracking-wider text-neutral-400 light:text-slate-600">
-                Distance Traveled (Trip Meter)
+                {ui.distanceTraveled}
               </label>
               <div className="flex items-center gap-1">
                 <input
@@ -75,9 +115,9 @@ Calculated on IndiaTools`
               className="w-full accent-orange-500 cursor-pointer"
             />
             <div className="flex justify-between text-[11px] text-neutral-400 mt-1">
-              <span>50 km (City)</span>
-              <span>450 km (Highway)</span>
-              <span>1000+ km (Long Tour)</span>
+              <span>{ui.cityGuide}</span>
+              <span>{ui.highwayGuide}</span>
+              <span>{ui.longTourGuide}</span>
             </div>
           </div>
 
@@ -85,7 +125,7 @@ Calculated on IndiaTools`
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs font-mono uppercase tracking-wider text-neutral-400 light:text-slate-600">
-                Fuel Refilled / Consumed
+                {ui.fuelRefilled}
               </label>
               <div className="flex items-center gap-1">
                 <input
@@ -97,7 +137,7 @@ Calculated on IndiaTools`
                   onChange={(e) => setFuelLitres(parseFloat(e.target.value) || 0)}
                   className="w-24 bg-neutral-950 light:bg-slate-50 border border-neutral-700 light:border-slate-300 rounded-lg px-2.5 py-1 text-sm font-mono text-right text-orange-400 font-bold focus:outline-none focus:border-orange-500"
                 />
-                <span className="text-xs text-neutral-400 font-mono">Litres</span>
+                <span className="text-xs text-neutral-400 font-mono">{ui.litres}</span>
               </div>
             </div>
             <input
@@ -114,7 +154,7 @@ Calculated on IndiaTools`
           {/* Fuel Price (₹/L) */}
           <div>
             <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 light:text-slate-600 mb-2">
-              Current Fuel Price (₹ / Litre)
+              {ui.currentFuelPrice}
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-3 text-neutral-400 text-sm font-bold">₹</span>
@@ -134,21 +174,21 @@ Calculated on IndiaTools`
                 onClick={() => setFuelPrice(102)}
                 className="px-2.5 py-1 rounded bg-neutral-800 text-[11px] text-neutral-300 hover:text-white"
               >
-                Petrol (~₹102)
+                {ui.petrolQuick}
               </button>
               <button
                 type="button"
                 onClick={() => setFuelPrice(90)}
                 className="px-2.5 py-1 rounded bg-neutral-800 text-[11px] text-neutral-300 hover:text-white"
               >
-                Diesel (~₹90)
+                {ui.dieselQuick}
               </button>
               <button
                 type="button"
                 onClick={() => setFuelPrice(85)}
                 className="px-2.5 py-1 rounded bg-neutral-800 text-[11px] text-neutral-300 hover:text-white"
               >
-                CNG (~₹85/kg)
+                {ui.cngQuick}
               </button>
             </div>
           </div>
@@ -165,16 +205,16 @@ Calculated on IndiaTools`
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono uppercase tracking-wider text-orange-400 font-semibold flex items-center gap-1.5">
                 <Gauge className="w-4 h-4" />
-                <span>Fuel Economy Analytics</span>
+                <span>{ui.fuelEconomyAnalytics}</span>
               </span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                {results.ratingLabel.split(' ')[0]}
+                {localizedRating.split(' ')[0]}
               </span>
             </div>
 
             {/* Main Headline: KM/L */}
             <div className="mb-6 pb-6 border-b border-neutral-800">
-              <span className="text-xs text-neutral-400 block font-medium">Calculated Fuel Mileage</span>
+              <span className="text-xs text-neutral-400 block font-medium">{ui.calculatedMileage}</span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-4xl sm:text-6xl font-black tracking-tight text-white">
                   {results.mileageKmPerL}
@@ -182,7 +222,7 @@ Calculated on IndiaTools`
                 <span className="text-lg font-bold text-orange-400">KM / L</span>
               </div>
               <p className="mt-2 text-xs text-neutral-400">
-                {results.ratingLabel}
+                {localizedRating}
               </p>
             </div>
 
@@ -192,19 +232,19 @@ Calculated on IndiaTools`
               <div className="p-3.5 rounded-xl bg-neutral-950/70 border border-neutral-800/90">
                 <div className="flex items-center gap-1.5 text-xs text-neutral-400 mb-1">
                   <IndianRupee className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Cost / Km</span>
+                  <span>{ui.costPerKm}</span>
                 </div>
                 <p className="text-lg sm:text-xl font-bold text-white font-mono">
                   ₹{results.fuelCostPerKm}
                 </p>
-                <span className="text-[11px] text-neutral-400">per kilometer</span>
+                <span className="text-[11px] text-neutral-400">{ui.perKilometer}</span>
               </div>
 
               {/* Cost for 100 Km */}
               <div className="p-3.5 rounded-xl bg-neutral-950/70 border border-neutral-800/90">
                 <div className="flex items-center gap-1.5 text-xs text-neutral-400 mb-1">
                   <Fuel className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Cost for 100 Km</span>
+                  <span>{ui.costFor100Km}</span>
                 </div>
                 <p className="text-lg sm:text-xl font-bold text-white font-mono">
                   ₹{results.costPer100Km}
@@ -215,7 +255,7 @@ Calculated on IndiaTools`
 
             {/* Total Refueling Spend */}
             <div className="mt-5 p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-center justify-between text-xs">
-              <span className="text-neutral-400">Total Fuel Paid for this Trip:</span>
+              <span className="text-neutral-400">{ui.totalFuelSpend}</span>
               <span className="font-bold text-white text-sm font-mono">
                 ₹{Math.round(fuelLitres * fuelPrice).toLocaleString('en-IN')}
               </span>
@@ -225,7 +265,7 @@ Calculated on IndiaTools`
           <div className="p-4 rounded-xl bg-neutral-900/50 light:bg-slate-100 border border-neutral-800 light:border-slate-200 text-xs text-neutral-400 flex items-start gap-2.5">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <p>
-              Keep tyre pressure at manufacturer recommended PSI (typically 32-35 PSI) and maintain steady 70-80 km/h on highways to maximize mileage.
+              {ui.tyreAdvice}
             </p>
           </div>
         </div>

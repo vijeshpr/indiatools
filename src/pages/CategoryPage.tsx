@@ -5,6 +5,7 @@ import { CATEGORIES, getToolsByCategory } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
 import { useSEO } from '../hooks/useSEO'
+import { useI18n } from '../i18n/I18nContext'
 
 export const CategoryPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId: string }>()
@@ -16,16 +17,21 @@ export const CategoryPage: React.FC = () => {
 
   const category = CATEGORIES[validCategory]
   const tools = getToolsByCategory(validCategory)
+  const { t } = useI18n()
+
+  const catTitle = t(`cat.${category.id}.title`, category.title)
+  const catSubtitle = t(`cat.${category.id}.subtitle`, category.subtitle)
+  const catDesc = t(`cat.${category.id}.desc`, category.description)
 
   useSEO({
-    title: `${category.title} Tools & Calculators (${category.subtitle}) | IndiaTools`,
-    description: category.description,
+    title: `${catTitle} Tools & Calculators (${catSubtitle}) | IndiaTools`,
+    description: catDesc,
     canonicalPath: `/category/${category.id}`,
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: `${category.title} Tools | IndiaTools`,
-      description: category.description,
+      name: `${catTitle} Tools | IndiaTools`,
+      description: catDesc,
       url: `https://indiatools-rho.vercel.app/category/${category.id}`,
       mainEntity: {
         '@type': 'ItemList',
@@ -47,7 +53,7 @@ export const CategoryPage: React.FC = () => {
         className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 mb-8 transition-colors font-medium cursor-pointer"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
-        <span>Back to All Tools</span>
+        <span>{t('tool.viewAll', 'Back to All Tools')}</span>
       </Link>
 
       {/* Category Hero Banner */}
@@ -70,16 +76,16 @@ export const CategoryPage: React.FC = () => {
                 color: category.accentColor,
               }}
             >
-              {category.subtitle}
+              {catSubtitle}
             </span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-            {category.title} Calculators
+            {catTitle}
           </h1>
 
           <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
-            {category.description}
+            {catDesc}
           </p>
         </div>
       </div>
@@ -87,7 +93,7 @@ export const CategoryPage: React.FC = () => {
       {/* Tools List */}
       <div>
         <h2 className="text-xl font-bold text-slate-900 mb-6">
-          Tools in this Category ({tools.length})
+          Tools ({tools.length})
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

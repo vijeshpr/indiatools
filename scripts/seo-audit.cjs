@@ -117,10 +117,22 @@ async function runAudit() {
   }
   check('Cheque SEO Dataset: All 13 languages contain complete localized Titles, Descriptions, H1s, 6-Step Guides, 5 FAQs, and 5 Mistakes', allChequeFieldsComplete);
 
+  // 3d. Gold Exchange Multilingual Sitemaps & Hreflang Audit (11 languages)
+  const goldLocales = ['en', 'ml', 'hi', 'ta', 'te', 'kn', 'bn', 'mr', 'gu', 'pa', 'or'];
+  let allGoldInSitemap = true;
+  for (const loc of goldLocales) {
+    const urlPath = loc === 'en' ? '/calculators/gold-exchange-calculator' : `/${loc}/tools/gold-exchange-calculator`;
+    if (!sitemapXml.includes(`https://indiatools-rho.vercel.app${urlPath}`)) {
+      allGoldInSitemap = false;
+      console.error(`Missing Gold Exchange localized URL in sitemap: ${urlPath}`);
+    }
+  }
+  check('sitemap.xml: Contains all 11 Gold Exchange language URLs', allGoldInSitemap);
+
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 46 unique tools', tools.length === 46, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 50 unique tools', tools.length === 50, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;

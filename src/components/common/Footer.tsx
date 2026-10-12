@@ -2,8 +2,10 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { ShieldCheck, ArrowUp } from 'lucide-react'
 import { CATEGORIES } from '../../data/tools'
+import { useI18n } from '../../i18n/I18nContext'
 
 export const Footer: React.FC = () => {
+  const { t } = useI18n()
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -27,16 +29,15 @@ export const Footer: React.FC = () => {
             </Link>
 
             <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
-              "Smart tools for real-life calculations." A fast, browser-native utility platform
-              for everyday automotive, civil construction, power tariffs, land area, salary, and educational cheque specimens in India.
+              {t('footer.tagline', '"Smart tools for real-life calculations." A fast, browser-native utility platform for everyday automotive, civil construction, power tariffs, land area, salary, and educational cheque specimens in India.')}
             </p>
 
             {/* Privacy Badge */}
             <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-300 max-w-sm">
               <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
               <div>
-                <span className="font-semibold text-white block">100% Client-Side Privacy</span>
-                <span className="text-slate-400">All calculations and photo resizing execute inside your browser. Zero cloud tracking.</span>
+                <span className="font-semibold text-white block">{t('footer.privacyTitle', '100% Client-Side Privacy')}</span>
+                <span className="text-slate-400">{t('footer.privacyDesc', 'All calculations and photo resizing execute inside your browser. Zero cloud tracking.')}</span>
               </div>
             </div>
           </div>
@@ -44,7 +45,7 @@ export const Footer: React.FC = () => {
           {/* Column: Popular Tools */}
           <div>
             <h4 className="text-xs font-mono uppercase tracking-wider text-white font-semibold mb-4">
-              Featured Tools
+              {t('footer.featuredTools', 'Featured Tools')}
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
@@ -84,7 +85,7 @@ export const Footer: React.FC = () => {
           {/* Column: Categories */}
           <div>
             <h4 className="text-xs font-mono uppercase tracking-wider text-white font-semibold mb-4">
-              Categories
+              {t('footer.categories', 'Categories')}
             </h4>
             <ul className="space-y-2.5 text-sm">
               {Object.values(CATEGORIES).map((cat) => (
@@ -97,7 +98,7 @@ export const Footer: React.FC = () => {
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: cat.accentColor }}
                     />
-                    <span>{cat.title} ({cat.subtitle})</span>
+                    <span>{t(`cat.${cat.id}.title`, cat.title)}</span>
                   </Link>
                 </li>
               ))}
@@ -107,27 +108,27 @@ export const Footer: React.FC = () => {
           {/* Column: Platform & Legal */}
           <div>
             <h4 className="text-xs font-mono uppercase tracking-wider text-white font-semibold mb-4">
-              Platform
+              {t('footer.platform', 'Platform')}
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link to="/about" className="hover:text-white transition-colors">
-                  About the Project
+                  {t('footer.about', 'About the Project')}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="hover:text-white transition-colors">
-                  Contact & Feedback
+                  {t('footer.contact', 'Contact & Feedback')}
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="hover:text-white transition-colors">
-                  Privacy Policy
+                  {t('footer.privacy', 'Privacy Policy')}
                 </Link>
               </li>
               <li>
                 <Link to="/terms" className="hover:text-white transition-colors">
-                  Terms of Service
+                  {t('footer.terms', 'Terms of Service')}
                 </Link>
               </li>
               <li className="pt-2">
@@ -136,7 +137,7 @@ export const Footer: React.FC = () => {
                   className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-medium cursor-pointer"
                 >
                   <ArrowUp className="w-3.5 h-3.5" />
-                  <span>Back to Top</span>
+                  <span>{t('footer.backToTop', 'Back to Top')}</span>
                 </button>
               </li>
             </ul>
@@ -146,12 +147,12 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>
-            © {new Date().getFullYear()} IndiaTools. Free open technology for India.
+            © {new Date().getFullYear()} {t('footer.copyright', 'IndiaTools. Free open technology for India.')}
           </p>
           <div className="flex items-center gap-3">
             <span>Built with precision for everyday Indian calculations</span>
             <span>•</span>
-            <span className="text-emerald-400">100% Client-Side Engine</span>
+            <span className="text-emerald-400">{t('footer.engineBadge', '100% Client-Side Engine')}</span>
           </div>
         </div>
       </div>

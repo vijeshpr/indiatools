@@ -14,8 +14,10 @@ import {
   LandSurveyMascot,
   PhotoDocMascot,
 } from '../mascot/CategoryMascots'
+import { useI18n } from '../../i18n/I18nContext'
 
 export const CategoryShowcase: React.FC = () => {
+  const { t } = useI18n()
   const categoryOrder: ToolCategory[] = ['drive', 'build', 'power', 'money', 'land', 'work', 'create']
 
   const renderHeaderMascot = (catKey: ToolCategory) => {
@@ -44,6 +46,9 @@ export const CategoryShowcase: React.FC = () => {
         {categoryOrder.map((catKey, catIdx) => {
           const category = CATEGORIES[catKey]
           const tools = getToolsByCategory(catKey)
+          const catTitle = t(`cat.${catKey}.title`, category.title)
+          const catSubtitle = t(`cat.${catKey}.subtitle`, category.subtitle)
+          const catDesc = t(`cat.${catKey}.desc`, category.description)
 
           return (
             <motion.div
@@ -80,7 +85,7 @@ export const CategoryShowcase: React.FC = () => {
                           borderColor: `${category.accentColor}40`,
                         }}
                       >
-                        {category.headline || category.title.toUpperCase()}
+                        {catTitle.toUpperCase()}
                       </span>
                       <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 font-semibold">
                         CATEGORY 0{catIdx + 1} • {tools.length} UTILITIES
@@ -88,15 +93,15 @@ export const CategoryShowcase: React.FC = () => {
                     </div>
 
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-                      <span>{category.title}</span>
+                      <span>{catTitle}</span>
                       <span className="text-slate-300 dark:text-zinc-700 font-light">/</span>
                       <span className="bg-gradient-to-r from-slate-700 to-slate-500 dark:from-zinc-200 dark:to-zinc-400 bg-clip-text text-transparent font-extrabold text-lg sm:text-2xl">
-                        {category.subtitle}
+                        {catSubtitle}
                       </span>
                     </h2>
 
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-                      {category.description}
+                      {catDesc}
                     </p>
                   </div>
                 </div>
@@ -105,7 +110,7 @@ export const CategoryShowcase: React.FC = () => {
                   to={`/category/${catKey}`}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white dark:bg-[#131B2E] hover:bg-slate-50 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-800 text-xs font-semibold shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-all shrink-0 cursor-pointer"
                 >
-                  <span>Explore All {tools.length} Tools</span>
+                  <span>{t('cat.exploreAll', `Explore All ${tools.length} Tools`)}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>

@@ -4,8 +4,10 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Layers } from 'lucide-react'
 import { CATEGORIES, getToolsByCategory } from '../data/tools'
 import { useSEO } from '../hooks/useSEO'
+import { useI18n } from '../i18n/I18nContext'
 
 export const CategoriesOverviewPage: React.FC = () => {
+  const { t } = useI18n()
   useSEO({
     title: 'Tool Categories – Browse Utilities by Sector | IndiaTools',
     description:
@@ -27,10 +29,10 @@ export const CategoriesOverviewPage: React.FC = () => {
       <div className="text-center max-w-3xl mx-auto mb-14">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-mono font-bold uppercase mb-3">
           <Layers className="w-3.5 h-3.5" />
-          <span>7 Practical Sectors</span>
+          <span>7 {t('hero.badgeCategories', 'Categories')}</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-          Explore by Category
+          {t('nav.categories', 'Categories')}
         </h1>
         <p className="mt-2.5 text-sm sm:text-base text-slate-600">
           Find purpose-built tools organized across vehicles, construction, power, finance, land, career, and documents.
@@ -41,6 +43,10 @@ export const CategoriesOverviewPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.values(CATEGORIES).map((cat, idx) => {
           const tools = getToolsByCategory(cat.id)
+          const catTitle = t(`cat.${cat.id}.title`, cat.title)
+          const catSubtitle = t(`cat.${cat.id}.subtitle`, cat.subtitle)
+          const catDesc = t(`cat.${cat.id}.desc`, cat.description)
+
           return (
             <motion.div
               key={cat.id}
@@ -54,7 +60,7 @@ export const CategoriesOverviewPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.accentColor }} />
                     <span className="text-xs font-mono font-bold uppercase text-slate-500">
-                      {cat.subtitle}
+                      {catSubtitle}
                     </span>
                   </div>
                   <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
@@ -63,10 +69,10 @@ export const CategoriesOverviewPage: React.FC = () => {
                 </div>
 
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">
-                  {cat.title}
+                  {catTitle}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 line-clamp-3 mb-6 leading-relaxed">
-                  {cat.description}
+                  {catDesc}
                 </p>
 
                 {/* Popular tools preview */}
@@ -88,7 +94,7 @@ export const CategoriesOverviewPage: React.FC = () => {
                 to={`/category/${cat.id}`}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 hover:bg-indigo-600 hover:text-white text-xs font-bold text-slate-800 transition-all cursor-pointer"
               >
-                <span>View All {tools.length} {cat.title} Tools</span>
+                <span>{t('cat.exploreAll', `View All ${tools.length} Tools`)}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </motion.div>
