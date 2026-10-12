@@ -34,6 +34,8 @@ interface ToolPageLayoutProps {
   customJsonLd?: Record<string, any>
   hideDefaultGuide?: boolean
   hideDefaultFaqs?: boolean
+  hideHeroHeader?: boolean
+  hideHeaderActions?: boolean
 }
 
 export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
@@ -53,6 +55,8 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
   customJsonLd,
   hideDefaultGuide = false,
   hideDefaultFaqs = false,
+  hideHeroHeader = false,
+  hideHeaderActions = false,
 }) => {
   const { showToast } = useToast()
 
@@ -170,129 +174,133 @@ export const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
   return (
     <article className="min-h-screen pb-20 print:min-h-0 print:pb-0 print:m-0 print:p-0">
       {/* Hero Header */}
-      <div
-        className={`relative border-b border-slate-200/90 bg-white no-print ${
-          compactHeader ? 'pt-4 pb-5' : 'pt-6 pb-10 sm:pb-12'
-        }`}
-      >
-        <div className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8`}>
-          {/* Breadcrumb */}
-          <nav
-            aria-label="Breadcrumb"
-            className={`flex items-center gap-1.5 text-xs text-slate-500 ${
-              compactHeader ? 'mb-2 sm:mb-2.5' : 'mb-6'
-            }`}
-          >
-            <Link to="/" className="hover:text-indigo-600 transition-colors">
-              Home
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <Link to="/tools" className="hover:text-indigo-600 transition-colors">
-              Tools
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <Link
-              to={`/category/${tool.category}`}
-              className="hover:text-indigo-600 transition-colors uppercase font-mono tracking-wider"
+      {!hideHeroHeader && (
+        <div
+          className={`relative border-b border-slate-200/90 bg-white no-print ${
+            compactHeader ? 'pt-4 pb-5' : 'pt-6 pb-10 sm:pb-12'
+          }`}
+        >
+          <div className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8`}>
+            {/* Breadcrumb */}
+            <nav
+              aria-label="Breadcrumb"
+              className={`flex items-center gap-1.5 text-xs text-slate-500 ${
+                compactHeader ? 'mb-2 sm:mb-2.5' : 'mb-6'
+              }`}
             >
-              {tool.categoryLabel}
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-slate-900 font-medium truncate">
-              {tool.shortTitle}
-            </span>
-          </nav>
+              <Link to="/" className="hover:text-indigo-600 transition-colors">
+                Home
+              </Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <Link to="/tools" className="hover:text-indigo-600 transition-colors">
+                Tools
+              </Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <Link
+                to={`/category/${tool.category}`}
+                className="hover:text-indigo-600 transition-colors uppercase font-mono tracking-wider"
+              >
+                {tool.categoryLabel}
+              </Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span className="text-slate-900 font-medium truncate">
+                {tool.shortTitle}
+              </span>
+            </nav>
 
-          <div
-            className={`flex flex-col md:flex-row md:items-center justify-between ${
-              compactHeader ? 'gap-3' : 'gap-6'
-            }`}
-          >
-            <div>
-              <div className={`flex items-center gap-2 ${compactHeader ? 'mb-1.5' : 'mb-3'}`}>
-                <span
-                  className="text-xs font-mono uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-md"
-                  style={{
-                    backgroundColor: `${tool.color}15`,
-                    color: tool.color,
-                  }}
-                >
-                  {tool.categoryLabel}
-                </span>
-
-                {tool.badge && (
-                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">
-                    {tool.badge}
+            <div
+              className={`flex flex-col md:flex-row md:items-center justify-between ${
+                compactHeader ? 'gap-3' : 'gap-6'
+              }`}
+            >
+              <div>
+                <div className={`flex items-center gap-2 ${compactHeader ? 'mb-1.5' : 'mb-3'}`}>
+                  <span
+                    className="text-xs font-mono uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-md"
+                    style={{
+                      backgroundColor: `${tool.color}15`,
+                      color: tool.color,
+                    }}
+                  >
+                    {tool.categoryLabel}
                   </span>
-                )}
 
-                <div className="flex items-center gap-1 text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                  <ShieldCheck className="w-3 h-3" />
-                  <span>100% Client-Side</span>
+                  {tool.badge && (
+                    <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">
+                      {tool.badge}
+                    </span>
+                  )}
+
+                  <div className="flex items-center gap-1 text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>100% Client-Side</span>
+                  </div>
                 </div>
+
+                <h1
+                  className={`font-black text-slate-900 tracking-tight leading-tight ${
+                    compactHeader ? 'text-xl sm:text-2xl lg:text-3xl' : 'text-2xl sm:text-4xl'
+                  }`}
+                >
+                  {customH1 || tool.title}
+                </h1>
+
+                <p
+                  className={`text-slate-600 max-w-3xl leading-relaxed ${
+                    compactHeader
+                      ? 'mt-1 text-xs sm:text-sm line-clamp-2 md:line-clamp-none'
+                      : 'mt-2.5 text-sm sm:text-base'
+                  }`}
+                >
+                  {customSubtitle || tool.detailedDescription}
+                </p>
               </div>
 
-              <h1
-                className={`font-black text-slate-900 tracking-tight leading-tight ${
-                  compactHeader ? 'text-xl sm:text-2xl lg:text-3xl' : 'text-2xl sm:text-4xl'
-                }`}
-              >
-                {customH1 || tool.title}
-              </h1>
+              {/* Quick Actions (Share, Copy Link, Reset) */}
+              {!hideHeaderActions && (
+                <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+                  {onReset && (
+                    <button
+                      onClick={onReset}
+                      type="button"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
+                      title="Reset to default values"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset</span>
+                    </button>
+                  )}
 
-              <p
-                className={`text-slate-600 max-w-3xl leading-relaxed ${
-                  compactHeader
-                    ? 'mt-1 text-xs sm:text-sm line-clamp-2 md:line-clamp-none'
-                    : 'mt-2.5 text-sm sm:text-base'
-                }`}
-              >
-                {customSubtitle || tool.detailedDescription}
-              </p>
-            </div>
+                  <button
+                    onClick={handleCopyResult}
+                    type="button"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
+                    title="Copy result summary"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Copy</span>
+                  </button>
 
-            {/* Quick Actions (Share, Copy Link, Reset) */}
-            <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-              {onReset && (
-                <button
-                  onClick={onReset}
-                  type="button"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
-                  title="Reset to default values"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Reset</span>
-                </button>
+                  <button
+                    onClick={handleShare}
+                    type="button"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-600/20 cursor-pointer"
+                    title="Share this tool"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Share</span>
+                  </button>
+                </div>
               )}
-
-              <button
-                onClick={handleCopyResult}
-                type="button"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
-                title="Copy result summary"
-              >
-                <Copy className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Copy</span>
-              </button>
-
-              <button
-                onClick={handleShare}
-                type="button"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-600/20 cursor-pointer"
-                title="Share this tool"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share</span>
-              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Tool & Calculator Section */}
       <main
         className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8 print:p-0 print:m-0 print:max-w-none ${
-          compactHeader ? 'mt-4 sm:mt-5' : 'mt-8'
+          compactHeader ? 'mt-4 sm:mt-5' : hideHeroHeader ? 'mt-4 sm:mt-6' : 'mt-8'
         }`}
       >
         {children}
