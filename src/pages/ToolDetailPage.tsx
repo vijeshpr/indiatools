@@ -59,6 +59,7 @@ import { ImageToPdfTool } from '../imageTools/ImageToPdfTool'
 import { QrCodeGeneratorTool } from '../imageTools/QrCodeGeneratorTool'
 import { PixelCraftTool } from '../imageTools/PixelCraftTool'
 import { ClearCutTool } from '../imageTools/ClearCutTool'
+import { ImageUpscalerTool } from '../imageTools/ImageUpscalerTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -118,6 +119,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'qr-code-generator': QrCodeGeneratorTool,
   'pixelcraft': PixelCraftTool,
   'clearcut-ai': ClearCutTool,
+  'image-upscaler': ImageUpscalerTool,
 }
 
 export const ToolDetailPage: React.FC = () => {
