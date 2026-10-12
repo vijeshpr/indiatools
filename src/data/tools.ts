@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 8,
+    toolCount: 7,
   },
 }
 
@@ -1893,65 +1893,6 @@ export const TOOLS: ToolDefinition[] = [
       canonicalPath: '/tools/clearcut-ai'
     },
     type: 'image-tool'
-  },
-  {
-    id: 'image-upscaler',
-    slug: 'image-upscaler',
-    title: 'AI Image Upscaler Online Free – Enhance & Enlarge Photos (2x, 4x)',
-    shortTitle: 'AI Image Upscaler',
-    category: 'create',
-    categoryLabel: 'Create',
-    description: 'Enlarge and enhance photos, artwork, and documents up to 4x resolution with client-side AI super-resolution and unsharp masking. 100% private in-browser processing.',
-    detailedDescription: 'Enhance image quality and resolution directly inside your browser. Features 2x and 4x upscaling, client-side Swin2SR neural super-resolution, classic high-quality progressive resampling, edge-preserving unsharp masking, interactive split comparison slider, and lossless PNG or JPEG exports.',
-    iconName: 'Sparkles',
-    badge: 'Popular',
-    color: '#8B5CF6',
-    tags: ['AI Upscaler', 'Super Resolution', 'Image Enhancer', '2x 4x Upscale', 'Photo Enlarger', 'Private'],
-    searchKeywords: [
-      'free ai image upscaler online',
-      'enhance photo resolution 4x',
-      'enlarge small images without losing quality',
-      'client side image super resolution tool',
-      'increase photo clarity online free',
-      'image upscaler 4k free',
-      'upscale anime image online'
-    ],
-    formulaExplanation: 'Super-resolution uses deep residual Swin Transformer networks (Swin2SR) and bicubic progressive scaling with Laplacian edge enhancement to recover high-frequency textures without uploading data.',
-    assumptions: ['100% private client-side execution via WebAssembly / WebGPU and HTML5 Canvas.'],
-    exampleCalculation: {
-      title: 'Photo Resolution Enhancement',
-      inputs: { 'Source Image': '640 × 480 px (85 KB JPG)', 'Upscale Factor': '4x Super-Resolution' },
-      outputs: { 'Enhanced Resolution': '2560 × 1920 px', 'Clarity': 'Crisp edges, reduced compression artifacts' },
-      explanation: 'Quadruples pixel dimensions using browser-executed algorithms while maintaining data confidentiality.'
-    },
-    faqs: [
-      {
-        question: 'Are my images uploaded to any cloud server or AI API?',
-        answer: 'Never. All upscaling, neural super-resolution, and sharpening run 100% client-side inside your browser using WebAssembly and HTML5 Canvas. Your photos never leave your device.'
-      },
-      {
-        question: 'What image formats and file sizes are supported?',
-        answer: 'The tool supports standard formats including JPG, PNG, and WebP up to 12 MB. For best neural model performance, input dimensions up to 1024×1024 px are recommended.'
-      },
-      {
-        question: 'What is the difference between AI Super-Resolution and Classic Upscaling?',
-        answer: 'Classic upscaling uses progressive bicubic resampling with unsharp mask edge enhancement for instantaneous processing. AI Super-Resolution executes a local Swin2SR neural network to reconstruct fine textures and remove compression artifacts.'
-      }
-    ],
-    relatedSlugs: ['clearcut-ai', 'pixelcraft', '50kb-photo', 'signature-resizer'],
-    seo: {
-      title: 'AI Image Upscaler Online Free – Enhance & Enlarge Photos (2x, 4x) | IndiaTools',
-      metaDescription: 'Enlarge and enhance photos, artwork, and documents up to 4x resolution with client-side AI super-resolution and unsharp masking. 100% private in-browser processing.',
-      keywords: [
-        'free ai image upscaler online',
-        'enhance photo resolution 4x',
-        'enlarge small images without losing quality',
-        'client side image super resolution tool',
-        'increase photo clarity online free'
-      ],
-      canonicalPath: '/calculators/image-upscaler'
-    },
-    type: 'calculator'
   }
 ]
 
