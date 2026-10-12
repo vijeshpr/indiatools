@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Upload,
   Download,
@@ -8,7 +7,6 @@ import {
   CheckCircle2,
   AlertCircle,
   RefreshCw,
-  Sliders,
   Eye,
   ShieldCheck,
   Cpu,
@@ -16,9 +14,16 @@ import {
   ArrowRight,
   Palette,
   Loader2,
+  Sliders,
+  Grid,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
+import { useToast } from '../components/common/Toast'
+import { removeBackground } from '@imgly/background-removal'
+
+// Preview background modes for inspecting edge accuracy
+type PreviewBgMode = 'checkerboard' | 'white' | 'black' | 'custom'
 
 // Background color preset
 interface ColorPreset {
@@ -43,22 +48,30 @@ const COLOR_PRESETS: ColorPreset[] = [
 
 export const ClearCutTool: React.FC = () => {
   const tool = getToolBySlug('clearcut-ai')!
+  const { showToast } = useToast()
 
   // Source image
   const [sourceImage, setSourceImage] = useState<HTMLImageElement | null>(null)
+  const [sourceFile, setSourceFile] = useState<File | Blob | null>(null)
   const [sourceFileName, setSourceFileName] = useState<string>('')
   const [sourceSizeKb, setSourceSizeKb] = useState<number>(0)
 
   // AI Pipeline states
-  const [isModelLoading, setIsModelLoading] = useState<boolean>(false)
-  const [modelProgress, setModelProgress] = useState<number>(0)
-  const [modelStatusText, setModelStatusText] = useState<string>('')
+  const [progress, setProgress] = useState<number>(0)
+  const [statusStep, setStatusStep] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState<boolean>(false)
   const [hasProcessed, setHasProcessed] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Output image
-  const [maskCanvas, setMaskCanvas] = useState<HTMLCanvasElement | null>(null)
+  const [outputBlob, setOutputBlob] = useState<Blob | null>(null)
+  const [outputImageUrl, setOutputImageUrl] = useState<string | null>(null)
+  const [cutoutImage, setCutoutImage] = useState<HTMLImageElement | null>(null)
+
+  // Edge Inspection Preview Mode
+  const [previewBgMode, setPreviewBgMode] = useState<PreviewBgMode>('checkerboard')
+
+  // Background color customization
   const [selectedBgColor, setSelectedBgColor] = useState<string>('transparent')
   const [customColor, setCustomColor] = useState<string>('#FFFFFF')
 
@@ -72,7 +85,7 @@ export const ClearCutTool: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Sample portrait demo
+  // Sample portrait demo generator
   const handleLoadSample = () => {
     const canvas = document.createElement('canvas')
     canvas.width = 800
@@ -82,13 +95,13 @@ export const ClearCutTool: React.FC = () => {
 
     // Background gradient
     const bgGrad = ctx.createLinearGradient(0, 0, 800, 1000)
-    bgGrad.addColorStop(0, '#CBD5E1')
+    bgGrad.addColorStop(0, '#E2E8F0')
     bgGrad.addColorStop(1, '#94A3B8')
     ctx.fillStyle = bgGrad
     ctx.fillRect(0, 0, 800, 1000)
 
-    // Draw silhouette portrait figure
-    ctx.fillStyle = '#1E293B'
+    // Draw silhouette portrait figure with detailed hair strands for testing edge accuracy
+    ctx.fillStyle = '#0F172A'
     // Head
     ctx.beginPath()
     ctx.arc(400, 380, 140, 0, Math.PI * 2)
@@ -104,16 +117,23 @@ export const ClearCutTool: React.FC = () => {
     ctx.textAlign = 'center'
     ctx.fillText('Portrait Specimen', 400, 390)
 
-    const img = new Image()
-    img.onload = () => {
-      setSourceImage(img)
-      setSourceFileName('Portrait_Specimen_Demo.jpg')
-      setSourceSizeKb(92)
-      setHasProcessed(false)
-      setMaskCanvas(null)
-      setErrorMessage(null)
-    }
-    img.src = canvas.toDataURL('image/jpeg', 0.9)
+    canvas.toBlob((blob) => {
+      if (!blob) return
+      const file = new File([blob], 'Portrait_Specimen_Demo.jpg', { type: 'image/jpeg' })
+      const img = new Image()
+      img.onload = () => {
+        setSourceImage(img)
+        setSourceFile(file)
+        setSourceFileName('Portrait_Specimen_Demo.jpg')
+        setSourceSizeKb(92)
+        setHasProcessed(false)
+        setOutputBlob(null)
+        setOutputImageUrl(null)
+        setCutoutImage(null)
+        setErrorMessage(null)
+      }
+      img.src = canvas.toDataURL('image/jpeg', 0.95)
+    }, 'image/jpeg', 0.95)
   }
 
   // Handle file select
@@ -122,180 +142,108 @@ export const ClearCutTool: React.FC = () => {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp']
     if (!validTypes.includes(file.type)) {
       setErrorMessage('Unsupported format. Please select a JPG, PNG, or WebP photo.')
+      showToast('Unsupported format. Please select a JPG, PNG, or WebP photo.', 'error')
       return
     }
 
-    if (file.size > 20 * 1024 * 1024) {
-      setErrorMessage('File size exceeds 20 MB limit. Please choose a smaller photo.')
+    if (file.size > 25 * 1024 * 1024) {
+      setErrorMessage('File size exceeds 25 MB limit. Please choose a smaller photo.')
+      showToast('File size exceeds 25 MB limit.', 'error')
       return
     }
+
+    setSourceFile(file)
+    setSourceFileName(file.name)
+    setSourceSizeKb(Math.round(file.size / 1024))
+    setHasProcessed(false)
+    setOutputBlob(null)
+    setOutputImageUrl(null)
+    setCutoutImage(null)
 
     const reader = new FileReader()
     reader.onload = (e) => {
       const img = new Image()
       img.onload = () => {
         setSourceImage(img)
-        setSourceFileName(file.name)
-        setSourceSizeKb(Math.round(file.size / 1024))
-        setHasProcessed(false)
-        setMaskCanvas(null)
-        setErrorMessage(null)
       }
       img.onerror = () => {
         setErrorMessage('Failed to decode image data.')
+        showToast('Failed to decode image.', 'error')
       }
       img.src = e.target?.result as string
     }
     reader.readAsDataURL(file)
   }
 
-  // AI Inference: Run Background Removal via Transformers.js
-  const runBackgroundRemoval = async () => {
-    if (!sourceImage) return
+  // AI Inference: Run State-of-the-art In-Browser Background Removal via @imgly/background-removal
+  const handleRemoveBackground = async () => {
+    if (!sourceFile && !sourceImage) return
 
     setIsProcessing(true)
-    setIsModelLoading(true)
-    setModelProgress(10)
-    setModelStatusText('Initializing in-browser AI runtime...')
+    setProgress(15)
+    setStatusStep('Loading AI model in browser...')
     setErrorMessage(null)
 
     try {
-      // Dynamically import Transformers.js so zero model code loads until user requests it
-      const { pipeline, env } = await import('@huggingface/transformers')
-
-      // Configure Transformers.js to use browser cache
-      env.allowLocalModels = false
-      if (env.backends?.onnx?.wasm) {
-        env.backends.onnx.wasm.proxy = false
+      // Determine image payload: file, blob, or sourceImage
+      let imageInput: File | Blob | string
+      if (sourceFile) {
+        imageInput = sourceFile
+      } else if (sourceImage) {
+        imageInput = sourceImage.src
+      } else {
+        throw new Error('No valid source image provided.')
       }
 
-      setModelProgress(30)
-      setModelStatusText('Loading MODNet segmentation model (Apache-2.0)...')
+      const blob = await removeBackground(imageInput, {
+        progress: (key: string, current: number, total: number) => {
+          // Provide real-time download and processing feedback with status steps
+          const percent = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 50
+          setProgress(percent)
 
-      // Use Xenova/modnet (Apache 2.0 licensed, fast ~25MB portrait matting)
-      const segmenter = await pipeline('background-removal', 'Xenova/modnet', {
-        progress_callback: (p: any) => {
-          if (p.status === 'progress' && p.total) {
-            const pct = Math.round((p.loaded / p.total) * 100)
-            setModelProgress(Math.min(95, Math.max(30, pct)))
-            setModelStatusText(`Downloading AI weights: ${pct}%`)
-          } else if (p.status === 'ready') {
-            setModelProgress(90)
-            setModelStatusText('Model ready. Running neural network inference...')
+          if (key.includes('fetch')) {
+            setStatusStep(`Loading AI model in browser... (${percent}%)`)
+          } else if (key.includes('decode') || key.includes('inference')) {
+            setStatusStep('Analyzing subject boundaries...')
+          } else if (key.includes('mask') || key.includes('encode')) {
+            setStatusStep('Generating transparent cutout...')
+          } else {
+            setStatusStep('Analyzing subject boundaries...')
           }
+        },
+        model: ('medium' as any), // 'isnet_fp16' (medium: balanced between precision and load speed)
+        output: {
+          format: 'image/png',
+          quality: 1.0,
         },
       })
 
-      setIsModelLoading(false)
-      setModelStatusText('Analyzing foreground portrait...')
+      setOutputBlob(blob)
+      const resultUrl = URL.createObjectURL(blob)
+      setOutputImageUrl(resultUrl)
 
-      // Create scaled working canvas to ensure smooth inference without memory spikes
-      const maxDim = 1024
-      let workW = sourceImage.naturalWidth
-      let workH = sourceImage.naturalHeight
-      if (workW > maxDim || workH > maxDim) {
-        if (workW > workH) {
-          workH = Math.round((workH * maxDim) / workW)
-          workW = maxDim
-        } else {
-          workW = Math.round((workW * maxDim) / workH)
-          workH = maxDim
-        }
-      }
-
-      const inputCanvas = document.createElement('canvas')
-      inputCanvas.width = workW
-      inputCanvas.height = workH
-      const inputCtx = inputCanvas.getContext('2d')
-      if (!inputCtx) throw new Error('Canvas context unavailable')
-      inputCtx.drawImage(sourceImage, 0, 0, workW, workH)
-
-      const inputDataUrl = inputCanvas.toDataURL('image/png')
-
-      // Run inference
-      const output: any = await segmenter(inputDataUrl)
-
-      // Output from pipeline('background-removal') is a RawImage with transparency mask applied
-      if (output && output[0]) {
-        const resultImg = output[0]
-        const mCanvas = document.createElement('canvas')
-        mCanvas.width = workW
-        mCanvas.height = workH
-        const mCtx = mCanvas.getContext('2d')
-        if (mCtx) {
-          // Render RawImage onto mask canvas
-          const imgBitmap = await createImageBitmap(new Blob([resultImg.data], { type: 'image/png' }))
-          mCtx.drawImage(imgBitmap, 0, 0, workW, workH)
-        }
-        setMaskCanvas(mCanvas)
+      // Load resulting cutout image into an HTMLImageElement for canvas compositing
+      const cutImg = new Image()
+      cutImg.onload = () => {
+        setCutoutImage(cutImg)
         setHasProcessed(true)
-      } else {
-        throw new Error('Neural network produced no output mask.')
+        showToast('Background removed successfully with state-of-the-art precision!', 'success')
       }
-    } catch (err: any) {
-      console.warn('Transformers.js model error, falling back to edge luminance segmentation:', err)
-      // High-precision client-side luminance & edge matting fallback if WebAssembly fails or network blocks HF CDN
-      runFallbackSegmentation()
+      cutImg.onerror = () => {
+        throw new Error('Failed to render cutout PNG output.')
+      }
+      cutImg.src = resultUrl
+    } catch (error: any) {
+      console.error('BG Removal Error:', error)
+      const msg = error?.message || 'Failed to remove background. Please try again.'
+      setErrorMessage(msg)
+      showToast('Background removal failed. Please check your network or image format.', 'error')
     } finally {
       setIsProcessing(false)
-      setIsModelLoading(false)
     }
   }
 
-  // Graceful client-side fallback if CDN is blocked or WebAssembly SIMD unsupported
-  const runFallbackSegmentation = () => {
-    if (!sourceImage) return
-
-    const maxDim = 1200
-    let w = sourceImage.naturalWidth
-    let h = sourceImage.naturalHeight
-    if (w > maxDim || h > maxDim) {
-      if (w > h) {
-        h = Math.round((h * maxDim) / w)
-        w = maxDim
-      } else {
-        w = Math.round((w * maxDim) / h)
-        h = maxDim
-      }
-    }
-
-    const c = document.createElement('canvas')
-    c.width = w
-    c.height = h
-    const ctx = c.getContext('2d')
-    if (!ctx) return
-
-    ctx.drawImage(sourceImage, 0, 0, w, h)
-    const imgData = ctx.getImageData(0, 0, w, h)
-    const data = imgData.data
-
-    // Sample 4 corner pixels to determine background chroma
-    const cornerR = (data[0] + data[(w - 1) * 4] + data[(h - 1) * w * 4] + data[(w * h - 1) * 4]) / 4
-    const cornerG = (data[1] + data[(w - 1) * 4 + 1] + data[(h - 1) * w * 4 + 1] + data[(w * h - 1) * 4 + 1]) / 4
-    const cornerB = (data[2] + data[(w - 1) * 4 + 2] + data[(h - 1) * w * 4 + 2] + data[(w * h - 1) * 4 + 2]) / 4
-
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i]
-      const g = data[i + 1]
-      const b = data[i + 2]
-
-      // Color distance from background
-      const dist = Math.sqrt((r - cornerR) ** 2 + (g - cornerG) ** 2 + (b - cornerB) ** 2)
-
-      if (dist < 45) {
-        data[i + 3] = 0 // transparent
-      } else if (dist < 80) {
-        // Soft feather edge
-        data[i + 3] = Math.round(((dist - 45) / 35) * 255)
-      }
-    }
-
-    ctx.putImageData(imgData, 0, 0)
-    setMaskCanvas(c)
-    setHasProcessed(true)
-  }
-
-  // Composite compositeCanvas with chosen background color
+  // Composite compositeCanvas with chosen preview background or color replacement & comparison slider
   useEffect(() => {
     if (!compositeCanvasRef.current || !sourceImage) return
 
@@ -303,26 +251,70 @@ export const ClearCutTool: React.FC = () => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const w = maskCanvas ? maskCanvas.width : sourceImage.naturalWidth
-    const h = maskCanvas ? maskCanvas.height : sourceImage.naturalHeight
+    const w = sourceImage.naturalWidth
+    const h = sourceImage.naturalHeight
 
     canvas.width = w
     canvas.height = h
 
     ctx.clearRect(0, 0, w, h)
 
-    if (hasProcessed && maskCanvas) {
-      // Draw background color if not transparent
-      const activeColor = selectedBgColor === 'custom' ? customColor : selectedBgColor
+    if (hasProcessed && cutoutImage) {
+      // Determine background fill for the processed side
+      const activeColor =
+        previewBgMode === 'white'
+          ? '#FFFFFF'
+          : previewBgMode === 'black'
+          ? '#000000'
+          : previewBgMode === 'custom'
+          ? selectedBgColor === 'custom'
+            ? customColor
+            : selectedBgColor
+          : 'transparent'
+
+      // Draw background on processed portion (Right or Left side depending on split)
+      // Here: Left side = original image (0 to splitX), Right side = processed cutout (splitX to w)
+      const splitX = Math.round((w * sliderPosition) / 100)
+
+      // Draw original on the entire canvas first
+      ctx.drawImage(sourceImage, 0, 0, w, h)
+
+      // Draw processed cutout on the right side with clipping
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(splitX, 0, w - splitX, h)
+      ctx.clip()
+
+      // Fill background under cutout if not transparent
       if (activeColor !== 'transparent') {
         ctx.fillStyle = activeColor
-        ctx.fillRect(0, 0, w, h)
+        ctx.fillRect(splitX, 0, w - splitX, h)
+      } else if (previewBgMode === 'checkerboard') {
+        // Draw subtle checkerboard pattern in canvas clip
+        const squareSize = 24
+        for (let x = splitX; x < w; x += squareSize) {
+          for (let y = 0; y < h; y += squareSize) {
+            const isDark = (Math.floor(x / squareSize) + Math.floor(y / squareSize)) % 2 === 0
+            ctx.fillStyle = isDark ? '#E2E8F0' : '#FFFFFF'
+            ctx.fillRect(x, y, Math.min(squareSize, w - x), Math.min(squareSize, h - y))
+          }
+        }
       }
-      ctx.drawImage(maskCanvas, 0, 0, w, h)
+
+      ctx.drawImage(cutoutImage, 0, 0, w, h)
+      ctx.restore()
     } else {
       ctx.drawImage(sourceImage, 0, 0, w, h)
     }
-  }, [sourceImage, maskCanvas, hasProcessed, selectedBgColor, customColor])
+  }, [
+    sourceImage,
+    cutoutImage,
+    hasProcessed,
+    sliderPosition,
+    previewBgMode,
+    selectedBgColor,
+    customColor,
+  ])
 
   // Mouse / Touch handler for comparison slider
   const handleSliderMove = (clientX: number) => {
@@ -333,23 +325,67 @@ export const ClearCutTool: React.FC = () => {
     setSliderPosition(pct)
   }
 
-  // Download final PNG
-  const handleDownload = () => {
-    if (!compositeCanvasRef.current || !sourceImage) return
+  // Download High-Res PNG (either pristine transparent cutout or composited custom background)
+  const handleDownloadHighResPng = () => {
+    if (!cutoutImage || !outputBlob) {
+      showToast('Please remove background first.', 'info')
+      return
+    }
 
-    const canvas = compositeCanvasRef.current
-    canvas.toBlob((blob) => {
-      if (!blob) return
-      const url = URL.createObjectURL(blob)
+    const baseName = (sourceFileName || 'photo').replace(/\.[^/.]+$/, '')
+
+    // If transparent or checkerboard, download the exact raw high-res cutout blob directly
+    if (
+      previewBgMode === 'checkerboard' ||
+      (previewBgMode === 'custom' && selectedBgColor === 'transparent')
+    ) {
+      const url = URL.createObjectURL(outputBlob)
       const a = document.createElement('a')
-      const baseName = sourceFileName.replace(/\.[^/.]+$/, '')
-      a.download = `${baseName}_ClearCut.png`
+      a.download = `${baseName}_ClearCut_Transparent.png`
       a.href = url
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-    }, 'image/png')
+      showToast('High-Res Transparent PNG downloaded!', 'success')
+      return
+    }
+
+    // Otherwise render full resolution onto a high-res canvas with the selected background
+    const exportCanvas = document.createElement('canvas')
+    exportCanvas.width = cutoutImage.naturalWidth || cutoutImage.width
+    exportCanvas.height = cutoutImage.naturalHeight || cutoutImage.height
+    const expCtx = exportCanvas.getContext('2d')
+    if (!expCtx) return
+
+    const activeColor =
+      previewBgMode === 'white'
+        ? '#FFFFFF'
+        : previewBgMode === 'black'
+        ? '#000000'
+        : selectedBgColor === 'custom'
+        ? customColor
+        : selectedBgColor
+
+    if (activeColor !== 'transparent') {
+      expCtx.fillStyle = activeColor
+      expCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height)
+    }
+
+    expCtx.drawImage(cutoutImage, 0, 0, exportCanvas.width, exportCanvas.height)
+
+    exportCanvas.toBlob((blob) => {
+      if (!blob) return
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.download = `${baseName}_ClearCut_HighRes.png`
+      a.href = url
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      showToast('High-Res PNG downloaded successfully!', 'success')
+    }, 'image/png', 1.0)
   }
 
   return (
@@ -364,33 +400,36 @@ export const ClearCutTool: React.FC = () => {
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-mono font-bold tracking-wider uppercase">
                 <Cpu className="w-3.5 h-3.5" />
-                <span>WebGPU & WASM Browser AI</span>
+                <span>WebAssembly & WebWorker AI</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
                 ClearCut AI — Background Remover
               </h1>
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                Remove photo backgrounds instantly using local AI neural networks.
-                100% private in-browser processing with transparent PNG export and background color replacement.
+                State-of-the-art neural background removal in your browser via WebAssembly.
+                Smooth edge matting for portraits, hair, vehicles, and products with 100% client-side privacy.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 shrink-0">
               {sourceImage ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSourceImage(null)
-                      setMaskCanvas(null)
-                      setHasProcessed(false)
-                    }}
-                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Upload New Photo</span>
-                  </button>
-                </>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSourceImage(null)
+                    setSourceFile(null)
+                    setOutputBlob(null)
+                    setOutputImageUrl(null)
+                    setCutoutImage(null)
+                    setHasProcessed(false)
+                    setProgress(0)
+                    setStatusStep('')
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Upload New Photo</span>
+                </button>
               ) : (
                 <button
                   type="button"
@@ -447,18 +486,18 @@ export const ClearCutTool: React.FC = () => {
                 Drag & drop your photo to remove background
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Or click to browse from your device. Portraits, products, and profile photos up to 20 MB.
+                Or click to browse from your device. Portraits, products, vehicles, and profile photos up to 25 MB.
               </p>
             </div>
 
             {/* Badges */}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
               <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                100% In-Browser AI • No Cloud Uploads
+                100% In-Browser WASM • Zero Server Upload
               </span>
               <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                Zero API Keys Required
+                State-of-the-Art Neural Matting
               </span>
             </div>
 
@@ -499,11 +538,62 @@ export const ClearCutTool: React.FC = () => {
                   {hasProcessed && (
                     <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />
-                      <span>Background Extracted</span>
+                      <span>Cutout Generated</span>
                     </span>
                   )}
                 </div>
               </div>
+
+              {/* Toggle Preview Background Bar (Checkerboard, Solid White, Solid Black) */}
+              {hasProcessed && (
+                <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <Eye className="w-3.5 h-3.5 text-cyan-500" />
+                    <span>Inspect Edge Accuracy:</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewBgMode('checkerboard')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        previewBgMode === 'checkerboard'
+                          ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      <Grid className="w-3.5 h-3.5" />
+                      <span>Checkerboard</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPreviewBgMode('white')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                        previewBgMode === 'white'
+                          ? 'bg-white text-slate-900 border-cyan-500 ring-2 ring-cyan-500/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-full bg-white border border-slate-400 inline-block" />
+                      <span>Solid White</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPreviewBgMode('black')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                        previewBgMode === 'black'
+                          ? 'bg-slate-950 text-white border-cyan-500 ring-2 ring-cyan-500/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-full bg-slate-950 border border-slate-600 inline-block" />
+                      <span>Solid Black</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Main Viewport Container */}
               <div
@@ -516,9 +606,17 @@ export const ClearCutTool: React.FC = () => {
                 onTouchMove={(e) => {
                   if (e.touches[0]) handleSliderMove(e.touches[0].clientX)
                 }}
-                className="relative rounded-3xl bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 min-h-[380px] sm:min-h-[500px] flex items-center justify-center p-4 overflow-hidden shadow-inner select-none cursor-ew-resize"
+                className={`relative rounded-3xl border border-slate-200 dark:border-slate-800 min-h-[380px] sm:min-h-[500px] flex items-center justify-center p-4 overflow-hidden shadow-inner select-none cursor-ew-resize ${
+                  previewBgMode === 'checkerboard'
+                    ? 'bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] bg-slate-100 dark:bg-slate-950/80'
+                    : previewBgMode === 'white'
+                    ? 'bg-white'
+                    : previewBgMode === 'black'
+                    ? 'bg-black'
+                    : 'bg-slate-900'
+                }`}
               >
-                {/* AI Loading State Overlay */}
+                {/* AI Loading State Overlay with Progress Steps */}
                 {isProcessing && (
                   <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center space-y-4 animate-in fade-in">
                     <div className="w-16 h-16 rounded-2xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center shadow-lg border border-cyan-500/30">
@@ -527,26 +625,26 @@ export const ClearCutTool: React.FC = () => {
 
                     <div className="space-y-1.5 max-w-sm">
                       <h4 className="text-base font-bold text-white">
-                        {isModelLoading ? 'Loading AI Model Locally' : 'Segmenting Image'}
+                        Client-Side Neural Matting
                       </h4>
-                      <p className="text-xs text-slate-400 font-mono">
-                        {modelStatusText || 'Running inference in your browser...'}
+                      <p className="text-xs text-cyan-400 font-medium">
+                        {statusStep || 'Loading AI model in browser...'}
                       </p>
                     </div>
 
-                    {isModelLoading && (
-                      <div className="w-full max-w-xs space-y-1">
-                        <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${modelProgress}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px] font-mono text-slate-500 block text-right">
-                          {modelProgress}%
-                        </span>
+                    {/* Progress Bar & Status Feedback */}
+                    <div className="w-full max-w-xs space-y-1.5">
+                      <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-500 h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.max(5, progress)}%` }}
+                        />
                       </div>
-                    )}
+                      <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                        <span>{statusStep}</span>
+                        <span className="font-bold text-cyan-400">{progress}%</span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -560,10 +658,10 @@ export const ClearCutTool: React.FC = () => {
                   {/* Interactive Before/After Split Line when processed */}
                   {hasProcessed && (
                     <div
-                      className="absolute inset-y-0 w-0.5 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)] pointer-events-none z-20"
+                      className="absolute inset-y-0 w-0.5 bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)] pointer-events-none z-20"
                       style={{ left: `${sliderPosition}%` }}
                     >
-                      <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white text-slate-900 shadow-lg flex items-center justify-center text-[10px] font-black">
+                      <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white text-slate-900 shadow-xl flex items-center justify-center text-xs font-black border border-slate-200">
                         ↔
                       </div>
                     </div>
@@ -574,7 +672,7 @@ export const ClearCutTool: React.FC = () => {
               {/* Slider instruction banner */}
               {hasProcessed && (
                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-2 font-mono">
-                  <span>← Drag slider to inspect edges</span>
+                  <span>← Drag slider: Left = Original photo | Right = Clean Cutout</span>
                   <span>100% In-Browser Matting</span>
                 </div>
               )}
@@ -590,19 +688,19 @@ export const ClearCutTool: React.FC = () => {
                       Neural AI Background Removal
                     </span>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                      One-Click Subject Cutout
+                      State-of-the-Art In-Browser Cutout
                     </h3>
                     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      Runs the MODNet segmentation network directly in your browser.
-                      Zero photos are uploaded to any cloud server or API.
+                      Powered by the high-precision <span className="font-mono text-cyan-600 dark:text-cyan-400">@imgly/background-removal</span> neural network.
+                      Produces ultra-smooth, clean masks without jagged edges or pixelated fringes.
                     </p>
                   </div>
 
                   <button
                     type="button"
-                    onClick={runBackgroundRemoval}
+                    onClick={handleRemoveBackground}
                     disabled={isProcessing}
-                    className="w-full py-4 px-6 rounded-2xl font-bold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-300 hover:from-cyan-300 hover:to-indigo-200 shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                    className="w-full py-4 px-6 rounded-2xl font-bold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-300 hover:from-cyan-300 hover:to-indigo-200 shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] disabled:opacity-50"
                   >
                     <Scissors className="w-4 h-4" />
                     <span>Remove Background Now</span>
@@ -610,7 +708,7 @@ export const ClearCutTool: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                /* Post-Processing Background Customizer */
+                /* Post-Processing Background Customizer & Download */
                 <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
                   <div className="pb-2 border-b border-slate-100 dark:border-slate-800">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
@@ -621,12 +719,15 @@ export const ClearCutTool: React.FC = () => {
                   {/* Preset Colors Grid */}
                   <div className="grid grid-cols-5 gap-2">
                     {COLOR_PRESETS.map((preset) => {
-                      const isSelected = selectedBgColor === preset.value
+                      const isSelected = previewBgMode === 'custom' && selectedBgColor === preset.value
                       return (
                         <button
                           key={preset.id}
                           type="button"
-                          onClick={() => setSelectedBgColor(preset.value)}
+                          onClick={() => {
+                            setPreviewBgMode('custom')
+                            setSelectedBgColor(preset.value)
+                          }}
                           className={`h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer relative ${
                             preset.value === 'transparent'
                               ? 'bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:6px_6px] bg-slate-100 dark:bg-slate-800'
@@ -659,6 +760,7 @@ export const ClearCutTool: React.FC = () => {
                         onChange={(e) => {
                           setCustomColor(e.target.value)
                           setSelectedBgColor('custom')
+                          setPreviewBgMode('custom')
                         }}
                         className="w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer"
                       />
@@ -666,16 +768,19 @@ export const ClearCutTool: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Download Action */}
-                  <div className="pt-3">
+                  {/* Download High-Res PNG Button */}
+                  <div className="pt-3 space-y-2">
                     <button
                       type="button"
-                      onClick={handleDownload}
+                      onClick={handleDownloadHighResPng}
                       className="w-full py-4 px-6 rounded-2xl font-bold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-300 hover:from-cyan-300 hover:to-indigo-200 shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
                     >
                       <Download className="w-4 h-4" />
-                      <span>Download Final PNG Image</span>
+                      <span>Download High-Res PNG</span>
                     </button>
+                    <p className="text-[11px] text-center text-slate-400 font-mono">
+                      Export original resolution with lossless alpha transparency
+                    </p>
                   </div>
                 </div>
               )}
