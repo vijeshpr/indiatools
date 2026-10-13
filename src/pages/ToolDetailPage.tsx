@@ -66,6 +66,8 @@ import { SatisfyingRelaxGameTool } from '../components/tools/SatisfyingRelaxGame
 import { AudioConverterTool } from '../imageTools/AudioConverterTool'
 import { OrbitAudioStudioTool } from '../imageTools/OrbitAudioStudioTool'
 import { AudioSpectrumVideoTool } from '../imageTools/AudioSpectrumVideoTool'
+import { DtsCinemaReverbTool } from '../imageTools/DtsCinemaReverbTool'
+import { VirtualSurroundUpmixerTool } from '../imageTools/VirtualSurroundUpmixerTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -132,6 +134,8 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'audio-converter': AudioConverterTool,
   'orbit-audio-studio': OrbitAudioStudioTool,
   'audio-spectrum-waveform-video-generator': AudioSpectrumVideoTool,
+  'dts-cinema-theater-reverb': DtsCinemaReverbTool,
+  'virtual-surround-upmixer': VirtualSurroundUpmixerTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

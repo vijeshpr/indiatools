@@ -63,6 +63,10 @@ export function App() {
                 <Route path="/calculators/orbit-audio-studio" element={<Navigate to="/tools/orbit-audio-studio" replace />} />
                 <Route path="/audio-spectrum-waveform-video-generator" element={<Navigate to="/tools/audio-spectrum-waveform-video-generator" replace />} />
                 <Route path="/calculators/audio-spectrum-waveform-video-generator" element={<Navigate to="/tools/audio-spectrum-waveform-video-generator" replace />} />
+                <Route path="/dts-cinema-theater-reverb" element={<Navigate to="/tools/dts-cinema-theater-reverb" replace />} />
+                <Route path="/calculators/dts-cinema-theater-reverb" element={<Navigate to="/tools/dts-cinema-theater-reverb" replace />} />
+                <Route path="/virtual-surround-upmixer" element={<Navigate to="/tools/virtual-surround-upmixer" replace />} />
+                <Route path="/calculators/virtual-surround-upmixer" element={<Navigate to="/tools/virtual-surround-upmixer" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

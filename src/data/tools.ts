@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 14,
+    toolCount: 16,
   },
 }
 
@@ -2426,6 +2426,148 @@ export const TOOLS: ToolDefinition[] = [
         'music video maker free'
       ],
       canonicalPath: '/tools/audio-spectrum-waveform-video-generator'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'dts-cinema-theater-reverb',
+    slug: 'dts-cinema-theater-reverb',
+    title: 'DTS Cinema Theater Acoustic Reverb Simulator',
+    shortTitle: 'Cinema Reverb Simulator',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Simulate real cinema auditorium acoustics and procedural impulse responses in your browser. 100% private with zero file uploads.',
+    detailedDescription: 'Transform dry audio and film mixes into immersive cinema sound using mathematically synthesized acoustic impulse responses for IMAX domes, vintage halls, and VIP screening rooms.',
+    iconName: 'Film',
+    badge: 'Flagship',
+    color: '#EAB308',
+    tags: ['Cinema Reverb', 'Acoustic Simulator', 'DTS Sound', 'Impulse Response', 'Audio Master'],
+    searchKeywords: [
+      'cinema reverb simulator',
+      'dts theater acoustics',
+      'theater reverb online',
+      'procedural impulse response',
+      'cinema sound maker'
+    ],
+    formulaExplanation: 'Calculates physical room ray reflections using speed of sound (343 m/s) and wall absorption coefficients, synthesized with exponential RT60 diffuse tail convolved via Web Audio ConvolverNode.',
+    assumptions: [
+      'Audio processed 100% locally in browser memory',
+      'Impulse responses mathematically generated on-the-fly without external asset downloads'
+    ],
+    exampleCalculation: {
+      title: 'IMAX-Style Dome Acoustic Master Render',
+      inputs: {
+        'Auditorium': 'IMAX Dome (38m x 28m x 18m)',
+        'RT60 Decay': '2.80 seconds',
+        'Wall Material': 'Architectural Concrete'
+      },
+      outputs: {
+        'Reverb Tail': 'Lossless 24-bit PCM Master WAV',
+        'Privacy': '100% In-Browser Offline Rendering (Zero Upload)'
+      },
+      explanation: 'Simulates physical acoustic reflections off curved concrete surfaces with deep sub-bass resonance and wide early reflections.'
+    },
+    faqs: [
+      {
+        question: 'Are my audio files uploaded to any server?',
+        answer: 'Never. The entire acoustic simulator runs 100% locally in your web browser using HTML5 Canvas and the Web Audio API. Your files never leave your device.'
+      },
+      {
+        question: 'How are the impulse responses created without external downloads?',
+        answer: 'Our engine mathematically synthesizes procedural stereo impulse responses in real time using room geometry, speed of sound, early reflection ray paths, and an exponentially damped diffuse tail.'
+      },
+      {
+        question: 'Can I export in studio-quality 24-bit WAV?',
+        answer: 'Yes! You can export true 24-bit linear PCM WAV, 16-bit CD-standard WAV, or 320 kbps MP3 directly from your browser.'
+      },
+      {
+        question: 'What is the purpose of the A/B Bypass switch?',
+        answer: 'The A/B Bypass switch instantly toggles between your original dry audio and the processed cinema reverb without pausing or interrupting playback, allowing precise mastering comparisons.'
+      }
+    ],
+    relatedSlugs: ['virtual-surround-upmixer', 'orbit-audio-studio', 'audio-converter', 'audio-spectrum-waveform-video-generator'],
+    seo: {
+      title: 'Free DTS Cinema Theater Acoustic Reverb Simulator | IndiaTools',
+      metaDescription: 'Simulate physical cinema auditorium acoustics and procedural impulse responses. Export studio-grade 24-bit WAV or MP3 audio with zero uploads.',
+      keywords: [
+        'cinema reverb simulator',
+        'dts audio simulator',
+        'theater acoustics online',
+        'procedural impulse response reverb',
+        'cinema sound mixing free'
+      ],
+      canonicalPath: '/tools/dts-cinema-theater-reverb'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'virtual-surround-upmixer',
+    slug: 'virtual-surround-upmixer',
+    title: 'Virtual 5.1 & 7.1 Surround Sound Upmixer',
+    shortTitle: 'Surround Sound Upmixer',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Upscale stereo music into discrete 5.1 and 7.1 surround sound audio files or 3D binaural headphone mixes privately in your browser.',
+    detailedDescription: 'Convert stereo songs and soundtracks into discrete 6-channel 5.1 or 8-channel 7.1 surround audio with dialogue clarity extraction, 24dB/oct LFE subwoofer crossover, and Woodworth 3D binaural headphone export.',
+    iconName: 'Speaker',
+    badge: 'Flagship',
+    color: '#06B6D4',
+    tags: ['Surround Sound', '5.1 Upmixer', '7.1 Upmixer', 'Spatial Audio', 'Multi-Channel Audio'],
+    searchKeywords: [
+      '5.1 surround sound converter',
+      'stereo to 5.1 upmixer',
+      '7.1 audio upmixer online',
+      'discrete multi channel wav',
+      '3d binaural sound maker'
+    ],
+    formulaExplanation: 'Decomposes stereo channels into mid-side components, applies 300Hz-3.5kHz dialogue bandpass for Centre, 4th-order Linkwitz-Riley low-pass for LFE, and decorrelation delays for surround ambience.',
+    assumptions: [
+      'Audio processed 100% locally in browser memory',
+      'Discrete multi-channel WAV files encoded with standard Microsoft WAVEFORMATEXTENSIBLE channel masks'
+    ],
+    exampleCalculation: {
+      title: 'Stereo to Discrete 5.1 Multi-Channel Render',
+      inputs: {
+        'Source': 'Lossless 2-Channel Stereo Master',
+        'Mode': 'Discrete 5.1 Surround Sound',
+        'LFE Crossover': '90 Hz (4th-order Linkwitz-Riley)'
+      },
+      outputs: {
+        'Channel Layout': '6 Discrete Channels (FL, FR, C, LFE, SL, SR)',
+        'Format': '24-bit PCM WAVEFORMATEXTENSIBLE WAV'
+      },
+      explanation: 'Generates dedicated Centre dialogue, 24dB/oct subwoofer bass, and decorrelated side ambience for true discrete surround playback.'
+    },
+    faqs: [
+      {
+        question: 'Can I play the exported 5.1 / 7.1 WAV on home theater receivers?',
+        answer: 'Yes! Our exporter writes standard multi-channel WAV files with Microsoft WAVEFORMATEXTENSIBLE headers and channel masks (0x3F for 5.1 and 0x63F for 7.1), compatible with VLC, professional DAWs, and AV receivers.'
+      },
+      {
+        question: 'Do I need surround speakers to test this tool?',
+        answer: 'No. You can select "3D Headphones (Binaural HRTF)" mode to experience authentic 3D spatial soundstage envelopment using regular stereo headphones or earbuds.'
+      },
+      {
+        question: 'How does the LFE subwoofer channel get created?',
+        answer: 'A dedicated mono feed is processed through a cascaded 4th-order Linkwitz-Riley low-pass filter (-24 dB/octave) at your chosen crossover frequency (60 Hz to 140 Hz), delivering punchy sub-bass without vocal bleeding.'
+      },
+      {
+        question: 'Are my audio files uploaded to any cloud service?',
+        answer: 'Zero server uploads. The entire upmixing matrix and multi-channel interleaving pipeline runs 100% locally inside your web browser.'
+      }
+    ],
+    relatedSlugs: ['dts-cinema-theater-reverb', 'orbit-audio-studio', 'audio-converter', 'audio-spectrum-waveform-video-generator'],
+    seo: {
+      title: 'Free Virtual 5.1 & 7.1 Surround Sound Upmixer | IndiaTools',
+      metaDescription: 'Convert stereo audio into discrete 5.1 and 7.1 surround sound WAV files or 3D binaural headphone mixes. 100% in-browser with zero uploads.',
+      keywords: [
+        '5.1 surround sound converter',
+        'stereo to 5.1 upmixer',
+        '7.1 surround audio online',
+        'binaural 3d audio maker',
+        'discrete multichannel wav generator'
+      ],
+      canonicalPath: '/tools/virtual-surround-upmixer'
     },
     type: 'image-tool'
   }
