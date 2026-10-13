@@ -2278,82 +2278,82 @@ export const TOOLS: ToolDefinition[] = [
     type: 'image-tool'
   },
   {
-    id: 'studio-karaoke-vocal-remover',
-    slug: 'studio-karaoke-vocal-remover',
+    id: 'orbit-audio-studio',
+    slug: 'orbit-audio-studio',
     category: 'create',
-    title: 'Studio Karaoke — Vocal Remover & Pitch Shifter',
-    shortTitle: 'Studio Karaoke',
-    description: 'Free in-browser vocal remover and karaoke track generator. Remove vocals from songs, shift pitch, preserve bass and kick drums, and export to WAV or MP3 with zero uploads.',
-    detailedDescription: 'Professional studio-grade vocal remover and pitch shifter operating 100% inside your browser. Features differential stereo phase cancellation, biquad sub-bass preservation, varispeed key transposition, and lossless WAV and MP3 downloads without any cloud uploads.',
-    iconName: 'Music',
+    title: 'Orbit Audio Studio — 8D & 16D Spatial Audio Creator',
+    shortTitle: 'Orbit Audio Studio',
+    description: 'Turn ordinary tracks into immersive spatial journeys. Create 8D and 16D binaural spatial audio with real-time HRTF radar, room ambience, and lossless WAV or MP3 export.',
+    detailedDescription: 'Professional in-browser spatial audio workstation. Converts standard stereo tracks into immersive 8D circular orbits and 16D multi-axis soundscapes using Web Audio HRTF panning, synthetic convolution room reverb, sub-bass crossover preservation, and fast offline export.',
+    iconName: 'Compass',
     badge: 'New',
     color: '#06B6D4',
     categoryLabel: 'Create',
-    tags: ['karaoke', 'vocal remover', 'pitch shifter', 'instrumental maker', 'audio converter', 'sound', 'music', 'mp3', 'wav'],
+    tags: ['8D Audio', '16D Audio', 'Spatial Audio', 'Orbit Audio', 'Binaural', 'HRTF', '3D Sound', 'Music Studio', 'MP3', 'WAV'],
     searchKeywords: [
-      'karaoke maker',
-      'vocal remover',
-      'remove vocals from song',
-      'pitch shifter online',
-      'instrumental generator',
-      'minus one audio',
-      'isolate vocals',
-      'studio karaoke',
-      'free vocal remover no upload'
+      '8d audio converter',
+      '8d music maker online',
+      '16d audio creator',
+      'spatial audio studio',
+      'orbit audio studio',
+      'binaural 3d audio converter',
+      'free 8d audio maker no upload',
+      'hrtf panner online'
     ],
-    formulaExplanation: 'Isolates and subtracts the mono center channel (C = (L + R) / 2) from stereo channels while re-injecting biquad low-pass filtered audio (<140 Hz) to keep the kick drum and bassline powerful.',
+    formulaExplanation: 'Calculates continuous deterministic 3D coordinates (X, Y, Z) along orbital vectors and routes audio through Web Audio HRTF PannerNodes with synthetic room impulse responses and centered sub-bass crossover filtering.',
     assumptions: [
-      'Audio is a stereo mix with centered lead vocals and wide instruments.',
-      'Processing is 100% client-side Web Audio DSP with zero server uploads.'
+      'Binaural spatial illusion is best experienced using stereo headphones or earphones.',
+      '100% client-side digital signal processing with zero server uploads or cloud latency.'
     ],
     exampleCalculation: {
-      title: 'Lead Vocal Removal & Instrumental Extraction',
+      title: 'Stereo Track to 360-Degree 8D Binaural Orbit',
       inputs: {
-        'Source Audio': 'Stereo Master Track (44.1 kHz, 16-bit)',
-        'DSP Mode': 'Center Cancellation (90%) + Bass Preservation (75%)'
+        'Source Audio': 'Stereo Song Master (44.1 kHz, 16-bit)',
+        'Spatial Profile': '8D Cosmic Orbit (8.0s period, 3.2m radius)',
+        'Acoustic Treatment': 'Studio Room Reverb (16% Wet) + Centered Bass (75%)'
       },
       outputs: {
-        'Extracted Audio': 'Clean Instrumental / Karaoke Stem',
-        'Privacy': 'Zero Server Uploads (100% Client DSP)'
+        'Spatial Effect': 'Continuous 360-degree rotating binaural soundstage',
+        'Privacy': '100% In-Browser Offline Rendering (Zero Upload)'
       },
-      explanation: 'Cancels centered vocal frequencies while retaining stereo guitars, keyboards, reverbs, and kick bass.'
+      explanation: 'Applies HRTF binaural panning and room reflections, smoothly orbiting the sound around the listener while keeping sub-bass centered.'
     },
     faqs: [
       {
-        question: 'How does in-browser vocal cancellation work?',
-        answer: 'In stereo studio mixing, lead vocals are usually panned dead center (equal amplitude and phase in Left and Right channels). By subtracting the center channel from both sides, centered frequencies cancel each other out while wide-panned guitars, keyboards, and stereo effects remain.'
+        question: 'What is 8D and 16D spatial audio?',
+        answer: '8D and 16D are creative names for binaural spatial audio. They do not add extra physical dimensions. Instead, they use Head-Related Transfer Functions (HRTF), subtle interaural time delays, and room reflections to create the sensation that sound is orbiting 360 degrees around your head.'
       },
       {
-        question: 'Why is bass preservation important in karaoke tracks?',
-        answer: 'Kick drums and bass instruments are also mixed in the center. Without bass preservation filtering, standard vocal cancellation removes the low-end punch. Our engine isolates frequencies below 140 Hz using a biquad low-pass filter and adds them back into the mix.'
+        question: 'Do I need headphones to hear the 3D spatial effect?',
+        answer: 'Yes. Binaural HRTF spatial audio relies on delivering distinct acoustic signals with precise micro-delays to each ear. Listening through stereo headphones or earbuds provides the full 360-degree immersive illusion.'
       },
       {
-        question: 'Does any audio get uploaded to an external server?',
-        answer: 'No. Every sample is processed entirely within your device browser memory using client-side Web Audio API and WebAssembly. No files or personal data ever leave your computer or phone.'
+        question: 'What is the difference between 8D and 16D modes?',
+        answer: '8D mode creates smooth horizontal circular orbits around your head on the X-Z plane. 16D mode introduces multi-axis movement with dynamic vertical elevation changes (Y-axis), elliptical depth modulation, and undulating spatial trajectories.'
       },
       {
-        question: 'Can I remove vocals from mono recordings?',
-        answer: 'No. Mono audio files have identical left and right channels. Because phase cancellation relies on differences between stereo channels, subtracting mono channels results in complete silence or total attenuation of the entire song.'
+        question: 'Why is sub-bass preservation important in spatial audio?',
+        answer: 'Frequencies below 130 Hz (kick drums and basslines) provide physical groove. Panning heavy sub-bass hard to one ear can cause ear fatigue and disorientation. Our crossover filter keeps sub-bass centered while orbiting melodic instruments and vocals freely.'
       },
       {
-        question: 'Can I change the song key to match my singing voice?',
-        answer: 'Yes. Use the Pitch Shifter slider to transpose the key up or down by up to 12 semitones (1 full octave) before exporting.'
+        question: 'Are my audio files uploaded to any server?',
+        answer: 'Never. Orbit Audio Studio executes 100% locally in your web browser using Web Audio API and WebAssembly. No audio, filenames, or metadata are ever transmitted across the internet.'
       }
     ],
     relatedSlugs: ['audio-converter', 'satisfying-relax-game', 'ai-token-calculator', 'pixelcraft'],
     seo: {
-      title: 'Studio Karaoke — Free Vocal Remover & Pitch Shifter Online | IndiaTools',
-      metaDescription: 'Free in-browser vocal remover and karaoke track generator. Remove vocals, adjust key pitch, preserve bass and kick drums, and export to WAV or MP3 with zero uploads.',
+      title: 'Free 8D & 16D Audio Studio | IndiaTools',
+      metaDescription: 'Convert ordinary stereo songs into immersive 8D and 16D spatial audio. Real-time HRTF radar, room reverb, sub-bass preservation, and WAV or MP3 export with zero uploads.',
       keywords: [
-        'vocal remover',
-        'karaoke maker',
-        'pitch shifter online',
-        'remove vocals from song',
-        'free karaoke converter',
-        'isolate instruments',
-        'mp3 vocal remover no upload'
+        '8d audio converter',
+        '8d music maker',
+        '16d audio creator',
+        'spatial audio studio',
+        'binaural 8d audio online',
+        'orbit audio studio',
+        'free 8d converter no upload'
       ],
-      canonicalPath: '/tools/studio-karaoke-vocal-remover'
+      canonicalPath: '/tools/orbit-audio-studio'
     },
     type: 'image-tool'
   }

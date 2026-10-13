@@ -59,8 +59,8 @@ export function App() {
                 <Route path="/:langCode/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/:langCode/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/qr-code-generator" element={<Navigate to="/calculators/qr-code-generator" replace />} />
-                <Route path="/studio-karaoke-vocal-remover" element={<Navigate to="/tools/studio-karaoke-vocal-remover" replace />} />
-                <Route path="/calculators/studio-karaoke-vocal-remover" element={<Navigate to="/tools/studio-karaoke-vocal-remover" replace />} />
+                <Route path="/orbit-audio-studio" element={<Navigate to="/tools/orbit-audio-studio" replace />} />
+                <Route path="/calculators/orbit-audio-studio" element={<Navigate to="/tools/orbit-audio-studio" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />
