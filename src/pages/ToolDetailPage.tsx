@@ -71,6 +71,7 @@ import { VirtualSurroundUpmixerTool } from '../imageTools/VirtualSurroundUpmixer
 import { StudioMasterSpatialSuiteTool } from '../imageTools/StudioMasterSpatialSuiteTool'
 import { StudioBassEnhancerTool } from '../imageTools/StudioBassEnhancerTool'
 import { BatchPdfPasswordVaultTool } from '../imageTools/BatchPdfPasswordVaultTool'
+import { ZeroKnowledgeFileVaultTool } from '../imageTools/ZeroKnowledgeFileVaultTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -142,6 +143,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'studio-master-spatial-suite': StudioMasterSpatialSuiteTool,
   'studio-bass-enhancer': StudioBassEnhancerTool,
   'batch-pdf-password-vault': BatchPdfPasswordVaultTool,
+  'zero-knowledge-file-vault': ZeroKnowledgeFileVaultTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

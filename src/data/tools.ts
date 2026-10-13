@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 19,
+    toolCount: 20,
   },
 }
 
@@ -2809,6 +2809,92 @@ export const TOOLS: ToolDefinition[] = [
         'client side pdf tool'
       ],
       canonicalPath: '/tools/batch-pdf-password-vault'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'zero-knowledge-file-vault',
+    slug: 'zero-knowledge-file-vault',
+    title: 'Zero-Knowledge File Encrypter & Decrypter Online | IndiaTools',
+    shortTitle: 'File Vault',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Encrypt and decrypt arbitrary files locally with password-based AES-256-GCM authenticated encryption and 4 MiB chunked streaming. Zero file uploads.',
+    detailedDescription: 'Enterprise-grade zero-knowledge file encryption suite executing 100% inside your local browser via native Web Crypto. Armors sensitive documents, images, databases, and archives with PBKDF2-HMAC-SHA256 (250,000 rounds) and AES-256-GCM authenticated chunk framing into verifiable .vault containers with complete tamper detection.',
+    iconName: 'Lock',
+    badge: 'Flagship',
+    color: '#06B6D4',
+    tags: ['File Encryption', 'Zero Knowledge', 'AES-256-GCM', 'File Vault', 'PBKDF2', 'Web Crypto', 'File Decrypt'],
+    searchKeywords: [
+      'zero knowledge file encryption',
+      'aes 256 gcm file encrypter',
+      'online file encryptor',
+      'browser based file encryption',
+      'decrypt vault file',
+      'password based file encryption',
+      'encrypt files without uploading',
+      'private file encryption tool'
+    ],
+    formulaExplanation: 'Derives a 256-bit AES key via PBKDF2 with SHA-256 (250,000 iterations and 16-byte random salt), partitions files into 4 MiB frames, and authenticates each frame and final manifest using AES-256-GCM with unique deterministic nonces and domain-separated AAD.',
+    assumptions: [
+      '100% private in-browser client-side Web Crypto API execution',
+      'Zero byte network upload or remote server data transmission',
+      'Uses PBKDF2-HMAC-SHA256 (250,000 rounds) and AES-256-GCM authenticated streaming container'
+    ],
+    exampleCalculation: {
+      title: 'Authenticated Vault Armor for Confidential Business Archive',
+      inputs: {
+        'File Selected': 'Q4_Financial_Audit_Report.xlsx (18.5 MB)',
+        'Passphrase Entropy': '~94 bits (CSPRNG generated)',
+        'Cipher Standard': 'AES-256-GCM with 4 MiB authenticated chunk framing'
+      },
+      outputs: {
+        'Container Output': 'Q4_Financial_Audit_Report.vault (5 Authenticated Frames)',
+        'Integrity Guarantee': 'Verified Cumulative SHA-256 Manifest'
+      },
+      explanation: 'Streams 5 authenticated chunks through local browser Web Crypto in 350ms, generating a tamper-proof .vault container with zero cloud exposure.'
+    },
+    faqs: [
+      {
+        question: 'How does AES-256-GCM file encryption work?',
+        answer: 'Galois/Counter Mode (GCM) combines symmetric encryption with an authentication tag. Every encrypted 4 MiB chunk produces a 128-bit authentication tag that cryptographically verifies that the data has not been modified or corrupted since encryption.'
+      },
+      {
+        question: 'Are my files or passwords uploaded to a server?',
+        answer: 'Never. The entire key derivation, chunk encryption, and file packaging pipeline runs locally in your browser memory via the native Web Crypto API. Zero bytes are transmitted across the internet.'
+      },
+      {
+        question: 'What is a .vault container file?',
+        answer: 'A .vault file is a versioned, authenticated binary container created by this tool. It packages the encrypted file data in bounded 4 MiB frames along with an authenticated header and final integrity manifest.'
+      },
+      {
+        question: 'Can I decrypt a vault file without its password?',
+        answer: 'No. Because the container uses genuine AES-256-GCM with 250,000 rounds of PBKDF2 key stretching, it is mathematically infeasible to bypass or decrypt without the correct passphrase.'
+      },
+      {
+        question: 'How does the tool detect tampered or modified files?',
+        answer: 'The container enforces Additional Authenticated Data (AAD) for each chunk bound to the header hash, plus an authenticated finalization manifest containing the cumulative SHA-256 digest of all chunks. Any flipped bit, missing chunk, or reordered record causes decryption to fail immediately.'
+      },
+      {
+        question: 'What are the limitations of browser-based file encryption?',
+        answer: 'While our chunked streaming handles large files efficiently, browser memory constraints require accumulating the final output file as a Blob for standard downloads. For extremely large multi-gigabyte files, ensure your device has sufficient RAM.'
+      }
+    ],
+    relatedSlugs: ['batch-pdf-password-vault', 'image-to-pdf', 'passport-photo-maker', 'clearcut-ai'],
+    seo: {
+      title: 'Zero-Knowledge File Encrypter & Decrypter Online | IndiaTools',
+      metaDescription: 'Encrypt and decrypt files locally with password-based AES-256-GCM authenticated encryption. Create and open secure .vault files in your browser without uploading your documents.',
+      keywords: [
+        'zero knowledge file encryption',
+        'aes 256 gcm file encrypter',
+        'online file encryptor',
+        'browser based file encryption',
+        'decrypt vault file',
+        'password based file encryption',
+        'encrypt files without uploading',
+        'private file encryption tool'
+      ],
+      canonicalPath: '/tools/zero-knowledge-file-vault'
     },
     type: 'image-tool'
   }
