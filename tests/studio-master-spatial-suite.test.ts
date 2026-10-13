@@ -13,8 +13,8 @@ import { encodeAudioBufferToMp3 } from '../src/lib/audio/encoders/mp3Encoder'
 
 describe('IndiaTools Studio Master & Spatial Suite Test Suite', () => {
   it('should register Studio Master & Spatial Suite in tools registry with complete SEO', () => {
-    assert.strictEqual(TOOLS.length, 56, 'Tools count should be exactly 56')
-    assert.strictEqual(CATEGORIES.create.toolCount, 17, 'Create category count should be 17')
+    assert.strictEqual(TOOLS.length, 57, 'Tools count should be exactly 57')
+    assert.strictEqual(CATEGORIES.create.toolCount, 18, 'Create category count should be 18')
 
     const tool = getToolBySlug('studio-master-spatial-suite')
     assert.ok(tool, 'Studio Master & Spatial Suite tool must be found by slug')

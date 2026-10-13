@@ -69,6 +69,7 @@ import { AudioSpectrumVideoTool } from '../imageTools/AudioSpectrumVideoTool'
 import { DtsCinemaReverbTool } from '../imageTools/DtsCinemaReverbTool'
 import { VirtualSurroundUpmixerTool } from '../imageTools/VirtualSurroundUpmixerTool'
 import { StudioMasterSpatialSuiteTool } from '../imageTools/StudioMasterSpatialSuiteTool'
+import { StudioBassEnhancerTool } from '../imageTools/StudioBassEnhancerTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -138,6 +139,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'dts-cinema-theater-reverb': DtsCinemaReverbTool,
   'virtual-surround-upmixer': VirtualSurroundUpmixerTool,
   'studio-master-spatial-suite': StudioMasterSpatialSuiteTool,
+  'studio-bass-enhancer': StudioBassEnhancerTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 17,
+    toolCount: 18,
   },
 }
 
@@ -2648,6 +2648,86 @@ export const TOOLS: ToolDefinition[] = [
         '24 bit wav master exporter'
       ],
       canonicalPath: '/tools/studio-master-spatial-suite'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'studio-bass-enhancer',
+    slug: 'studio-bass-enhancer',
+    title: 'Free Studio Bass Enhancer & Sub-Harmonic Generator | IndiaTools',
+    shortTitle: 'Studio Bass Enhancer',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Boost low-end with authentic -1 octave sub-harmonic synthesis, 4th-order Linkwitz-Riley crossovers, and mobile speaker saturation.',
+    detailedDescription: 'Ultra-modern in-browser pro audio workstation featuring true -1 octave sub-harmonic tracking synthesis, 4th-order Linkwitz-Riley crossovers (40–160 Hz), hyperbolic tangent (tanh) saturation waveshaping, transient punch accentuation, mono bass locking (<120 Hz), and lossless 24-bit WAV & 320 kbps MP3 export.',
+    iconName: 'Zap',
+    badge: 'Flagship',
+    color: '#FF2D55',
+    tags: ['Bass Enhancer', 'Sub-Harmonic Generator', 'Audio Mastering', 'Sub-Bass Boost', 'Audio Workstation', 'Linkwitz-Riley'],
+    searchKeywords: [
+      'bass enhancer online',
+      'sub harmonic generator online',
+      'free sub bass booster',
+      '808 bass enhancer',
+      'sub octave synthesizer',
+      'linkwitz riley bass crossover',
+      'mono bass lock online',
+      'punchy kick drum enhancer'
+    ],
+    formulaExplanation: 'Isolates sub-bass via 4th-order Linkwitz-Riley (-24 dB/oct) crossover, synthesizes pure -1 octave sub content using zero-crossing frequency division and envelope tracking, applies asymmetric hyperbolic tangent waveshaping for mobile speaker overtones, and anchors frequencies below 120Hz in mono.',
+    assumptions: [
+      '100% private in-browser client-side Web Audio API & AudioWorklet processing',
+      'Zero audio file uploads or server-side DSP',
+      'Lossless 24-bit PCM WAV and 320 kbps MP3 local export'
+    ],
+    exampleCalculation: {
+      title: 'Electronic 808 & Kick Low-End Synthesis',
+      inputs: {
+        'Crossover Split': '85 Hz (4th-order Linkwitz-Riley)',
+        'Sub-Harmonic Synthesis': '55% (-1 Octave Sub Tone)',
+        'Saturation Drive': '40% (Asymmetric Tanh WaveShaping)'
+      },
+      outputs: {
+        'Low-End Extension': 'Down to 20–42 Hz Pure Sub-Bass',
+        'Mobile Audibility': 'Enhanced 2nd & 3rd Order Overtones (80–240 Hz)'
+      },
+      explanation: 'Adds deep physical chest-thumping sub-octave energy while generating warm harmonic overtones that make bass cut through on smartphones and small earbuds.'
+    },
+    faqs: [
+      {
+        question: 'How is this different from a standard equalizer bass boost?',
+        answer: 'Standard EQs can only boost existing frequencies and often introduce muddiness around 150–250 Hz. This sub-harmonic generator analyzes fundamental zero-crossings and synthesizes genuine new sub-bass tones one octave below the fundamental ($f/2$), adding depth that didn’t previously exist.'
+      },
+      {
+        question: 'What is the purpose of the 4th-order Linkwitz-Riley crossover?',
+        answer: 'Linkwitz-Riley 4th-order (-24 dB/octave) crossovers maintain perfect 360 degree phase coherence across the crossover point, meaning the sub-bass path and the clean mid/high passthrough sum together with zero comb filtering or frequency cancellation.'
+      },
+      {
+        question: 'Why does the Drive control make bass audible on phone speakers?',
+        answer: 'Smartphone speakers physically cannot reproduce frequencies below 60 Hz. Our non-linear hyperbolic tangent (tanh) waveshaper injects harmonic overtones into the 80–240 Hz range, allowing the human brain to perceive the deep sub fundamental through psychoacoustic harmonic reconstruction.'
+      },
+      {
+        question: 'Why should I turn on Mono Bass Lock?',
+        answer: 'Stereo low frequencies cause destructive phase cancellation on car subwoofers, club PA systems, and vinyl pressings. Mono Bass Lock forces all content below 120 Hz to mono center, ensuring maximum bass impact without phase smearing.'
+      },
+      {
+        question: 'Are my audio tracks uploaded or stored anywhere?',
+        answer: 'Never. The entire sub-harmonic DSP pipeline, canvas visualizer, and export rendering run 100% locally inside your web browser. Your audio never leaves your device.'
+      }
+    ],
+    relatedSlugs: ['studio-master-spatial-suite', 'orbit-audio-studio', 'dts-cinema-theater-reverb', 'virtual-surround-upmixer'],
+    seo: {
+      title: 'Free Studio Bass Enhancer & Sub-Harmonic Generator | IndiaTools',
+      metaDescription: 'Boost low-end with authentic -1 octave sub-harmonic synthesis, 4th-order Linkwitz-Riley crossovers, and mobile speaker saturation. 100% free and private in-browser.',
+      keywords: [
+        'bass enhancer online',
+        'sub harmonic generator online',
+        'free sub bass booster',
+        '808 bass enhancer',
+        'sub octave synthesizer',
+        'linkwitz riley bass crossover'
+      ],
+      canonicalPath: '/tools/studio-bass-enhancer'
     },
     type: 'image-tool'
   }
