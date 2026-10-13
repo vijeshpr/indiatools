@@ -378,6 +378,12 @@
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/tools/studio-master-spatial-suite</loc>
+    <lastmod>2026-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
 
   <url>
     <loc>https://indiatools-rho.vercel.app/calculators/qr-code-generator</loc>

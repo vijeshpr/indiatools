@@ -67,6 +67,8 @@ export function App() {
                 <Route path="/calculators/dts-cinema-theater-reverb" element={<Navigate to="/tools/dts-cinema-theater-reverb" replace />} />
                 <Route path="/virtual-surround-upmixer" element={<Navigate to="/tools/virtual-surround-upmixer" replace />} />
                 <Route path="/calculators/virtual-surround-upmixer" element={<Navigate to="/tools/virtual-surround-upmixer" replace />} />
+                <Route path="/studio-master-spatial-suite" element={<Navigate to="/tools/studio-master-spatial-suite" replace />} />
+                <Route path="/calculators/studio-master-spatial-suite" element={<Navigate to="/tools/studio-master-spatial-suite" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

@@ -10,8 +10,8 @@ import { encodeMultiChannelWav, SPEAKER_MASKS } from '../src/lib/audio/encoders/
 
 describe('IndiaTools Cinematic Audio Lab Test Suite', () => {
   it('should register both DTS Cinema Reverb and Surround Upmixer tools in registry', () => {
-    assert.strictEqual(TOOLS.length, 55, 'Tools count should be exactly 55')
-    assert.strictEqual(CATEGORIES.create.toolCount, 16, 'Create category count should be 16')
+    assert.strictEqual(TOOLS.length, 56, 'Tools count should be exactly 56')
+    assert.strictEqual(CATEGORIES.create.toolCount, 17, 'Create category count should be 17')
 
     // Tool 1: DTS Cinema Reverb
     const reverbTool = getToolBySlug('dts-cinema-theater-reverb')

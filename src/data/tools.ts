@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 16,
+    toolCount: 17,
   },
 }
 
@@ -2568,6 +2568,86 @@ export const TOOLS: ToolDefinition[] = [
         'discrete multichannel wav generator'
       ],
       canonicalPath: '/tools/virtual-surround-upmixer'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'studio-master-spatial-suite',
+    slug: 'studio-master-spatial-suite',
+    title: 'Studio Master & Spatial Suite — Browser Audio Workstation',
+    shortTitle: 'Studio Master & Spatial Suite',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Master tracks in your browser with smart auto-mastering, 3-band multiband dynamics, LFO spatial motion, and 24-bit WAV export.',
+    detailedDescription: 'All-in-one browser-based professional audio mastering suite featuring ITU-R BS.1770 / EBU R128 loudness targeting (-14 LUFS), Linkwitz-Riley 4th-order 3-band multiband compressor, orbital LFO spatial auto-panner with sub-bass mono lock, real-time vectorscope analysis, and lossless 24-bit PCM WAV export.',
+    iconName: 'Sliders',
+    badge: 'Flagship',
+    color: '#10B981',
+    tags: ['Audio Mastering', 'Multiband Compressor', 'Loudness Normalization', 'LUFS Meter', 'Spatial Audio', 'Audio Workstation'],
+    searchKeywords: [
+      'audio mastering online',
+      'free audio master tool',
+      'multiband compressor online',
+      'lufs loudness normalizer',
+      'auto master audio track',
+      'orbit spatial audio panner',
+      '24 bit wav exporter',
+      'online mastering suite'
+    ],
+    formulaExplanation: 'Calculates ITU-R BS.1770 K-weighted integrated LUFS and True Peak, splits spectrum via 4th-order Linkwitz-Riley (-24 dB/oct) crossovers for independent 3-band dynamic compression, and modulates stereo pan via synced LFO with sub-bass center lock.',
+    assumptions: [
+      '100% private in-browser client-side Web Audio API & OfflineAudioContext processing',
+      'Zero audio file uploads or cloud processing',
+      'Lossless 24-bit/16-bit PCM WAV and 320 kbps MP3 local export'
+    ],
+    exampleCalculation: {
+      title: 'Commercial Streaming Loudness Master',
+      inputs: {
+        'Target Standard': 'EBU R128 / Spotify / Apple Music (-14 LUFS)',
+        'Dynamics Processing': '3-Band Cascaded Linkwitz-Riley Multiband Compressor',
+        'Spatial Modulation': 'Orbit Auto-Pan with 120Hz Sub-Bass Center Lock'
+      },
+      outputs: {
+        'Integrated Loudness': '-14.0 LUFS (True Peak -1.0 dBFS)',
+        'Output Audio': 'Lossless 24-bit PCM Linear WAV'
+      },
+      explanation: 'Applies subsonic rumble cutoff, dynamic tape saturation, precision multi-band compression, and transparent peak limiting to match modern streaming loudness targets.'
+    },
+    faqs: [
+      {
+        question: 'Are my audio tracks uploaded to any server or cloud?',
+        answer: 'Never. The entire mastering suite runs 100% inside your web browser using HTML5 Web Audio DSP and OfflineAudioContext. Your audio files never leave your device.'
+      },
+      {
+        question: 'What is the benefit of the Linkwitz-Riley 4th-order crossovers?',
+        answer: 'Linkwitz-Riley 4th-order (-24 dB/octave) crossovers ensure that the low, mid, and high frequency bands sum together with a completely flat magnitude response and zero phase cancellation at the crossover points.'
+      },
+      {
+        question: 'How does the Sub-Bass Center Lock protect low frequencies?',
+        answer: 'Modulating low frequencies across the stereo field causes severe phase cancellation and muddy playback on club subwoofers. Sub-Bass Center Lock isolates all frequencies below 120 Hz and pins them dead-center in mono while moving mids and highs freely.'
+      },
+      {
+        question: 'What export formats are supported?',
+        answer: 'You can export in studio-grade 24-bit PCM WAV, CD-standard 16-bit WAV, or maximum-quality 320 kbps MP3 directly from your browser with no file size limitations.'
+      },
+      {
+        question: 'Can I do instant A/B raw vs mastered comparison?',
+        answer: 'Yes! Toggle the global A/B switch at any time during playback to instantly hear the original raw audio versus the fully mastered chain with zero stutter or interruption.'
+      }
+    ],
+    relatedSlugs: ['virtual-surround-upmixer', 'dts-cinema-theater-reverb', 'orbit-audio-studio', 'audio-spectrum-waveform-video-generator'],
+    seo: {
+      title: 'Free Studio Audio Master & Spatial Suite Online | IndiaTools',
+      metaDescription: 'Master tracks online with AI-assisted smart mastering, 3-band multiband compressor, orbital spatial motion, and 24-bit WAV export. 100% free and private in-browser.',
+      keywords: [
+        'online audio mastering',
+        'free mastering suite',
+        'multiband compressor online',
+        'lufs loudness meter online',
+        'spatial audio panner',
+        '24 bit wav master exporter'
+      ],
+      canonicalPath: '/tools/studio-master-spatial-suite'
     },
     type: 'image-tool'
   }

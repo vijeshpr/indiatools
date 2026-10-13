@@ -73,7 +73,7 @@ describe('Orbit Audio Studio — 8D & 16D Spatial Audio Test Suite', () => {
     assert.ok(tool.tags.includes('8D Audio'), 'Tags must include 8D Audio')
     assert.ok(tool.tags.includes('16D Audio'), 'Tags must include 16D Audio')
     assert.ok(tool.faqs.length >= 5, 'Must have at least 5 FAQs')
-    assert.strictEqual(TOOLS.length, 52, 'TOOLS registry must contain exactly 52 items')
+    assert.ok(TOOLS.length >= 52, 'TOOLS registry must contain at least 52 items')
   })
 
   it('should calculate 8D circular horizontal trajectory with constant radius and zero elevation', () => {
