@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 21,
+    toolCount: 22,
   },
 }
 
@@ -2977,6 +2977,84 @@ export const TOOLS: ToolDefinition[] = [
         'invisible copyright tracer'
       ],
       canonicalPath: '/tools/invisible-document-watermarker'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'smart-document-scanner',
+    slug: 'smart-document-scanner',
+    title: 'Smart Document Scanner & Perspective Warp Online | IndiaTools',
+    shortTitle: 'Document Scanner',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Auto-detect paper boundaries, un-skew angled photos with 4-point projective homography, and enhance text with CamScanner-style filters. 100% private in-browser computer vision.',
+    detailedDescription: 'Full-featured client-side document scanner that straightens skewed mobile camera photos into clean rectangular scans using 4-point projective homography matrix calculations. Features Sobel edge detection, an interactive magnified loupe lens, B&W Magic shadow removal, and direct PDF export with zero server uploads.',
+    iconName: 'Scan',
+    badge: 'Flagship',
+    color: '#10B981',
+    tags: ['Document Scanner', 'Perspective Warp', 'CamScanner Alternative', 'Homography', 'Edge Detection', 'Clean PDF', 'Photo to PDF'],
+    searchKeywords: [
+      'smart document scanner',
+      'perspective warp document',
+      'unskew photo to document',
+      'camscanner alternative no upload',
+      'online document scanner free',
+      'flatten angled receipt photo',
+      'remove shadows from document photo',
+      'mobile camera document scanner'
+    ],
+    formulaExplanation: 'Computes an 8-variable projective homography transformation matrix solving an 8x8 linear system, interpolating output pixels backwards with subpixel bilinear sampling. Removes room shadows using local mean integral-image spatial filtering.',
+    assumptions: [
+      '100% private in-browser memory execution with zero cloud network transmissions',
+      'Subpixel bilinear backward mapping ensures zero pixel cracks or aliasing',
+      'B&W Magic filter applies adaptive thresholding across an integral image to eliminate uneven lighting'
+    ],
+    exampleCalculation: {
+      title: 'Angled GST Invoice Photo Flattening & Enhancement',
+      inputs: {
+        'Photo Condition': 'Skewed 15-degree mobile camera photo on dark table',
+        'Detected Corners': 'TL(120, 80), TR(780, 50), BR(810, 940), BL(90, 960)',
+        'Enhancement Mode': 'B&W Magic (Shadow Eraser & Contrast Boost)'
+      },
+      outputs: {
+        'Warped Dimensions': '720 x 890 px (Perfect Flat Rectangle)',
+        'Background Contrast': 'Bleached pure paper white (255, 255, 255) with deep black text'
+      },
+      explanation: 'Un-skews the angled perspective quadrilateral in 80ms and removes room lighting shadows, ready for clean PDF export.'
+    },
+    faqs: [
+      {
+        question: 'How does the perspective warp straighten angled documents?',
+        answer: 'The engine solves an 8-variable projective homography matrix between the 4 selected corner pins and a perfect rectangle. It backward-maps every destination pixel using sub-pixel bilinear interpolation, eliminating perspective distortion without blurring.'
+      },
+      {
+        question: 'Does it remove shadows and table backgrounds?',
+        answer: 'Yes. The B&W Magic Filter calculates local background luminance across the document using fast integral-image spatial filtering, bleaching out uneven room shadows while boosting ink contrast.'
+      },
+      {
+        question: 'Are any document photos uploaded to a cloud server?',
+        answer: 'Never. All computer vision, Canny/Sobel edge detection, homography matrix math, and PDF generation execute 100% locally in your device memory via HTML5 Canvas.'
+      },
+      {
+        question: 'Can I scan multi-page documents directly using my phone camera?',
+        answer: 'Yes. Tap "Scan with Camera" on any mobile browser or laptop webcam to capture photos directly without third-party app installations.'
+      }
+    ],
+    relatedSlugs: ['invisible-document-watermarker', 'image-to-pdf', 'clearcut-ai', 'exact-kb-compressor'],
+    seo: {
+      title: 'Smart Document Scanner & Perspective Warp Online | IndiaTools',
+      metaDescription: 'Free online document scanner with zero uploads. Auto-detect paper edges, straighten angled photos with 4-point perspective warp, remove shadows, and export clean PDFs.',
+      keywords: [
+        'smart document scanner',
+        'perspective warp document',
+        'unskew photo to document',
+        'camscanner alternative no upload',
+        'online document scanner free',
+        'flatten angled receipt photo',
+        'remove shadows from document photo',
+        'mobile camera document scanner'
+      ],
+      canonicalPath: '/tools/smart-document-scanner'
     },
     type: 'image-tool'
   }

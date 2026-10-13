@@ -435,6 +435,21 @@
   </url>
 
   <url>
+    <loc>https://indiatools-rho.vercel.app/tools/smart-document-scanner</loc>
+    <lastmod>2026-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/smart-document-scanner" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/smart-document-scanner" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/smart-document-scanner" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/smart-document-scanner" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/smart-document-scanner" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/smart-document-scanner" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/smart-document-scanner" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/smart-document-scanner" />
+  </url>
+
+  <url>
     <loc>https://indiatools-rho.vercel.app/calculators/qr-code-generator</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>

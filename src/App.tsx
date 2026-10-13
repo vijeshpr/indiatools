@@ -77,6 +77,8 @@ export function App() {
                 <Route path="/calculators/zero-knowledge-file-vault" element={<Navigate to="/tools/zero-knowledge-file-vault" replace />} />
                 <Route path="/invisible-document-watermarker" element={<Navigate to="/tools/invisible-document-watermarker" replace />} />
                 <Route path="/calculators/invisible-document-watermarker" element={<Navigate to="/tools/invisible-document-watermarker" replace />} />
+                <Route path="/smart-document-scanner" element={<Navigate to="/tools/smart-document-scanner" replace />} />
+                <Route path="/calculators/smart-document-scanner" element={<Navigate to="/tools/smart-document-scanner" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

@@ -73,6 +73,7 @@ import { StudioBassEnhancerTool } from '../imageTools/StudioBassEnhancerTool'
 import { BatchPdfPasswordVaultTool } from '../imageTools/BatchPdfPasswordVaultTool'
 import { ZeroKnowledgeFileVaultTool } from '../imageTools/ZeroKnowledgeFileVaultTool'
 import { InvisibleDocumentWatermarkerTool } from '../imageTools/InvisibleDocumentWatermarkerTool'
+import { SmartDocumentScannerTool } from '../imageTools/SmartDocumentScannerTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -146,6 +147,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'batch-pdf-password-vault': BatchPdfPasswordVaultTool,
   'zero-knowledge-file-vault': ZeroKnowledgeFileVaultTool,
   'invisible-document-watermarker': InvisibleDocumentWatermarkerTool,
+  'smart-document-scanner': SmartDocumentScannerTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'
