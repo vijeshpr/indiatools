@@ -81,6 +81,8 @@ export function App() {
                 <Route path="/calculators/smart-document-scanner" element={<Navigate to="/tools/smart-document-scanner" replace />} />
                 <Route path="/batch-image-watermarker" element={<Navigate to="/tools/batch-image-watermarker" replace />} />
                 <Route path="/calculators/batch-image-watermarker" element={<Navigate to="/tools/batch-image-watermarker" replace />} />
+                <Route path="/fast-inpainting-watermark-remover" element={<Navigate to="/tools/fast-inpainting-watermark-remover" replace />} />
+                <Route path="/calculators/fast-inpainting-watermark-remover" element={<Navigate to="/tools/fast-inpainting-watermark-remover" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

@@ -75,6 +75,7 @@ import { ZeroKnowledgeFileVaultTool } from '../imageTools/ZeroKnowledgeFileVault
 import { InvisibleDocumentWatermarkerTool } from '../imageTools/InvisibleDocumentWatermarkerTool'
 import { SmartDocumentScannerTool } from '../imageTools/SmartDocumentScannerTool'
 import { BatchImageWatermarkerTool } from '../imageTools/BatchImageWatermarkerTool'
+import { FastInpaintingWatermarkRemoverTool } from '../imageTools/FastInpaintingWatermarkRemoverTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -150,6 +151,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'invisible-document-watermarker': InvisibleDocumentWatermarkerTool,
   'smart-document-scanner': SmartDocumentScannerTool,
   'batch-image-watermarker': BatchImageWatermarkerTool,
+  'fast-inpainting-watermark-remover': FastInpaintingWatermarkRemoverTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

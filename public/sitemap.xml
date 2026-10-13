@@ -462,6 +462,20 @@
     <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/batch-image-watermarker" />
     <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/batch-image-watermarker" />
   </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover</loc>
+    <lastmod>2026-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
+  </url>
 
   <url>
     <loc>https://indiatools-rho.vercel.app/calculators/qr-code-generator</loc>

@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 23,
+    toolCount: 24,
   },
 }
 
@@ -3146,6 +3146,96 @@ export const TOOLS: ToolDefinition[] = [
         'bulk image stamp online'
       ],
       canonicalPath: '/tools/batch-image-watermarker'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'fast-inpainting-watermark-remover',
+    slug: 'fast-inpainting-watermark-remover',
+    title: 'Fast Inpainting Watermark Remover & Object Eraser',
+    shortTitle: 'Inpainting Eraser',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Erase watermarks, date stamps, phone logos, and unwanted objects from photos in seconds using Fast Marching inpainting with 100% client-side privacy.',
+    detailedDescription: 'High-precision photo inpainting and watermark removal tool running entirely in your browser memory. Brush over any unwanted text, logo, timestamp, or object to seamlessly reconstruct the underlying background texture with zero cloud uploads.',
+    iconName: 'Wand2',
+    badge: 'Flagship',
+    color: '#F43F5E',
+    tags: ['Inpainting', 'Watermark Remover', 'Object Eraser', 'Photo Retouch', 'Client-Side', 'No Upload'],
+    searchKeywords: [
+      'remove watermark from photo free online no blur',
+      'erase text from image zero upload',
+      'remove shot on watermark from phone photo',
+      'clean object eraser online',
+      'photo inpainting tool',
+      'content aware fill free online',
+      'remove date stamp from photo',
+      'ഫോട്ടോയിൽ നിന്ന് വാട്ടർമാർക്ക് മാറ്റാൻ',
+      'ഫോട്ടോയിലെ അനാവശ്യ എഴുത്തുകൾ മായ്ക്കാൻ',
+      'ഫോട്ടോ ക്ലീൻ ചെയ്യാൻ',
+      'फोटो से वॉटरमार्क कैसे हटाएं फ्री',
+      'फोटो से अवांछित टेक्स्ट हटाएं',
+      'फोटो साफ करने वाला टूल ऑनलाइन',
+      'புகைப்படத்திலிருந்து வாட்டர்மார்க் நீக்க',
+      'தேவையற்ற எழுத்துக்களை அழிக்க',
+      'ఫోటో నుండి వాటర్మార్క్ తొలగించడం',
+      'ఫోటోలో అనవసరమైన వాటిని తొలగించండి'
+    ],
+    formulaExplanation: 'Fast Marching Method & Gradient Marching: I(p) = Σ w(p, q) · [I(q) + ∇I(q) · (p - q)] / Σ w(p, q), where w(p, q) = dir(p, q) · dst(p, q) · lev(p, q).',
+    assumptions: [
+      '100% in-browser WebAssembly and Canvas execution',
+      'Zero bytes uploaded to external servers'
+    ],
+    exampleCalculation: {
+      title: 'Erasing Shot On Camera Watermark from 12MP Photo',
+      inputs: {
+        'Resolution': '4000 × 3000 px',
+        'Target Object': 'Shot on Phone brand watermark + Date stamp',
+        'Brush Radius': '24 px',
+        'Algorithm': 'Alexandru Telea Fast Marching Inpainting'
+      },
+      outputs: {
+        'Inpainting Time': '~180ms client-side',
+        'Visual Artifacts': 'Seamless texture reconstruction with zero blur',
+        'Server Upload': '0 bytes'
+      },
+      explanation: 'The algorithm marches inward from surrounding clean pixels, estimating color and directional gradients to reconstruct natural image texture without blurring.'
+    },
+    faqs: [
+      {
+        question: 'How does the inpainting algorithm remove watermarks without blurring?',
+        answer: 'The tool uses the Alexandru Telea Fast Marching inpainting method. It calculates the gradient and distance map from the surrounding clean pixels and seamlessly marches inward, reconstructing the natural background texture.'
+      },
+      {
+        question: 'Are my private photographs uploaded to any cloud server?',
+        answer: 'Never. All computer vision calculations and canvas rendering execute 100% locally in your device browser memory. Zero bytes leave your device.'
+      },
+      {
+        question: 'Can I erase camera "Shot on..." phone watermarks and date stamps?',
+        answer: 'Yes. Simply paint over the phone brand logo, date stamp, or text watermark with the red brush and click "Erase & Inpaint".'
+      },
+      {
+        question: 'Is there a resolution limit or watermark added by IndiaTools?',
+        answer: 'No. There are no resolution caps, no paywalls, and IndiaTools never adds any branding or watermark of its own.'
+      },
+      {
+        question: 'What should I do if I accidentally brush over parts I want to keep?',
+        answer: 'Use the "Eraser" tool to unmask any unwanted brush strokes, or click "Undo" to revert previous brush actions.'
+      }
+    ],
+    relatedSlugs: ['batch-image-watermarker', 'invisible-document-watermarker', 'smart-document-scanner', 'clearcut-ai', 'pixelcraft'],
+    seo: {
+      title: 'Fast Inpainting Watermark Remover & Object Eraser Online | IndiaTools',
+      metaDescription: 'Free online inpainting watermark remover with zero uploads. Erase watermarks, timestamps, logos, and unwanted objects from photos with clean background reconstruction.',
+      keywords: [
+        'fast inpainting watermark remover',
+        'remove watermark from photo free',
+        'object eraser online no blur',
+        'content aware fill in browser',
+        'remove timestamp from image',
+        'clean phone camera watermark'
+      ],
+      canonicalPath: '/tools/fast-inpainting-watermark-remover'
     },
     type: 'image-tool'
   }
