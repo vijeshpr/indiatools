@@ -71,6 +71,8 @@ export function App() {
                 <Route path="/calculators/studio-master-spatial-suite" element={<Navigate to="/tools/studio-master-spatial-suite" replace />} />
                 <Route path="/studio-bass-enhancer" element={<Navigate to="/tools/studio-bass-enhancer" replace />} />
                 <Route path="/calculators/studio-bass-enhancer" element={<Navigate to="/tools/studio-bass-enhancer" replace />} />
+                <Route path="/batch-pdf-password-vault" element={<Navigate to="/tools/batch-pdf-password-vault" replace />} />
+                <Route path="/calculators/batch-pdf-password-vault" element={<Navigate to="/tools/batch-pdf-password-vault" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

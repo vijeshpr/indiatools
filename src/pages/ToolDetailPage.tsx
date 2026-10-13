@@ -70,6 +70,7 @@ import { DtsCinemaReverbTool } from '../imageTools/DtsCinemaReverbTool'
 import { VirtualSurroundUpmixerTool } from '../imageTools/VirtualSurroundUpmixerTool'
 import { StudioMasterSpatialSuiteTool } from '../imageTools/StudioMasterSpatialSuiteTool'
 import { StudioBassEnhancerTool } from '../imageTools/StudioBassEnhancerTool'
+import { BatchPdfPasswordVaultTool } from '../imageTools/BatchPdfPasswordVaultTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -140,6 +141,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'virtual-surround-upmixer': VirtualSurroundUpmixerTool,
   'studio-master-spatial-suite': StudioMasterSpatialSuiteTool,
   'studio-bass-enhancer': StudioBassEnhancerTool,
+  'batch-pdf-password-vault': BatchPdfPasswordVaultTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

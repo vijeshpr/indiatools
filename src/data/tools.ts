@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 18,
+    toolCount: 19,
   },
 }
 
@@ -2728,6 +2728,87 @@ export const TOOLS: ToolDefinition[] = [
         'linkwitz riley bass crossover'
       ],
       canonicalPath: '/tools/studio-bass-enhancer'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'batch-pdf-password-vault',
+    slug: 'batch-pdf-password-vault',
+    title: 'Batch PDF Password Vault & Permissions Manager | IndiaTools',
+    shortTitle: 'PDF Password Vault',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Protect sensitive PDFs with military-grade AES-256/128 encryption, granular printing/copying permissions, or batch-decrypt files 100% locally.',
+    detailedDescription: 'Enterprise-grade client-side PDF security suite powered by QPDF WebAssembly. Encrypt batches of confidential PDFs with ISO 32000 compliant AES-256, set distinct User and Owner passwords, restrict printing, copying, and modification, or strip passwords from unlocked documents with zero server uploads.',
+    iconName: 'Shield',
+    badge: 'New',
+    color: '#F59E0B',
+    tags: ['PDF Security', 'PDF Password', 'PDF Encrypt', 'PDF Decrypt', 'AES-256', 'Permissions Manager', 'QPDF WebAssembly'],
+    searchKeywords: [
+      'batch pdf password protect',
+      'encrypt pdf online free',
+      'aes 256 pdf encryption',
+      'remove pdf password batch',
+      'pdf permissions manager',
+      'lock pdf without uploading',
+      'client side pdf encryptor',
+      'qpdf wasm online'
+    ],
+    formulaExplanation: 'Implements native ISO 32000-2 encryption using 256-bit AES cipher with PBKDF2/SHA-256 key derivation, 32-byte cryptographic salt, and permission flag bitmask encoding in the document trailer dictionary.',
+    assumptions: [
+      '100% private in-browser client-side WebAssembly execution via QPDF 12.3.2',
+      'Zero document uploads or server-side data transmission',
+      'Supports standard AES-256 (ISO 32000-2) and AES-128 (ISO 32000-1) encryption standards'
+    ],
+    exampleCalculation: {
+      title: 'Batch Encryption for Corporate Financial Statements',
+      inputs: {
+        'Files Queued': '15 Confidential Balance Sheets (PDF)',
+        'Cipher Standard': 'AES-256 (ISO 32000-2)',
+        'Permissions Policy': 'Printing Low-Res, Copying Blocked, Editing Blocked'
+      },
+      outputs: {
+        'Security Status': 'Fully Encrypted with User & Owner Keys',
+        'Output Format': 'ZIP Archive Bundle with Manifest'
+      },
+      explanation: 'Applies cryptographic AES-256 locks to all 15 documents concurrently in browser memory within seconds, preserving confidentiality without any cloud exposure.'
+    },
+    faqs: [
+      {
+        question: 'Are my confidential PDF documents uploaded to your server?',
+        answer: 'Never. Processing is 100% client-side inside your browser via local QPDF WebAssembly binaries. Your files, metadata, and passwords never leave your computer.'
+      },
+      {
+        question: 'What is the difference between User Password and Owner Password?',
+        answer: 'The User Password (Open Password) is required to view the document. The Owner Password (Permissions Password) controls restriction changes, allowing you to alter printing or copying rules without sharing your master management key.'
+      },
+      {
+        question: 'What encryption cipher is used?',
+        answer: 'The tool uses standard AES-256 (ISO 32000-2) by default, or AES-128 for legacy reader compatibility. This is genuine cryptographic encryption, not just visual masking.'
+      },
+      {
+        question: 'Can I remove passwords from multiple PDF files at once?',
+        answer: 'Yes. In Unlock mode, enter the correct password once and the tool will batch-decrypt all queued files, stripping passwords and permissions permanently.'
+      },
+      {
+        question: 'What happens if I forget the password I set?',
+        answer: 'Because encryption is cryptographically authentic AES-256, it is impossible to recover or bypass without the password. We recommend noting down your passwords or using our password generator and saving them securely.'
+      }
+    ],
+    relatedSlugs: ['image-to-pdf', 'passport-photo-maker', 'image-compressor-upsc-ssc', 'compress-image-to-20kb'],
+    seo: {
+      title: 'Batch PDF Password Vault & Permissions Manager | IndiaTools',
+      metaDescription: 'Protect PDFs with AES-256 encryption, configure printing & copying permissions, or batch-decrypt documents 100% locally in your browser. Zero file uploads.',
+      keywords: [
+        'batch pdf password',
+        'encrypt pdf online',
+        'aes 256 pdf encryption',
+        'pdf permissions manager',
+        'unlock pdf batch',
+        'private pdf encryptor',
+        'client side pdf tool'
+      ],
+      canonicalPath: '/tools/batch-pdf-password-vault'
     },
     type: 'image-tool'
   }
