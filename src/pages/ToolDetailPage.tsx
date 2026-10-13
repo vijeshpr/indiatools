@@ -74,6 +74,7 @@ import { BatchPdfPasswordVaultTool } from '../imageTools/BatchPdfPasswordVaultTo
 import { ZeroKnowledgeFileVaultTool } from '../imageTools/ZeroKnowledgeFileVaultTool'
 import { InvisibleDocumentWatermarkerTool } from '../imageTools/InvisibleDocumentWatermarkerTool'
 import { SmartDocumentScannerTool } from '../imageTools/SmartDocumentScannerTool'
+import { BatchImageWatermarkerTool } from '../imageTools/BatchImageWatermarkerTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -148,6 +149,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'zero-knowledge-file-vault': ZeroKnowledgeFileVaultTool,
   'invisible-document-watermarker': InvisibleDocumentWatermarkerTool,
   'smart-document-scanner': SmartDocumentScannerTool,
+  'batch-image-watermarker': BatchImageWatermarkerTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

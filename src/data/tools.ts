@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 22,
+    toolCount: 23,
   },
 }
 
@@ -3055,6 +3055,97 @@ export const TOOLS: ToolDefinition[] = [
         'mobile camera document scanner'
       ],
       canonicalPath: '/tools/smart-document-scanner'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'batch-image-watermarker',
+    slug: 'batch-image-watermarker',
+    title: 'Batch Image Watermarker & Multi-Stamp Engine',
+    shortTitle: 'Batch Watermarker',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Watermark hundreds of photos in parallel with custom text, transparent PNG logos, diagonal anti-theft tiling grids, and instant ZIP download.',
+    detailedDescription: 'Professional bulk photo watermarking workstation running 100% locally in your browser. Stamp multiple photographs simultaneously with 9-point anchor alignment, font styling, blend modes, repeated diagonal anti-theft patterns, and zero cloud uploads.',
+    iconName: 'Stamp',
+    badge: 'Flagship',
+    color: '#06B6D4',
+    tags: ['Batch Watermarker', 'Bulk Image Stamp', 'Logo Watermark', 'Photo Protection', 'ZIP Export', 'No Upload'],
+    searchKeywords: [
+      'batch watermark images free online',
+      'add logo to multiple photos at once',
+      'bulk image watermarker no upload zero limit',
+      'protect photos with repeated watermark pattern',
+      'bulk watermark photos',
+      'multi image watermark stamp',
+      'free watermark generator no watermark',
+      'ഒരുമിച്ച് നിരവധി ഫോട്ടോകളിൽ ലോഗോ ചേർക്കാൻ',
+      'ബൾക്ക് ഫോട്ടോ വാട്ടർമാർക്ക് ടൂൾ',
+      'ഫോട്ടോഗ്രാഫർമാർക്ക് ഫോട്ടോകളിൽ പേര് ചേർക്കാൻ',
+      'एक साथ कई फोटो पर वॉटरमार्क लगाएं',
+      'थोक में फोटो पर अपना लोगो लगाएं',
+      'फोटो पर अपना नाम लिखें एक साथ',
+      'ஒரே நேரத்தில் பல புகைப்படங்களில் வாட்டர்மார்க் சேர்க்க',
+      'மொத்தமாக புகைப்படங்களை பாதுகாக்க',
+      'ఒకేసారి అనేక ఫోటోలపై లోగో వేయడం',
+      'బల్క్ వాటర్మార్క్ ఉచితం'
+    ],
+    formulaExplanation: 'Position Anchor: (x, y) = AnchorOffset(W, H, contentW, contentH, anchor, marginX, marginY). Diagonal Tiling: Matrix Translation(W/2, H/2) → Rotate(θ) → Loop(stepX, stepY) across diagonal bounds [-√(W²+H²), +√(W²+H²)].',
+    assumptions: [
+      '100% in-browser memory execution with zero cloud file uploads',
+      'Concurrent worker queue limits memory footprint for 100+ images'
+    ],
+    exampleCalculation: {
+      title: 'Batch Watermarking 50 High-Res Wedding Photos',
+      inputs: {
+        'Total Images': '50 photos (180 MB)',
+        'Watermark Mode': 'Dual Stamp (Text + PNG Studio Logo)',
+        'Position': 'Bottom-Right (4% margin) + Diagonal Tiling',
+        'Output Format': 'Original JPEG (92% Quality)'
+      },
+      outputs: {
+        'Processing Time': '~3.2 seconds client-side',
+        'Memory Transferred': '0 bytes to external servers',
+        'Export Archive': 'Single compressed ZIP download'
+      },
+      explanation: 'Each photo is processed concurrently using browser OffscreenCanvas buffers and packaged into an organized ZIP archive ready for client delivery.'
+    },
+    faqs: [
+      {
+        question: 'How many photos can I watermark simultaneously?',
+        answer: 'There are no artificial limits. You can drag and drop 100+ high-resolution camera photos at once. Processing runs in parallel using modern browser multi-threading.'
+      },
+      {
+        question: 'Are my private photographs uploaded to any cloud server?',
+        answer: 'Never. All watermarking, font rendering, logo blending, and ZIP packaging execute 100% locally in your browser memory. Zero bytes leave your device.'
+      },
+      {
+        question: 'Does IndiaTools add any watermark or logo of its own?',
+        answer: 'Absolutely not. Only your specified custom text or uploaded brand logo will appear on the processed photos.'
+      },
+      {
+        question: 'How does the anti-theft diagonal tiling watermark work?',
+        answer: 'When diagonal tiling is enabled, your text or logo is repeated diagonally across the entire surface of each photograph. This prevents unauthorized cropping of corner stamps.'
+      },
+      {
+        question: 'Can I download all processed images in a single ZIP file?',
+        answer: 'Yes. Once batch processing completes, click "Download All as ZIP" to receive a clean, organized ZIP archive containing all stamped photos with original or custom formats.'
+      }
+    ],
+    relatedSlugs: ['invisible-document-watermarker', 'smart-document-scanner', 'image-to-pdf', 'clearcut-ai', 'pixelcraft'],
+    seo: {
+      title: 'Batch Image Watermarker & Multi-Stamp Engine Online | IndiaTools',
+      metaDescription: 'Free online batch image watermarker with zero uploads. Stamp custom text, PNG logos, and diagonal anti-theft tiling on 100+ photos at once with instant ZIP export.',
+      keywords: [
+        'batch image watermarker',
+        'bulk watermark photos free',
+        'add logo to multiple photos',
+        'photo watermark tool no upload',
+        'protect photographs copyright stamp',
+        'diagonal tiling watermark pattern',
+        'bulk image stamp online'
+      ],
+      canonicalPath: '/tools/batch-image-watermarker'
     },
     type: 'image-tool'
   }

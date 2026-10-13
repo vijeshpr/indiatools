@@ -79,6 +79,8 @@ export function App() {
                 <Route path="/calculators/invisible-document-watermarker" element={<Navigate to="/tools/invisible-document-watermarker" replace />} />
                 <Route path="/smart-document-scanner" element={<Navigate to="/tools/smart-document-scanner" replace />} />
                 <Route path="/calculators/smart-document-scanner" element={<Navigate to="/tools/smart-document-scanner" replace />} />
+                <Route path="/batch-image-watermarker" element={<Navigate to="/tools/batch-image-watermarker" replace />} />
+                <Route path="/calculators/batch-image-watermarker" element={<Navigate to="/tools/batch-image-watermarker" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />
