@@ -65,6 +65,7 @@ import { AiTokenCalculatorTool } from '../calculators/AiTokenCalculatorTool'
 import { SatisfyingRelaxGameTool } from '../components/tools/SatisfyingRelaxGameTool'
 import { AudioConverterTool } from '../imageTools/AudioConverterTool'
 import { OrbitAudioStudioTool } from '../imageTools/OrbitAudioStudioTool'
+import { AudioSpectrumVideoTool } from '../imageTools/AudioSpectrumVideoTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -130,6 +131,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'satisfying-relax-game': SatisfyingRelaxGameTool,
   'audio-converter': AudioConverterTool,
   'orbit-audio-studio': OrbitAudioStudioTool,
+  'audio-spectrum-waveform-video-generator': AudioSpectrumVideoTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

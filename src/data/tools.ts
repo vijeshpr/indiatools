@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 13,
+    toolCount: 14,
   },
 }
 
@@ -2354,6 +2354,78 @@ export const TOOLS: ToolDefinition[] = [
         'free 8d converter no upload'
       ],
       canonicalPath: '/tools/orbit-audio-studio'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'audio-spectrum-waveform-video-generator',
+    slug: 'audio-spectrum-waveform-video-generator',
+    title: 'Free Audio Spectrum & Waveform Video Generator',
+    shortTitle: 'Audio Spectrum Video',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Create high-definition music visualizer and waveform videos from audio in your browser. 100% private with zero file uploads.',
+    detailedDescription: 'Turn songs, beats, and podcasts into reactive music videos for YouTube, Instagram Reels, and TikTok with circular vinyl pulse, linear equalizer bars, glowing neon waveforms, and retro oscilloscopes.',
+    iconName: 'Activity',
+    badge: 'Flagship',
+    color: '#06B6D4',
+    tags: ['Audio Visualizer', 'Spectrum Video', 'Waveform Video', 'Music Video Maker', 'Audio To Video'],
+    searchKeywords: [
+      'audio spectrum video generator',
+      'audio visualizer maker',
+      'music waveform video online',
+      'youtube music visualizer',
+      'audio to video generator',
+      'free audio spectrum visualizer'
+    ],
+    formulaExplanation: 'Real-time Fast Fourier Transform (FFT) analysis decomposes audio into frequency bins and time-domain waveforms, driving reactive Canvas renderers recorded via Web MediaRecorder.',
+    assumptions: [
+      '100% client-side Web Audio API and HTML5 Canvas processing',
+      'Real-time synchronous recording ensures sample-accurate audio and visual sync'
+    ],
+    exampleCalculation: {
+      title: 'YouTube Music Visualizer Video Render',
+      inputs: {
+        'Audio Track': 'Stereo MP3 (320 kbps, 44.1 kHz)',
+        'Preset Style': 'Circular Pulse (Vinyl & Radial Halo)',
+        'Aspect Ratio': '16:9 Landscape (1920x1080 HD)'
+      },
+      outputs: {
+        'Render Quality': '60 FPS Full HD with lossless audio sync',
+        'Privacy': '100% Client-Side In-Browser Video Export (Zero Upload)'
+      },
+      explanation: 'Real-time FFT audio analysis decomposes frequency bands, driving the glowing circular spectrum halo synchronized with lossless audio capture.'
+    },
+    faqs: [
+      {
+        question: 'Are my audio files or images uploaded to any server?',
+        answer: 'Never. The entire visualizer rendering and video capture pipeline runs 100% locally in your web browser using HTML5 Canvas and the Web Audio API. Your files never leave your device.'
+      },
+      {
+        question: 'What video formats can I export?',
+        answer: 'Videos are exported directly as MP4 (H.264/AAC) or WebM (VP9/Opus) depending on your browser platform, with high-bitrate synchronized audio ready for direct upload to YouTube, Instagram, and TikTok.'
+      },
+      {
+        question: 'Can I create vertical videos for Instagram Reels and YouTube Shorts?',
+        answer: 'Yes! Select the 9:16 aspect ratio preset for vertical video output specifically designed for Instagram Reels, TikTok, and YouTube Shorts.'
+      },
+      {
+        question: 'Is there any watermark, limit, or fee?',
+        answer: 'No. This tool is 100% free with no watermark, no signup, no subscriptions, and no length restrictions.'
+      }
+    ],
+    relatedSlugs: ['orbit-audio-studio', 'audio-converter', 'pixelcraft', 'satisfying-relax-game'],
+    seo: {
+      title: 'Free Audio Spectrum & Waveform Video Generator | IndiaTools',
+      metaDescription: 'Create stunning audio visualizer and waveform videos for YouTube, Reels, and Shorts. 100% in-browser rendering with zero file uploads.',
+      keywords: [
+        'audio spectrum video generator',
+        'waveform video maker',
+        'audio visualizer online',
+        'music visualizer for youtube',
+        'music video maker free'
+      ],
+      canonicalPath: '/tools/audio-spectrum-waveform-video-generator'
     },
     type: 'image-tool'
   }
