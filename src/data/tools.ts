@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 9,
+    toolCount: 12,
   },
 }
 
@@ -2174,6 +2174,108 @@ export const TOOLS: ToolDefinition[] = [
       canonicalPath: '/calculators/satisfying-relax-game'
     },
     type: 'calculator'
+  },
+  // ==================== AUDIO CONVERTER ====================
+  {
+    id: 'audio-converter',
+    slug: 'audio-converter',
+    title: '100% Free Audio Converter Online — Zero Upload | IndiaTools',
+    shortTitle: 'Audio Converter',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Convert MP3, WAV, M4A, AAC, OGG, FLAC and WebM audio files privately in your browser with zero uploads and instant downloads.',
+    detailedDescription: 'Convert audio files privately in your browser with zero cloud uploads or third-party APIs. Supports bidirectional conversion across MP3, WAV, M4A, AAC, OGG, FLAC, and WebM with advanced bitrate control, resampling, and peak normalization.',
+    iconName: 'Music',
+    badge: 'Popular',
+    color: '#10B981',
+    tags: [
+      'Audio Converter',
+      'MP3 to WAV',
+      'WAV to MP3',
+      'M4A to MP3',
+      'FLAC to MP3',
+      'Audio Compression',
+      'Zero Upload',
+      'Private Audio'
+    ],
+    searchKeywords: [
+      'free audio converter online',
+      'mp3 to wav converter no upload',
+      'wav to mp3 converter',
+      'm4a to mp3 converter online',
+      'flac to mp3 converter',
+      'ogg to mp3 converter',
+      'browser audio format converter',
+      'client side audio converter'
+    ],
+    formulaExplanation: 'Decodes audio bitstreams via browser AudioContext.decodeAudioData() and re-encodes PCM samples via local LAME and linear PCM encoders directly inside browser memory.',
+    assumptions: [
+      '100% client-side Web Audio API execution without server transmission.',
+      'Processing speed depends on local device CPU and memory capabilities.'
+    ],
+    exampleCalculation: {
+      title: 'Voice Memo / Music File Format Conversion',
+      inputs: {
+        'Source Audio': 'Apple Voice Memo (M4A / AAC)',
+        'Output Target': 'MP3 (192 kbps, 44.1 kHz, Stereo)'
+      },
+      outputs: {
+        'Privacy Status': '100% Client-Side In-Browser Conversion',
+        'Output Format': 'Universal MP3 (Lossless Re-encoding)'
+      },
+      explanation: 'Decodes AAC voice memo into raw PCM buffers and encodes into standard universal MP3 with zero server uploads.'
+    },
+    faqs: [
+      {
+        question: 'Is this audio converter completely free?',
+        answer: 'Yes, IndiaTools Audio Converter is 100% free with unlimited conversions. There are no subscriptions, account registrations, paywalls, or daily limits.'
+      },
+      {
+        question: 'Are audio files uploaded to a server?',
+        answer: 'Never. All decoding, processing, and encoding take place 100% locally inside your web browser using HTML5 Web Audio and client-side encoders. Zero audio data, filenames, or metadata are ever transmitted to any external server.'
+      },
+      {
+        question: 'Can I convert MP3 to WAV?',
+        answer: 'Yes! You can instantly convert any MP3 file into studio-grade uncompressed 16-bit linear PCM WAV audio. This is ideal for importing into music production software, digital audio workstations (DAWs), or video editors.'
+      },
+      {
+        question: 'Can I convert WAV to MP3?',
+        answer: 'Yes. You can convert large uncompressed WAV files into lightweight, universally compatible MP3 files with customizable bitrates from 64 kbps up to 320 kbps using our bundled LAME encoder.'
+      },
+      {
+        question: 'Which formats are supported?',
+        answer: 'Input decoding is supported for MP3, WAV, M4A, AAC, OGG, WebM, FLAC, and AIFF. Output encoding is supported for MP3, WAV, and browser-supported streaming formats like WebM and OGG Opus.'
+      },
+      {
+        question: 'Why might some M4A or FLAC files fail?',
+        answer: 'Decoding failures typically occur if an audio file contains proprietary DRM protection (such as copy-protected iTunes purchases), is corrupted, or uses rare proprietary sub-codecs (like ALAC in older containers) that the browser engine cannot decode.'
+      },
+      {
+        question: 'Can I convert large audio files?',
+        answer: 'Yes, files up to 50–100 MB can be converted depending on your device RAM. The engine processes audio in asynchronous chunks to keep your browser responsive and prevent freezing.'
+      },
+      {
+        question: 'Does converting to a higher bitrate improve sound quality?',
+        answer: 'No. If an original file was compressed at 128 kbps, converting it to 320 kbps or WAV will preserve remaining fidelity, but cannot restore acoustic frequencies discarded during the initial compression.'
+      }
+    ],
+    relatedSlugs: ['pixelcraft', 'clearcut-ai', 'satisfying-relax-game', 'ai-token-calculator'],
+    seo: {
+      title: '100% Free Audio Converter Online — Zero Upload | IndiaTools',
+      metaDescription: 'Convert MP3, WAV, M4A, AAC, OGG and FLAC audio formats for free. Zero uploads, private browser-based processing and instant downloads. No registration required.',
+      keywords: [
+        'free audio converter',
+        'audio format converter',
+        'mp3 to wav converter',
+        'wav to mp3',
+        'm4a to mp3 converter',
+        'ogg to mp3',
+        'flac to mp3',
+        'online audio converter no upload'
+      ],
+      canonicalPath: '/tools/audio-converter'
+    },
+    type: 'image-tool'
   }
 ]
 

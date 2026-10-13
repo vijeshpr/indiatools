@@ -63,6 +63,7 @@ import { PixelCraftTool } from '../imageTools/PixelCraftTool'
 import { ClearCutTool } from '../imageTools/ClearCutTool'
 import { AiTokenCalculatorTool } from '../calculators/AiTokenCalculatorTool'
 import { SatisfyingRelaxGameTool } from '../components/tools/SatisfyingRelaxGameTool'
+import { AudioConverterTool } from '../imageTools/AudioConverterTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -126,6 +127,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'clearcut-ai': ClearCutTool,
   'ai-token-calculator': AiTokenCalculatorTool,
   'satisfying-relax-game': SatisfyingRelaxGameTool,
+  'audio-converter': AudioConverterTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'
