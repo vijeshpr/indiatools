@@ -7,6 +7,12 @@
 export type SpatialMode = '8d' | '16d' | 'preset' | 'custom'
 
 export type SpatialPreset =
+  | '360-rotation'
+  | 'flyby'
+  | 'front-back'
+  | 'slow-cinematic'
+  | 'fast-spin'
+  | 'stationary'
   | 'cosmic-orbit'
   | 'deep-space'
   | 'neon-spiral'
@@ -40,6 +46,72 @@ export interface SpatialCoordinate {
 }
 
 export const PRESET_CONFIGS: Record<SpatialPreset, Partial<SpatialOptions>> = {
+  '360-rotation': {
+    speedSec: 8.0,
+    radius: 3.0,
+    direction: 1,
+    elevation: 0.0,
+    depthRatio: 1.0,
+    widthRatio: 1.0,
+    reverbPreset: 'studio',
+    reverbWet: 0.14,
+    bassPreservation: 0.75,
+  },
+  flyby: {
+    speedSec: 6.0,
+    radius: 3.0,
+    direction: 1,
+    elevation: 0.0,
+    depthRatio: 0.8,
+    widthRatio: 1.4,
+    reverbPreset: 'studio',
+    reverbWet: 0.16,
+    bassPreservation: 0.7,
+  },
+  'front-back': {
+    speedSec: 7.5,
+    radius: 3.2,
+    direction: 1,
+    elevation: 0.5,
+    depthRatio: 1.3,
+    widthRatio: 0.6,
+    reverbPreset: 'studio',
+    reverbWet: 0.15,
+    bassPreservation: 0.75,
+  },
+  'slow-cinematic': {
+    speedSec: 16.0,
+    radius: 3.8,
+    direction: 1,
+    elevation: 0.8,
+    depthRatio: 1.1,
+    widthRatio: 1.3,
+    reverbPreset: 'hall',
+    reverbWet: 0.22,
+    bassPreservation: 0.8,
+  },
+  'fast-spin': {
+    speedSec: 4.0,
+    radius: 2.6,
+    direction: 1,
+    elevation: 0.0,
+    depthRatio: 1.0,
+    widthRatio: 1.0,
+    reverbPreset: 'studio',
+    reverbWet: 0.12,
+    bassPreservation: 0.75,
+  },
+  stationary: {
+    speedSec: 8.0,
+    radius: 2.5,
+    direction: 1,
+    elevation: 0.0,
+    depthRatio: 1.0,
+    widthRatio: 1.0,
+    reverbPreset: 'off',
+    reverbWet: 0.0,
+    bassPreservation: 1.0,
+  },
   'cosmic-orbit': {
     speedSec: 9.0,
     radius: 3.2,
@@ -148,8 +220,29 @@ export function getSpatialCoordinates(timeSec: number, options: SpatialOptions):
   let y = 0
   let z = -r // Web Audio convention: -Z is Front, +Z is Back
 
-  if (options.mode === '8d') {
-    // Pure 360-degree horizontal circular orbit
+  if (options.preset === 'stationary') {
+    // Stationary Stereo (fixed front listening position)
+    x = 0
+    y = 0
+    z = -2.5
+  } else if (options.preset === 'flyby') {
+    // Left-to-Right Flyby across front soundstage
+    const phi = Math.sin(theta)
+    x = r * 1.5 * phi * w
+    z = -r * (0.6 + 0.3 * (1 - phi * phi)) * d
+    y = 0
+  } else if (options.preset === 'front-back') {
+    // Front-to-Back Orbit
+    x = r * 0.35 * Math.sin(2 * theta) * w
+    z = -r * Math.cos(theta) * d
+    y = elev * 0.35 * Math.sin(theta)
+  } else if (options.preset === 'slow-cinematic') {
+    // Slow Cinematic Orbit with gentle elevation sweep
+    x = r * 1.25 * Math.sin(theta) * w
+    z = -r * Math.cos(theta) * d
+    y = elev * 0.5 * Math.sin(2 * theta)
+  } else if (options.preset === 'fast-spin' || options.preset === '360-rotation' || options.mode === '8d') {
+    // Pure 360-degree horizontal circular head rotation
     x = r * Math.sin(theta) * w
     z = -r * Math.cos(theta) * d
     y = 0

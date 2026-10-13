@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Compass,
   Headphones,
@@ -14,7 +14,6 @@ import {
   FileAudio,
   Radio,
   SlidersHorizontal,
-  Layers,
   ShieldCheck,
   Cpu,
   Zap,
@@ -23,9 +22,8 @@ import {
   AlertTriangle,
   X,
   FileDown,
-  ChevronRight,
-  Maximize2,
   RotateCw,
+  Power,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -65,21 +63,23 @@ export const OrbitAudioStudioTool: React.FC = () => {
   // Spatial configuration state
   const [options, setOptions] = useState<SpatialOptions>({
     mode: '8d',
-    preset: 'cosmic-orbit',
+    preset: '360-rotation',
     speedSec: 8.0,
     radius: 3.0,
     direction: 1, // Clockwise
-    elevation: 0.8,
+    elevation: 0.0,
     depthRatio: 1.0,
-    widthRatio: 1.1,
+    widthRatio: 1.0,
     reverbPreset: 'studio',
-    reverbWet: 0.16,
+    reverbWet: 0.14,
     bassPreservation: 0.75,
     outputGain: 1.0,
   })
 
+  // 3D Spatial Audio master toggle (ON / OFF)
+  const [isSpatialEnabled, setIsSpatialEnabled] = useState<boolean>(true)
+
   // Playback state
-  const [activePlaybackMode, setActivePlaybackMode] = useState<'spatial' | 'original'>('spatial')
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
   const [currentTime, setCurrentTime] = useState<number>(0)
   const [duration, setDuration] = useState<number>(0)
@@ -104,9 +104,9 @@ export const OrbitAudioStudioTool: React.FC = () => {
   const [exportProgress, setExportProgress] = useState<number>(0)
   const [exportStage, setExportStage] = useState<string>('')
 
-  // Refs for Web Audio graph
+  // Refs for Web Audio graph & robust playback lifecycle
   const audioCtxRef = useRef<AudioContext | null>(null)
-  const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null)
+  const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set())
   const pannerNodeRef = useRef<PannerNode | null>(null)
   const dryGainRef = useRef<GainNode | null>(null)
   const reverbGainRef = useRef<GainNode | null>(null)
@@ -121,12 +121,13 @@ export const OrbitAudioStudioTool: React.FC = () => {
   const animFrameRef = useRef<number | null>(null)
   const trailsRef = useRef<RadarPoint[]>([])
   const isCancelledRef = useRef<boolean>(false)
+  const isStartingPlaybackRef = useRef<boolean>(false)
 
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const waveformCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Get or lazily create AudioContext
+  // Get or lazily create AudioContext with autoplay unlock
   const getAudioContext = useCallback((): AudioContext => {
     if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
       const AudioCtxClass =
@@ -134,41 +135,89 @@ export const OrbitAudioStudioTool: React.FC = () => {
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       audioCtxRef.current = new AudioCtxClass()
     }
-    if (audioCtxRef.current.state === 'suspended') {
-      audioCtxRef.current.resume()
-    }
     return audioCtxRef.current
   }, [])
 
-  // Cleanup on unmount
+  // =========================================================================
+  // CRITICAL FIX: STOP ALL ACTIVE AUDIO INSTANCES & SUSPEND HARDWARE PIPELINE
+  // =========================================================================
+  const stopAllAudio = useCallback((resetPosition = false) => {
+    // 1. Cancel active animation frame loop
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current)
+      animFrameRef.current = null
+    }
+
+    // 2. Stop and disconnect every registered AudioBufferSourceNode immediately
+    activeSourcesRef.current.forEach((src) => {
+      try {
+        src.onended = null // Remove listener to avoid race conditions
+        src.stop(0)
+        src.disconnect()
+      } catch {
+        // Source might already have stopped
+      }
+    })
+    activeSourcesRef.current.clear()
+
+    // 3. Immediately silence master output gain to avoid any reverb tail or residual capacitor bleed
+    if (masterGainRef.current && audioCtxRef.current) {
+      try {
+        masterGainRef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime)
+        masterGainRef.current.gain.setValueAtTime(0, audioCtxRef.current.currentTime)
+      } catch {
+        // ignore
+      }
+    }
+
+    // 4. Suspend AudioContext to guarantee zero hardware audio thread activity
+    if (audioCtxRef.current && audioCtxRef.current.state === 'running') {
+      audioCtxRef.current.suspend().catch(() => {})
+    }
+
+    // 5. Update state
+    setIsPlaying(false)
+    isStartingPlaybackRef.current = false
+
+    if (resetPosition) {
+      playbackOffsetRef.current = 0
+      setCurrentTime(0)
+      trailsRef.current = []
+    }
+  }, [])
+
+  // Component unmount & page navigation cleanup
   useEffect(() => {
     return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
-      if (sourceNodeRef.current) {
-        try {
-          sourceNodeRef.current.stop()
-          sourceNodeRef.current.disconnect()
-        } catch {
-          // ignore
-        }
-      }
+      stopAllAudio(true)
       if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
         try {
-          audioCtxRef.current.close()
+          audioCtxRef.current.close().catch(() => {})
         } catch {
           // ignore
         }
       }
     }
-  }, [])
+  }, [stopAllAudio])
+
+  // Pause playback automatically when tab/window is hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && isPlaying) {
+        pausePlayback()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  })
 
   // Waveform render on progress change
   useEffect(() => {
     const canvas = waveformCanvasRef.current
     if (!canvas) return
     const progress = duration > 0 ? Math.min(1, Math.max(0, currentTime / duration)) : 0
-    renderWaveformOnCanvas(canvas, waveformData, progress, activePlaybackMode === 'spatial')
-  }, [waveformData, currentTime, duration, activePlaybackMode])
+    renderWaveformOnCanvas(canvas, waveformData, progress, isSpatialEnabled)
+  }, [waveformData, currentTime, duration, isSpatialEnabled])
 
   // Canvas resize listener
   useEffect(() => {
@@ -191,14 +240,14 @@ export const OrbitAudioStudioTool: React.FC = () => {
         wave.width = Math.floor(rect.width * dpr)
         wave.height = Math.floor(rect.height * dpr)
         const progress = duration > 0 ? Math.min(1, Math.max(0, currentTime / duration)) : 0
-        renderWaveformOnCanvas(wave, waveformData, progress, activePlaybackMode === 'spatial')
+        renderWaveformOnCanvas(wave, waveformData, progress, isSpatialEnabled)
       }
     }
 
     handleResize()
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [currentCoord, options, waveformData, currentTime, duration, activePlaybackMode])
+  }, [currentCoord, options, waveformData, currentTime, duration, isSpatialEnabled])
 
   // Handle Audio File Loading
   const loadAudioFile = async (file: File) => {
@@ -225,7 +274,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
       setIsMono(detectedMono)
 
       const baseName = file.name.replace(/\.[^/.]+$/, '')
-      setCustomFilename(`${baseName}_8d_orbit`)
+      setCustomFilename(`${baseName}_3d_spatial`)
 
       setLoadingStep('Extracting audio peaks for timeline...')
       const wf = extractWaveformData(buffer, 600)
@@ -264,126 +313,142 @@ export const OrbitAudioStudioTool: React.FC = () => {
   }
 
   // Build / Rebuild Live Web Audio Processing Graph
-  const startPlaybackAt = (offset: number) => {
-    if (!sourceBuffer) return
+  const startPlaybackAt = async (offset: number) => {
+    if (!sourceBuffer || isStartingPlaybackRef.current) return
+    isStartingPlaybackRef.current = true
 
-    const ctx = getAudioContext()
+    // Stop any existing sources first to guarantee NO duplicate instances
+    stopAllAudio(false)
 
-    // 1. Master Output Gain
-    if (!masterGainRef.current) {
-      const master = ctx.createGain()
-      master.gain.value = isMuted ? 0 : volume * options.outputGain
-      master.connect(ctx.destination)
-      masterGainRef.current = master
-    } else {
-      masterGainRef.current.gain.value = isMuted ? 0 : volume * options.outputGain
-    }
-
-    // 2. High-Pass / Low-Pass Crossover for Bass Preservation
-    const crossoverFreq = 130
-    const lp = ctx.createBiquadFilter()
-    lp.type = 'lowpass'
-    lp.frequency.value = crossoverFreq
-    lp.Q.value = 0.7071
-    bassFilterRef.current = lp
-
-    const bassGain = ctx.createGain()
-    bassGain.gain.value = activePlaybackMode === 'spatial' ? options.bassPreservation : 0
-    bassGainRef.current = bassGain
-
-    lp.connect(bassGain)
-    bassGain.connect(masterGainRef.current)
-
-    const hp = ctx.createBiquadFilter()
-    hp.type = 'highpass'
-    hp.frequency.value = crossoverFreq
-    hp.Q.value = 0.7071
-    highPassFilterRef.current = hp
-
-    // 3. Panner Node (HRTF Panning)
-    const panner = ctx.createPanner()
-    panner.panningModel = 'HRTF'
-    panner.distanceModel = 'inverse'
-    panner.refDistance = 1.0
-    panner.maxDistance = 10000
-    panner.rolloffFactor = 0.8
-    panner.coneInnerAngle = 360
-    pannerNodeRef.current = panner
-
-    // Set listener defaults
     try {
-      if (ctx.listener.forwardX) {
-        ctx.listener.forwardX.value = 0
-        ctx.listener.forwardY.value = 0
-        ctx.listener.forwardZ.value = -1
-        ctx.listener.upX.value = 0
-        ctx.listener.upY.value = 1
-        ctx.listener.upZ.value = 0
-      } else {
-        ;(ctx.listener as unknown as { setOrientation: (x: number, y: number, z: number, ux: number, uy: number, uz: number) => void }).setOrientation(0, 0, -1, 0, 1, 0)
+      const ctx = getAudioContext()
+      if (ctx.state === 'suspended') {
+        await ctx.resume()
       }
-    } catch {
-      // ignore
-    }
 
-    hp.connect(panner)
-
-    // Dry spatial gain
-    const dry = ctx.createGain()
-    const wetMix = options.reverbPreset === 'off' ? 0 : options.reverbWet
-    dry.gain.value = activePlaybackMode === 'spatial' ? Math.max(0.6, 1.0 - wetMix * 0.8) : 0
-    dryGainRef.current = dry
-    panner.connect(dry)
-    dry.connect(masterGainRef.current)
-
-    // Wet reverb branch
-    const reverbGain = ctx.createGain()
-    reverbGain.gain.value = activePlaybackMode === 'spatial' && options.reverbPreset !== 'off' ? wetMix : 0
-    reverbGainRef.current = reverbGain
-
-    if (options.reverbPreset !== 'off') {
-      const convolver = ctx.createConvolver()
-      convolver.buffer = createSyntheticImpulseResponse(ctx, options.reverbPreset)
-      panner.connect(convolver)
-      convolver.connect(reverbGain)
-      reverbGain.connect(masterGainRef.current)
-    }
-
-    // Bypass branch for original audio
-    const bypass = ctx.createGain()
-    bypass.gain.value = activePlaybackMode === 'original' ? 1.0 : 0
-    bypassGainRef.current = bypass
-    bypass.connect(masterGainRef.current)
-
-    // 4. Source Node
-    const source = ctx.createBufferSource()
-    source.buffer = sourceBuffer
-    source.loop = isLooping
-
-    // Connect source to crossover and bypass
-    source.connect(lp)
-    source.connect(hp)
-    source.connect(bypass)
-
-    const boundedOffset = Math.max(0, Math.min(sourceBuffer.duration, offset))
-    playbackStartTimeRef.current = ctx.currentTime
-    playbackOffsetRef.current = boundedOffset
-
-    source.onended = () => {
-      if (!isLooping && isPlaying) {
-        setIsPlaying(false)
-        setCurrentTime(0)
-        playbackOffsetRef.current = 0
-        if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
+      // 1. Master Output Gain Node
+      if (!masterGainRef.current) {
+        const master = ctx.createGain()
+        master.connect(ctx.destination)
+        masterGainRef.current = master
       }
+
+      // Set master volume
+      const targetGain = isMuted ? 0 : volume * options.outputGain
+      masterGainRef.current.gain.cancelScheduledValues(ctx.currentTime)
+      masterGainRef.current.gain.setValueAtTime(targetGain, ctx.currentTime)
+
+      // 2. High-Pass / Low-Pass Crossover for Bass Preservation
+      const crossoverFreq = 130
+      const lp = ctx.createBiquadFilter()
+      lp.type = 'lowpass'
+      lp.frequency.value = crossoverFreq
+      lp.Q.value = 0.7071
+      bassFilterRef.current = lp
+
+      const bassGain = ctx.createGain()
+      bassGain.gain.value = isSpatialEnabled ? options.bassPreservation : 0
+      bassGainRef.current = bassGain
+
+      lp.connect(bassGain)
+      bassGain.connect(masterGainRef.current)
+
+      const hp = ctx.createBiquadFilter()
+      hp.type = 'highpass'
+      hp.frequency.value = crossoverFreq
+      hp.Q.value = 0.7071
+      highPassFilterRef.current = hp
+
+      // 3. Panner Node (HRTF Panning)
+      const panner = ctx.createPanner()
+      panner.panningModel = 'HRTF'
+      panner.distanceModel = 'inverse'
+      panner.refDistance = 1.0
+      panner.maxDistance = 10000
+      panner.rolloffFactor = 0.8
+      panner.coneInnerAngle = 360
+      pannerNodeRef.current = panner
+
+      // Set initial listener position
+      try {
+        if (ctx.listener.forwardX) {
+          ctx.listener.forwardX.value = 0
+          ctx.listener.forwardY.value = 0
+          ctx.listener.forwardZ.value = -1
+          ctx.listener.upX.value = 0
+          ctx.listener.upY.value = 1
+          ctx.listener.upZ.value = 0
+        } else {
+          ;(ctx.listener as unknown as { setOrientation: (x: number, y: number, z: number, ux: number, uy: number, uz: number) => void }).setOrientation(0, 0, -1, 0, 1, 0)
+        }
+      } catch {
+        // ignore
+      }
+
+      hp.connect(panner)
+
+      // Dry spatial gain
+      const dry = ctx.createGain()
+      const wetMix = options.reverbPreset === 'off' ? 0 : options.reverbWet
+      dry.gain.value = isSpatialEnabled ? Math.max(0.6, 1.0 - wetMix * 0.8) : 0
+      dryGainRef.current = dry
+      panner.connect(dry)
+      dry.connect(masterGainRef.current)
+
+      // Wet reverb branch
+      const reverbGain = ctx.createGain()
+      reverbGain.gain.value = isSpatialEnabled && options.reverbPreset !== 'off' ? wetMix : 0
+      reverbGainRef.current = reverbGain
+
+      if (options.reverbPreset !== 'off') {
+        const convolver = ctx.createConvolver()
+        convolver.buffer = createSyntheticImpulseResponse(ctx, options.reverbPreset)
+        panner.connect(convolver)
+        convolver.connect(reverbGain)
+        reverbGain.connect(masterGainRef.current)
+      }
+
+      // Bypass branch for stereo playback when 3D Spatial is disabled
+      const bypass = ctx.createGain()
+      bypass.gain.value = isSpatialEnabled ? 0 : 1.0
+      bypassGainRef.current = bypass
+      bypass.connect(masterGainRef.current)
+
+      // 4. Source Node
+      const source = ctx.createBufferSource()
+      source.buffer = sourceBuffer
+      source.loop = isLooping
+
+      // Connect source to crossover and bypass
+      source.connect(lp)
+      source.connect(hp)
+      source.connect(bypass)
+
+      const boundedOffset = Math.max(0, Math.min(sourceBuffer.duration, offset))
+      playbackStartTimeRef.current = ctx.currentTime
+      playbackOffsetRef.current = boundedOffset
+
+      // Register source in active registry
+      activeSourcesRef.current.add(source)
+
+      source.onended = () => {
+        activeSourcesRef.current.delete(source)
+        if (!isLooping && isPlaying) {
+          stopAllAudio(true)
+        }
+      }
+
+      source.start(0, boundedOffset)
+      setIsPlaying(true)
+      isStartingPlaybackRef.current = false
+
+      // Launch 60fps telemetry and radar update loop
+      startTelemetryLoop()
+    } catch (err: unknown) {
+      console.error('Playback initialization error', err)
+      stopAllAudio(false)
+      isStartingPlaybackRef.current = false
     }
-
-    source.start(0, boundedOffset)
-    sourceNodeRef.current = source
-    setIsPlaying(true)
-
-    // Launch 60fps telemetry and radar update loop
-    startTelemetryLoop()
   }
 
   // 60 FPS Telemetry & Visualizer Animation Loop
@@ -400,9 +465,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
       const cur = playbackOffsetRef.current + elapsed
 
       if (cur >= duration && !isLooping) {
-        setIsPlaying(false)
-        setCurrentTime(0)
-        playbackOffsetRef.current = 0
+        stopAllAudio(true)
         return
       }
 
@@ -414,12 +477,12 @@ export const OrbitAudioStudioTool: React.FC = () => {
       setCurrentCoord(coord)
 
       // Update PannerNode position dynamically in real time
-      if (pannerNodeRef.current) {
+      if (pannerNodeRef.current && isSpatialEnabled) {
         try {
           if (pannerNodeRef.current.positionX) {
-            pannerNodeRef.current.positionX.value = coord.x
-            pannerNodeRef.current.positionY.value = coord.y
-            pannerNodeRef.current.positionZ.value = coord.z
+            pannerNodeRef.current.positionX.setValueAtTime(coord.x, ctx.currentTime)
+            pannerNodeRef.current.positionY.setValueAtTime(coord.y, ctx.currentTime)
+            pannerNodeRef.current.positionZ.setValueAtTime(coord.z, ctx.currentTime)
           } else {
             ;(pannerNodeRef.current as unknown as { setPosition: (x: number, y: number, z: number) => void }).setPosition(coord.x, coord.y, coord.z)
           }
@@ -456,50 +519,27 @@ export const OrbitAudioStudioTool: React.FC = () => {
     animFrameRef.current = requestAnimationFrame(updateFrame)
   }
 
-  // Pause playback
-  const pausePlayback = () => {
-    if (!sourceNodeRef.current || !audioCtxRef.current) return
-    const ctx = audioCtxRef.current
-    const elapsed = ctx.currentTime - playbackStartTimeRef.current
-    const newOffset = Math.min(duration, playbackOffsetRef.current + elapsed)
-    playbackOffsetRef.current = newOffset
-    setCurrentTime(newOffset)
-
-    try {
-      sourceNodeRef.current.stop()
-      sourceNodeRef.current.disconnect()
-    } catch {
-      // ignore
+  // Pause playback: saves current playback offset, kills all nodes & suspends AudioContext
+  const pausePlayback = useCallback(() => {
+    if (audioCtxRef.current && isPlaying) {
+      const elapsed = audioCtxRef.current.currentTime - playbackStartTimeRef.current
+      const currentPos = playbackOffsetRef.current + elapsed
+      const boundedOffset = Math.max(0, Math.min(duration, currentPos))
+      playbackOffsetRef.current = boundedOffset
+      setCurrentTime(boundedOffset)
     }
-    sourceNodeRef.current = null
-    setIsPlaying(false)
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
-  }
+    stopAllAudio(false)
+  }, [duration, isPlaying, stopAllAudio])
 
-  // Stop playback completely
-  const stopPlayback = () => {
-    if (sourceNodeRef.current) {
-      try {
-        sourceNodeRef.current.stop()
-        sourceNodeRef.current.disconnect()
-      } catch {
-        // ignore
-      }
-      sourceNodeRef.current = null
-    }
-    setIsPlaying(false)
-    setCurrentTime(0)
-    playbackOffsetRef.current = 0
-    trailsRef.current = []
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
-
-    // Redraw radar at start position
-    const init = getSpatialCoordinates(0, options)
-    setCurrentCoord(init)
+  // Stop playback: kills all nodes, suspends AudioContext, resets playhead to 0
+  const stopPlayback = useCallback(() => {
+    stopAllAudio(true)
+    const initCoord = getSpatialCoordinates(0, options)
+    setCurrentCoord(initCoord)
     if (radarCanvasRef.current) {
-      renderSpatialRadar(radarCanvasRef.current, init, options, [])
+      renderSpatialRadar(radarCanvasRef.current, initCoord, options, [])
     }
-  }
+  }, [options, stopAllAudio])
 
   // Play / Pause toggle
   const handleTogglePlay = () => {
@@ -515,14 +555,14 @@ export const OrbitAudioStudioTool: React.FC = () => {
     }
   }
 
-  // Instant A/B Toggle: Spatial vs Original
-  const handleToggleAB = (mode: 'spatial' | 'original') => {
-    setActivePlaybackMode(mode)
+  // 3D Spatial Audio Master Enable / Disable Toggle
+  const handleToggleSpatial = (enabled: boolean) => {
+    setIsSpatialEnabled(enabled)
 
     if (dryGainRef.current && reverbGainRef.current && bassGainRef.current && bypassGainRef.current) {
       const wetMix = options.reverbPreset === 'off' ? 0 : options.reverbWet
 
-      if (mode === 'spatial') {
+      if (enabled) {
         dryGainRef.current.gain.value = Math.max(0.6, 1.0 - wetMix * 0.8)
         reverbGainRef.current.gain.value = options.reverbPreset !== 'off' ? wetMix : 0
         bassGainRef.current.gain.value = options.bassPreservation
@@ -549,19 +589,11 @@ export const OrbitAudioStudioTool: React.FC = () => {
     playbackOffsetRef.current = seekTime
 
     if (isPlaying) {
-      if (sourceNodeRef.current) {
-        try {
-          sourceNodeRef.current.stop()
-          sourceNodeRef.current.disconnect()
-        } catch {
-          // ignore
-        }
-      }
       startPlaybackAt(seekTime)
     }
   }
 
-  // Apply Preset
+  // Apply Movement Preset
   const handleApplyPreset = (presetKey: SpatialPreset) => {
     const config = PRESET_CONFIGS[presetKey]
     const next: SpatialOptions = {
@@ -572,8 +604,15 @@ export const OrbitAudioStudioTool: React.FC = () => {
     }
     setOptions(next)
 
+    // If stationary preset chosen, set spatial mode appropriately
+    if (presetKey === 'stationary') {
+      setIsSpatialEnabled(false)
+    } else {
+      setIsSpatialEnabled(true)
+    }
+
     // Update active gains immediately if currently playing
-    if (reverbGainRef.current && dryGainRef.current && bassGainRef.current && activePlaybackMode === 'spatial') {
+    if (reverbGainRef.current && dryGainRef.current && bassGainRef.current && isSpatialEnabled) {
       const wetMix = next.reverbPreset === 'off' ? 0 : next.reverbWet
       dryGainRef.current.gain.value = Math.max(0.6, 1.0 - wetMix * 0.8)
       reverbGainRef.current.gain.value = next.reverbPreset !== 'off' ? wetMix : 0
@@ -583,20 +622,26 @@ export const OrbitAudioStudioTool: React.FC = () => {
     showToast(`Loaded "${presetKey.replace('-', ' ').toUpperCase()}" preset!`, 'info')
   }
 
-  // Volume
+  // Volume Change
   const handleVolumeChange = (newVol: number) => {
     setVolume(newVol)
     setIsMuted(false)
-    if (masterGainRef.current) {
-      masterGainRef.current.gain.value = newVol * options.outputGain
+    if (masterGainRef.current && audioCtxRef.current) {
+      masterGainRef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime)
+      masterGainRef.current.gain.setValueAtTime(newVol * options.outputGain, audioCtxRef.current.currentTime)
     }
   }
 
+  // Mute Toggle (Immediate complete silence)
   const handleToggleMute = () => {
-    const next = !isMuted
-    setIsMuted(next)
-    if (masterGainRef.current) {
-      masterGainRef.current.gain.value = next ? 0 : volume * options.outputGain
+    const nextMuted = !isMuted
+    setIsMuted(nextMuted)
+    if (masterGainRef.current && audioCtxRef.current) {
+      masterGainRef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime)
+      masterGainRef.current.gain.setValueAtTime(
+        nextMuted ? 0 : volume * options.outputGain,
+        audioCtxRef.current.currentTime
+      )
     }
   }
 
@@ -677,7 +722,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
         {/* MAIN FUTURISTIC STUDIO WORKSPACE                                          */}
         {/* ========================================================================= */}
         <div className="rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-4 sm:p-6 lg:p-8 text-white relative overflow-hidden">
-          {/* Ambient Studio Lighting (Electric Violet & Cyan) */}
+          {/* Ambient Studio Lighting */}
           <div className="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
           <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -691,11 +736,11 @@ export const OrbitAudioStudioTool: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-black tracking-tight text-white">Orbit Audio Studio</h2>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    8D &amp; 16D Spatial
+                    3D Headphone Spatial
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 font-medium">
-                  Turn ordinary tracks into immersive spatial journeys • 100% Client-Side HRTF Engine
+                  Binaural 360° sound movement around the listener • 100% Client-Side HRTF Engine
                 </p>
               </div>
             </div>
@@ -734,18 +779,37 @@ export const OrbitAudioStudioTool: React.FC = () => {
             </div>
           </div>
 
-          {/* Headphone Recommendation Badge */}
-          <div className="mb-6 p-3 rounded-2xl bg-cyan-950/40 border border-cyan-800/50 text-cyan-200 text-xs flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <Headphones className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span>
-                <strong>Headphones Recommended:</strong> Binaural HRTF spatial audio requires stereo headphones
-                to perceive genuine 360-degree rotation around your head.
-              </span>
+          {/* Headphone Recommendation & 3D Spatial Master Toggle Bar */}
+          <div className="mb-6 p-4 rounded-2xl bg-cyan-950/40 border border-cyan-800/50 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-cyan-900/50 flex items-center justify-center text-cyan-300">
+                <Headphones className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-bold text-cyan-200">
+                  Headphone-Based 3D Spatial Audio Experience
+                </p>
+                <p className="text-[11px] text-cyan-300/80">
+                  Binaural HRTF simulates acoustic waves traveling around your head. Wear stereo headphones for the 360° illusion.
+                </p>
+              </div>
             </div>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-900/80 text-cyan-300 border border-cyan-700/60 shrink-0 hidden sm:inline">
-              Binaural HRTF
-            </span>
+
+            {/* Master 3D Spatial Toggle Button */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleToggleSpatial(!isSpatialEnabled)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition border cursor-pointer ${
+                  isSpatialEnabled
+                    ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-white border-cyan-400 shadow-md shadow-cyan-500/25'
+                    : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                }`}
+              >
+                <Power className="w-3.5 h-3.5" />
+                <span>3D Spatial Mode: {isSpatialEnabled ? 'ENABLED' : 'BYPASSED'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Error & Warnings */}
@@ -759,7 +823,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setFileError(null)}
-                className="text-rose-400 hover:text-white"
+                className="text-rose-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -770,8 +834,8 @@ export const OrbitAudioStudioTool: React.FC = () => {
             <div className="mb-6 p-3.5 rounded-2xl bg-amber-950/40 border border-amber-800/60 text-amber-200 text-xs flex items-start gap-2.5">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <strong>Mono Recording Detected:</strong> Mono tracks will orbit around the listener smoothly,
-                though stereo multi-track songs provide richer spatial dimension.
+                <strong>Mono Recording Detected:</strong> Audio will orbit in 360° space smoothly, though stereo multi-track
+                recordings provide deeper spatial dimension.
               </div>
             </div>
           )}
@@ -780,8 +844,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
             <div className="mb-6 p-3.5 rounded-2xl bg-purple-950/40 border border-purple-800/60 text-purple-200 text-xs flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
               <div>
-                <strong>Large Audio File (&gt;60MB):</strong> High memory usage. Processing is chunked to keep
-                your browser responsive.
+                <strong>Large Audio File (&gt;60MB):</strong> High browser memory usage. Processing runs in chunked slices.
               </div>
             </div>
           )}
@@ -856,7 +919,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
           {/* ========================================================================= */}
           {sourceBuffer && !isLoading && (
             <div className="space-y-6">
-              {/* File Info & A/B Comparison Toggle */}
+              {/* File Info Bar */}
               <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300">
@@ -880,9 +943,9 @@ export const OrbitAudioStudioTool: React.FC = () => {
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800">
                   <button
                     type="button"
-                    onClick={() => handleToggleAB('spatial')}
+                    onClick={() => handleToggleSpatial(true)}
                     className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      activePlaybackMode === 'spatial'
+                      isSpatialEnabled
                         ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/20'
                         : 'text-slate-400 hover:text-white'
                     }`}
@@ -893,15 +956,15 @@ export const OrbitAudioStudioTool: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => handleToggleAB('original')}
+                    onClick={() => handleToggleSpatial(false)}
                     className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      activePlaybackMode === 'original'
+                      !isSpatialEnabled
                         ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     <Radio className="w-3.5 h-3.5" />
-                    <span>Original Stereo Bypass</span>
+                    <span>Stationary Stereo Bypass</span>
                   </button>
                 </div>
               </div>
@@ -916,7 +979,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
                       <span>Live Acoustic Radar</span>
                     </span>
                     <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">
-                      HRTF Synchronized
+                      {isSpatialEnabled ? 'HRTF Synchronized' : 'Bypassed (Center)'}
                     </span>
                   </div>
 
@@ -935,90 +998,53 @@ export const OrbitAudioStudioTool: React.FC = () => {
                       <strong className="text-cyan-400">{options.speedSec.toFixed(1)}s / orbit</strong>
                     </span>
                     <span>
-                      Mode:{' '}
-                      <strong className="text-purple-400 uppercase">{options.mode}</strong>
+                      Preset:{' '}
+                      <strong className="text-purple-400 uppercase">{options.preset.replace('-', ' ')}</strong>
                     </span>
                   </div>
                 </div>
 
-                {/* 2. Trajectory Mode & Orbit Customization (7 Cols on LG) */}
+                {/* 2. Sound Movement Presets & Orbit Customization (7 Cols on LG) */}
                 <div className="lg:col-span-7 rounded-2xl bg-slate-950/70 border border-slate-800 p-5 space-y-5">
-                  {/* Mode Tabs */}
-                  <div>
-                    <label className="text-xs font-bold text-slate-300 mb-2 block">Spatial Effect Style</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setOptions({ ...options, mode: '8d' })}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
-                          options.mode === '8d'
-                            ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md shadow-cyan-500/20'
-                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-                        }`}
-                      >
-                        8D Audio Orbit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setOptions({ ...options, mode: '16d' })}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
-                          options.mode === '16d'
-                            ? 'bg-purple-600 text-white border-purple-500 shadow-md shadow-purple-600/20'
-                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-                        }`}
-                      >
-                        16D Multi-Axis
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setOptions({ ...options, mode: 'custom' })}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
-                          options.mode === 'custom'
-                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/20'
-                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-                        }`}
-                      >
-                        Custom Orbit
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Preset Gallery Carousel/Grid */}
+                  {/* Presets Grid (Featuring all requested sound movement presets) */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-300">Spatial Preset Gallery</label>
-                      <span className="text-[11px] text-slate-500">1-click acoustic profiles</span>
+                      <label className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                        <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
+                        <span>Sound Movement Presets</span>
+                      </label>
+                      <span className="text-[11px] text-slate-500">Instant 3D spatial trajectories</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {(
                         [
-                          { key: 'cosmic-orbit', label: 'Cosmic Orbit' },
-                          { key: 'deep-space', label: 'Deep Space' },
-                          { key: 'neon-spiral', label: 'Neon Spiral' },
-                          { key: 'gentle-8d', label: 'Gentle 8D' },
-                          { key: 'wide-cinema', label: 'Wide Cinema' },
-                          { key: 'floating-dream', label: 'Floating' },
-                          { key: 'figure-eight', label: 'Figure Eight' },
-                          { key: 'pendulum', label: 'Pendulum' },
+                          { key: '360-rotation', label: '360° Head Rotation', desc: 'Smooth horizontal orbit' },
+                          { key: 'flyby', label: 'Left-to-Right Flyby', desc: 'Front soundstage sweep' },
+                          { key: 'front-back', label: 'Front-to-Back Orbit', desc: 'Deep front-to-back arc' },
+                          { key: 'slow-cinematic', label: 'Slow Cinematic', desc: '16s expansive orbit' },
+                          { key: 'fast-spin', label: 'Fast Circular Spin', desc: 'Energetic 4s rotation' },
+                          { key: 'stationary', label: 'Stationary Stereo', desc: 'Fixed centered position' },
                         ] as const
-                      ).map(({ key, label }) => (
+                      ).map(({ key, label, desc }) => (
                         <button
                           key={key}
                           type="button"
                           onClick={() => handleApplyPreset(key)}
-                          className={`p-2 rounded-xl text-xs text-left transition border cursor-pointer truncate ${
+                          className={`p-2.5 rounded-xl text-left transition border cursor-pointer ${
                             options.preset === key
-                              ? 'bg-cyan-950 text-cyan-300 border-cyan-600 font-bold'
-                              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:text-white hover:bg-slate-850'
+                              ? 'bg-cyan-950 text-cyan-300 border-cyan-500 shadow-md shadow-cyan-950'
+                              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:text-white hover:bg-slate-800'
                           }`}
                         >
-                          {label}
+                          <p className="text-xs font-bold text-white truncate">{label}</p>
+                          <p className="text-[10px] text-slate-500 truncate mt-0.5">{desc}</p>
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Sliders Grid */}
+                  {/* Sliders Grid: Speed, Distance Radius, Elevation, Direction */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                     {/* Orbit Speed */}
                     <div className="space-y-1.5">
@@ -1028,7 +1054,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
                       </div>
                       <input
                         type="range"
-                        min="3"
+                        min="2"
                         max="24"
                         step="0.5"
                         value={options.speedSec}
@@ -1036,9 +1062,9 @@ export const OrbitAudioStudioTool: React.FC = () => {
                         className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
                       />
                       <div className="flex justify-between text-[10px] text-slate-500">
-                        <span>3s (Fast)</span>
-                        <span>12s (Standard)</span>
-                        <span>24s (Gentle)</span>
+                        <span>2s (Fast)</span>
+                        <span>8s (Balanced)</span>
+                        <span>24s (Slow)</span>
                       </div>
                     </div>
 
@@ -1050,7 +1076,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
                       </div>
                       <input
                         type="range"
-                        min="1.2"
+                        min="1.0"
                         max="5.0"
                         step="0.2"
                         value={options.radius}
@@ -1058,13 +1084,13 @@ export const OrbitAudioStudioTool: React.FC = () => {
                         className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
                       />
                       <div className="flex justify-between text-[10px] text-slate-500">
-                        <span>1.2m (Close)</span>
+                        <span>1.0m (Close)</span>
                         <span>3.0m (Studio)</span>
                         <span>5.0m (Distant)</span>
                       </div>
                     </div>
 
-                    {/* Elevation Modulation (for 16D and Custom) */}
+                    {/* Elevation Modulation (Y) */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-slate-300 font-medium">Elevation Modulation (Y)</span>
@@ -1208,7 +1234,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
 
                   <p className="text-[11px] text-slate-400 leading-relaxed">
                     Crossover filter keeps frequencies below 130 Hz centered in stereo space, preventing disorientation
-                    and preserving punch.
+                    and preserving kick drum punch.
                   </p>
                 </div>
               </div>
@@ -1229,12 +1255,12 @@ export const OrbitAudioStudioTool: React.FC = () => {
                   <div className="absolute top-2 right-3 pointer-events-none">
                     <span
                       className={`text-[10px] font-mono uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border ${
-                        activePlaybackMode === 'spatial'
+                        isSpatialEnabled
                           ? 'bg-cyan-950/80 text-cyan-400 border-cyan-800'
                           : 'bg-purple-950/80 text-purple-400 border-purple-800'
                       }`}
                     >
-                      {activePlaybackMode === 'spatial' ? '3D Spatial Active' : 'Stereo Bypass Active'}
+                      {isSpatialEnabled ? '3D Headphone Spatial Active' : 'Stereo Bypass Active'}
                     </span>
                   </div>
                 </div>
@@ -1280,7 +1306,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Master Volume */}
+                {/* Master Volume & Mute */}
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
@@ -1452,7 +1478,7 @@ export const OrbitAudioStudioTool: React.FC = () => {
           <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Cpu className="w-5 h-5 text-cyan-500" />
-              <span>How 8D &amp; 16D Spatial Audio Works (Demystifying the Science)</span>
+              <span>How 3D Headphone Spatial Audio Works</span>
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               &quot;8D&quot; and &quot;16D&quot; audio are creative names for <strong>Binaural Spatial Audio</strong>.
@@ -1497,11 +1523,11 @@ export const OrbitAudioStudioTool: React.FC = () => {
 
             <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm space-y-2">
               <p className="font-bold text-slate-900 dark:text-white">
-                Why Sub-Bass Preservation is Essential in 8D Tracks:
+                Why Sub-Bass Preservation is Essential in 3D Tracks:
               </p>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 In music production, low frequencies below 130 Hz (kick drum and sub-bass) carry physical weight and energy.
-                If heavy sub-bass is panned hard to one ear during an 8D orbit, it creates an uncomfortable ear-pressure
+                If heavy sub-bass is panned hard to one ear during a 3D orbit, it creates an uncomfortable ear-pressure
                 sensation and fatigue. Orbit Audio Studio includes a built-in crossover filter that keeps sub-bass frequencies
                 centered while freely orbiting the melodic and vocal frequencies around your head!
               </p>

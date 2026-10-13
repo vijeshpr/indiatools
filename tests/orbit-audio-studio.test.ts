@@ -206,4 +206,45 @@ describe('Orbit Audio Studio — 8D & 16D Spatial Audio Test Suite', () => {
     assert.strictEqual(mp3Blob.type, 'audio/mp3')
     assert.ok(mp3Blob.size > 500)
   })
+
+  it('should verify all 6 required 3D Headphone sound movement presets', () => {
+    const requiredPresets = [
+      '360-rotation',
+      'flyby',
+      'front-back',
+      'slow-cinematic',
+      'fast-spin',
+      'stationary',
+    ] as const
+
+    for (const p of requiredPresets) {
+      assert.ok(PRESET_CONFIGS[p], `Preset ${p} must exist in PRESET_CONFIGS`)
+      const config = PRESET_CONFIGS[p]
+      const opts: SpatialOptions = {
+        mode: p === 'stationary' ? 'preset' : '8d',
+        preset: p,
+        speedSec: config.speedSec || 8.0,
+        radius: config.radius || 3.0,
+        direction: config.direction || 1,
+        elevation: config.elevation || 0.0,
+        depthRatio: config.depthRatio || 1.0,
+        widthRatio: config.widthRatio || 1.0,
+        reverbPreset: config.reverbPreset || 'studio',
+        reverbWet: config.reverbWet || 0.15,
+        bassPreservation: config.bassPreservation || 0.75,
+        outputGain: 1.0,
+      }
+
+      const coord = getSpatialCoordinates(2.0, opts)
+      assert.ok(!isNaN(coord.x), `Preset ${p} X must be valid`)
+      assert.ok(!isNaN(coord.y), `Preset ${p} Y must be valid`)
+      assert.ok(!isNaN(coord.z), `Preset ${p} Z must be valid`)
+
+      if (p === 'stationary') {
+        assert.strictEqual(coord.x, 0, 'Stationary must have X=0')
+        assert.strictEqual(coord.y, 0, 'Stationary must have Y=0')
+        assert.strictEqual(coord.z, -2.5, 'Stationary must have Z=-2.5 (in front)')
+      }
+    }
+  })
 })
