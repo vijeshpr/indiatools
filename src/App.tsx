@@ -75,6 +75,8 @@ export function App() {
                 <Route path="/calculators/batch-pdf-password-vault" element={<Navigate to="/tools/batch-pdf-password-vault" replace />} />
                 <Route path="/zero-knowledge-file-vault" element={<Navigate to="/tools/zero-knowledge-file-vault" replace />} />
                 <Route path="/calculators/zero-knowledge-file-vault" element={<Navigate to="/tools/zero-knowledge-file-vault" replace />} />
+                <Route path="/invisible-document-watermarker" element={<Navigate to="/tools/invisible-document-watermarker" replace />} />
+                <Route path="/calculators/invisible-document-watermarker" element={<Navigate to="/tools/invisible-document-watermarker" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

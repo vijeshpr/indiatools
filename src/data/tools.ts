@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 20,
+    toolCount: 21,
   },
 }
 
@@ -2895,6 +2895,88 @@ export const TOOLS: ToolDefinition[] = [
         'private file encryption tool'
       ],
       canonicalPath: '/tools/zero-knowledge-file-vault'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'invisible-document-watermarker',
+    slug: 'invisible-document-watermarker',
+    title: 'Invisible Document Watermarker & Copyright Tracer Online | IndiaTools',
+    shortTitle: 'Invisible Watermarker',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Inject imperceptible forensic watermarks into documents and images with Unicode zero-width steganography and Canvas LSB modulation. Trace leaks with zero server uploads.',
+    detailedDescription: 'Forensic digital steganography and copyright tracing suite running 100% client-side in browser memory. Armors sensitive contracts, certificates, memos, and images with imperceptible Unicode zero-width tokens and 2D Canvas Least Significant Bit (LSB) spread-spectrum modulation protected by CRC16 and CRC32 polynomial checksums across 23 Indian languages.',
+    iconName: 'ShieldAlert',
+    badge: 'Flagship',
+    color: '#00F2FE',
+    tags: ['Watermarker', 'Steganography', 'Zero Width', 'Forensics', 'Copyright Protection', 'Canvas LSB', 'Document Security'],
+    searchKeywords: [
+      'invisible document watermarker',
+      'unicode zero width steganography',
+      'invisible text watermark',
+      'lsb image watermarking online',
+      'trace document leak',
+      'copyright proof tool',
+      'client side watermark generator',
+      'invisible copyright tracer'
+    ],
+    formulaExplanation: 'Encodes metadata into 2-bit quaternary symbols using non-printing Unicode characters (U+200B, U+200C, U+200D, U+FEFF) at word boundaries for text, and modulates blue channel LSBs (bit 0) with a 32-bit sync preamble and CRC32 checksum for images.',
+    assumptions: [
+      '100% private in-browser memory execution with zero cloud network transmissions',
+      'Unicode text fingerprints survive standard copy-paste operations across modern word processors and PDFs',
+      'Canvas image watermarks survive lossless storage formats (PNG, TIFF) without perceptual distortion'
+    ],
+    exampleCalculation: {
+      title: 'Confidential Executive Memorandum Leak Tracing',
+      inputs: {
+        'Document Text': 'Internal strategy proposal regarding FY 2026-27 strategic acquisition',
+        'Signatory ID': 'EXEC-9042 (Corporate Strategy Directorate)',
+        'Carrier Method': 'Unicode Zero-Width Quaternary Encoding with CRC16 framing'
+      },
+      outputs: {
+        'Injected Codepoints': '64 non-printing tokens (U+200B, U+200C, U+200D, U+FEFF)',
+        'Visual Distortion': '0.00% (Identical character count in standard word view)'
+      },
+      explanation: 'Invisibly embeds signatory ID and UTC timestamp between words, allowing instant forensic verification and leak attribution upon pasting into the decoder.'
+    },
+    faqs: [
+      {
+        question: 'How does invisible text watermarking work?',
+        answer: 'The system serializes tracking metadata (Owner ID, Organization, Reference Key, Timestamp, and CRC16 checksum) into binary quaternary sequences, then encodes them using zero-width Unicode characters (U+200B, U+200C, U+200D, U+FEFF) inserted at word boundaries without disrupting font rendering or layout.'
+      },
+      {
+        question: 'Does the invisible watermark survive copy-pasting?',
+        answer: 'Yes. Modern word processors, PDF generators, email clients, and messaging apps preserve Unicode characters verbatim during standard copy-paste operations. Pasting leaked text into the Forensics panel immediately decodes the embedded signatory and timestamp.'
+      },
+      {
+        question: 'Does it affect Indian language scripts or Arabic/Urdu ligatures?',
+        answer: 'No. Our engine uses an Indic-safe boundary injector that places zero-width sequences strictly at whitespace or sentence boundaries, completely avoiding intra-word ligatures, halants, or chillu characters.'
+      },
+      {
+        question: 'How does invisible image watermarking work?',
+        answer: 'The engine embeds an authenticated bitstream (Sync Preamble, Version, Length, Payload, and 32-bit CRC) directly into the Least Significant Bits (LSB) of the image raster. Because human eyes are least sensitive to subtle blue channel variations, the image remains visually identical to the original.'
+      },
+      {
+        question: 'Are any documents or images uploaded to IndiaTools servers?',
+        answer: 'Never. IndiaTools operates on a zero-knowledge, zero-upload architecture. 100% of the image pixel processing and Unicode steganography occurs inside your browser runtime.'
+      }
+    ],
+    relatedSlugs: ['zero-knowledge-file-vault', 'batch-pdf-password-vault', 'image-to-pdf', 'clearcut-ai'],
+    seo: {
+      title: 'Invisible Document Watermarker & Copyright Tracer Online | IndiaTools',
+      metaDescription: 'Embed invisible watermarks into images and contracts with Unicode zero-width steganography and Canvas LSB modulation. Trace document leaks with zero server uploads.',
+      keywords: [
+        'invisible document watermarker',
+        'unicode zero width steganography',
+        'invisible text watermark',
+        'lsb image watermarking online',
+        'trace document leak',
+        'copyright proof tool',
+        'client side watermark generator',
+        'invisible copyright tracer'
+      ],
+      canonicalPath: '/tools/invisible-document-watermarker'
     },
     type: 'image-tool'
   }

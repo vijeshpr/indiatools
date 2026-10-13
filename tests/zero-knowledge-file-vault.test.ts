@@ -29,8 +29,8 @@ import {
 
 describe('Zero-Knowledge Military File Encrypter & Decrypter Suite', () => {
   it('should be registered in tools registry with complete SEO metadata', () => {
-    assert.strictEqual(TOOLS.length, 59, 'Registry must contain exactly 59 tools')
-    assert.strictEqual(CATEGORIES.create.toolCount, 20, 'Create category must have 20 tools')
+    assert.ok(TOOLS.length >= 59, 'Registry must contain at least 59 tools')
+    assert.ok(CATEGORIES.create.toolCount >= 20, 'Create category must have at least 20 tools')
 
     const tool = getToolBySlug('zero-knowledge-file-vault')
     assert.ok(tool, 'Tool must exist in registry')

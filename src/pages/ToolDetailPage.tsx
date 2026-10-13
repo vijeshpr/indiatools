@@ -72,6 +72,7 @@ import { StudioMasterSpatialSuiteTool } from '../imageTools/StudioMasterSpatialS
 import { StudioBassEnhancerTool } from '../imageTools/StudioBassEnhancerTool'
 import { BatchPdfPasswordVaultTool } from '../imageTools/BatchPdfPasswordVaultTool'
 import { ZeroKnowledgeFileVaultTool } from '../imageTools/ZeroKnowledgeFileVaultTool'
+import { InvisibleDocumentWatermarkerTool } from '../imageTools/InvisibleDocumentWatermarkerTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -144,6 +145,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'studio-bass-enhancer': StudioBassEnhancerTool,
   'batch-pdf-password-vault': BatchPdfPasswordVaultTool,
   'zero-knowledge-file-vault': ZeroKnowledgeFileVaultTool,
+  'invisible-document-watermarker': InvisibleDocumentWatermarkerTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'
