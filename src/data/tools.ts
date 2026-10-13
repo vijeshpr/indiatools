@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 12,
+    toolCount: 13,
   },
 }
 
@@ -2274,6 +2274,86 @@ export const TOOLS: ToolDefinition[] = [
         'online audio converter no upload'
       ],
       canonicalPath: '/tools/audio-converter'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'studio-karaoke-vocal-remover',
+    slug: 'studio-karaoke-vocal-remover',
+    category: 'create',
+    title: 'Studio Karaoke — Vocal Remover & Pitch Shifter',
+    shortTitle: 'Studio Karaoke',
+    description: 'Free in-browser vocal remover and karaoke track generator. Remove vocals from songs, shift pitch, preserve bass and kick drums, and export to WAV or MP3 with zero uploads.',
+    detailedDescription: 'Professional studio-grade vocal remover and pitch shifter operating 100% inside your browser. Features differential stereo phase cancellation, biquad sub-bass preservation, varispeed key transposition, and lossless WAV and MP3 downloads without any cloud uploads.',
+    iconName: 'Music',
+    badge: 'New',
+    color: '#06B6D4',
+    categoryLabel: 'Create',
+    tags: ['karaoke', 'vocal remover', 'pitch shifter', 'instrumental maker', 'audio converter', 'sound', 'music', 'mp3', 'wav'],
+    searchKeywords: [
+      'karaoke maker',
+      'vocal remover',
+      'remove vocals from song',
+      'pitch shifter online',
+      'instrumental generator',
+      'minus one audio',
+      'isolate vocals',
+      'studio karaoke',
+      'free vocal remover no upload'
+    ],
+    formulaExplanation: 'Isolates and subtracts the mono center channel (C = (L + R) / 2) from stereo channels while re-injecting biquad low-pass filtered audio (<140 Hz) to keep the kick drum and bassline powerful.',
+    assumptions: [
+      'Audio is a stereo mix with centered lead vocals and wide instruments.',
+      'Processing is 100% client-side Web Audio DSP with zero server uploads.'
+    ],
+    exampleCalculation: {
+      title: 'Lead Vocal Removal & Instrumental Extraction',
+      inputs: {
+        'Source Audio': 'Stereo Master Track (44.1 kHz, 16-bit)',
+        'DSP Mode': 'Center Cancellation (90%) + Bass Preservation (75%)'
+      },
+      outputs: {
+        'Extracted Audio': 'Clean Instrumental / Karaoke Stem',
+        'Privacy': 'Zero Server Uploads (100% Client DSP)'
+      },
+      explanation: 'Cancels centered vocal frequencies while retaining stereo guitars, keyboards, reverbs, and kick bass.'
+    },
+    faqs: [
+      {
+        question: 'How does in-browser vocal cancellation work?',
+        answer: 'In stereo studio mixing, lead vocals are usually panned dead center (equal amplitude and phase in Left and Right channels). By subtracting the center channel from both sides, centered frequencies cancel each other out while wide-panned guitars, keyboards, and stereo effects remain.'
+      },
+      {
+        question: 'Why is bass preservation important in karaoke tracks?',
+        answer: 'Kick drums and bass instruments are also mixed in the center. Without bass preservation filtering, standard vocal cancellation removes the low-end punch. Our engine isolates frequencies below 140 Hz using a biquad low-pass filter and adds them back into the mix.'
+      },
+      {
+        question: 'Does any audio get uploaded to an external server?',
+        answer: 'No. Every sample is processed entirely within your device browser memory using client-side Web Audio API and WebAssembly. No files or personal data ever leave your computer or phone.'
+      },
+      {
+        question: 'Can I remove vocals from mono recordings?',
+        answer: 'No. Mono audio files have identical left and right channels. Because phase cancellation relies on differences between stereo channels, subtracting mono channels results in complete silence or total attenuation of the entire song.'
+      },
+      {
+        question: 'Can I change the song key to match my singing voice?',
+        answer: 'Yes. Use the Pitch Shifter slider to transpose the key up or down by up to 12 semitones (1 full octave) before exporting.'
+      }
+    ],
+    relatedSlugs: ['audio-converter', 'satisfying-relax-game', 'ai-token-calculator', 'pixelcraft'],
+    seo: {
+      title: 'Studio Karaoke — Free Vocal Remover & Pitch Shifter Online | IndiaTools',
+      metaDescription: 'Free in-browser vocal remover and karaoke track generator. Remove vocals, adjust key pitch, preserve bass and kick drums, and export to WAV or MP3 with zero uploads.',
+      keywords: [
+        'vocal remover',
+        'karaoke maker',
+        'pitch shifter online',
+        'remove vocals from song',
+        'free karaoke converter',
+        'isolate instruments',
+        'mp3 vocal remover no upload'
+      ],
+      canonicalPath: '/tools/studio-karaoke-vocal-remover'
     },
     type: 'image-tool'
   }

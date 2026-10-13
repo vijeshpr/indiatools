@@ -64,6 +64,7 @@ import { ClearCutTool } from '../imageTools/ClearCutTool'
 import { AiTokenCalculatorTool } from '../calculators/AiTokenCalculatorTool'
 import { SatisfyingRelaxGameTool } from '../components/tools/SatisfyingRelaxGameTool'
 import { AudioConverterTool } from '../imageTools/AudioConverterTool'
+import { StudioKaraokeTool } from '../imageTools/StudioKaraokeTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -128,6 +129,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'ai-token-calculator': AiTokenCalculatorTool,
   'satisfying-relax-game': SatisfyingRelaxGameTool,
   'audio-converter': AudioConverterTool,
+  'studio-karaoke-vocal-remover': StudioKaraokeTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'
