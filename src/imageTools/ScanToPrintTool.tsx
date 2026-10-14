@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   Printer,
   Smartphone,
@@ -39,14 +39,27 @@ function generateCleanSessionId(): string {
 }
 
 export const ScanToPrintTool: React.FC = () => {
+  const { langCode } = useParams<{ langCode?: string }>()
   const [searchParams] = useSearchParams()
   const sessionFromUrl = searchParams.get('session')
   const modeFromUrl = searchParams.get('mode')
 
   const tool = getToolBySlug('scan-to-print')
 
-  // Language state (default: English)
-  const [currentLang, setCurrentLang] = useState<SupportedLanguage>('en')
+  // Language state (default: English or from localized URL)
+  const [currentLang, setCurrentLang] = useState<SupportedLanguage>(() => {
+    if (langCode && ['en', 'ml', 'hi', 'ta', 'te'].includes(langCode)) {
+      return langCode as SupportedLanguage
+    }
+    return 'en'
+  })
+
+  useEffect(() => {
+    if (langCode && ['en', 'ml', 'hi', 'ta', 'te'].includes(langCode) && langCode !== currentLang) {
+      setCurrentLang(langCode as SupportedLanguage)
+    }
+  }, [langCode])
+
   const i18n = useMemo(() => I18N_DATA[currentLang] || I18N_DATA.en, [currentLang])
 
   // Session ID & Mode

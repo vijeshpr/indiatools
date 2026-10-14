@@ -194,6 +194,17 @@ async function runAudit() {
   check('Assets: og-image.png exists in public', fs.existsSync('public/og-image.png'));
   check('Assets: favicon.svg exists in public', fs.existsSync('public/favicon.svg'));
   check('Assets: vercel.json SPA rewrite configured', fs.existsSync('vercel.json') && fs.readFileSync('vercel.json', 'utf8').includes('"destination": "/"'));
+  check('Verification: Google Search Console verification HTML file exists and is intact', fs.existsSync('public/google11a4b4cf825c95a6.html') && fs.readFileSync('public/google11a4b4cf825c95a6.html', 'utf8').includes('google11a4b4cf825c95a6'));
+
+  // 6b. Sitemap Quality & Production Host Integrity
+  const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+  const dupes = locs.filter((item, index) => locs.indexOf(item) !== index);
+  check('sitemap.xml: Exactly 101 production URLs with zero duplicates', locs.length === 101 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
+  const nonProd = locs.filter(u => !u.startsWith('https://indiatools-rho.vercel.app/'));
+  check('sitemap.xml: 100% of URLs use canonical production domain https://indiatools-rho.vercel.app', nonProd.length === 0, `${nonProd.length} non-production URLs`);
+  const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);
+  const invalidDates = lastmods.filter(d => !/^\d{4}-\d{2}-\d{2}$/.test(d));
+  check('sitemap.xml: All lastmod dates are valid YYYY-MM-DD format', invalidDates.length === 0, `${invalidDates.length} invalid dates`);
 
   // 7. Cleanliness / Zero Prohibited Domains
   const prohibitedDomains = [
