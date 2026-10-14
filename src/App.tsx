@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './components/common/Toast'
 import { I18nProvider } from './i18n/I18nContext'
@@ -16,8 +16,14 @@ import { AboutPage } from './pages/AboutPage'
 import { ContactPage } from './pages/ContactPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { TermsPage } from './pages/TermsPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 import { IndianChequeStudioTool } from './calculators/IndianChequeStudioTool'
 import { GoldExchangeCalculatorTool } from './calculators/GoldExchangeCalculatorTool'
+
+const LocalizedGoldRedirect: React.FC = () => {
+  const { langCode } = useParams<{ langCode?: string }>()
+  return <Navigate to={langCode ? `/${langCode}/tools/gold-exchange-calculator` : '/calculators/gold-exchange-calculator'} replace />
+}
 
 export function App() {
   return (
@@ -49,12 +55,12 @@ export function App() {
                 <Route path="/category/:categoryId" element={<CategoryPage />} />
                 <Route path="/calculators/indian-cheque-studio" element={<IndianChequeStudioTool />} />
                 <Route path="/calculators/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
-                <Route path="/tools/indian-cheque-studio" element={<IndianChequeStudioTool />} />
-                <Route path="/tools/indian-cheque-studio/:langCode" element={<IndianChequeStudioTool />} />
-                <Route path="/tools/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
+                <Route path="/tools/indian-cheque-studio" element={<Navigate to="/calculators/indian-cheque-studio" replace />} />
+                <Route path="/tools/indian-cheque-studio/:langCode" element={<Navigate to="/calculators/indian-cheque-studio" replace />} />
+                <Route path="/tools/gold-exchange-calculator" element={<Navigate to="/calculators/gold-exchange-calculator" replace />} />
                 <Route path="/calculators/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
                 <Route path="/:langCode/tools/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
-                <Route path="/:langCode/calculators/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
+                <Route path="/:langCode/calculators/gold-exchange-calculator" element={<LocalizedGoldRedirect />} />
                 <Route path="/:langCode/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/:langCode/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/qr-code-generator" element={<Navigate to="/calculators/qr-code-generator" replace />} />
@@ -90,7 +96,7 @@ export function App() {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </div>
 

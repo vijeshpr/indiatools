@@ -177,7 +177,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
 
   const handleSelect = (tool: ToolDefinition) => {
     onClose()
-    const targetPath = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
+    const targetPath = tool.seo.canonicalPath || (tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`)
     navigate(targetPath)
   }
 
@@ -216,7 +216,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type a command or search 63 tools..."
+                placeholder={`Type a command or search ${TOOLS.length} tools...`}
                 className="w-full bg-transparent text-white placeholder-slate-500 focus:outline-none text-base sm:text-lg font-medium selection:bg-cyan-500 selection:text-black"
                 aria-label="Search tools"
               />

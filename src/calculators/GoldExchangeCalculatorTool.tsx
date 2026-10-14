@@ -219,13 +219,15 @@ ${
 - Net Cash Payable: ₹${result.netPayableWithExchangeA.toLocaleString('en-IN')}`
     : ''
 }
-Calculated via IndiaTools (https://indiatools-rho.vercel.app/tools/gold-exchange-calculator)`
+Calculated via IndiaTools (https://indiatools-rho.vercel.app/calculators/gold-exchange-calculator)`
   }
 
-  // Pre-generate hreflangs for SEO
+  // Pre-generate hreflangs for SEO matching sitemap.xml
   const hreflangs = useMemo(() => {
     const list = [
-      { lang: 'en', href: 'https://indiatools-rho.vercel.app/tools/gold-exchange-calculator' },
+      { lang: 'x-default', href: 'https://indiatools-rho.vercel.app/calculators/gold-exchange-calculator' },
+      { lang: 'en', href: 'https://indiatools-rho.vercel.app/calculators/gold-exchange-calculator' },
+      { lang: 'en-IN', href: 'https://indiatools-rho.vercel.app/calculators/gold-exchange-calculator' },
       { lang: 'ml', href: 'https://indiatools-rho.vercel.app/ml/tools/gold-exchange-calculator' },
       { lang: 'hi', href: 'https://indiatools-rho.vercel.app/hi/tools/gold-exchange-calculator' },
       { lang: 'ta', href: 'https://indiatools-rho.vercel.app/ta/tools/gold-exchange-calculator' },
@@ -242,7 +244,7 @@ Calculated via IndiaTools (https://indiatools-rho.vercel.app/tools/gold-exchange
 
   const canonicalPath =
     activeLocale === 'en'
-      ? '/tools/gold-exchange-calculator'
+      ? '/calculators/gold-exchange-calculator'
       : `/${activeLocale}/tools/gold-exchange-calculator`
 
   return (

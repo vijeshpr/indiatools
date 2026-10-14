@@ -88,7 +88,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
 
   const handleSelect = (tool: ToolDefinition) => {
     onClose()
-    const path = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
+    const path = tool.seo.canonicalPath || (tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`)
     navigate(path)
   }
 

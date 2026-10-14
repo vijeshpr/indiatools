@@ -8,6 +8,7 @@ export interface UseSEOProps {
   ogImage?: string
   jsonLd?: Record<string, any>
   hreflangs?: Array<{ lang: string; href: string }>
+  noindex?: boolean
 }
 
 const BASE_URL = 'https://indiatools-rho.vercel.app'
@@ -20,6 +21,7 @@ export function useSEO({
   ogImage = `${BASE_URL}/og-image.png`,
   jsonLd,
   hreflangs,
+  noindex = false,
 }: UseSEOProps) {
   // Route change scroll-to-top (only fires when navigating between routes, never on input change)
   useEffect(() => {
@@ -42,6 +44,15 @@ export function useSEO({
       document.head.appendChild(metaDesc)
     }
     metaDesc.setAttribute('content', description)
+
+    // 2b. Robots directive
+    let robotsMeta = document.querySelector('meta[name="robots"]')
+    if (!robotsMeta) {
+      robotsMeta = document.createElement('meta')
+      robotsMeta.setAttribute('name', 'robots')
+      document.head.appendChild(robotsMeta)
+    }
+    robotsMeta.setAttribute('content', noindex ? 'noindex, follow' : 'index, follow')
 
     // 3. Canonical URL
     const canonicalUrl = `${BASE_URL}${canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`}`.replace(/\/+$/, '') || `${BASE_URL}/`
@@ -107,8 +118,12 @@ export function useSEO({
     }
 
     return () => {
+      const robotsEl = document.querySelector('meta[name="robots"]')
+      if (robotsEl && noindex) {
+        robotsEl.setAttribute('content', 'index, follow')
+      }
       const cleanupHreflangs = document.querySelectorAll('link[rel="alternate"][data-seo-hreflang="true"]')
       cleanupHreflangs.forEach((el) => el.remove())
     }
-  }, [title, description, canonicalPath, ogType, ogImage, jsonLdSerialized, hreflangsSerialized])
+  }, [title, description, canonicalPath, ogType, ogImage, jsonLdSerialized, hreflangsSerialized, noindex])
 }

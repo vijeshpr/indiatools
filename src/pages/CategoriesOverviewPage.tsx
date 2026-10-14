@@ -80,7 +80,7 @@ export const CategoriesOverviewPage: React.FC = () => {
                   {tools.slice(0, 3).map((tool) => (
                     <Link
                       key={tool.id}
-                      to={tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`}
+                      to={tool.seo.canonicalPath || (tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`)}
                       className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 hover:bg-indigo-50/60 hover:text-indigo-700 hover:border-indigo-200 transition-colors"
                     >
                       <span className="truncate font-medium">{tool.title}</span>

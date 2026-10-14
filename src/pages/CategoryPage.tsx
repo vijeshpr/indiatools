@@ -1,11 +1,12 @@
 import React from 'react'
-import { useParams, Link, Navigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { CATEGORIES, getToolsByCategory } from '../data/tools'
 import { ToolCard } from '../components/tools/ToolCard'
 import { ToolCategory } from '../types'
 import { useSEO } from '../hooks/useSEO'
 import { useI18n } from '../i18n/I18nContext'
+import { NotFoundPage } from './NotFoundPage'
 
 export const CategoryPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId: string }>()
@@ -22,6 +23,7 @@ export const CategoryPage: React.FC = () => {
     title: category ? `${catTitle} Tools & Calculators (${catSubtitle}) | IndiaTools` : 'Category | IndiaTools',
     description: catDesc || 'Browse tools and calculators on IndiaTools.',
     canonicalPath: category ? `/category/${category.id}` : '/tools',
+    noindex: !category,
     jsonLd: category
       ? {
           '@context': 'https://schema.org',
@@ -43,7 +45,7 @@ export const CategoryPage: React.FC = () => {
   })
 
   if (!validCategory || !category) {
-    return <Navigate to="/tools" replace />
+    return <NotFoundPage />
   }
 
   return (

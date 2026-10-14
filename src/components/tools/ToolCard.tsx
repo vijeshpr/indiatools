@@ -49,7 +49,7 @@ interface ToolCardProps {
 export const ToolCard: React.FC<ToolCardProps> = ({ tool, index = 0 }) => {
   const { t } = useI18n()
   const IconComponent = ICON_MAP[tool.iconName] || ArrowRight
-  const path = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
+  const path = tool.seo.canonicalPath || (tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`)
 
   return (
     <motion.div

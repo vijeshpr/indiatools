@@ -1,6 +1,7 @@
 import React from 'react'
-import { useParams, Navigate } from 'react-router-dom'
+import { useParams, useLocation, Navigate } from 'react-router-dom'
 import { getToolBySlug } from '../data/tools'
+import { NotFoundPage } from './NotFoundPage'
 
 // Vehicle Calculators
 import { VehicleMileageTool } from '../calculators/VehicleMileageTool'
@@ -161,6 +162,7 @@ import { isValidLocale } from '../i18n/locales'
 
 export const ToolDetailPage: React.FC = () => {
   const { slug, langCode } = useParams<{ slug: string; langCode?: string }>()
+  const location = useLocation()
   const { locale, setLocale } = useI18n()
 
   // Sync route locale if present in URL parameter (e.g. /:langCode/calculators/:slug)
@@ -170,13 +172,18 @@ export const ToolDetailPage: React.FC = () => {
     }
   }, [langCode, locale, setLocale])
 
-  if (!slug) return <Navigate to="/tools" replace />
+  if (!slug) return <NotFoundPage />
 
   const tool = getToolBySlug(slug)
-  if (!tool) return <Navigate to="/tools" replace />
+  if (!tool) return <NotFoundPage />
 
   const Component = TOOL_COMPONENTS[slug]
-  if (!Component) return <Navigate to="/tools" replace />
+  if (!Component) return <NotFoundPage />
+
+  // Enforce single canonical path prefix (e.g. redirect /calculators/50kb-photo to /tools/50kb-photo)
+  if (!langCode && tool.seo.canonicalPath && location.pathname !== tool.seo.canonicalPath) {
+    return <Navigate to={tool.seo.canonicalPath} replace />
+  }
 
   return <Component />
 }

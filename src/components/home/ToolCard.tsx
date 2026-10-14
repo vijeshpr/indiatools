@@ -97,7 +97,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
     return tool.category
   }, [tool.category, tool.slug])
 
-  const targetPath = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
+  const targetPath = tool.seo.canonicalPath || (tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`)
 
   return (
     <div
