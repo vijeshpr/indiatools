@@ -42,30 +42,30 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
       {/* 1. Realistic 3D Indian Flower Garden Stage (Roses, Chendumalli, Jasmine & Climbing Vines) */}
       <BotanicalHero3D />
 
-      {/* 2. Hero Content Container (Deliberate Negative-Space Framing in Center) */}
-      <div className="relative z-10 max-w-4xl mx-auto space-y-6 sm:space-y-8 pointer-events-auto">
+      {/* 2. Hero Content Container (Elevated Frosted Botanical Glass Conservatory Card) */}
+      <div className="relative z-10 max-w-4xl mx-auto p-6 sm:p-10 lg:p-12 rounded-3xl bg-[#06140D]/55 border border-emerald-500/25 backdrop-blur-md shadow-2xl shadow-emerald-950/80 pointer-events-auto space-y-6 sm:space-y-7">
         {/* Eyebrow Badge */}
         <motion.div
-          initial={{ opacity: 0, y: -16 }}
+          initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-[#06140D]/85 border border-[#D8B879]/40 backdrop-blur-xl shadow-2xl shadow-emerald-950/60"
+          transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+          className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-[#06140D]/90 border border-emerald-400/40 backdrop-blur-xl shadow-lg shadow-emerald-950/70"
         >
           <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
           </span>
           <span className="text-xs sm:text-[13px] font-mono tracking-widest uppercase text-[#FDE68A] font-bold">
-            YOUR EVERYDAY DIGITAL TOOLKIT
+            INDIA'S PRACTICAL UTILITY SUITE
           </span>
         </motion.div>
 
         {/* Large, High-Contrast Cinematic Headline */}
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.12 }}
-          className="space-y-4"
+          transition={{ type: 'spring', stiffness: 380, damping: 28, delay: 0.1 }}
+          className="space-y-3.5"
         >
           <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white font-sans leading-[1.04] drop-shadow-md">
             Technology in <br className="hidden sm:inline" />
@@ -75,17 +75,17 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
           </h1>
 
           {/* Supporting Text */}
-          <p className="max-w-2xl mx-auto text-base sm:text-xl text-slate-200 leading-relaxed font-sans font-normal drop-shadow-sm px-2">
-            Powerful browser tools for audio, images, video, documents, finance and everyday work — thoughtfully designed for everyone.
+          <p className="max-w-2xl mx-auto text-base sm:text-xl text-slate-100 leading-relaxed font-sans font-normal drop-shadow-sm px-2">
+            Powerful browser tools for audio, images, video, documents, finance and everyday work — crafted with 100% in-browser privacy.
           </p>
         </motion.div>
 
         {/* Action CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="flex flex-wrap items-center justify-center gap-4 pt-2"
+          transition={{ type: 'spring', stiffness: 380, damping: 28, delay: 0.2 }}
+          className="flex flex-wrap items-center justify-center gap-4 pt-1"
         >
           {/* Primary CTA */}
           <button
@@ -110,10 +110,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
 
         {/* Global Command Search Bar Input */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          className="max-w-xl mx-auto pt-2"
+          transition={{ type: 'spring', stiffness: 380, damping: 28, delay: 0.28 }}
+          className="max-w-xl mx-auto pt-1"
         >
           <div
             onClick={handleTriggerSearch}
@@ -145,8 +145,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.45 }}
-          className="pt-2 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-mono text-slate-300"
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="pt-1 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-mono text-slate-300"
         >
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/60 border border-emerald-500/20 backdrop-blur-md">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -161,6 +161,29 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
             <span>{TOOLS.length} Production Utilities</span>
           </div>
         </motion.div>
+
+        {/* Botanical Species Ribbon */}
+        <div className="pt-2 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[11px] font-mono text-emerald-300/80 border-t border-white/10">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+            <span>Velvety Red Roses</span>
+          </span>
+          <span>•</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+            <span>Pink Stargazer Lilies</span>
+          </span>
+          <span>•</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-200" />
+            <span>White Star Jasmine</span>
+          </span>
+          <span>•</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+            <span>Exotic Orchids</span>
+          </span>
+        </div>
       </div>
 
       <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
