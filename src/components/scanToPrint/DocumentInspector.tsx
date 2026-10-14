@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
   Printer,
   Trash2,
@@ -9,6 +10,9 @@ import {
   Copy,
   Layers,
   ZoomIn,
+  ChevronLeft,
+  ChevronRight,
+  ShieldAlert,
 } from 'lucide-react'
 import { ReceivedDocument } from '../../types/p2pPrint'
 import { I18nContent } from './scanToPrintI18n'
@@ -32,17 +36,82 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
 }) => {
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait')
   const [previewZoom, setPreviewZoom] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isPurging, setIsPurging] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
 
   const isPdf = document.type.includes('pdf')
   const isImage = document.type.startsWith('image/')
   const isBw = document.preferences.colorMode === 'bw'
+  const totalPages = Math.max(1, document.pageCount || 1)
+
+  const springPhysics = {
+    type: 'spring' as const,
+    stiffness: 380,
+    damping: 28,
+  }
 
   const toggleOrientation = () => {
     setOrientation((prev) => (prev === 'portrait' ? 'landscape' : 'portrait'))
   }
 
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((p) => p + 1)
+    }
+  }
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((p) => p - 1)
+    }
+  }
+
+  const handlePurgeWithFeedback = () => {
+    setIsPurging(true)
+    setTimeout(() => {
+      onPurge()
+    }, 320)
+  }
+
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-slate-900/90 border border-emerald-500/30 backdrop-blur-xl shadow-2xl space-y-5 animate-in fade-in duration-300">
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={springPhysics}
+      className="relative p-5 sm:p-6 rounded-2xl bg-slate-900/90 border border-emerald-500/30 backdrop-blur-xl shadow-2xl space-y-5 overflow-hidden"
+    >
+      {/* Memory Shredding Purge Feedback Overlay */}
+      <AnimatePresence>
+        {isPurging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center space-y-3"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 0.8, ease: 'linear', repeat: Infinity }}
+              className="p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-400"
+            >
+              <ShieldAlert className="w-8 h-8" />
+            </motion.div>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-white">Shredding Ephemeral RAM Buffers...</p>
+              <p className="text-xs text-slate-400 font-mono">Zero traces retained • Blob URLs revoked</p>
+            </div>
+            {/* Shredder Laser Line */}
+            <motion.div
+              animate={{ x: [-120, 120] }}
+              transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut' }}
+              className="w-24 h-0.5 bg-gradient-to-r from-transparent via-rose-500 to-transparent"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header with Title & Badges */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -54,7 +123,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
               {document.name}
             </h3>
             <p className="text-xs text-slate-400 font-mono">
-              {(document.size / (1024 * 1024)).toFixed(2)} MB • {document.pageCount} page(s)
+              {(document.size / (1024 * 1024)).toFixed(2)} MB • {totalPages} page(s)
             </p>
           </div>
         </div>
@@ -106,46 +175,58 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
       </div>
 
       {/* Preview Viewport Container */}
-      <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-white/10 flex items-center justify-center min-h-[300px] max-h-[460px]">
-        {/* Orientation Toggle Button */}
+      <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-white/10 flex flex-col items-center justify-center min-h-[320px]">
+        {/* Top Controls Toolbar */}
         <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
-          <button
+          <motion.button
+            whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
             onClick={toggleOrientation}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 hover:bg-slate-700/90 text-slate-300 hover:text-white border border-white/10 shadow-md transition-colors cursor-pointer"
             title="Rotate layout orientation"
           >
             <RotateCw className="w-3.5 h-3.5 text-cyan-400" />
             <span className="capitalize">{orientation}</span>
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
             onClick={() => setPreviewZoom(!previewZoom)}
             className="p-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700/90 text-slate-300 hover:text-white border border-white/10 shadow-md transition-colors cursor-pointer"
             title="Toggle Zoom View"
           >
             <ZoomIn className="w-3.5 h-3.5" />
-          </button>
+          </motion.button>
         </div>
 
         {/* In-Memory Document Render */}
         <div
-          className={`w-full h-full flex items-center justify-center p-4 transition-all duration-300 ${
-            orientation === 'landscape' ? 'rotate-0' : ''
+          className={`w-full flex items-center justify-center p-4 transition-all duration-300 ${
+            previewZoom ? 'min-h-[460px]' : 'min-h-[300px]'
           }`}
         >
           {isPdf ? (
             <iframe
-              src={`${document.blobUrl}#toolbar=0&navpanes=0`}
-              title="PDF Print Preview"
+              key={`pdf-page-${currentPage}`}
+              src={`${document.blobUrl}#page=${currentPage}&toolbar=0&navpanes=0`}
+              title={`PDF Print Preview Page ${currentPage}`}
               className={`w-full rounded-lg border border-white/10 transition-all ${
-                orientation === 'landscape' ? 'h-[280px] max-w-2xl' : 'h-[380px] max-w-md'
+                orientation === 'landscape'
+                  ? previewZoom ? 'h-[440px] max-w-3xl' : 'h-[280px] max-w-2xl'
+                  : previewZoom ? 'h-[480px] max-w-xl' : 'h-[360px] max-w-md'
               } ${isBw ? 'grayscale' : ''}`}
             />
           ) : isImage ? (
-            <img
+            <motion.img
+              initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={springPhysics}
               src={document.blobUrl}
               alt="Customer Upload"
-              className={`max-h-[380px] object-contain rounded-lg border border-white/10 shadow-lg transition-all ${
+              className={`object-contain rounded-lg border border-white/10 shadow-lg transition-all ${
+                previewZoom ? 'max-h-[460px]' : 'max-h-[360px]'
+              } ${
                 orientation === 'landscape' ? 'max-w-xl' : 'max-w-md'
               } ${isBw ? 'grayscale contrast-125' : ''}`}
             />
@@ -157,6 +238,52 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
             </div>
           )}
         </div>
+
+        {/* Multi-Page Carousel Navigation Bar */}
+        {totalPages > 1 && (
+          <div className="w-full px-4 py-2 bg-slate-900/90 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
+            <div className="flex items-center gap-1.5">
+              <motion.button
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+                disabled={currentPage <= 1}
+                onClick={handlePrevPage}
+                className="p-1 rounded-md bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-700 text-white cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </motion.button>
+              <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-950 border border-white/5">
+                Page {currentPage} of {totalPages}
+              </span>
+              <motion.button
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+                disabled={currentPage >= totalPages}
+                onClick={handleNextPage}
+                className="p-1 rounded-md bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-700 text-white cursor-pointer"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </motion.button>
+            </div>
+
+            {/* Thumbnail dots */}
+            <div className="flex items-center gap-1 overflow-x-auto max-w-[200px] py-1">
+              {Array.from({ length: Math.min(totalPages, 8) }).map((_, idx) => {
+                const pageNum = idx + 1
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
+                      currentPage === pageNum ? 'w-5 bg-cyan-400' : 'bg-slate-700 hover:bg-slate-500'
+                    }`}
+                    title={`Go to page ${pageNum}`}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Control Actions Toolbar */}
@@ -176,25 +303,31 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
         {/* Primary Action Buttons */}
         <div className="flex items-center gap-2">
           {/* Done & Purge Button */}
-          <button
-            onClick={onPurge}
+          <motion.button
+            whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+            transition={springPhysics}
+            onClick={handlePurgeWithFeedback}
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 transition-colors cursor-pointer"
             title="Immediately shred file from RAM"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>{i18n.cta.purge}</span>
-          </button>
+          </motion.button>
 
           {/* Big Print Button */}
-          <button
+          <motion.button
+            whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+            transition={springPhysics}
             onClick={onPrint}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/35 transition-all cursor-pointer transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/35 transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>{i18n.cta.printDoc}</span>
-          </button>
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

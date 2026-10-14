@@ -1,5 +1,5 @@
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
   ShieldCheck,
   Zap,
@@ -37,6 +37,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenPosterModal,
   onOpenMobileTest,
 }) => {
+  const shouldReduceMotion = useReducedMotion()
+
+  const springPhysics = {
+    type: 'spring' as const,
+    stiffness: 380,
+    damping: 28,
+  }
+
   return (
     <section className="relative pt-6 sm:pt-10 pb-10 sm:pb-14 px-4 sm:px-6 lg:px-8 overflow-hidden no-print">
       {/* Background radial glow */}
@@ -70,9 +78,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Live Status Pills */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={springPhysics}
           className="flex flex-wrap items-center justify-center gap-2.5 pt-2"
         >
           {/* Green Pulsing Dot Pill */}
@@ -97,9 +105,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Primary Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 15 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ ...springPhysics, delay: shouldReduceMotion ? 0 : 0.08 }}
           className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight"
         >
           {i18n.heroHeadline}
@@ -107,9 +115,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Subheading */}
         <motion.p
-          initial={{ opacity: 0, y: 15 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ ...springPhysics, delay: shouldReduceMotion ? 0 : 0.16 }}
           className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed"
         >
           {i18n.heroSubheadline}
@@ -117,28 +125,37 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* CTA Bar */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ ...springPhysics, delay: shouldReduceMotion ? 0 : 0.24 }}
           className="flex flex-wrap items-center justify-center gap-3 pt-2"
         >
-          <button
+          <motion.button
+            whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+            transition={springPhysics}
             onClick={onOpenTerminal}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all cursor-pointer transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>{i18n.cta.openTerminal}</span>
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+            transition={springPhysics}
             onClick={onOpenPosterModal}
             className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm bg-slate-800/90 hover:bg-slate-700/90 border border-white/10 hover:border-cyan-500/30 text-slate-200 transition-all cursor-pointer"
           >
             <FileText className="w-4 h-4 text-cyan-400" />
             <span>{i18n.cta.downloadPoster}</span>
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+            transition={springPhysics}
             onClick={onOpenMobileTest}
             className="flex items-center gap-1.5 px-3.5 py-3 rounded-xl font-medium text-xs bg-slate-900/60 hover:bg-slate-800/80 border border-white/5 text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
             title="Open test mobile sender in new tab"
@@ -146,7 +163,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
             <span>{i18n.cta.testMobile}</span>
             <ExternalLink className="w-3 h-3 ml-0.5 opacity-60" />
-          </button>
+          </motion.button>
         </motion.div>
 
         {/* Dynamic Stat Badges */}

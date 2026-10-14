@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import {
   UploadCloud,
@@ -39,6 +39,13 @@ export const MobileSender: React.FC<MobileSenderProps> = ({
   const [isSent, setIsSent] = useState<boolean>(false)
   const [isSending, setIsSending] = useState<boolean>(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const shouldReduceMotion = useReducedMotion()
+
+  const springPhysics = {
+    type: 'spring' as const,
+    stiffness: 380,
+    damping: 26,
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -101,7 +108,7 @@ export const MobileSender: React.FC<MobileSenderProps> = ({
   const isConnected = connectionState === 'connected' || connectionState === 'transferring'
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 sm:p-6 rounded-2xl bg-slate-900/95 border border-white/10 backdrop-blur-2xl shadow-2xl space-y-6">
+    <div className="w-full max-w-md mx-auto p-4 sm:p-6 rounded-2xl bg-slate-900/95 border border-white/10 backdrop-blur-2xl shadow-2xl space-y-6 no-print">
       {/* Top Station Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div className="flex items-center gap-2">
@@ -118,16 +125,24 @@ export const MobileSender: React.FC<MobileSenderProps> = ({
         {isSent ? (
           <motion.div
             key="success-screen"
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
+            transition={springPhysics}
             className="text-center py-8 space-y-4"
           >
             <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping opacity-75" />
-              <div className="relative z-10 w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              {!shouldReduceMotion && (
+                <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping opacity-75" />
+              )}
+              <motion.div
+                initial={shouldReduceMotion ? false : { scale: 0 }}
+                animate={{ scale: [0, 1.15, 1] }}
+                transition={{ type: 'spring', stiffness: 420, damping: 20 }}
+                className="relative z-10 w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30"
+              >
                 <CheckCircle2 className="w-10 h-10" />
-              </div>
+              </motion.div>
             </div>
 
             <div className="space-y-1">
@@ -312,11 +327,14 @@ export const MobileSender: React.FC<MobileSenderProps> = ({
 
             {/* Big Glowing Send to Printer CTA */}
             {selectedFile && (
-              <button
+              <motion.button
                 type="button"
+                whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+                transition={springPhysics}
                 disabled={isSending}
                 onClick={handleSend}
-                className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 disabled:opacity-50 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5"
+                className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 disabled:opacity-50 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 {isSending ? (
                   <>
@@ -329,7 +347,7 @@ export const MobileSender: React.FC<MobileSenderProps> = ({
                     <span>{i18n.cta.sendToPrinter}</span>
                   </>
                 )}
-              </button>
+              </motion.button>
             )}
 
             {/* Zero WhatsApp privacy badge */}

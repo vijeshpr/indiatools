@@ -1,5 +1,5 @@
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Wifi, Smartphone, CheckCircle, Volume2, VolumeX } from 'lucide-react'
 import { P2PConnectionState } from '../../types/p2pPrint'
 import { getChimeMuted, setChimeMuted } from './chimeAudio'
@@ -22,6 +22,7 @@ export const ConnectionRadar: React.FC<ConnectionRadarProps> = ({
   clientDeviceName,
 }) => {
   const [muted, setMutedState] = React.useState(getChimeMuted())
+  const shouldReduceMotion = useReducedMotion()
 
   const toggleSound = () => {
     const next = !muted
@@ -72,7 +73,7 @@ export const ConnectionRadar: React.FC<ConnectionRadarProps> = ({
         <div className="absolute inset-8 rounded-full border border-white/10" />
 
         {/* Dynamic Expanding Pulse Rings */}
-        {!isConnected ? (
+        {!shouldReduceMotion && (!isConnected ? (
           // Amber Pulse Ring
           <motion.div
             animate={{
@@ -100,12 +101,14 @@ export const ConnectionRadar: React.FC<ConnectionRadarProps> = ({
             }}
             className="absolute w-16 h-16 rounded-full bg-emerald-400/25 border border-emerald-400/50 pointer-events-none"
           />
-        )}
+        ))}
 
         {/* Center Beacon Icon */}
         <motion.div
           animate={
-            isConnected
+            shouldReduceMotion
+              ? {}
+              : isConnected
               ? { scale: [1, 1.08, 1], filter: 'drop-shadow(0 0 16px rgba(16,185,129,0.5))' }
               : { scale: [1, 1.04, 1], filter: 'drop-shadow(0 0 10px rgba(245,158,11,0.3))' }
           }

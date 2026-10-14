@@ -232,7 +232,14 @@ export const ScanToPrintTool: React.FC = () => {
       hreflangs={hreflangs}
       customJsonLd={customJsonLd}
     >
-      <div className="space-y-12">
+      <div className="relative space-y-12">
+        {/* Subtle Ambient Particle & Radial Light Drift */}
+        <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden no-print" aria-hidden="true">
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[720px] h-[720px] bg-gradient-to-tr from-cyan-500/10 via-emerald-500/8 to-transparent rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute top-[35%] -left-20 w-[550px] h-[550px] bg-cyan-600/6 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute top-[60%] -right-20 w-[550px] h-[550px] bg-emerald-600/6 rounded-full blur-[120px] pointer-events-none" />
+        </div>
+
         {/* Dedicated Standalone SaaS Hero Section */}
         <HeroSection
           i18n={i18n}
@@ -484,7 +491,7 @@ export const ScanToPrintTool: React.FC = () => {
         />
 
         {/* PRINT ONLY DOCUMENT RENDER */}
-        {receivedDoc && (
+        {!isPosterModalOpen && receivedDoc && (
           <div className="hidden print:block print:w-full print:m-0 print:p-0">
             {receivedDoc.type.startsWith('image/') ? (
               <img

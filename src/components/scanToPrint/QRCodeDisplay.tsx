@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import QRCodeStyling from 'qr-code-styling'
 import { Copy, Check, ExternalLink, Maximize2, Minimize2, Smartphone } from 'lucide-react'
 
@@ -21,6 +22,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   const qrInstanceRef = useRef<QRCodeStyling | null>(null)
   const [copied, setCopied] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
     if (!qrRef.current) return
@@ -71,7 +73,10 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   }
 
   return (
-    <div
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 28 }}
       className={`relative p-5 rounded-2xl bg-slate-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex flex-col items-center transition-all ${
         isFullscreen
           ? 'fixed inset-0 z-50 bg-slate-950/98 p-8 flex items-center justify-center'
@@ -96,8 +101,22 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         </button>
       </div>
 
-      {/* Styled QR Code Box with Glowing Bevel */}
-      <div className="relative p-3 rounded-2xl bg-[#0A0F1D] border-2 border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)] flex items-center justify-center group">
+      {/* Styled QR Code Box with Glowing Bevel and subtle continuous pulse */}
+      <motion.div
+        animate={
+          shouldReduceMotion
+            ? {}
+            : {
+                boxShadow: [
+                  '0 0 25px rgba(6,182,212,0.15)',
+                  '0 0 35px rgba(16,185,129,0.22)',
+                  '0 0 25px rgba(6,182,212,0.15)',
+                ],
+              }
+        }
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        className="relative p-3 rounded-2xl bg-[#0A0F1D] border-2 border-cyan-500/30 flex items-center justify-center group"
+      >
         <div ref={qrRef} className="rounded-xl overflow-hidden" />
 
         {/* Ambient Corner Accents */}
@@ -105,7 +124,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-cyan-400 rounded-tr-sm pointer-events-none" />
         <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-emerald-400 rounded-bl-sm pointer-events-none" />
         <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-emerald-400 rounded-br-sm pointer-events-none" />
-      </div>
+      </motion.div>
 
       <p className="text-xs text-center text-slate-400 max-w-xs mt-3 leading-relaxed">
         {instructionText}
@@ -130,6 +149,6 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
           <ExternalLink className="w-3 h-3 opacity-60" />
         </button>
       </div>
-    </div>
+    </motion.div>
   )
 }
