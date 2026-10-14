@@ -35,12 +35,22 @@ export const HomePage: React.FC = () => {
     canonicalPath: '/',
   })
 
-  // Filter tools based on selected category
+  // Filter tools based on selected category with alias mapping
   const filteredTools = useMemo(() => {
     if (selectedCategory === 'all') {
       return TOOLS
     }
-    return TOOLS.filter((tool) => tool.category === selectedCategory)
+    return TOOLS.filter((tool) => {
+      if (tool.category === selectedCategory) return true
+      if (selectedCategory === 'utilities' && ['drive', 'build', 'power', 'land', 'work'].includes(tool.category)) return true
+      if (selectedCategory === 'image' && tool.category === 'create' && (tool.slug.includes('photo') || tool.slug.includes('compressor') || tool.slug.includes('watermark') || tool.slug.includes('scanner') || tool.slug.includes('pixel') || tool.slug.includes('clear'))) return true
+      if (selectedCategory === 'audio' && (tool.category === 'create' || tool.category === 'audio') && (tool.slug.includes('audio') || tool.slug.includes('reverb') || tool.slug.includes('bass') || tool.slug.includes('surround'))) return true
+      if (selectedCategory === 'video' && tool.slug.includes('spectrum')) return true
+      if (selectedCategory === 'pdf' && (tool.slug.includes('pdf') || tool.slug.includes('print') || tool.slug.includes('qr'))) return true
+      if (selectedCategory === 'security' && (tool.slug.includes('vault') || tool.slug.includes('watermark'))) return true
+      if (selectedCategory === 'developer' && (tool.slug.includes('ai-token') || tool.slug.includes('experience'))) return true
+      return false
+    })
   }, [selectedCategory])
 
   const handleResetFilters = () => {

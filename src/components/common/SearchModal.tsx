@@ -14,6 +14,12 @@ import {
   ChevronRight,
   Command,
   IndianRupee,
+  Volume2,
+  Film,
+  FileText,
+  ShieldCheck,
+  Code2,
+  Gauge,
 } from 'lucide-react'
 import { searchTools } from '../../data/tools'
 import { ToolDefinition, ToolCategory } from '../../types'
@@ -24,10 +30,17 @@ interface SearchModalProps {
 }
 
 const CATEGORY_ICONS: Record<ToolCategory, React.ElementType> = {
+  audio: Volume2,
+  image: FileImage,
+  video: Film,
+  pdf: FileText,
+  money: IndianRupee,
+  security: ShieldCheck,
+  developer: Code2,
+  utilities: Gauge,
   drive: Car,
   build: HardHat,
   power: Zap,
-  money: IndianRupee,
   land: MapPin,
   work: Briefcase,
   create: FileImage,

@@ -11,6 +11,7 @@ import {
   Cpu,
   Lock,
   ShieldCheck,
+  Layers,
 } from 'lucide-react'
 import { BotanicalHero3D } from '../garden/BotanicalHero3D'
 import { CommandPalette } from '../common/CommandPalette'
@@ -31,8 +32,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
     }
   }
 
-  const handleScrollToGarden = () => {
-    const el = document.getElementById('garden-catalogue')
+  const handleScrollToTools = () => {
+    const el = document.getElementById('category-explorer') || document.getElementById('garden-catalogue')
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' })
     }
@@ -40,12 +41,12 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
 
   return (
     <section className="relative pt-6 pb-20 sm:pt-10 sm:pb-28 overflow-hidden text-center px-4 sm:px-6 lg:px-8">
-      {/* 1. Real 3D Botanical Hero Scene with Opening Flower, Leaves & Pollen */}
-      <div className="relative w-full max-w-5xl mx-auto -mb-16 sm:-mb-24 z-0">
+      {/* 1. Realistic 3D Indian Flower Garden Scene with Roses, Chendumalli, Jasmine & Climbing Vines */}
+      <div className="relative w-full max-w-6xl mx-auto -mb-20 sm:-mb-32 z-0">
         <BotanicalHero3D />
       </div>
 
-      {/* 2. Hero Content Container with Editorial Nature-Tech Typography */}
+      {/* 2. Hero Content Container with Deliberate Negative-Space Framing */}
       <div className="relative z-10 max-w-4xl mx-auto space-y-6 sm:space-y-8">
         {/* Botanical Identity Badge */}
         <motion.div
@@ -59,11 +60,11 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
           <span className="text-[11px] font-mono tracking-widest uppercase text-[#F3F0E5] font-semibold">
-            IndiaTools • The Living Digital Garden • {TOOLS.length} Utilities
+            IndiaTools • Living Digital Garden • {TOOLS.length} Verified Utilities
           </span>
         </motion.div>
 
-        {/* Cinematic Headline */}
+        {/* Cinematic Headlines */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -71,15 +72,18 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
           className="space-y-4"
         >
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#F3F0E5] font-sans leading-[1.08]">
-            A world of tools. <br className="hidden sm:inline" />
+            Technology in <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-[#D8B879] via-[#A8C5AC] to-[#16865D] bg-clip-text text-transparent">
-              Growing around you.
+              full bloom.
             </span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-base sm:text-xl text-[#A8C5AC] leading-relaxed font-sans">
-            Discover powerful browser utilities for media, documents, creativity, and everyday work —
-            wrapped in a completely new digital experience.
+          <p className="text-xl sm:text-2xl font-semibold text-[#D8B879] tracking-tight">
+            Powerful tools. A more beautiful way to work.
+          </p>
+
+          <p className="max-w-2xl mx-auto text-base sm:text-lg text-[#A8C5AC] leading-relaxed font-sans">
+            Explore useful browser utilities for audio, images, video, documents, security, and everyday work in a living digital garden.
           </p>
         </motion.div>
 
@@ -92,20 +96,20 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
         >
           <button
             type="button"
-            onClick={handleScrollToGarden}
+            onClick={handleScrollToTools}
             className="px-7 py-3.5 rounded-2xl bg-[#16865D] hover:bg-[#1fa372] text-[#F3F0E5] font-bold text-sm sm:text-base flex items-center gap-2.5 shadow-xl shadow-emerald-900/40 transition-all cursor-pointer group hover:scale-[1.02]"
           >
             <Sparkles className="w-4 h-4 text-[#D8B879]" />
-            <span>Explore the Garden</span>
+            <span>Explore Tools</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
 
           <Link
-            to="/tools"
+            to="/categories"
             className="px-6 py-3.5 rounded-2xl bg-[#10271C]/90 hover:bg-[#163628] text-[#F3F0E5] font-semibold text-sm sm:text-base border border-emerald-500/25 flex items-center gap-2 transition-all cursor-pointer shadow-lg"
           >
-            <Compass className="w-4 h-4 text-[#A8C5AC]" />
-            <span>Discover All Tools</span>
+            <Compass className="w-4 h-4 text-[#D8B879]" />
+            <span>Discover Categories</span>
           </Link>
         </motion.div>
 
@@ -157,11 +161,11 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
         >
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#10271C]/70 border border-emerald-500/20">
             <Cpu className="w-3.5 h-3.5 text-[#16865D]" />
-            <span>In-Browser Processing</span>
+            <span>100% In-Browser Processing</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#10271C]/70 border border-emerald-500/20">
             <Lock className="w-3.5 h-3.5 text-[#D8B879]" />
-            <span>Zero Server Uploads</span>
+            <span>Zero Server File Uploads</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#10271C]/70 border border-emerald-500/20">
             <Sparkles className="w-3.5 h-3.5 text-[#A8C5AC]" />
@@ -179,7 +183,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.7 }}
           className="pt-6 flex flex-col items-center justify-center gap-1 text-[#A8C5AC]/70 cursor-pointer"
-          onClick={handleScrollToGarden}
+          onClick={handleScrollToTools}
         >
           <span className="text-[10px] font-mono tracking-widest uppercase">Scroll to bloom</span>
           <ChevronDown className="w-4 h-4 animate-bounce text-[#D8B879]" />

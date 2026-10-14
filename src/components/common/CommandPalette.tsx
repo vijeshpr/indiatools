@@ -16,6 +16,12 @@ import {
   Sparkles,
   Command,
   SlidersHorizontal,
+  Volume2,
+  Film,
+  FileText,
+  ShieldCheck,
+  Code2,
+  Gauge,
 } from 'lucide-react'
 import { TOOLS, CATEGORIES } from '../../data/tools'
 import type { ToolDefinition, ToolCategory } from '../../types'
@@ -26,20 +32,34 @@ interface CommandPaletteProps {
 }
 
 const CATEGORY_ICONS: Record<ToolCategory, React.ElementType> = {
+  audio: Volume2,
+  image: FileImage,
+  video: Film,
+  pdf: FileText,
+  money: IndianRupee,
+  security: ShieldCheck,
+  developer: Code2,
+  utilities: Gauge,
   drive: Car,
   build: HardHat,
   power: Zap,
-  money: IndianRupee,
   land: MapPin,
   work: Briefcase,
   create: FileImage,
 }
 
 const CATEGORY_COLORS: Record<ToolCategory, { text: string; bg: string; border: string }> = {
+  audio: { text: '#A855F7', bg: 'rgba(168, 85, 247, 0.1)', border: 'rgba(168, 85, 247, 0.25)' },
+  image: { text: '#10B981', bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.25)' },
+  video: { text: '#06B6D4', bg: 'rgba(6, 182, 212, 0.1)', border: 'rgba(6, 182, 212, 0.25)' },
+  pdf: { text: '#F59E0B', bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.25)' },
+  money: { text: '#D8B879', bg: 'rgba(216, 184, 121, 0.1)', border: 'rgba(216, 184, 121, 0.25)' },
+  security: { text: '#16865D', bg: 'rgba(22, 134, 93, 0.1)', border: 'rgba(22, 134, 93, 0.25)' },
+  developer: { text: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.25)' },
+  utilities: { text: '#F97316', bg: 'rgba(249, 115, 22, 0.1)', border: 'rgba(249, 115, 22, 0.25)' },
   drive: { text: '#F97316', bg: 'rgba(249, 115, 22, 0.1)', border: 'rgba(249, 115, 22, 0.25)' },
   build: { text: '#EAB308', bg: 'rgba(234, 179, 8, 0.1)', border: 'rgba(234, 179, 8, 0.25)' },
   power: { text: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.25)' },
-  money: { text: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)', border: 'rgba(139, 92, 246, 0.25)' },
   land: { text: '#10B981', bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.25)' },
   work: { text: '#06B6D4', bg: 'rgba(6, 182, 212, 0.1)', border: 'rgba(6, 182, 212, 0.25)' },
   create: { text: '#EC4899', bg: 'rgba(236, 72, 153, 0.1)', border: 'rgba(236, 72, 153, 0.25)' },

@@ -78,6 +78,83 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     icon: 'FileImage',
     toolCount: 25,
   },
+  audio: {
+    id: 'audio',
+    title: 'Audio',
+    subtitle: 'Sound & Acoustics',
+    headline: 'AUDIO.',
+    description: 'Client-side 8D audio spatializer, volume booster, bass enhancement, and audio spectrum visualization.',
+    accentColor: '#A855F7',
+    gradient: 'from-purple-500/20 via-violet-500/10 to-transparent',
+    icon: 'Volume2',
+    toolCount: 4,
+  },
+  image: {
+    id: 'image',
+    title: 'Image',
+    subtitle: 'Photos & Graphics',
+    headline: 'IMAGE.',
+    description: 'UPSC/SSC photo compressor, signature resizer, multi-stamp watermarker, inpainting eraser, and perspective scanner.',
+    accentColor: '#10B981',
+    gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent',
+    icon: 'FileImage',
+    toolCount: 16,
+  },
+  video: {
+    id: 'video',
+    title: 'Video',
+    subtitle: 'Motion & Visuals',
+    headline: 'VIDEO.',
+    description: 'High-definition audio/video spectrum visualizer, video frames extractor, and media format utilities.',
+    accentColor: '#06B6D4',
+    gradient: 'from-cyan-500/20 via-blue-500/10 to-transparent',
+    icon: 'Video',
+    toolCount: 2,
+  },
+  pdf: {
+    id: 'pdf',
+    title: 'PDF',
+    subtitle: 'Documents & Scanning',
+    headline: 'PDF.',
+    description: 'Multi-image to PDF converter, document perspective warp scanner, scan-to-print drop, and PDF page tools.',
+    accentColor: '#F59E0B',
+    gradient: 'from-amber-500/20 via-orange-500/10 to-transparent',
+    icon: 'FileText',
+    toolCount: 6,
+  },
+  security: {
+    id: 'security',
+    title: 'Security',
+    subtitle: 'Vault & Privacy',
+    headline: 'SECURITY.',
+    description: 'Zero-knowledge military file encrypter & decrypter, invisible document watermarker & forensic copyright tracer.',
+    accentColor: '#16865D',
+    gradient: 'from-emerald-600/20 via-green-500/10 to-transparent',
+    icon: 'ShieldCheck',
+    toolCount: 4,
+  },
+  developer: {
+    id: 'developer',
+    title: 'Developer',
+    subtitle: 'AI & Web Tools',
+    headline: 'DEVELOPER.',
+    description: 'In-browser AI token calculator, experience tenure verifier, and client-side developer productivity utilities.',
+    accentColor: '#3B82F6',
+    gradient: 'from-blue-500/20 via-indigo-500/10 to-transparent',
+    icon: 'Code2',
+    toolCount: 5,
+  },
+  utilities: {
+    id: 'utilities',
+    title: 'Utilities',
+    subtitle: 'Daily Calculations',
+    headline: 'UTILITIES.',
+    description: 'Scan-to-print P2P drop, satisfying relax toy, vehicle mileage, electricity, and everyday Indian life calculators.',
+    accentColor: '#F97316',
+    gradient: 'from-orange-500/20 via-amber-500/10 to-transparent',
+    icon: 'Gauge',
+    toolCount: 25,
+  },
 }
 
 export const TOOLS: ToolDefinition[] = [
@@ -3324,7 +3401,17 @@ export function getToolBySlug(slug: string): ToolDefinition | undefined {
 }
 
 export function getToolsByCategory(category: ToolCategory): ToolDefinition[] {
-  return TOOLS.filter((t) => t.category === category)
+  return TOOLS.filter((t) => {
+    if (t.category === category) return true
+    if (category === 'utilities' && ['drive', 'build', 'power', 'land', 'work'].includes(t.category)) return true
+    if (category === 'image' && t.category === 'create' && (t.slug.includes('photo') || t.slug.includes('compressor') || t.slug.includes('watermark') || t.slug.includes('scanner') || t.slug.includes('pixel') || t.slug.includes('clear'))) return true
+    if (category === 'audio' && (t.category === 'create' || t.category === 'audio') && (t.slug.includes('audio') || t.slug.includes('reverb') || t.slug.includes('bass') || t.slug.includes('surround'))) return true
+    if (category === 'video' && t.slug.includes('spectrum')) return true
+    if (category === 'pdf' && (t.slug.includes('pdf') || t.slug.includes('print') || t.slug.includes('qr'))) return true
+    if (category === 'security' && (t.slug.includes('vault') || t.slug.includes('watermark'))) return true
+    if (category === 'developer' && (t.slug.includes('ai-token') || t.slug.includes('experience'))) return true
+    return false
+  })
 }
 
 export function getFeaturedTools(): ToolDefinition[] {

@@ -6,16 +6,15 @@ import {
   Menu,
   X,
   Command,
-  ArrowRight,
+  Compass,
   Sparkles,
-  Layers,
-  Wrench,
-  PenTool,
+  Info,
+  ShieldCheck,
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { CommandPalette } from './CommandPalette'
 import { LanguageSelector } from './LanguageSelector'
-import { CATEGORIES, TOOLS } from '../../data/tools'
+import { TOOLS } from '../../data/tools'
 import { useI18n } from '../../i18n/I18nContext'
 
 export const Header: React.FC = () => {
@@ -28,7 +27,6 @@ export const Header: React.FC = () => {
   // Listen for Ctrl+K or Cmd+K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input or textarea
       const target = e.target as HTMLElement
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         return
@@ -48,7 +46,7 @@ export const Header: React.FC = () => {
     setIsMobileMenuOpen(false)
   }, [location.pathname])
 
-  // Track scroll position for subtle depth
+  // Track scroll position for subtle elevation
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
@@ -63,18 +61,17 @@ export const Header: React.FC = () => {
         <div
           className={`max-w-7xl mx-auto rounded-2xl transition-all duration-300 ${
             isScrolled
-              ? 'bg-[#07130E]/95 dark:bg-[#07130E]/95 backdrop-blur-2xl border border-emerald-500/25 shadow-2xl shadow-emerald-950/60'
-              : 'bg-[#10271C]/85 dark:bg-[#10271C]/85 backdrop-blur-xl border border-emerald-500/20 shadow-lg shadow-emerald-950/30'
+              ? 'bg-[#07130E]/95 backdrop-blur-2xl border border-emerald-500/25 shadow-2xl shadow-emerald-950/60'
+              : 'bg-[#10271C]/90 backdrop-blur-xl border border-emerald-500/20 shadow-lg shadow-emerald-950/30'
           }`}
         >
           <div className="px-3.5 sm:px-5 h-16 flex items-center justify-between gap-2 sm:gap-4">
             {/* Left: Brand Mark & Logo */}
             <Link
               to="/"
-              className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8B879] rounded-xl p-1"
+              className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8B879] rounded-xl p-1 shrink-0"
               aria-label="IndiaTools Homepage"
             >
-              {/* Brand Icon with Indian tricolor micro hairline */}
               <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#16865D] via-[#10271C] to-[#07130E] text-[#F3F0E5] shadow-md shadow-emerald-900/40 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 border border-emerald-500/30">
                 <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
                 <svg
@@ -98,17 +95,17 @@ export const Header: React.FC = () => {
                 <span className="font-extrabold tracking-tight text-lg text-[#F3F0E5] font-sans">
                   India<span className="text-[#D8B879]">Tools</span>
                 </span>
-                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-[#10271C] text-[#D8B879] border border-[#D8B879]/30 font-bold uppercase tracking-wider">
-                  NATURE-TECH
+                <span className="hidden sm:inline-block font-mono text-[9px] px-1.5 py-0.5 rounded bg-[#10271C] text-[#D8B879] border border-[#D8B879]/30 font-bold uppercase tracking-wider">
+                  GARDEN
                 </span>
               </div>
             </Link>
 
-            {/* Center: Main Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            {/* Center: Global Navigation Only (No category clutter) */}
+            <nav className="hidden md:flex items-center gap-1.5">
               <Link
                 to="/"
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
                   location.pathname === '/'
                     ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
                     : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
@@ -119,48 +116,47 @@ export const Header: React.FC = () => {
 
               <Link
                 to="/tools"
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                   location.pathname === '/tools'
                     ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
                     : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
                 }`}
               >
-                {t('nav.allTools', 'Explore Tools')}
+                <Compass className="w-3.5 h-3.5 text-[#D8B879]" />
+                <span>{t('nav.allTools', 'Explore Tools')}</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[#D8B879]">
+                  {TOOLS.length}
+                </span>
               </Link>
 
               <a
                 href="#creative-assets"
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04] transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04] transition-colors flex items-center gap-1.5"
               >
+                <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
                 <span>Creative Hub</span>
-                <span className="text-[9px] font-mono font-bold bg-emerald-950 text-[#D8B879] border border-emerald-800 px-1.5 py-0.2 rounded uppercase">
-                  5 Presets
-                </span>
               </a>
 
               <Link
-                to="/categories"
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  location.pathname === '/categories'
+                to="/about"
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                  location.pathname === '/about'
                     ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
                     : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
                 }`}
               >
-                {t('nav.categories', 'Categories')}
+                {t('nav.about', 'About')}
               </Link>
 
               <Link
-                to="/calculators/indian-cheque-studio"
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-                  location.pathname.includes('indian-cheque-studio')
+                to="/privacy"
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                  location.pathname === '/privacy'
                     ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
                     : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
                 }`}
               >
-                <span>Cheque Studio</span>
-                <span className="text-[9px] font-mono font-bold bg-[#16865D] text-[#F3F0E5] border border-emerald-400/40 px-1.5 py-0.2 rounded uppercase">
-                  13 Lang
-                </span>
+                Privacy
               </Link>
             </nav>
 
@@ -199,7 +195,7 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Drawer */}
+          {/* Mobile Global Drawer */}
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div
@@ -207,7 +203,7 @@ export const Header: React.FC = () => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="md:hidden border-t border-emerald-500/20 px-4 py-3 space-y-3 bg-[#07130E]/98 rounded-b-2xl"
+                className="md:hidden border-t border-emerald-500/20 px-4 py-3 space-y-2 bg-[#07130E]/98 rounded-b-2xl"
               >
                 <div className="flex flex-col gap-1">
                   <Link
@@ -216,71 +212,44 @@ export const Header: React.FC = () => {
                   >
                     {t('nav.home', 'Home')}
                   </Link>
+
                   <Link
                     to="/tools"
                     className="px-3 py-2 rounded-lg text-sm font-medium text-[#A8C5AC] hover:bg-white/[0.05] flex items-center justify-between"
                   >
-                    <span>{t('nav.allTools', 'Explore All Garden Tools')}</span>
+                    <span className="flex items-center gap-2">
+                      <Compass className="w-4 h-4 text-[#D8B879]" />
+                      <span>{t('nav.allTools', 'Explore All Garden Tools')}</span>
+                    </span>
                     <span className="text-xs font-mono font-bold text-[#D8B879] bg-[#10271C] px-2 py-0.5 rounded border border-emerald-500/30">
                       {TOOLS.length}
                     </span>
                   </Link>
+
                   <a
                     href="#creative-assets"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#D8B879] hover:bg-white/[0.05] flex items-center justify-between"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#D8B879] hover:bg-white/[0.05] flex items-center gap-2"
                   >
-                    <span>🌿 Creative Hub</span>
-                    <span className="text-[10px] font-mono font-bold bg-[#10271C] text-[#D8B879] border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                      5 Presets
-                    </span>
+                    <Sparkles className="w-4 h-4 text-[#10B981]" />
+                    <span>Creative Hub</span>
                   </a>
-                  <Link
-                    to="/calculators/indian-cheque-studio"
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-cyan-300 bg-cyan-950/40 hover:bg-cyan-950/70 border border-cyan-800/60 flex items-center justify-between"
-                  >
-                    <span>🖋️ {t('nav.chequeStudio', 'Indian Cheque Studio')}</span>
-                    <span className="text-[10px] bg-cyan-600 text-black px-1.5 py-0.5 rounded font-mono font-bold">
-                      13 Lang
-                    </span>
-                  </Link>
-                  <Link
-                    to="/categories"
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/[0.05]"
-                  >
-                    {t('nav.categories', 'Categories')}
-                  </Link>
+
                   <Link
                     to="/about"
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/[0.05]"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#A8C5AC] hover:bg-white/[0.05] flex items-center gap-2"
                   >
-                    {t('nav.about', 'About the Engineering Platform')}
+                    <Info className="w-4 h-4 text-[#D8B879]" />
+                    <span>{t('nav.about', 'About IndiaTools')}</span>
                   </Link>
-                </div>
 
-                {/* Category quick links */}
-                <div className="pt-2 border-t border-white/[0.06]">
-                  <p className="text-[10px] font-mono uppercase text-slate-500 px-3 mb-1.5">
-                    Categories
-                  </p>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {Object.values(CATEGORIES).map((cat) => {
-                      const count = TOOLS.filter((t) => t.category === cat.id).length
-                      return (
-                        <Link
-                          key={cat.id}
-                          to={`/category/${cat.id}`}
-                          className="flex items-center justify-between p-2 rounded-lg text-xs text-slate-300 hover:bg-white/[0.05]"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.accentColor }} />
-                            <span>{cat.title}</span>
-                          </span>
-                          <span className="text-[10px] font-mono text-slate-500">{count}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
+                  <Link
+                    to="/privacy"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#A8C5AC] hover:bg-white/[0.05] flex items-center gap-2"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-[#10B981]" />
+                    <span>Client-Side Privacy</span>
+                  </Link>
                 </div>
               </motion.div>
             )}

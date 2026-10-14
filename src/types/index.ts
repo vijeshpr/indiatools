@@ -1,4 +1,18 @@
-export type ToolCategory = 'drive' | 'build' | 'power' | 'money' | 'land' | 'work' | 'create'
+export type ToolCategory =
+  | 'audio'
+  | 'image'
+  | 'video'
+  | 'pdf'
+  | 'money'
+  | 'security'
+  | 'developer'
+  | 'utilities'
+  | 'drive'
+  | 'build'
+  | 'power'
+  | 'land'
+  | 'work'
+  | 'create'
 
 export interface FAQItem {
   question: string
