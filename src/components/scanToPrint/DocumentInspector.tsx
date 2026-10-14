@@ -113,7 +113,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
       </AnimatePresence>
 
       {/* Header with Title & Badges */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10 no-print">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
             <FileText className="w-5 h-5" />
@@ -136,7 +136,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
       </div>
 
       {/* Pre-Print Preferences Chips (Sent by Customer) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 rounded-xl bg-slate-950/70 border border-white/5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 rounded-xl bg-slate-950/70 border border-white/5 no-print">
         <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-900/80 border border-white/5">
           <Palette className={`w-4 h-4 ${isBw ? 'text-slate-400' : 'text-cyan-400'}`} />
           <div>
@@ -175,9 +175,9 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
       </div>
 
       {/* Preview Viewport Container */}
-      <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-white/10 flex flex-col items-center justify-center min-h-[320px]">
+      <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-white/10 flex flex-col items-center justify-center min-h-[360px]">
         {/* Top Controls Toolbar */}
-        <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-2 no-print">
           <motion.button
             whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
             whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
@@ -200,23 +200,38 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
           </motion.button>
         </div>
 
-        {/* In-Memory Document Render */}
+        {/* In-Memory Document Render wrapped in printable-area */}
         <div
+          id="printable-area"
           className={`w-full flex items-center justify-center p-4 transition-all duration-300 ${
-            previewZoom ? 'min-h-[460px]' : 'min-h-[300px]'
+            previewZoom ? 'min-h-[580px]' : 'min-h-[440px]'
           }`}
         >
           {isPdf ? (
-            <iframe
-              key={`pdf-page-${currentPage}`}
-              src={`${document.blobUrl}#page=${currentPage}&toolbar=0&navpanes=0`}
-              title={`PDF Print Preview Page ${currentPage}`}
+            <object
+              key={`pdf-obj-${document.id}-${currentPage}`}
+              data={`${document.blobUrl}#page=${currentPage}&toolbar=0&navpanes=0`}
+              type="application/pdf"
               className={`w-full rounded-lg border border-white/10 transition-all ${
-                orientation === 'landscape'
-                  ? previewZoom ? 'h-[440px] max-w-3xl' : 'h-[280px] max-w-2xl'
-                  : previewZoom ? 'h-[480px] max-w-xl' : 'h-[360px] max-w-md'
-              } ${isBw ? 'grayscale' : ''}`}
-            />
+                previewZoom ? 'h-[620px]' : 'h-[550px]'
+              } ${orientation === 'landscape' ? 'max-w-4xl' : 'max-w-3xl'} ${
+                isBw ? 'grayscale' : ''
+              }`}
+            >
+              <div className="flex flex-col items-center justify-center p-8 bg-slate-900 border border-white/10 rounded-lg text-center space-y-3">
+                <FileText className="w-10 h-10 text-cyan-400 mx-auto" />
+                <p className="text-white font-medium text-sm">
+                  Native PDF preview unavailable in your browser
+                </p>
+                <a
+                  href={document.blobUrl}
+                  download={document.name}
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg text-xs font-semibold transition-colors inline-block"
+                >
+                  Download & Print
+                </a>
+              </div>
+            </object>
           ) : isImage ? (
             <motion.img
               initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.98 }}
@@ -224,10 +239,10 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
               transition={springPhysics}
               src={document.blobUrl}
               alt="Customer Upload"
-              className={`object-contain rounded-lg border border-white/10 shadow-lg transition-all ${
-                previewZoom ? 'max-h-[460px]' : 'max-h-[360px]'
+              className={`scan-to-print-image object-contain rounded-lg border border-white/10 shadow-lg transition-all ${
+                previewZoom ? 'max-h-[580px]' : 'max-h-[480px]'
               } ${
-                orientation === 'landscape' ? 'max-w-xl' : 'max-w-md'
+                orientation === 'landscape' ? 'max-w-3xl' : 'max-w-xl'
               } ${isBw ? 'grayscale contrast-125' : ''}`}
             />
           ) : (
@@ -241,7 +256,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
 
         {/* Multi-Page Carousel Navigation Bar */}
         {totalPages > 1 && (
-          <div className="w-full px-4 py-2 bg-slate-900/90 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
+          <div className="w-full px-4 py-2 bg-slate-900/90 border-t border-white/10 flex items-center justify-between text-xs text-slate-300 no-print">
             <div className="flex items-center gap-1.5">
               <motion.button
                 whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
@@ -287,7 +302,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
       </div>
 
       {/* Control Actions Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 no-print">
         {/* Auto-Print Toggle Switch */}
         <label className="flex items-center gap-2 cursor-pointer select-none">
           <input

@@ -9,7 +9,8 @@ import {
   TransferProgress,
 } from '../../types/p2pPrint'
 
-const CHUNK_SIZE = 64 * 1024 // 64KB chunks for optimal WebRTC DataChannel throughput
+// Strictly slice ArrayBuffer into 16,384 bytes (16 KB) segments
+const CHUNK_SIZE = 16384
 
 export interface P2PEngineCallbacks {
   onStateChange: (state: P2PConnectionState, detail?: string) => void
@@ -29,13 +30,13 @@ export class P2PPrintEngine {
   private callbacks: P2PEngineCallbacks
   private state: P2PConnectionState = 'idle'
 
-  // Transfer state
+  // Receiver transfer state: guaranteed in-memory array buffer assembly
   private incomingMetadata: TransferMetadata | null = null
-  private incomingChunks: Map<number, Uint8Array> = new Map()
+  private receivedChunks: ArrayBuffer[] = []
   private bytesReceived = 0
   private transferStartTime = 0
 
-  // Created URLs to revoke on purge
+  // Created URLs to revoke on purge / new arrivals
   private objectUrlsToRevoke: string[] = []
 
   constructor(role: 'receiver' | 'sender', sessionId: string, callbacks: P2PEngineCallbacks) {
@@ -57,7 +58,7 @@ export class P2PPrintEngine {
       try {
         this.broadcastChannel = new BroadcastChannel(`ipt_p2p_print_${this.sessionId}`)
         this.broadcastChannel.onmessage = (event) => {
-          this.handleIncomingMessage(event.data)
+          this.handleIncomingData(event.data)
         }
       } catch (e) {
         // BroadcastChannel optional fallback
@@ -68,7 +69,10 @@ export class P2PPrintEngine {
   private initPeer() {
     this.updateState('generating_session')
 
-    const peerId = this.role === 'receiver' ? `ipt-recv-${this.sessionId}` : `ipt-send-${this.sessionId}-${Math.random().toString(36).slice(2, 6)}`
+    const peerId =
+      this.role === 'receiver'
+        ? `ipt-recv-${this.sessionId}`
+        : `ipt-send-${this.sessionId}-${Math.random().toString(36).slice(2, 6)}`
 
     try {
       this.peer = new Peer(peerId, {
@@ -95,7 +99,6 @@ export class P2PPrintEngine {
       })
 
       this.peer.on('error', (err) => {
-        // If peer ID already taken or server unavailable, fallback to BroadcastChannel seamlessly
         if (err.type === 'unavailable-id') {
           // Already generated or active in local session
         } else {
@@ -126,7 +129,20 @@ export class P2PPrintEngine {
   private setupConnection(conn: DataConnection) {
     this.connection = conn
 
+    // Ensure underlying RTCDataChannel is configured for ArrayBuffer binary transfer
+    const dc = (conn as any).dataChannel as RTCDataChannel | undefined
+    if (dc) {
+      dc.binaryType = 'arraybuffer'
+      dc.bufferedAmountLowThreshold = 65536
+    }
+
     conn.on('open', () => {
+      const activeDc = (conn as any).dataChannel as RTCDataChannel | undefined
+      if (activeDc) {
+        activeDc.binaryType = 'arraybuffer'
+        activeDc.bufferedAmountLowThreshold = 65536
+      }
+
       this.updateState('connected')
       this.callbacks.onPeerConnected?.()
 
@@ -138,7 +154,7 @@ export class P2PPrintEngine {
     })
 
     conn.on('data', (data: any) => {
-      this.handleIncomingMessage(data)
+      this.handleIncomingData(data)
     })
 
     conn.on('close', () => {
@@ -176,6 +192,73 @@ export class P2PPrintEngine {
     }
   }
 
+  private sendBinaryChunk(chunk: ArrayBuffer) {
+    if (this.connection && this.connection.open) {
+      try {
+        this.connection.send(chunk)
+      } catch (e) {
+        try {
+          const dc = (this.connection as any)?.dataChannel as RTCDataChannel | undefined
+          if (dc && dc.readyState === 'open') {
+            dc.send(chunk)
+          }
+        } catch (err) {
+          // Fallback
+        }
+      }
+    }
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage(chunk)
+      } catch (e) {
+        // Fallback
+      }
+    }
+  }
+
+  private handleIncomingData(data: any) {
+    if (!data) return
+
+    // If direct binary chunk arrived (ArrayBuffer or TypedArray view)
+    if (data instanceof ArrayBuffer) {
+      this.handleBinaryChunk(data)
+      return
+    }
+
+    if (ArrayBuffer.isView(data)) {
+      const u8 = new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+      const copy = new Uint8Array(u8.byteLength)
+      copy.set(u8)
+      this.handleBinaryChunk(copy.buffer)
+      return
+    }
+
+    // Otherwise JSON / P2P control message
+    this.handleIncomingMessage(data)
+  }
+
+  private handleBinaryChunk(chunk: ArrayBuffer) {
+    if (this.role !== 'receiver') return
+
+    this.receivedChunks.push(chunk)
+    this.bytesReceived += chunk.byteLength
+
+    const totalBytes = this.incomingMetadata?.fileSize || 1
+    const totalChunks =
+      this.incomingMetadata?.totalChunks || Math.ceil(totalBytes / CHUNK_SIZE) || 1
+    const durationSec = Math.max(0.1, (Date.now() - this.transferStartTime) / 1000)
+    const speedBps = Math.round(this.bytesReceived / durationSec)
+
+    this.callbacks.onProgress?.({
+      bytesReceived: this.bytesReceived,
+      totalBytes,
+      percentage: Math.min(100, Math.round((this.bytesReceived / totalBytes) * 100)),
+      speedBps,
+      chunkIndex: this.receivedChunks.length,
+      totalChunks,
+    })
+  }
+
   private handleIncomingMessage(msg: P2PMessage) {
     if (!msg || msg.sessionId !== this.sessionId) return
 
@@ -187,61 +270,69 @@ export class P2PPrintEngine {
         }
         break
 
-      case 'METADATA':
+      case 'TRANSFER_START':
+      case 'METADATA': {
         if (this.role === 'receiver') {
-          this.incomingMetadata = msg.payload as TransferMetadata
-          this.incomingChunks.clear()
+          const payload = msg.payload || {}
+          this.incomingMetadata = {
+            fileName: msg.fileName || payload.fileName || 'document.pdf',
+            fileType: msg.fileType || payload.fileType || 'application/pdf',
+            fileSize: msg.fileSize || payload.fileSize || 0,
+            totalChunks: msg.totalChunks || payload.totalChunks || 1,
+            totalPages: payload.totalPages || 1,
+            preferences: msg.preferences || payload.preferences || {
+              colorMode: 'bw',
+              copies: 1,
+              pageRange: 'All',
+              orientation: 'portrait',
+              paperSize: 'a4',
+            },
+            sentAt: payload.sentAt || Date.now(),
+          }
+          this.receivedChunks = []
           this.bytesReceived = 0
           this.transferStartTime = Date.now()
           this.updateState('transferring')
         }
         break
+      }
 
-      case 'CHUNK':
-        if (this.role === 'receiver' && msg.chunkIndex !== undefined && msg.payload) {
+      case 'CHUNK': {
+        if (this.role === 'receiver' && msg.payload) {
           const rawChunk = msg.payload
-          let chunkBytes: Uint8Array
+          let chunkBytes: ArrayBuffer
           if (rawChunk instanceof ArrayBuffer) {
-            chunkBytes = new Uint8Array(rawChunk)
-          } else if (rawChunk instanceof Uint8Array) {
             chunkBytes = rawChunk
+          } else if (ArrayBuffer.isView(rawChunk)) {
+            const u8 = new Uint8Array(rawChunk.buffer, rawChunk.byteOffset, rawChunk.byteLength)
+            const copy = new Uint8Array(u8.byteLength)
+            copy.set(u8)
+            chunkBytes = copy.buffer
           } else if (Array.isArray(rawChunk)) {
-            chunkBytes = new Uint8Array(rawChunk)
+            const copy = new Uint8Array(rawChunk)
+            chunkBytes = copy.buffer
           } else if (typeof rawChunk === 'string') {
-            // Base64 fallback
             const binStr = atob(rawChunk)
-            chunkBytes = new Uint8Array(binStr.length)
+            const copy = new Uint8Array(binStr.length)
             for (let i = 0; i < binStr.length; i++) {
-              chunkBytes[i] = binStr.charCodeAt(i)
+              copy[i] = binStr.charCodeAt(i)
             }
+            chunkBytes = copy.buffer
           } else {
-            chunkBytes = new Uint8Array(0)
+            chunkBytes = new ArrayBuffer(0)
           }
-
-          this.incomingChunks.set(msg.chunkIndex, chunkBytes)
-          this.bytesReceived += chunkBytes.byteLength
-
-          const totalBytes = this.incomingMetadata?.fileSize || 1
-          const totalChunks = msg.totalChunks || 1
-          const durationSec = Math.max(0.1, (Date.now() - this.transferStartTime) / 1000)
-          const speedBps = Math.round(this.bytesReceived / durationSec)
-
-          this.callbacks.onProgress?.({
-            bytesReceived: this.bytesReceived,
-            totalBytes,
-            percentage: Math.min(100, Math.round((this.bytesReceived / totalBytes) * 100)),
-            speedBps,
-            chunkIndex: msg.chunkIndex + 1,
-            totalChunks,
-          })
+          this.handleBinaryChunk(chunkBytes)
         }
         break
+      }
 
-      case 'COMPLETE':
+      case 'TRANSFER_END':
+      case 'COMPLETE': {
         if (this.role === 'receiver') {
           this.finalizeIncomingDocument()
         }
         break
+      }
 
       case 'PURGE':
         this.purgeMemory()
@@ -253,21 +344,31 @@ export class P2PPrintEngine {
     if (!this.incomingMetadata) return
 
     const meta = this.incomingMetadata
-    const totalChunks = this.incomingChunks.size
 
-    // Assemble unified buffer
-    const merged = new Uint8Array(this.bytesReceived)
-    let offset = 0
-    for (let i = 0; i < totalChunks; i++) {
-      const chunk = this.incomingChunks.get(i)
-      if (chunk) {
-        merged.set(chunk, offset)
-        offset += chunk.byteLength
-      }
+    // Assemble final Blob directly from received chunks
+    const finalBlob = new Blob(this.receivedChunks, {
+      type: meta.fileType || 'application/pdf',
+    })
+
+    // Verify byte integrity
+    if (meta.fileSize > 0 && finalBlob.size !== meta.fileSize) {
+      console.warn(
+        `[Scan-to-Print P2P] Byte integrity warning: expected ${meta.fileSize} bytes, assembled ${finalBlob.size} bytes.`
+      )
     }
 
-    const blob = new Blob([merged.buffer], { type: meta.fileType || 'application/octet-stream' })
-    const blobUrl = URL.createObjectURL(blob)
+    // Revoke previous Blob URLs to guarantee zero memory leaks
+    for (const oldUrl of this.objectUrlsToRevoke) {
+      try {
+        URL.revokeObjectURL(oldUrl)
+      } catch (e) {
+        // Ignore
+      }
+    }
+    this.objectUrlsToRevoke = []
+
+    // Generate new clean Blob URL
+    const blobUrl = URL.createObjectURL(finalBlob)
     this.objectUrlsToRevoke.push(blobUrl)
 
     let pageCount = 1
@@ -275,7 +376,8 @@ export class P2PPrintEngine {
 
     if (meta.fileType.includes('pdf')) {
       try {
-        const pdfDoc = await PDFDocument.load(merged.buffer, { ignoreEncryption: true })
+        const arrayBuf = await finalBlob.arrayBuffer()
+        const pdfDoc = await PDFDocument.load(arrayBuf, { ignoreEncryption: true })
         pageCount = pdfDoc.getPageCount()
       } catch (err) {
         pageCount = meta.totalPages || 1
@@ -289,14 +391,14 @@ export class P2PPrintEngine {
       id: `doc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       name: meta.fileName,
       type: meta.fileType,
-      size: meta.fileSize,
-      blob,
+      size: finalBlob.size,
+      blob: finalBlob,
       blobUrl,
       pageCount,
       thumbnails,
       preferences: meta.preferences,
       receivedAt: new Date(),
-      orientation: meta.preferences.orientation || 'portrait',
+      orientation: meta.preferences?.orientation || 'portrait',
     }
 
     this.updateState('complete')
@@ -304,7 +406,8 @@ export class P2PPrintEngine {
   }
 
   /**
-   * Sender API: Send a selected file to the receiver with streaming chunks
+   * Sender API: Send a selected file to the receiver with streaming 16KB binary chunks
+   * and strict WebRTC backpressure handling.
    */
   public async sendFile(file: File, preferences: PrintPreferences): Promise<void> {
     if (this.state !== 'connected') {
@@ -332,39 +435,70 @@ export class P2PPrintEngine {
 
     const meta: TransferMetadata = {
       fileName: file.name,
-      fileType: file.type || 'application/octet-stream',
+      fileType: file.type || 'application/pdf',
       fileSize: totalBytes,
       totalPages,
       preferences,
       sentAt: Date.now(),
     }
 
-    // 1. Send METADATA
+    // Step 1: Send TRANSFER_START metadata handshake
     this.sendMessage({
-      type: 'METADATA',
+      type: 'TRANSFER_START',
       sessionId: this.sessionId,
+      fileName: file.name,
+      fileType: file.type || 'application/pdf',
+      fileSize: totalBytes,
+      totalChunks,
+      preferences,
       payload: meta,
     })
 
-    // 2. Stream CHUNKS
+    // Brief delay to allow receiver to initialize chunks buffer
+    await new Promise((resolve) => setTimeout(resolve, 30))
+
+    // Step 2: Iterate through chunks with strict backpressure handling
     const startTime = Date.now()
     let bytesSent = 0
+
+    const dc = (this.connection as any)?.dataChannel as RTCDataChannel | undefined
+    if (dc) {
+      dc.bufferedAmountLowThreshold = 65536
+    }
 
     for (let i = 0; i < totalChunks; i++) {
       const start = i * CHUNK_SIZE
       const end = Math.min(start + CHUNK_SIZE, totalBytes)
       const chunkSlice = fileBuffer.slice(start, end)
-      const chunkArray = new Uint8Array(chunkSlice)
 
-      this.sendMessage({
-        type: 'CHUNK',
-        sessionId: this.sessionId,
-        chunkIndex: i,
-        totalChunks,
-        payload: Array.from(chunkArray),
-      })
+      // Backpressure check: if bufferedAmount > 65536, pause and await bufferedamountlow
+      if (dc && dc.readyState === 'open') {
+        if (dc.bufferedAmount > 65536) {
+          await new Promise<void>((resolve) => {
+            let done = false
+            const onLow = () => {
+              if (!done) {
+                done = true
+                dc.removeEventListener('bufferedamountlow', onLow)
+                resolve()
+              }
+            }
+            dc.addEventListener('bufferedamountlow', onLow)
+            setTimeout(() => {
+              if (!done) {
+                done = true
+                dc.removeEventListener('bufferedamountlow', onLow)
+                resolve()
+              }
+            }, 60)
+          })
+        }
+      }
 
-      bytesSent += chunkArray.byteLength
+      // Dispatch raw binary chunk
+      this.sendBinaryChunk(chunkSlice)
+
+      bytesSent += chunkSlice.byteLength
       const elapsed = Math.max(0.1, (Date.now() - startTime) / 1000)
       const speedBps = Math.round(bytesSent / elapsed)
 
@@ -377,16 +511,17 @@ export class P2PPrintEngine {
         totalChunks,
       })
 
-      // Brief delay to allow buffer drain without overwhelming the peer
-      if (i % 8 === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 8))
+      // Minimal yield every 16 chunks (256 KB) to maintain browser responsiveness
+      if (i % 16 === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 4))
       }
     }
 
-    // 3. Send COMPLETE
+    // Step 3: When all chunks are sent, dispatch completion signal
     this.sendMessage({
-      type: 'COMPLETE',
+      type: 'TRANSFER_END',
       sessionId: this.sessionId,
+      payload: { fileName: file.name, fileSize: totalBytes },
     })
 
     this.updateState('complete')
@@ -406,8 +541,8 @@ export class P2PPrintEngine {
     }
     this.objectUrlsToRevoke = []
 
-    // Wipe chunks map
-    this.incomingChunks.clear()
+    // Wipe received chunks array and metadata
+    this.receivedChunks = []
     this.incomingMetadata = null
     this.bytesReceived = 0
 

@@ -23,6 +23,7 @@ export interface TransferMetadata {
   fileName: string
   fileType: string
   fileSize: number
+  totalChunks?: number
   totalPages?: number
   preferences: PrintPreferences
   sentAt: number
@@ -63,9 +64,13 @@ export interface PosterConfig {
 export type SupportedLanguage = 'en' | 'ml' | 'hi' | 'ta' | 'te'
 
 export interface P2PMessage {
-  type: 'HANDSHAKE' | 'METADATA' | 'CHUNK' | 'COMPLETE' | 'ACK' | 'STATUS' | 'PURGE'
+  type: 'HANDSHAKE' | 'METADATA' | 'CHUNK' | 'COMPLETE' | 'ACK' | 'STATUS' | 'PURGE' | 'TRANSFER_START' | 'TRANSFER_END'
   sessionId: string
   payload?: any
   chunkIndex?: number
   totalChunks?: number
+  fileName?: string
+  fileType?: string
+  fileSize?: number
+  preferences?: PrintPreferences
 }

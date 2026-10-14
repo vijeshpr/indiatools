@@ -296,6 +296,21 @@ export const ScanToPrintTool: React.FC = () => {
               margin: 10mm;
             }
             @media print {
+              body * {
+                visibility: hidden;
+              }
+              #printable-area, #printable-area * {
+                visibility: visible;
+              }
+              #printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: transparent !important;
+              }
               html, body {
                 background: #ffffff !important;
                 color: #000000 !important;

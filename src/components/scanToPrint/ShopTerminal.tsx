@@ -38,9 +38,9 @@ export const ShopTerminal: React.FC<ShopTerminalProps> = ({
   i18n,
 }) => {
   return (
-    <div id="shop-terminal" className="w-full space-y-6 no-print">
+    <div id="shop-terminal" className="w-full space-y-6">
       {/* Station Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/90 border border-white/10 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/90 border border-white/10 backdrop-blur-xl shadow-xl no-print">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400">
             <Printer className="w-5 h-5" />
@@ -81,7 +81,7 @@ export const ShopTerminal: React.FC<ShopTerminalProps> = ({
       </div>
 
       {/* Dynamic Session QR Box & Visual Connection Radar */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch no-print">
         {/* Dynamic Session QR Box */}
         <QRCodeDisplay
           sessionId={sessionId}
@@ -114,7 +114,7 @@ export const ShopTerminal: React.FC<ShopTerminalProps> = ({
       />
 
       {/* In-Memory Guarantee Card */}
-      <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-center gap-3 text-xs text-slate-400">
+      <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-center gap-3 text-xs text-slate-400 no-print">
         <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
         <p>
           <span className="font-semibold text-slate-200">100% In-RAM Transfer:</span> Files exist strictly in browser heap memory. No cloud upload, no disk writes, and zero logs. Buffers shredded upon printing or clearing.
