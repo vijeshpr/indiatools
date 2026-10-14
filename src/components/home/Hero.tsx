@@ -3,14 +3,12 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Search,
-  Command,
   ArrowRight,
-  ChevronDown,
   Sparkles,
   Compass,
-  Cpu,
-  Lock,
   ShieldCheck,
+  Zap,
+  CheckCircle2,
   Layers,
 } from 'lucide-react'
 import { BotanicalHero3D } from '../garden/BotanicalHero3D'
@@ -40,89 +38,86 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
   }
 
   return (
-    <section className="relative pt-6 pb-20 sm:pt-10 sm:pb-28 overflow-hidden text-center px-4 sm:px-6 lg:px-8">
-      {/* 1. Realistic 3D Indian Flower Garden Scene with Roses, Chendumalli, Jasmine & Climbing Vines */}
-      <div className="relative w-full max-w-6xl mx-auto -mb-20 sm:-mb-32 z-0">
-        <BotanicalHero3D />
-      </div>
+    <section className="relative min-h-[85vh] sm:min-h-[88vh] flex items-center justify-center overflow-hidden text-center px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      {/* 1. Realistic 3D Indian Flower Garden Stage (Roses, Chendumalli, Jasmine & Climbing Vines) */}
+      <BotanicalHero3D />
 
-      {/* 2. Hero Content Container with Deliberate Negative-Space Framing */}
-      <div className="relative z-10 max-w-4xl mx-auto space-y-6 sm:space-y-8">
-        {/* Botanical Identity Badge */}
+      {/* 2. Hero Content Container (Deliberate Negative-Space Framing in Center) */}
+      <div className="relative z-10 max-w-4xl mx-auto space-y-6 sm:space-y-8 pointer-events-auto">
+        {/* Eyebrow Badge */}
         <motion.div
-          initial={{ opacity: 0, y: -12 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10271C]/90 border border-emerald-500/30 backdrop-blur-md shadow-lg shadow-emerald-950/40"
+          className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-[#06140D]/85 border border-[#D8B879]/40 backdrop-blur-xl shadow-2xl shadow-emerald-950/60"
         >
-          <span className="flex h-2 w-2 relative">
+          <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
           </span>
-          <span className="text-[11px] font-mono tracking-widest uppercase text-[#F3F0E5] font-semibold">
-            IndiaTools • Living Digital Garden • {TOOLS.length} Verified Utilities
+          <span className="text-xs sm:text-[13px] font-mono tracking-widest uppercase text-[#FDE68A] font-bold">
+            YOUR EVERYDAY DIGITAL TOOLKIT
           </span>
         </motion.div>
 
-        {/* Cinematic Headlines */}
+        {/* Large, High-Contrast Cinematic Headline */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15 }}
+          transition={{ duration: 0.7, delay: 0.12 }}
           className="space-y-4"
         >
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#F3F0E5] font-sans leading-[1.08]">
+          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white font-sans leading-[1.04] drop-shadow-md">
             Technology in <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-[#D8B879] via-[#A8C5AC] to-[#16865D] bg-clip-text text-transparent">
-              full bloom.
+            <span className="bg-gradient-to-r from-[#FDE68A] via-[#FBBF24] to-[#F59E0B] bg-clip-text text-transparent drop-shadow-sm">
+              Full Bloom.
             </span>
           </h1>
 
-          <p className="text-xl sm:text-2xl font-semibold text-[#D8B879] tracking-tight">
-            Powerful tools. A more beautiful way to work.
-          </p>
-
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-[#A8C5AC] leading-relaxed font-sans">
-            Explore useful browser utilities for audio, images, video, documents, security, and everyday work in a living digital garden.
+          {/* Supporting Text */}
+          <p className="max-w-2xl mx-auto text-base sm:text-xl text-slate-200 leading-relaxed font-sans font-normal drop-shadow-sm px-2">
+            Powerful browser tools for audio, images, video, documents, finance and everyday work — thoughtfully designed for everyone.
           </p>
         </motion.div>
 
-        {/* Primary & Secondary Action CTAs */}
+        {/* Action CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-wrap items-center justify-center gap-3.5 pt-2"
+          transition={{ duration: 0.6, delay: 0.25 }}
+          className="flex flex-wrap items-center justify-center gap-4 pt-2"
         >
+          {/* Primary CTA */}
           <button
             type="button"
             onClick={handleScrollToTools}
-            className="px-7 py-3.5 rounded-2xl bg-[#16865D] hover:bg-[#1fa372] text-[#F3F0E5] font-bold text-sm sm:text-base flex items-center gap-2.5 shadow-xl shadow-emerald-900/40 transition-all cursor-pointer group hover:scale-[1.02]"
+            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-base sm:text-lg flex items-center gap-3 shadow-2xl shadow-emerald-950/70 hover:shadow-emerald-500/30 transition-all duration-200 cursor-pointer group hover:scale-[1.03] active:scale-[0.98]"
           >
-            <Sparkles className="w-4 h-4 text-[#D8B879]" />
-            <span>Explore Tools</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <Sparkles className="w-5 h-5 text-amber-300" />
+            <span>Explore All Tools</span>
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
           </button>
 
+          {/* Secondary CTA */}
           <Link
             to="/categories"
-            className="px-6 py-3.5 rounded-2xl bg-[#10271C]/90 hover:bg-[#163628] text-[#F3F0E5] font-semibold text-sm sm:text-base border border-emerald-500/25 flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+            className="px-7 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-white font-semibold text-base sm:text-lg border border-[#D8B879]/40 hover:border-[#D8B879] flex items-center gap-2.5 transition-all duration-200 cursor-pointer shadow-xl shadow-black/40 backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Compass className="w-4 h-4 text-[#D8B879]" />
+            <Compass className="w-5 h-5 text-amber-300" />
             <span>Discover Categories</span>
           </Link>
         </motion.div>
 
-        {/* Raycast-style Botanical Command Search Bar */}
+        {/* Global Command Search Bar Input */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="max-w-2xl mx-auto pt-3"
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="max-w-xl mx-auto pt-2"
         >
           <div
             onClick={handleTriggerSearch}
-            className="group relative flex items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-[#10271C]/85 hover:bg-[#163628] border border-emerald-500/25 hover:border-[#D8B879]/50 shadow-2xl shadow-emerald-950/40 cursor-pointer transition-all backdrop-blur-xl"
+            className="group relative flex items-center justify-between p-3 sm:p-3.5 rounded-2xl bg-[#0A1D14]/90 hover:bg-[#102B1E] border border-emerald-500/35 hover:border-[#D8B879]/70 shadow-2xl shadow-black/60 cursor-pointer transition-all backdrop-blur-2xl"
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
@@ -131,68 +126,44 @@ export const Hero: React.FC<HeroProps> = ({ onOpenSearch }) => {
                 handleTriggerSearch()
               }
             }}
-            aria-label="Open Botanical Command Palette (Ctrl+K)"
+            aria-label="Open Command Search (Ctrl+K)"
           >
             <div className="flex items-center gap-3 pl-2 sm:pl-3 flex-1 min-w-0">
-              <Search className="w-5 h-5 text-[#D8B879] shrink-0 group-hover:scale-110 transition-transform" />
-              <span className="text-sm sm:text-base text-[#A8C5AC] group-hover:text-[#F3F0E5] font-sans truncate text-left">
-                Search tools, explore categories, or jump to a utility...
+              <Search className="w-5 h-5 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" />
+              <span className="text-sm sm:text-base text-slate-300 group-hover:text-white font-sans truncate text-left">
+                Search 64 verified tools, calculators & utilities...
               </span>
             </div>
-
-            <div className="flex items-center gap-1.5 shrink-0 pr-1">
-              <kbd className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-[#D8B879] bg-black/40 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                <Command className="w-3 h-3 text-[#A8C5AC]" />
-                <span>K</span>
-              </kbd>
-              <div className="sm:hidden px-2.5 py-1 rounded-lg bg-[#16865D] text-[#F3F0E5] text-xs font-bold font-mono">
-                Search
-              </div>
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-xs font-mono text-amber-300">
+              <span>Ctrl</span>
+              <span>K</span>
             </div>
           </div>
         </motion.div>
 
-        {/* Floating Trust Indicators */}
+        {/* Trust Badges Bar */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="pt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs font-medium text-[#A8C5AC]"
+          transition={{ duration: 0.8, delay: 0.45 }}
+          className="pt-2 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-mono text-slate-300"
         >
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#10271C]/70 border border-emerald-500/20">
-            <Cpu className="w-3.5 h-3.5 text-[#16865D]" />
-            <span>100% In-Browser Processing</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/60 border border-emerald-500/20 backdrop-blur-md">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>100% In-Browser Privacy</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#10271C]/70 border border-emerald-500/20">
-            <Lock className="w-3.5 h-3.5 text-[#D8B879]" />
-            <span>Zero Server File Uploads</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/60 border border-emerald-500/20 backdrop-blur-md">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Zero Mandatory Logins</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#10271C]/70 border border-emerald-500/20">
-            <Sparkles className="w-3.5 h-3.5 text-[#A8C5AC]" />
-            <span>Free & Open Access</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/60 border border-emerald-500/20 backdrop-blur-md">
+            <Zap className="w-4 h-4 text-amber-400" />
+            <span>{TOOLS.length} Production Utilities</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#10271C]/70 border border-emerald-500/20">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Client-Side Privacy</span>
-          </div>
-        </motion.div>
-
-        {/* Botanical Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          className="pt-6 flex flex-col items-center justify-center gap-1 text-[#A8C5AC]/70 cursor-pointer"
-          onClick={handleScrollToTools}
-        >
-          <span className="text-[10px] font-mono tracking-widest uppercase">Scroll to bloom</span>
-          <ChevronDown className="w-4 h-4 animate-bounce text-[#D8B879]" />
         </motion.div>
       </div>
 
-      {!onOpenSearch && (
-        <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-      )}
+      <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </section>
   )
 }

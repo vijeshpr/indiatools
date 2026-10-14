@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
@@ -14,11 +14,11 @@ import {
   Volume2,
   Video,
   FileText,
-  Code,
+  Code2,
   Wrench,
   Sparkles,
 } from 'lucide-react'
-import type { ToolDefinition, ToolCategory } from '../../types'
+import type { ToolDefinition } from '../../types'
 import { CategoryAnimationPreview } from './CategoryAnimationPreview'
 
 interface ToolCardProps {
@@ -33,7 +33,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   pdf: FileText,
   money: IndianRupee,
   security: ShieldCheck,
-  developer: Code,
+  developer: Code2,
   utilities: Wrench,
   drive: Car,
   build: HardHat,
@@ -44,20 +44,20 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 }
 
 const CATEGORY_ACCENTS: Record<string, { text: string; bg: string; border: string; glow: string }> = {
-  audio: { text: '#A855F7', bg: 'rgba(168, 85, 247, 0.12)', border: 'rgba(168, 85, 247, 0.3)', glow: 'rgba(168, 85, 247, 0.2)' },
-  image: { text: '#10B981', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(16, 185, 129, 0.3)', glow: 'rgba(16, 185, 129, 0.2)' },
-  video: { text: '#06B6D4', bg: 'rgba(6, 182, 212, 0.12)', border: 'rgba(6, 182, 212, 0.3)', glow: 'rgba(6, 182, 212, 0.2)' },
-  pdf: { text: '#F59E0B', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.3)', glow: 'rgba(245, 158, 11, 0.2)' },
-  money: { text: '#D8B879', bg: 'rgba(216, 184, 121, 0.12)', border: 'rgba(216, 184, 121, 0.3)', glow: 'rgba(216, 184, 121, 0.2)' },
-  security: { text: '#16865D', bg: 'rgba(22, 134, 93, 0.15)', border: 'rgba(22, 134, 93, 0.35)', glow: 'rgba(22, 134, 93, 0.2)' },
-  developer: { text: '#3B82F6', bg: 'rgba(59, 130, 246, 0.12)', border: 'rgba(59, 130, 246, 0.3)', glow: 'rgba(59, 130, 246, 0.2)' },
-  utilities: { text: '#F97316', bg: 'rgba(249, 115, 22, 0.12)', border: 'rgba(249, 115, 22, 0.3)', glow: 'rgba(249, 115, 22, 0.2)' },
-  drive: { text: '#F97316', bg: 'rgba(249, 115, 22, 0.12)', border: 'rgba(249, 115, 22, 0.3)', glow: 'rgba(249, 115, 22, 0.15)' },
-  build: { text: '#EAB308', bg: 'rgba(234, 179, 8, 0.12)', border: 'rgba(234, 179, 8, 0.3)', glow: 'rgba(234, 179, 8, 0.15)' },
-  power: { text: '#3B82F6', bg: 'rgba(59, 130, 246, 0.12)', border: 'rgba(59, 130, 246, 0.3)', glow: 'rgba(59, 130, 246, 0.15)' },
-  land: { text: '#10B981', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(16, 185, 129, 0.3)', glow: 'rgba(16, 185, 129, 0.15)' },
-  work: { text: '#06B6D4', bg: 'rgba(6, 182, 212, 0.12)', border: 'rgba(6, 182, 212, 0.3)', glow: 'rgba(6, 182, 212, 0.15)' },
-  create: { text: '#EC4899', bg: 'rgba(236, 72, 153, 0.12)', border: 'rgba(236, 72, 153, 0.3)', glow: 'rgba(236, 72, 153, 0.15)' },
+  audio: { text: '#C084FC', bg: 'rgba(192, 132, 252, 0.15)', border: 'rgba(192, 132, 252, 0.4)', glow: 'rgba(192, 132, 252, 0.25)' },
+  image: { text: '#34D399', bg: 'rgba(52, 211, 153, 0.15)', border: 'rgba(52, 211, 153, 0.4)', glow: 'rgba(52, 211, 153, 0.25)' },
+  video: { text: '#22D3EE', bg: 'rgba(34, 211, 238, 0.15)', border: 'rgba(34, 211, 238, 0.4)', glow: 'rgba(34, 211, 238, 0.25)' },
+  pdf: { text: '#FBBF24', bg: 'rgba(251, 191, 36, 0.15)', border: 'rgba(251, 191, 36, 0.4)', glow: 'rgba(251, 191, 36, 0.25)' },
+  money: { text: '#FDE047', bg: 'rgba(253, 224, 71, 0.15)', border: 'rgba(253, 224, 71, 0.4)', glow: 'rgba(253, 224, 71, 0.25)' },
+  security: { text: '#10B981', bg: 'rgba(16, 185, 129, 0.18)', border: 'rgba(16, 185, 129, 0.45)', glow: 'rgba(16, 185, 129, 0.3)' },
+  developer: { text: '#60A5FA', bg: 'rgba(96, 165, 250, 0.15)', border: 'rgba(96, 165, 250, 0.4)', glow: 'rgba(96, 165, 250, 0.25)' },
+  utilities: { text: '#FB923C', bg: 'rgba(251, 146, 60, 0.15)', border: 'rgba(251, 146, 60, 0.4)', glow: 'rgba(251, 146, 60, 0.25)' },
+  drive: { text: '#FB923C', bg: 'rgba(251, 146, 60, 0.15)', border: 'rgba(251, 146, 60, 0.4)', glow: 'rgba(251, 146, 60, 0.2)' },
+  build: { text: '#FBBF24', bg: 'rgba(251, 191, 36, 0.15)', border: 'rgba(251, 191, 36, 0.4)', glow: 'rgba(251, 191, 36, 0.2)' },
+  power: { text: '#60A5FA', bg: 'rgba(96, 165, 250, 0.15)', border: 'rgba(96, 165, 250, 0.4)', glow: 'rgba(96, 165, 250, 0.2)' },
+  land: { text: '#34D399', bg: 'rgba(52, 211, 153, 0.15)', border: 'rgba(52, 211, 153, 0.4)', glow: 'rgba(52, 211, 153, 0.2)' },
+  work: { text: '#22D3EE', bg: 'rgba(34, 211, 238, 0.15)', border: 'rgba(34, 211, 238, 0.4)', glow: 'rgba(34, 211, 238, 0.2)' },
+  create: { text: '#F472B6', bg: 'rgba(244, 114, 182, 0.15)', border: 'rgba(244, 114, 182, 0.4)', glow: 'rgba(244, 114, 182, 0.2)' },
 }
 
 export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) => {
@@ -66,10 +66,10 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
 
   const Icon = CATEGORY_ICONS[tool.category] || ArrowRight
   const accents = CATEGORY_ACCENTS[tool.category] || {
-    text: '#16865D',
-    bg: 'rgba(22, 134, 93, 0.12)',
-    border: 'rgba(22, 134, 93, 0.3)',
-    glow: 'rgba(22, 134, 93, 0.15)',
+    text: '#10B981',
+    bg: 'rgba(16, 185, 129, 0.15)',
+    border: 'rgba(16, 185, 129, 0.35)',
+    glow: 'rgba(16, 185, 129, 0.2)',
   }
 
   // Mouse-following reflection coordinates
@@ -83,7 +83,8 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
     card.style.setProperty('--mouse-y', `${y}px`)
   }
 
-  const previewCategory = React.useMemo(() => {
+  // Determine specific animation category
+  const previewCategory = useMemo(() => {
     if (tool.category === 'money') return 'money'
     if (tool.category === 'create') {
       if (tool.slug.includes('vault') || tool.slug.includes('watermark') || tool.slug.includes('tracer')) return 'security'
@@ -107,11 +108,13 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
       onFocus={() => setIsHovered(true)}
       onBlur={() => setIsHovered(false)}
       tabIndex={0}
-      className={`botanical-card group rounded-2xl p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8B879] ${
-        isFeatured ? 'md:col-span-2 bg-[#10271C]' : 'bg-[#0C1E16]'
+      className={`rounded-3xl p-6 sm:p-7 flex flex-col justify-between overflow-hidden relative transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 group hover:-translate-y-1 shadow-lg ${
+        isFeatured
+          ? 'md:col-span-2 bg-[#0E261B] border border-emerald-500/35 hover:border-amber-400/60 hover:shadow-2xl hover:shadow-emerald-950/60'
+          : 'bg-[#0A1E15] border border-emerald-500/20 hover:border-amber-400/40 hover:shadow-2xl hover:shadow-emerald-950/40'
       }`}
     >
-      {/* Category-Reactive Hover Animation Layer */}
+      {/* Category-Reactive Hover Motion Layer */}
       <CategoryAnimationPreview
         category={previewCategory}
         isHovered={isHovered}
@@ -123,9 +126,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
 
       {/* Top Header: Category Icon & Badges */}
       <div className="relative z-10">
-        <div className="flex items-center justify-between gap-2 mb-3.5">
+        <div className="flex items-center justify-between gap-2.5 mb-4">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105"
+            className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105 shadow-inner"
             style={{
               backgroundColor: accents.bg,
               borderColor: accents.border,
@@ -137,29 +140,29 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
 
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {tool.badge && (
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#10271C] text-[#D8B879] border border-[#D8B879]/30">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#122F22] text-amber-300 border border-amber-400/30">
                 {tool.badge}
               </span>
             )}
-            <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md text-[#A8C5AC] bg-[#07130E]/60 border border-emerald-500/15">
+            <span className="text-[11px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-md text-emerald-300 bg-[#06150F]/80 border border-emerald-500/25">
               {tool.categoryLabel}
             </span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="text-lg sm:text-xl font-bold text-[#F3F0E5] group-hover:text-[#D8B879] transition-colors tracking-tight leading-snug">
+        <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-amber-200 transition-colors tracking-tight leading-snug">
           {tool.title}
         </h3>
 
         {/* Description */}
-        <p className="mt-2 text-xs sm:text-sm text-[#A8C5AC] leading-relaxed font-sans line-clamp-3">
+        <p className="mt-2.5 text-sm sm:text-[15px] text-slate-300 leading-relaxed font-sans line-clamp-3">
           {tool.description}
         </p>
 
         {/* Micro Category Metadata Footer */}
         <div className="mt-4 pt-3 border-t border-emerald-500/15">
-          <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#D8B879]">
+          <div className="flex items-center gap-2 text-xs font-mono text-amber-300/90">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="truncate">{tool.tags.slice(0, 3).join(' • ')}</span>
           </div>
@@ -167,18 +170,18 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="relative z-10 mt-5 pt-3 border-t border-emerald-500/15 flex items-center justify-between">
-        <span className="text-[11px] font-mono text-[#A8C5AC]/70">
+      <div className="relative z-10 mt-6 pt-3.5 border-t border-emerald-500/15 flex items-center justify-between">
+        <span className="text-xs font-mono text-emerald-400/70">
           Client-Side Zero-Install
         </span>
 
         <Link
           to={targetPath}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D8B879] group-hover:text-[#F3F0E5] focus:outline-none focus-visible:underline cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-300 group-hover:text-white focus:outline-none focus-visible:underline cursor-pointer transition-colors"
           aria-label={`Launch ${tool.title}`}
         >
           <span>Launch Tool</span>
-          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-200" />
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-200" />
         </Link>
       </div>
     </div>
