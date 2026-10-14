@@ -132,7 +132,7 @@ async function runAudit() {
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 63 unique tools', tools.length === 63, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 64 unique tools', tools.length === 64, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;

@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 24,
+    toolCount: 25,
   },
 }
 
@@ -3236,6 +3236,84 @@ export const TOOLS: ToolDefinition[] = [
         'clean phone camera watermark'
       ],
       canonicalPath: '/tools/fast-inpainting-watermark-remover'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'scan-to-print',
+    slug: 'scan-to-print',
+    title: 'Scan-to-Print P2P QR Drop Studio – Zero-WhatsApp Mobile Printing | IndiaTools',
+    shortTitle: 'Scan-to-Print P2P',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Scan a countertop QR code with your phone camera to transfer and print PDFs and photos to the shop computer instantly without WhatsApp or number sharing.',
+    detailedDescription: 'Direct peer-to-peer phone-to-computer document transmission built for Akshaya Centres, DTP shops, cyber cafes, and stationery stores. 100% private in-memory streaming with zero cloud storage.',
+    iconName: 'Printer',
+    badge: 'New',
+    color: '#06B6D4',
+    tags: ['Scan to Print', 'P2P', 'QR Code', 'DTP Printing', 'WhatsApp Alternative', 'Zero Upload'],
+    searchKeywords: [
+      'scan qr code to print documents online free',
+      'whatsapp print alternative for photocopy shops',
+      'direct mobile to pc print p2p zero upload',
+      'akshaya centre dtp print qr tool',
+      'phone to computer print without whatsapp',
+      'xerox shop qr print drop'
+    ],
+    formulaExplanation: 'Direct WebRTC SCTP binary data channel streams 64KB chunks directly into computer RAM without writing files to disk or cloud servers.',
+    assumptions: [
+      'Requires WebRTC-enabled browser on phone and computer',
+      'Zero disk storage or cloud retention; all files shredded on purge'
+    ],
+    exampleCalculation: {
+      title: 'Direct Phone-to-Shop Counter A4 PDF Printing',
+      inputs: {
+        'Transfer Method': 'Direct WebRTC P2P DataChannel',
+        'Customer Action': 'Scan QR with phone camera and select PDF',
+        'Shop Computer': 'Document auto-opens in RAM and triggers print'
+      },
+      outputs: {
+        'WhatsApp Number Sharing': 'None (0 numbers exchanged)',
+        'Shop PC Hard Drive Storage': '0 bytes (In-Memory Only)',
+        'Transfer Latency': '< 2 seconds over local Wi-Fi / 5G'
+      },
+      explanation: 'Customer scans countertop QR code, picks a 4-page PDF, selects 2 copies B&W, and taps send. The shop PC receives the stream into browser RAM and triggers native print in seconds.'
+    },
+    faqs: [
+      {
+        question: 'Why should photocopy shops use Scan-to-Print instead of WhatsApp?',
+        answer: 'It eliminates saving random customer phone numbers, avoids filling computer hard drives with unwanted downloads, and allows instant printing in seconds.'
+      },
+      {
+        question: 'Are files uploaded to any online server or cloud?',
+        answer: 'No. WebRTC streams the file binary data directly between the phone and shop computer browser RAM. Zero bytes are saved on any cloud or disk.'
+      },
+      {
+        question: 'Can customers choose color, copies, and page ranges from their mobile?',
+        answer: 'Yes. Customers can select color vs black & white, number of copies (1-10), and custom page ranges right on their mobile interface before sending.'
+      },
+      {
+        question: 'How do I print the countertop standee poster for my shop?',
+        answer: 'Click "Download Countertop A4 QR Poster" or the "Counter Standee" button in the terminal, type your shop name, and click Print for an instant A4 or A5 laminated-style standee.'
+      },
+      {
+        question: 'What happens when I click Done & Purge?',
+        answer: 'The shop terminal immediately zeroes out all memory buffers, revokes the temporary Object URLs, and triggers garbage collection so zero customer data remains.'
+      }
+    ],
+    relatedSlugs: ['smart-document-scanner', 'image-to-pdf', 'qr-code-generator', 'passport-photo', 'signature-resizer'],
+    seo: {
+      title: 'Scan-to-Print P2P QR Drop Studio – Zero-WhatsApp Mobile Printing | IndiaTools',
+      metaDescription: 'Direct phone-to-computer document printing for Akshaya centres, DTP photocopy shops, and students. Scan QR code to transfer and print PDF and photos instantly with zero uploads.',
+      keywords: [
+        'scan qr code to print documents online free',
+        'whatsapp print alternative for photocopy shops',
+        'direct mobile to pc print p2p zero upload',
+        'akshaya centre dtp print qr tool',
+        'phone to computer print without whatsapp',
+        'xerox shop qr print drop'
+      ],
+      canonicalPath: '/tools/scan-to-print'
     },
     type: 'image-tool'
   }

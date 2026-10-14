@@ -76,6 +76,7 @@ import { InvisibleDocumentWatermarkerTool } from '../imageTools/InvisibleDocumen
 import { SmartDocumentScannerTool } from '../imageTools/SmartDocumentScannerTool'
 import { BatchImageWatermarkerTool } from '../imageTools/BatchImageWatermarkerTool'
 import { FastInpaintingWatermarkRemoverTool } from '../imageTools/FastInpaintingWatermarkRemoverTool'
+import { ScanToPrintTool } from '../imageTools/ScanToPrintTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -152,6 +153,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'smart-document-scanner': SmartDocumentScannerTool,
   'batch-image-watermarker': BatchImageWatermarkerTool,
   'fast-inpainting-watermark-remover': FastInpaintingWatermarkRemoverTool,
+  'scan-to-print': ScanToPrintTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'
