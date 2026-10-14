@@ -3331,11 +3331,21 @@ export const TOOLS: ToolDefinition[] = [
     tags: ['Scan to Print', 'P2P', 'QR Code', 'DTP Printing', 'WhatsApp Alternative', 'Zero Upload'],
     searchKeywords: [
       'scan qr code to print documents online free',
-      'whatsapp print alternative for photocopy shops',
+      'print documents without whatsapp number',
       'direct mobile to pc print p2p zero upload',
       'akshaya centre dtp print qr tool',
       'phone to computer print without whatsapp',
-      'xerox shop qr print drop'
+      'xerox shop qr print drop',
+      'വാട്സാപ്പ് ഇല്ലാതെ പ്രിന്റ് എടുക്കാൻ',
+      'ക്യുആർ കോഡ് സ്കാൻ ചെയ്തു പ്രിന്റ് ചെയ്യാം',
+      'അക്ഷയ സെന്റർ പ്രിന്റ് ടൂൾ',
+      'മൊബൈൽ ഫയൽ കമ്പ്യൂട്ടറിലേക്ക് അയക്കാൻ',
+      'बिना व्हाट्सएप के मोबाइल से प्रिंट कैसे निकालें',
+      'दुकान के लिए क्यूआर प्रिंट टूल',
+      'क्यूआर कोड स्कैन करके प्रिंट करें',
+      'வாட்ஸ்அப் இல்லாமல் பிரிண்ட் செய்ய',
+      'க்யூஆர் கோட் பிரிண்டிங் டூல்',
+      'వాట్సాప్ లేకుండా డైరెక్ట్ ప్రింట్'
     ],
     formulaExplanation: 'Direct WebRTC SCTP binary data channel streams 64KB chunks directly into computer RAM without writing files to disk or cloud servers.',
     assumptions: [
@@ -3384,11 +3394,21 @@ export const TOOLS: ToolDefinition[] = [
       metaDescription: 'Direct phone-to-computer document printing for Akshaya centres, DTP photocopy shops, and students. Scan QR code to transfer and print PDF and photos instantly with zero uploads.',
       keywords: [
         'scan qr code to print documents online free',
-        'whatsapp print alternative for photocopy shops',
+        'print documents without whatsapp number',
         'direct mobile to pc print p2p zero upload',
         'akshaya centre dtp print qr tool',
         'phone to computer print without whatsapp',
-        'xerox shop qr print drop'
+        'xerox shop qr print drop',
+        'വാട്സാപ്പ് ഇല്ലാതെ പ്രിന്റ് എടുക്കാൻ',
+        'ക്യുആർ കോഡ് സ്കാൻ ചെയ്തു പ്രിന്റ് ചെയ്യാം',
+        'അക്ഷയ സെന്റർ പ്രിന്റ് ടൂൾ',
+        'മൊബൈൽ ഫയൽ കമ്പ്യൂട്ടറിലേക്ക് അയക്കാൻ',
+        'बिना व्हाट्सएप के मोबाइल से प्रिंट कैसे निकालें',
+        'दुकान के लिए क्यूआर प्रिंट टूल',
+        'क्यूआर कोड स्कैन करके प्रिंट करें',
+        'வாட்ஸ்அப் இல்லாமல் பிரிண்ட் செய்ய',
+        'க்யூஆர் கோட் பிரிண்டிங் டூல்',
+        'వాట్సాప్ లేకుండా డైరెక్ట్ ప్రింట్'
       ],
       canonicalPath: '/tools/scan-to-print'
     },

@@ -23,13 +23,9 @@ import {
 } from '../types/p2pPrint'
 import { I18N_DATA } from '../components/scanToPrint/scanToPrintI18n'
 import { P2PPrintEngine } from '../lib/p2p/p2pPrintEngine'
-import {
-  playConnectedChime,
-  playReceivedChime,
-  playPurgeChime,
-} from '../components/scanToPrint/chimeAudio'
 import { HeroSection } from '../components/scanToPrint/HeroSection'
 import { ShopTerminal } from '../components/scanToPrint/ShopTerminal'
+import { MultilingualGuideSidebar } from '../components/scanToPrint/MultilingualGuideSidebar'
 import { MobileSender } from '../components/scanToPrint/MobileSender'
 import { CountertopPosterGenerator } from '../components/scanToPrint/CountertopPosterGenerator'
 
@@ -76,7 +72,7 @@ export const ScanToPrintTool: React.FC = () => {
     return `${window.location.origin}/tools/scan-to-print?session=${sessionId}`
   }, [sessionId])
 
-  // Initialize or recreate P2P Engine
+  // Initialize or recreate P2P Engine (STRICTLY SILENT: 0 Web Audio)
   useEffect(() => {
     if (engineRef.current) {
       engineRef.current.destroy()
@@ -87,16 +83,12 @@ export const ScanToPrintTool: React.FC = () => {
     const engine = new P2PPrintEngine(role, sessionId, {
       onStateChange: (state) => {
         setConnectionState(state)
-        if (state === 'connected') {
-          playConnectedChime()
-        }
       },
       onProgress: (prog) => {
         setProgress(prog)
       },
       onDocumentReceived: (doc) => {
         setReceivedDoc(doc)
-        playReceivedChime()
 
         // Auto-print trigger if enabled
         if (autoPrintEnabled) {
@@ -161,7 +153,6 @@ export const ScanToPrintTool: React.FC = () => {
     }
     setReceivedDoc(null)
     setProgress(null)
-    playPurgeChime()
   }
 
   const handleResetSession = () => {
@@ -190,6 +181,20 @@ export const ScanToPrintTool: React.FC = () => {
     }
   }
 
+  // Global Keyboard Shortcut: Ctrl + P / Cmd + P when document is ready
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        if (receivedDoc) {
+          e.preventDefault()
+          handlePrint()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [receivedDoc])
+
   if (!tool) return null
 
   // Canonical hreflangs for Multilingual SEO
@@ -202,21 +207,58 @@ export const ScanToPrintTool: React.FC = () => {
     { lang: 'te-IN', href: 'https://indiatools-rho.vercel.app/te/tools/scan-to-print' },
   ]
 
-  // Structured Data Schema for Search Engines
+  // Structured Data Schema for Search Engines (SoftwareApplication + HowTo for Google Rich Snippets)
   const customJsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'Scan-to-Print P2P QR Drop Studio',
-    applicationCategory: 'UtilitiesApplication',
-    operatingSystem: 'All Web Browsers (Mobile & Desktop)',
-    browserRequirements: 'Requires JavaScript. Requires HTML5 & WebRTC.',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'INR',
-    },
-    description:
-      'Direct phone-to-computer document transmission built for Akshaya Centres, DTP shops, colleges, and stationery stores. Zero WhatsApp clutter, no mobile number sharing, 100% private in-memory P2P transfer.',
+    '@graph': [
+      {
+        '@type': 'SoftwareApplication',
+        name: 'Scan-to-Print P2P QR Drop Studio',
+        applicationCategory: 'UtilitiesApplication',
+        operatingSystem: 'All Web Browsers (Mobile & Desktop)',
+        browserRequirements: 'Requires JavaScript. Requires HTML5 & WebRTC.',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'INR',
+        },
+        description:
+          'Direct phone-to-computer document transmission built for Akshaya Centres, DTP shops, colleges, and stationery stores. Zero WhatsApp clutter, no mobile number sharing, 100% private in-memory P2P transfer.',
+      },
+      {
+        '@type': 'HowTo',
+        name: 'How to Print Documents from Mobile to Shop Computer Without WhatsApp',
+        description:
+          'Step-by-step instructions to print PDF documents and photos from mobile to any shop counter printer without sharing phone numbers.',
+        totalTime: 'PT15S',
+        step: [
+          {
+            '@type': 'HowToStep',
+            position: 1,
+            name: 'Open Counter Station on PC',
+            text: 'Open IndiaTools Scan-to-Print on the shop counter computer and display the dynamic QR code.',
+          },
+          {
+            '@type': 'HowToStep',
+            position: 2,
+            name: 'Customer Scans QR Code',
+            text: 'Customer points their phone camera or Google Lens at the countertop QR code without installing any application.',
+          },
+          {
+            '@type': 'HowToStep',
+            position: 3,
+            name: 'Select File and Tap Send',
+            text: 'Customer chooses the PDF or image on their phone, selects Black & White or Color and copy count, then taps Send.',
+          },
+          {
+            '@type': 'HowToStep',
+            position: 4,
+            name: 'Instant Native Print',
+            text: 'Document loads into PC RAM and triggers native system print dialog automatically. Zero files saved on disk.',
+          },
+        ],
+      },
+    ],
   }
 
   return (
@@ -232,6 +274,43 @@ export const ScanToPrintTool: React.FC = () => {
       hreflangs={hreflangs}
       customJsonLd={customJsonLd}
     >
+      {/* Strict Standard A4 Print CSS Injection */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @page {
+              size: A4 portrait;
+              margin: 10mm;
+            }
+            @media print {
+              html, body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              .no-print {
+                display: none !important;
+              }
+              .scan-to-print-page {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+                page-break-inside: avoid;
+              }
+              img.scan-to-print-image {
+                max-width: 100% !important;
+                height: auto !important;
+                display: block !important;
+                margin: 0 auto !important;
+                object-fit: contain !important;
+              }
+            }
+          `,
+        }}
+      />
+
       <div className="relative space-y-12">
         {/* Subtle Ambient Particle & Radial Light Drift */}
         <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden no-print" aria-hidden="true">
@@ -240,7 +319,7 @@ export const ScanToPrintTool: React.FC = () => {
           <div className="absolute top-[60%] -right-20 w-[550px] h-[550px] bg-emerald-600/6 rounded-full blur-[120px] pointer-events-none" />
         </div>
 
-        {/* Dedicated Standalone SaaS Hero Section */}
+        {/* 1. DEDICATED SAAS HERO SECTION */}
         <HeroSection
           i18n={i18n}
           currentLang={currentLang}
@@ -279,32 +358,57 @@ export const ScanToPrintTool: React.FC = () => {
           </div>
         </div>
 
-        {/* ACTIVE OPERATIONAL INTERFACE */}
+        {/* 2. MAIN WORKSTATION (TWO-COLUMN DESKTOP LAYOUT: 65% Terminal | 35% Multilingual Sidebar) */}
         <div className="relative">
           {activeMode === 'terminal' ? (
-            <ShopTerminal
-              sessionId={sessionId}
-              sessionUrl={sessionUrl}
-              state={connectionState}
-              progress={progress}
-              document={receivedDoc}
-              autoPrintEnabled={autoPrintEnabled}
-              onToggleAutoPrint={() => setAutoPrintEnabled(!autoPrintEnabled)}
-              onPrint={handlePrint}
-              onPurge={handlePurge}
-              onOpenPosterModal={() => setIsPosterModalOpen(true)}
-              onOpenMobileTest={handleOpenMobileTest}
-              onResetSession={handleResetSession}
-              i18n={i18n}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column (65% width) - Shopkeeper Terminal (The Print Station) */}
+              <div className="lg:col-span-8">
+                <ShopTerminal
+                  sessionId={sessionId}
+                  sessionUrl={sessionUrl}
+                  state={connectionState}
+                  progress={progress}
+                  document={receivedDoc}
+                  autoPrintEnabled={autoPrintEnabled}
+                  onToggleAutoPrint={() => setAutoPrintEnabled(!autoPrintEnabled)}
+                  onPrint={handlePrint}
+                  onPurge={handlePurge}
+                  onOpenPosterModal={() => setIsPosterModalOpen(true)}
+                  onOpenMobileTest={handleOpenMobileTest}
+                  onResetSession={handleResetSession}
+                  i18n={i18n}
+                />
+              </div>
+
+              {/* Right Column (35% width) - Interactive Multilingual Guide & Printer Setup */}
+              <div className="lg:col-span-4">
+                <MultilingualGuideSidebar
+                  i18n={i18n}
+                  currentLang={currentLang}
+                  onLangChange={setCurrentLang}
+                />
+              </div>
+            </div>
           ) : (
-            <MobileSender
-              sessionId={sessionId}
-              connectionState={connectionState}
-              progress={progress}
-              onSendFile={handleSendFileFromMobile}
-              i18n={i18n}
-            />
+            /* 3. CUSTOMER MOBILE SENDER INTERFACE */
+            <div className="space-y-6">
+              <MobileSender
+                sessionId={sessionId}
+                connectionState={connectionState}
+                progress={progress}
+                onSendFile={handleSendFileFromMobile}
+                i18n={i18n}
+              />
+
+              <div className="max-w-md mx-auto">
+                <MultilingualGuideSidebar
+                  i18n={i18n}
+                  currentLang={currentLang}
+                  onLangChange={setCurrentLang}
+                />
+              </div>
+            </div>
           )}
         </div>
 
@@ -366,7 +470,7 @@ export const ScanToPrintTool: React.FC = () => {
                     Personal Aadhaar, PAN cards remain visible in WhatsApp chat media
                   </td>
                   <td className="py-3.5 px-4 text-emerald-300">
-                    One-click "Purge RAM" zeroes out all memory buffers instantly
+                    One-click "Done / Clear Document" zeroes out all memory buffers instantly
                   </td>
                 </tr>
                 <tr>
@@ -442,7 +546,7 @@ export const ScanToPrintTool: React.FC = () => {
                 Confidential identity cards, bank statements, and examination certificates must never leave digital traces on shared public computers.
               </p>
               <p>
-                Clicking &quot;Done &amp; Purge&quot; immediately revokes all generated Blob URLs and releases references to the underlying binary buffers.
+                Clicking &quot;Done / Clear Document&quot; immediately revokes all generated Blob URLs and releases references to the underlying binary buffers.
               </p>
             </div>
           </div>
@@ -492,12 +596,12 @@ export const ScanToPrintTool: React.FC = () => {
 
         {/* PRINT ONLY DOCUMENT RENDER */}
         {!isPosterModalOpen && receivedDoc && (
-          <div className="hidden print:block print:w-full print:m-0 print:p-0">
+          <div className="hidden print:block print:w-full print:m-0 print:p-0 scan-to-print-page">
             {receivedDoc.type.startsWith('image/') ? (
               <img
                 src={receivedDoc.blobUrl}
-                alt="Document Output"
-                className={`w-full h-auto object-contain ${
+                alt={receivedDoc.name}
+                className={`scan-to-print-image w-full h-auto object-contain ${
                   receivedDoc.preferences.colorMode === 'bw' ? 'grayscale' : ''
                 }`}
               />

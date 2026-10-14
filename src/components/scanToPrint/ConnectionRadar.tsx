@@ -1,8 +1,7 @@
 import React from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Wifi, Smartphone, CheckCircle, Volume2, VolumeX } from 'lucide-react'
+import { Wifi, Smartphone, CheckCircle, ArrowDownCircle } from 'lucide-react'
 import { P2PConnectionState } from '../../types/p2pPrint'
-import { getChimeMuted, setChimeMuted } from './chimeAudio'
 
 interface ConnectionRadarProps {
   state: P2PConnectionState
@@ -21,14 +20,7 @@ export const ConnectionRadar: React.FC<ConnectionRadarProps> = ({
   readyText,
   clientDeviceName,
 }) => {
-  const [muted, setMutedState] = React.useState(getChimeMuted())
   const shouldReduceMotion = useReducedMotion()
-
-  const toggleSound = () => {
-    const next = !muted
-    setChimeMuted(next)
-    setMutedState(next)
-  }
 
   const isConnected = state === 'connected' || state === 'transferring' || state === 'complete'
   const isTransferring = state === 'transferring'
@@ -56,43 +48,44 @@ export const ConnectionRadar: React.FC<ConnectionRadarProps> = ({
 
   return (
     <div className="relative p-5 rounded-2xl bg-slate-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex flex-col items-center justify-center overflow-hidden">
-      {/* Sound toggle button */}
-      <button
-        onClick={toggleSound}
-        className="absolute top-3 right-3 p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1"
-        title={muted ? 'Unmute connection chime' : 'Mute connection chime'}
-      >
-        {muted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
-      </button>
+      {/* 100% Silent Visual Architecture Pill */}
+      <div className="w-full flex items-center justify-between pb-2 border-b border-white/5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          P2P Connection Radar
+        </span>
+        <span className="text-[10px] font-mono text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          100% Visual • Silent
+        </span>
+      </div>
 
       {/* Radar Graphic Viewport */}
-      <div className="relative w-36 h-36 flex items-center justify-center my-3">
+      <div className="relative w-36 h-36 flex items-center justify-center my-4">
         {/* Concentric Radar Rings */}
         <div className="absolute inset-0 rounded-full border border-white/10" />
         <div className="absolute inset-4 rounded-full border border-white/10" />
         <div className="absolute inset-8 rounded-full border border-white/10" />
 
-        {/* Dynamic Expanding Pulse Rings */}
+        {/* Dynamic Expanding Pulse Rings (Visual-Only) */}
         {!shouldReduceMotion && (!isConnected ? (
-          // Amber Pulse Ring
+          // Idle State: Pulsing Amber Ring
           <motion.div
             animate={{
               scale: [1, 1.8],
-              opacity: [0.6, 0],
+              opacity: [0.65, 0],
             }}
             transition={{
               duration: 2.2,
               repeat: Infinity,
               ease: 'easeOut',
             }}
-            className="absolute w-16 h-16 rounded-full bg-amber-400/20 border border-amber-400/40 pointer-events-none"
+            className="absolute w-16 h-16 rounded-full bg-amber-400/25 border border-amber-400/40 pointer-events-none"
           />
         ) : (
-          // Emerald / Cyan Active Rings
+          // Connected / Active State: Vibrant Emerald / Cyan Rings
           <motion.div
             animate={{
               scale: [1, 1.9],
-              opacity: [0.7, 0],
+              opacity: [0.75, 0],
             }}
             transition={{
               duration: 1.8,
@@ -110,17 +103,23 @@ export const ConnectionRadar: React.FC<ConnectionRadarProps> = ({
               ? {}
               : isConnected
               ? { scale: [1, 1.08, 1], filter: 'drop-shadow(0 0 16px rgba(16,185,129,0.5))' }
-              : { scale: [1, 1.04, 1], filter: 'drop-shadow(0 0 10px rgba(245,158,11,0.3))' }
+              : { scale: [1, 1.05, 1], filter: 'drop-shadow(0 0 10px rgba(245,158,11,0.35))' }
           }
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className={`relative z-10 w-16 h-16 rounded-full flex items-center justify-center border shadow-inner ${
-            isConnected
+          className={`relative z-10 w-16 h-16 rounded-full flex items-center justify-center border shadow-inner transition-colors duration-300 ${
+            isComplete
+              ? 'bg-gradient-to-br from-cyan-500/20 to-teal-600/30 border-cyan-400/50 text-cyan-300'
+              : isTransferring
+              ? 'bg-gradient-to-br from-cyan-500/20 to-blue-600/30 border-cyan-400/50 text-cyan-300'
+              : isConnected
               ? 'bg-gradient-to-br from-emerald-500/20 to-teal-600/30 border-emerald-400/50 text-emerald-300'
               : 'bg-gradient-to-br from-amber-500/20 to-orange-600/30 border-amber-400/50 text-amber-300'
           }`}
         >
           {isComplete ? (
             <CheckCircle className="w-8 h-8 text-cyan-400" />
+          ) : isTransferring ? (
+            <ArrowDownCircle className="w-8 h-8 text-cyan-400 animate-pulse" />
           ) : isConnected ? (
             <Smartphone className="w-8 h-8 text-emerald-400" />
           ) : (
@@ -129,26 +128,28 @@ export const ConnectionRadar: React.FC<ConnectionRadarProps> = ({
         </motion.div>
       </div>
 
-      {/* Status Badge */}
-      <div className={`mt-2 px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-2 ${statusBg} ${statusColor}`}>
+      {/* Status Badge with Live Ping Indicator */}
+      <div
+        className={`mt-1 px-3.5 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-2 transition-all duration-300 ${statusBg} ${statusColor}`}
+      >
         <span className="relative flex h-2 w-2">
           <span
             className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-              isConnected ? 'bg-emerald-400' : 'bg-amber-400'
+              isComplete ? 'bg-cyan-400' : isConnected ? 'bg-emerald-400' : 'bg-amber-400'
             }`}
           />
           <span
             className={`relative inline-flex rounded-full h-2 w-2 ${
-              isConnected ? 'bg-emerald-400' : 'bg-amber-400'
+              isComplete ? 'bg-cyan-400' : isConnected ? 'bg-emerald-400' : 'bg-amber-400'
             }`}
           />
         </span>
-        <span>{currentLabel}</span>
+        <span className="text-center">{currentLabel}</span>
       </div>
 
       {clientDeviceName && isConnected && (
-        <p className="text-xs text-slate-400 mt-2 font-mono">
-          Device: <span className="text-emerald-400">{clientDeviceName}</span>
+        <p className="text-[11px] text-slate-400 mt-2 font-mono">
+          Device: <span className="text-emerald-400 font-semibold">{clientDeviceName}</span>
         </p>
       )}
     </div>
