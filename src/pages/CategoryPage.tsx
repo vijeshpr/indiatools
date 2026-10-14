@@ -10,40 +10,41 @@ import { useI18n } from '../i18n/I18nContext'
 export const CategoryPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId: string }>()
   const validCategory = categoryId as ToolCategory | undefined
-
-  if (!validCategory || !CATEGORIES[validCategory]) {
-    return <Navigate to="/tools" replace />
-  }
-
-  const category = CATEGORIES[validCategory]
-  const tools = getToolsByCategory(validCategory)
+  const category = validCategory && CATEGORIES[validCategory] ? CATEGORIES[validCategory] : null
+  const tools = validCategory && category ? getToolsByCategory(validCategory) : []
   const { t } = useI18n()
 
-  const catTitle = t(`cat.${category.id}.title`, category.title)
-  const catSubtitle = t(`cat.${category.id}.subtitle`, category.subtitle)
-  const catDesc = t(`cat.${category.id}.desc`, category.description)
+  const catTitle = category ? t(`cat.${category.id}.title`, category.title) : ''
+  const catSubtitle = category ? t(`cat.${category.id}.subtitle`, category.subtitle) : ''
+  const catDesc = category ? t(`cat.${category.id}.desc`, category.description) : ''
 
   useSEO({
-    title: `${catTitle} Tools & Calculators (${catSubtitle}) | IndiaTools`,
-    description: catDesc,
-    canonicalPath: `/category/${category.id}`,
-    jsonLd: {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: `${catTitle} Tools | IndiaTools`,
-      description: catDesc,
-      url: `https://indiatools-rho.vercel.app/category/${category.id}`,
-      mainEntity: {
-        '@type': 'ItemList',
-        itemListElement: tools.map((t, idx) => ({
-          '@type': 'ListItem',
-          position: idx + 1,
-          name: t.title,
-          url: `https://indiatools-rho.vercel.app${t.seo.canonicalPath}`,
-        })),
-      },
-    },
+    title: category ? `${catTitle} Tools & Calculators (${catSubtitle}) | IndiaTools` : 'Category | IndiaTools',
+    description: catDesc || 'Browse tools and calculators on IndiaTools.',
+    canonicalPath: category ? `/category/${category.id}` : '/tools',
+    jsonLd: category
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: `${catTitle} Tools | IndiaTools`,
+          description: catDesc,
+          url: `https://indiatools-rho.vercel.app/category/${category.id}`,
+          mainEntity: {
+            '@type': 'ItemList',
+            itemListElement: tools.map((t, idx) => ({
+              '@type': 'ListItem',
+              position: idx + 1,
+              name: t.title,
+              url: `https://indiatools-rho.vercel.app${t.seo.canonicalPath}`,
+            })),
+          },
+        }
+      : undefined,
   })
+
+  if (!validCategory || !category) {
+    return <Navigate to="/tools" replace />
+  }
 
   return (
     <div className="min-h-screen py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

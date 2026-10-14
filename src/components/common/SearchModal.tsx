@@ -73,6 +73,12 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
 
   const results = searchTools(query)
 
+  const handleSelect = (tool: ToolDefinition) => {
+    onClose()
+    const path = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
+    navigate(path)
+  }
+
   // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return
@@ -97,12 +103,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, results, selectedIndex])
-
-  const handleSelect = (tool: ToolDefinition) => {
-    onClose()
-    const path = tool.type === 'image-tool' ? `/tools/${tool.slug}` : `/calculators/${tool.slug}`
-    navigate(path)
-  }
 
   return (
     <AnimatePresence>

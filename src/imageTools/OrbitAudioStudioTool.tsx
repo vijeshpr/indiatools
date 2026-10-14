@@ -200,17 +200,6 @@ export const OrbitAudioStudioTool: React.FC = () => {
     }
   }, [stopAllAudio])
 
-  // Pause playback automatically when tab/window is hidden
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && isPlaying) {
-        pausePlayback()
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  })
-
   // Waveform render on progress change
   useEffect(() => {
     const canvas = waveformCanvasRef.current
@@ -530,6 +519,17 @@ export const OrbitAudioStudioTool: React.FC = () => {
     }
     stopAllAudio(false)
   }, [duration, isPlaying, stopAllAudio])
+
+  // Pause playback automatically when tab/window is hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && isPlaying) {
+        pausePlayback()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [isPlaying, pausePlayback])
 
   // Stop playback: kills all nodes, suspends AudioContext, resets playhead to 0
   const stopPlayback = useCallback(() => {

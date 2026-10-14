@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -7,26 +7,24 @@ import {
   FileCheck,
   Lock,
   CheckCircle2,
-  ShieldCheck,
-  Languages,
   QrCode,
-  Store,
   Sparkles,
+  Store,
+  Layers,
+  Cpu,
+  ShieldCheck,
 } from 'lucide-react'
-import { HeroSection } from '../components/home/HeroSection'
-import { CategoryShowcase } from '../components/home/CategoryShowcase'
-import { StatsSection } from '../components/home/StatsSection'
-import { CategoryMascotGrid } from '../components/mascot/CategoryMascotGrid'
-import { JcbExcavatorMascot, PhotoDocMascot } from '../components/mascot/CategoryMascots'
-import {
-  TricolorScrollRibbon,
-  SectionTricolorDivider,
-} from '../components/animations/TricolorScrollRibbon'
-import { SearchModal } from '../components/common/SearchModal'
+import { Hero } from '../components/home/Hero'
+import { CategoryNav } from '../components/home/CategoryNav'
+import { ToolGrid } from '../components/home/ToolGrid'
+import { AssetHubSection } from '../components/home/AssetHubSection'
+import { CommandPalette } from '../components/common/CommandPalette'
+import { TOOLS } from '../data/tools'
 import { useSEO } from '../hooks/useSEO'
 
 export const HomePage: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   useSEO({
     title: 'IndiaTools – Practical Calculators & Useful Online Tools',
@@ -35,62 +33,96 @@ export const HomePage: React.FC = () => {
     canonicalPath: '/',
   })
 
+  // Filter tools based on selected category
+  const filteredTools = useMemo(() => {
+    if (selectedCategory === 'all') {
+      return TOOLS
+    }
+    return TOOLS.filter((tool) => tool.category === selectedCategory)
+  }, [selectedCategory])
+
+  const handleResetFilters = () => {
+    setSelectedCategory('all')
+  }
+
   return (
-    <div className="relative overflow-hidden">
-      {/* Signature Indian Tricolor Flowing Scroll Ribbon */}
-      <TricolorScrollRibbon />
+    <div className="relative overflow-hidden selection:bg-cyan-500 selection:text-black">
+      {/* 1. Linear-Grade Hero Section with Raycast Search Trigger */}
+      <Hero onOpenSearch={() => setIsSearchOpen(true)} />
 
-      {/* Hero Section with Interactive AI Robot Mascot */}
-      <HeroSection onOpenSearch={() => setIsSearchOpen(true)} />
+      {/* 2. Sticky Category Filter Bar */}
+      <CategoryNav
+        activeCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        totalFilteredCount={filteredTools.length}
+        hasActiveFilters={selectedCategory !== 'all'}
+        onResetFilters={handleResetFilters}
+      />
 
-      {/* Tricolor Section Divider */}
-      <SectionTricolorDivider />
+      {/* 3. Next-Generation Bento Tool Grid */}
+      <section className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-2.5">
+              <span>Tool Catalogue</span>
+              <span className="text-xs font-mono font-normal px-2.5 py-0.5 rounded-full bg-white/[0.08] text-cyan-300 border border-white/[0.1]">
+                {filteredTools.length} of {TOOLS.length} Ready
+              </span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              Engineered for local in-browser execution with zero mandatory logins.
+            </p>
+          </div>
 
-      {/* Verified Stats Section */}
-      <StatsSection />
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-mono text-slate-300 transition-colors cursor-pointer"
+          >
+            <span>Command Palette</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-white/[0.08] text-[10px] text-cyan-400">Ctrl+K</kbd>
+          </button>
+        </div>
 
-      {/* Tricolor Section Divider */}
-      <SectionTricolorDivider />
+        <ToolGrid tools={filteredTools} onResetFilters={handleResetFilters} />
+      </section>
 
-      {/* Interactive 7 Category Mascots Grid */}
-      <CategoryMascotGrid />
-
-      {/* ================= FEATURED FLAGSHIP SPOTLIGHT: INDIAN CHEQUE STUDIO ================= */}
+      {/* 4. Flagship Spotlight 1: Indian Cheque Studio */}
       <motion.section
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.15 }}
         transition={{ duration: 0.5 }}
-        className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
       >
-        <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-[#131B2E] border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-black/20 relative overflow-hidden group">
-          {/* Subtle background decoration */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-teal-50/40 dark:bg-teal-950/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="p-8 sm:p-12 rounded-3xl bg-[#11131F] border border-white/[0.08] shadow-2xl shadow-cyan-500/5 relative overflow-hidden group">
+          {/* Subtle ambient lighting */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             {/* Left Column: Context & Benefits */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-mono uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                <span className="text-[10px] font-mono uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800">
                   ★ FEATURED FINTECH TOOL
                 </span>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                  NEW
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
+                  VERIFIED
                 </span>
-                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full bg-white/[0.06] text-slate-300 border border-white/[0.08]">
                   CTS-2010 SPECIMEN
                 </span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
                 Indian Cheque Studio
-                <span className="block text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                <span className="block text-xl sm:text-2xl font-bold text-cyan-400 mt-1">
                   Interactive Cheque Demo in 13 Indian Languages
                 </span>
               </h2>
 
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-sans">
                 Master cheque-filling with zero mistakes. Generate authentic CTS-2010 specimen cheques,
                 convert numeric rupees into flawless words across 13 Indian languages, simulate Account Payee crossings,
                 and export high-fidelity A4 specimen printouts.
@@ -98,12 +130,15 @@ export const HomePage: React.FC = () => {
 
               {/* Supported Indian Languages Ribbon */}
               <div className="pt-2">
-                <span className="text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 block mb-1.5 font-bold">
+                <span className="text-[11px] font-mono uppercase text-slate-400 block mb-1.5 font-bold">
                   Supported Regional Scripts:
                 </span>
-                <div className="flex flex-wrap gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
-                  {['English', 'हिन्दी', 'தமிழ்', 'മലയാളം', 'తెలుగు', 'ಕನ್ನಡ', 'বাংলা', 'मराठी', 'ગુજરાતી', 'ਪੰਜਾਬੀ', 'ଓଡ଼ିଆ', 'অসমীয়া', 'اردو'].map((langName) => (
-                    <span key={langName} className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium">
+                <div className="flex flex-wrap gap-1.5 text-xs font-medium text-slate-300">
+                  {['English', 'हिन्दी', 'தமிழ்', 'മലയാളം', 'తెలుగు', 'ಕನ್ನಡ', 'বাংলা', 'मराठी', 'ગુજરાતી', 'ਪੰਜਾਬੀ', 'ଓଡ଼ിଆ', 'অসমীয়া', 'اردو'].map((langName) => (
+                    <span
+                      key={langName}
+                      className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 font-medium"
+                    >
                       {langName}
                     </span>
                   ))}
@@ -114,13 +149,13 @@ export const HomePage: React.FC = () => {
               <div className="pt-3 flex flex-wrap items-center gap-3">
                 <Link
                   to="/calculators/indian-cheque-studio"
-                  className="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center gap-2 shadow-md shadow-indigo-600/20 transition-all cursor-pointer group"
+                  className="px-7 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition-all cursor-pointer group"
                 >
                   <span>Explore Cheque Studio</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
 
-                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-mono text-slate-400">
                   100% Free • Non-Negotiable Training Specimen
                 </span>
               </div>
@@ -128,7 +163,7 @@ export const HomePage: React.FC = () => {
 
             {/* Right Column: Visual Mini Specimen Illustration */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-[340px] sm:max-w-[390px] rounded-2xl border border-slate-300 bg-[#FAFBFB] text-slate-900 shadow-sm overflow-hidden font-serif select-none relative p-3 sm:p-4 text-xs">
+              <div className="w-full max-w-[340px] sm:max-w-[390px] rounded-2xl border border-slate-300 bg-[#FAFBFB] text-slate-900 shadow-xl overflow-hidden font-serif select-none relative p-3 sm:p-4 text-xs">
                 {/* Bank Header Bar */}
                 <div className="absolute top-0 inset-x-0 h-1.5 bg-[#004B87]" />
 
@@ -219,7 +254,7 @@ export const HomePage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* ================= FEATURED NEW TOOL SPOTLIGHT: UPI QR CODE & SHOP STANDEE POSTER ================= */}
+      {/* 5. Flagship Spotlight 2: UPI QR Code & Shop Standee Poster */}
       <motion.section
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -227,108 +262,98 @@ export const HomePage: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
       >
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-[#131B2E] dark:via-[#0F172A] dark:to-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/50 shadow-sm dark:shadow-black/20 relative overflow-hidden group">
-          {/* Subtle background glow */}
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-500/10 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="p-8 sm:p-12 rounded-3xl bg-[#11131F] border border-white/[0.08] shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-            {/* Left Column: Context & Benefits */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-mono uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800 flex items-center gap-1">
-                  <QrCode className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-[10px] font-mono uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800 flex items-center gap-1">
+                  <QrCode className="w-3 h-3 text-cyan-400" />
                   <span>★ NEW CREATE TOOL</span>
                 </span>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-emerald-500" />
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-emerald-400" />
                   <span>PRINT READY</span>
                 </span>
-                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full bg-white/[0.06] text-slate-300 border border-white/[0.08]">
                   A4 / A5 STANDEE
                 </span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
                 UPI QR Code Generator with Logo
-                <span className="block text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                <span className="block text-xl sm:text-2xl font-bold text-cyan-400 mt-1">
                   & Printable Merchant Counter Stand Posters
                 </span>
               </h2>
 
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-sans">
                 Create high-resolution payment QR codes for Google Pay, PhonePe, and Paytm with your custom shop logo,
                 fixed or open payment amounts, and transaction notes. Print authentic counter standee cards (A5 acrylic)
                 or shop wall posters (A4) directly from your browser with zero registration.
               </p>
 
-              {/* Supported QR Types Chips */}
               <div className="pt-2">
-                <span className="text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 block mb-1.5 font-bold">
+                <span className="text-[11px] font-mono uppercase text-slate-400 block mb-1.5 font-bold">
                   Supported QR Formats:
                 </span>
-                <div className="flex flex-wrap gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <div className="flex flex-wrap gap-1.5 text-xs font-medium text-slate-300">
                   {['UPI Payment Deep Link', 'Shop Logo Overlay', 'Website URL', 'WhatsApp Chat', 'Wi-Fi Auto-Connect', 'SVG Vector Export', 'Printable A5/A4 Standee'].map((badge) => (
-                    <span key={badge} className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium shadow-2xs">
+                    <span
+                      key={badge}
+                      className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 font-medium"
+                    >
                       {badge}
                     </span>
                   ))}
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="pt-3 flex flex-wrap items-center gap-3">
                 <Link
                   to="/calculators/qr-code-generator"
-                  className="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center gap-2 shadow-md shadow-indigo-600/20 transition-all cursor-pointer group"
+                  className="px-7 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition-all cursor-pointer group"
                 >
                   <QrCode className="w-4 h-4" />
                   <span>Create UPI QR & Poster</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
 
-                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-mono text-slate-400">
                   100% Client-Side • Instant Vector SVG & PNG
                 </span>
               </div>
             </div>
 
-            {/* Right Column: Visual Merchant Standee Preview Card */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-[280px] sm:max-w-[310px] rounded-3xl border-2 border-indigo-200 dark:border-indigo-800/80 bg-white dark:bg-slate-900 shadow-xl overflow-hidden text-center p-5 space-y-4 select-none relative group hover:scale-[1.02] transition-transform">
-                {/* Header Tag */}
-                <div className="flex items-center justify-center gap-1.5 py-1 px-3 rounded-full bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">
-                  <Store className="w-3.5 h-3.5 text-indigo-600" />
+              <div className="w-full max-w-[280px] sm:max-w-[310px] rounded-3xl border border-white/[0.12] bg-[#090A0F] shadow-2xl text-center p-5 space-y-4 select-none relative group hover:scale-[1.02] transition-transform">
+                <div className="flex items-center justify-center gap-1.5 py-1 px-3 rounded-full bg-cyan-950/80 border border-cyan-800 text-[11px] font-bold text-cyan-300 font-mono">
+                  <Store className="w-3.5 h-3.5 text-cyan-400" />
                   <span>MERCHANT STANDEE SPECIMEN</span>
                 </div>
 
                 <div className="space-y-0.5">
-                  <h4 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+                  <h4 className="text-base font-black text-white tracking-tight">
                     ANAND GENERAL STORE
                   </h4>
-                  <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] font-mono text-slate-400">
                     Scan to pay with any UPI App
                   </p>
                 </div>
 
-                {/* QR Code Graphic Box */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 inline-block shadow-inner">
+                <div className="p-3 rounded-2xl bg-black border border-white/[0.08] inline-block shadow-inner">
                   <div className="w-36 h-36 bg-white rounded-xl p-2 flex items-center justify-center relative border border-slate-200">
-                    {/* Simulated Clean QR Code Graphic */}
                     <div className="w-full h-full relative grid grid-cols-6 grid-rows-6 gap-1 p-1 bg-white">
-                      {/* Top-Left Finder */}
                       <div className="col-span-2 row-span-2 border-2 border-slate-900 p-0.5 flex items-center justify-center">
                         <div className="w-full h-full bg-slate-900" />
                       </div>
-                      {/* Top-Right Finder */}
                       <div className="col-start-5 col-span-2 row-span-2 border-2 border-slate-900 p-0.5 flex items-center justify-center">
                         <div className="w-full h-full bg-slate-900" />
                       </div>
-                      {/* Bottom-Left Finder */}
                       <div className="col-span-2 row-start-5 row-span-2 border-2 border-slate-900 p-0.5 flex items-center justify-center">
                         <div className="w-full h-full bg-slate-900" />
                       </div>
-                      {/* Random Data Dots */}
                       <div className="col-start-3 row-start-1 bg-slate-800 rounded-xs" />
                       <div className="col-start-4 row-start-2 bg-slate-800 rounded-xs" />
                       <div className="col-start-3 row-start-3 bg-slate-800 rounded-xs" />
@@ -336,9 +361,8 @@ export const HomePage: React.FC = () => {
                       <div className="col-start-5 row-start-4 bg-slate-800 rounded-xs" />
                       <div className="col-start-6 row-start-3 bg-slate-800 rounded-xs" />
                       <div className="col-start-4 row-start-6 bg-slate-800 rounded-xs" />
-                      {/* Center Shop / UPI Badge */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white font-black text-[9px] flex items-center justify-center shadow-md border-2 border-white">
+                        <div className="w-7 h-7 rounded-lg bg-cyan-600 text-white font-black text-[9px] flex items-center justify-center shadow-md border-2 border-white">
                           UPI
                         </div>
                       </div>
@@ -346,12 +370,11 @@ export const HomePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Accepted Payment Apps Badges */}
-                <div className="pt-1 flex items-center justify-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-400">
-                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">GPay</span>
-                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">PhonePe</span>
-                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Paytm</span>
-                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">BHIM</span>
+                <div className="pt-1 flex items-center justify-center gap-2 text-[10px] font-bold text-slate-400 font-mono">
+                  <span className="px-2 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]">GPay</span>
+                  <span className="px-2 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]">PhonePe</span>
+                  <span className="px-2 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]">Paytm</span>
+                  <span className="px-2 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]">BHIM</span>
                 </div>
               </div>
             </div>
@@ -359,102 +382,10 @@ export const HomePage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* Dual Flagship Spotlight Banner */}
-      <motion.section
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.5 }}
-        className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Flagship 1: JCB / Excavator Diesel Cost */}
-          <div className="p-8 rounded-3xl bg-white dark:bg-[#131B2E] border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-black/20 relative overflow-hidden flex flex-col justify-between group hover:border-amber-300 dark:hover:border-amber-500/50 hover:shadow-md dark:hover:shadow-amber-950/20 transition-all">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center justify-center">
-                    <Truck className="w-4 h-4" />
-                  </span>
-                  <span className="text-xs font-mono uppercase font-bold text-amber-800 dark:text-amber-300 tracking-wider">
-                    Flagship Commercial Tool
-                  </span>
-                </div>
-                <div className="hidden sm:block shrink-0">
-                  <JcbExcavatorMascot size={88} isHovered={true} />
-                </div>
-              </div>
+      {/* 6. Creative Asset Hub Showcase */}
+      <AssetHubSection />
 
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
-                JCB & Heavy Excavator Fuel Cost
-              </h3>
-
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Compute exact hourly, daily, weekly, and monthly diesel expenditure for JCB 3DX, 4DX,
-                and 20-ton hydraulic excavators. Used by contractors, earthmovers, and quarry operators.
-              </p>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span className="text-xs font-mono text-slate-500 dark:text-slate-400">JCB 3DX & Excavators</span>
-              <Link
-                to="/calculators/jcb-fuel-cost"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
-              >
-                <span>Launch Calculator</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Flagship 2: 50KB Photo Resizer for Govt Exams */}
-          <div className="p-8 rounded-3xl bg-white dark:bg-[#131B2E] border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-black/20 relative overflow-hidden flex flex-col justify-between group hover:border-pink-300 dark:hover:border-pink-500/50 hover:shadow-md dark:hover:shadow-pink-950/20 transition-all">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-8 h-8 rounded-xl bg-pink-50 dark:bg-pink-950/80 text-pink-700 dark:text-pink-400 border border-pink-200 dark:border-pink-800 flex items-center justify-center">
-                    <FileCheck className="w-4 h-4" />
-                  </span>
-                  <span className="text-xs font-mono uppercase font-bold text-pink-800 dark:text-pink-300 tracking-wider">
-                    Govt Exam Special
-                  </span>
-                </div>
-                <div className="hidden sm:block shrink-0">
-                  <PhotoDocMascot size={82} isHovered={true} />
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-400 transition-colors">
-                50KB Photo Resizer for UPSC & SSC
-              </h3>
-
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Resize and compress applicant portrait photos strictly under 50KB for UPSC, SSC, IBPS,
-                and State PSC portals. 100% private client-side processing directly in your browser.
-              </p>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span className="text-xs font-mono text-slate-500 dark:text-slate-400">100% In-Browser Privacy</span>
-              <Link
-                to="/tools/50kb-photo"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-700 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300"
-              >
-                <span>Resize Photo</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Tricolor Section Divider */}
-      <SectionTricolorDivider />
-
-      {/* Category Showcase: DRIVE, BUILD, POWER, MONEY, LAND, WORK, CREATE */}
-      <CategoryShowcase />
-
-      {/* Privacy & Philosophy Callout */}
+      {/* 7. Privacy & Engineering Quality Guarantee */}
       <motion.section
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -462,39 +393,39 @@ export const HomePage: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
       >
-        <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-[#131B2E] border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-black/20 relative overflow-hidden">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center mx-auto mb-4">
+        <div className="p-8 sm:p-12 rounded-3xl bg-[#11131F] border border-white/[0.08] shadow-2xl relative overflow-hidden">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-950/80 text-emerald-400 border border-emerald-800 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-6 h-6" />
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Built for Privacy. Zero Cloud Uploads.
           </h3>
 
-          <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Your personal photos, signatures, CTC figures, and calculations never leave your device.
-            Everything is computed client-side in your own browser using modern HTML5 standards.
+          <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed font-sans">
+            Your personal photos, signatures, CTC figures, audio files, and calculations never leave your device.
+            Everything is computed client-side in your own browser using modern HTML5, Web Audio, and Canvas2D standards.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs font-medium text-slate-700 dark:text-slate-300">
-            <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs font-mono text-slate-300">
+            <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>No Cookies Tracking</span>
             </span>
-            <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>No Account Mandatory</span>
             </span>
-            <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>100% Free Forever</span>
             </span>
           </div>
         </div>
       </motion.section>
 
-      {/* Global Search Modal */}
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      {/* Global Command Palette */}
+      <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </div>
   )
 }
