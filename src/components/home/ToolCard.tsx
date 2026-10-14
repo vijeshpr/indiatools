@@ -60,8 +60,8 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      className={`bento-card group rounded-2xl p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative ${
-        isFeatured ? 'md:col-span-2 bg-[#141726]' : 'bg-[#11131F]'
+      className={`botanical-card group rounded-2xl p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative ${
+        isFeatured ? 'md:col-span-2 bg-[#10271C]' : 'bg-[#0C1E16]'
       }`}
     >
       {/* Mouse Reflection Spotlight Element */}
@@ -83,50 +83,50 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
 
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {tool.badge && (
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/[0.08] text-white border border-white/[0.12]">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#10271C] text-[#D8B879] border border-[#D8B879]/30">
                 {tool.badge}
               </span>
             )}
-            <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md text-slate-400 bg-white/[0.03] border border-white/[0.06]">
+            <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md text-[#A8C5AC] bg-[#07130E]/60 border border-emerald-500/15">
               {tool.categoryLabel}
             </span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-cyan-300 transition-colors tracking-tight leading-snug">
+        <h3 className="text-lg sm:text-xl font-bold text-[#F3F0E5] group-hover:text-[#D8B879] transition-colors tracking-tight leading-snug">
           {tool.title}
         </h3>
 
         {/* Description */}
-        <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed font-sans line-clamp-3">
+        <p className="mt-2 text-xs sm:text-sm text-[#A8C5AC] leading-relaxed font-sans line-clamp-3">
           {tool.description}
         </p>
 
         {/* Micro Visualizer */}
-        <div className="mt-4 pt-3 border-t border-white/[0.04]">
+        <div className="mt-4 pt-3 border-t border-emerald-500/15">
           {isAudio ? (
-            <div className="flex items-center gap-1 h-3 opacity-60 group-hover:opacity-100 transition-opacity">
-              <div className="w-1 bg-violet-400 rounded-full h-2 group-hover:h-3 transition-all duration-300 animate-pulse" />
-              <div className="w-1 bg-violet-400 rounded-full h-3 group-hover:h-2 transition-all duration-300" />
-              <div className="w-1 bg-violet-400 rounded-full h-1.5 group-hover:h-3 transition-all duration-300 animate-pulse delay-75" />
-              <div className="w-1 bg-violet-400 rounded-full h-2.5 group-hover:h-1.5 transition-all duration-300" />
-              <div className="w-1 bg-violet-400 rounded-full h-1 group-hover:h-3 transition-all duration-300 animate-pulse delay-150" />
-              <span className="text-[10px] font-mono text-violet-300/80 ml-2">DSP Real-Time Node</span>
+            <div className="flex items-center gap-1 h-3 opacity-75 group-hover:opacity-100 transition-opacity">
+              <div className="w-1 bg-[#16865D] rounded-full h-2 group-hover:h-3 transition-all duration-300 animate-pulse" />
+              <div className="w-1 bg-[#D8B879] rounded-full h-3 group-hover:h-2 transition-all duration-300" />
+              <div className="w-1 bg-[#16865D] rounded-full h-1.5 group-hover:h-3 transition-all duration-300 animate-pulse delay-75" />
+              <div className="w-1 bg-[#D8B879] rounded-full h-2.5 group-hover:h-1.5 transition-all duration-300" />
+              <div className="w-1 bg-[#16865D] rounded-full h-1 group-hover:h-3 transition-all duration-300 animate-pulse delay-150" />
+              <span className="text-[10px] font-mono text-[#A8C5AC] ml-2">DSP Real-Time Node</span>
             </div>
           ) : isSecurity ? (
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400/80">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#D8B879]">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>AES-256-GCM • Zero-Cloud</span>
             </div>
           ) : isVisual ? (
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-cyan-400/80">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#A8C5AC]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
               <span>Canvas2D & Offscreen Engine</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
-              <CheckCircle2 className="w-3 h-3 text-slate-400" />
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#A8C5AC]/70">
+              <CheckCircle2 className="w-3 h-3 text-[#16865D]" />
               <span>Standard Indian Calculation</span>
             </div>
           )}
@@ -134,14 +134,14 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, isFeatured = false }) 
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="relative z-10 mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
-        <span className="text-[11px] font-mono text-slate-500">
+      <div className="relative z-10 mt-5 pt-3 border-t border-emerald-500/15 flex items-center justify-between">
+        <span className="text-[11px] font-mono text-[#A8C5AC]/70">
           Client-Side
         </span>
 
         <Link
           to={targetPath}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-400 group-hover:text-cyan-300 focus:outline-none focus-visible:underline cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D8B879] group-hover:text-[#F3F0E5] focus:outline-none focus-visible:underline cursor-pointer"
           aria-label={`Launch ${tool.title}`}
         >
           <span>Launch Tool</span>

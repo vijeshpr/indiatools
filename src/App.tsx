@@ -25,14 +25,13 @@ export function App() {
       <I18nProvider>
         <ToastProvider>
         <BrowserRouter>
-          <div className="relative min-h-screen flex flex-col bg-[#F7F8FC] dark:bg-[#090A0F] text-[#111827] dark:text-[#F8FAFC] transition-colors duration-200 selection:bg-cyan-500 selection:text-black overflow-x-hidden w-full max-w-full font-sans">
-            {/* Ambient Radial Gradient Mesh Lighting & Tech Grid */}
+          <div className="relative min-h-screen flex flex-col bg-[#F7F8FC] dark:bg-[#07130E] text-[#111827] dark:text-[#F3F0E5] transition-colors duration-300 selection:bg-[#16865D] selection:text-white overflow-x-hidden w-full max-w-full font-sans">
+            {/* Ambient Radial Gradient Botanical Mesh Lighting */}
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none no-print" aria-hidden="true">
-              <div className="absolute -top-32 -left-32 w-[650px] h-[650px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-[140px]" />
-              <div className="absolute top-20 -right-32 w-[600px] h-[600px] bg-violet-600/10 dark:bg-violet-600/15 rounded-full blur-[140px]" />
-              <div className="absolute top-[45%] -left-32 w-[550px] h-[550px] bg-indigo-500/6 dark:bg-indigo-500/10 rounded-full blur-[150px]" />
-              <div className="absolute bottom-20 right-10 w-[650px] h-[650px] bg-emerald-500/6 dark:bg-emerald-500/10 rounded-full blur-[160px]" />
-              <div className="absolute inset-0 bg-[radial-gradient(#4f46e50f_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px]" />
+              <div className="absolute -top-32 -left-32 w-[650px] h-[650px] bg-emerald-600/15 dark:bg-emerald-600/18 rounded-full blur-[140px]" />
+              <div className="absolute top-20 -right-32 w-[600px] h-[600px] bg-[#617A43]/15 dark:bg-[#617A43]/15 rounded-full blur-[140px]" />
+              <div className="absolute top-[45%] -left-32 w-[550px] h-[550px] bg-[#D8B879]/8 dark:bg-[#D8B879]/10 rounded-full blur-[150px]" />
+              <div className="absolute bottom-20 right-10 w-[650px] h-[650px] bg-emerald-700/10 dark:bg-emerald-700/12 rounded-full blur-[160px]" />
             </div>
 
             {/* Header Navigation */}

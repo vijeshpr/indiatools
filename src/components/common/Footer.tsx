@@ -21,34 +21,34 @@ export const Footer: React.FC = () => {
   }, [])
 
   return (
-    <footer className="relative border-t border-white/[0.08] bg-[#090A0F] text-slate-400 overflow-hidden no-print">
+    <footer className="relative border-t border-emerald-500/20 bg-[#07130E] text-[#A8C5AC] overflow-hidden no-print">
       {/* Precision tricolor top accent line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-[#FF9933] via-white/40 to-[#138808]" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
-          {/* Column 1: Brand & Engineering Mission */}
+          {/* Column 1: Brand & Living Garden Mission */}
           <div className="space-y-4">
             <Link to="/" className="inline-flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-cyan-600 text-white font-bold text-sm flex items-center justify-center shadow-md border border-white/20">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#16865D] via-[#10271C] to-[#07130E] text-[#F3F0E5] font-bold text-sm flex items-center justify-center shadow-md border border-emerald-500/30">
                 IT
               </div>
-              <span className="font-extrabold text-lg text-white tracking-tight font-sans">
-                India<span className="text-cyan-400">Tools</span>
+              <span className="font-extrabold text-lg text-[#F3F0E5] tracking-tight font-sans">
+                India<span className="text-[#D8B879]">Tools</span>
               </span>
             </Link>
 
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-sans">
-              High-performance browser utility platform. Built with the visual quality and interaction engineering of modern tools for everyday calculations in India.
+            <p className="text-xs sm:text-sm text-[#A8C5AC] leading-relaxed font-sans">
+              Where Technology Comes Alive. A cinematic digital garden uniting everyday automotive, civil construction, power tariffs, land area, audio, and visual utilities.
             </p>
 
             {/* Privacy Badge */}
-            <div className="p-3 rounded-xl bg-[#11131F] border border-white/[0.08] text-xs text-slate-300 space-y-1">
-              <div className="flex items-center gap-1.5 font-semibold text-white">
+            <div className="p-3 rounded-xl bg-[#10271C] border border-emerald-500/20 text-xs text-[#F3F0E5] space-y-1">
+              <div className="flex items-center gap-1.5 font-semibold text-[#D8B879]">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>100% Client-Side Privacy</span>
               </div>
-              <p className="text-[11px] text-slate-400 font-sans leading-tight">
+              <p className="text-[11px] text-[#A8C5AC] font-sans leading-tight">
                 Designed for efficient browser-based workflows. Photos, audio, and documents never leave your device.
               </p>
             </div>
@@ -56,18 +56,18 @@ export const Footer: React.FC = () => {
 
           {/* Column 2: Popular Tools */}
           <div>
-            <h4 className="text-xs font-mono uppercase tracking-wider text-white font-bold mb-4 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>Popular Tools</span>
+            <h4 className="text-xs font-mono uppercase tracking-wider text-[#F3F0E5] font-bold mb-4 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D8B879]" />
+              <span>Popular Garden Tools</span>
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm font-sans">
               <li>
                 <Link
                   to="/calculators/indian-cheque-studio"
-                  className="hover:text-cyan-300 transition-colors flex items-center justify-between group"
+                  className="hover:text-[#D8B879] transition-colors flex items-center justify-between group"
                 >
                   <span>Indian Cheque Studio</span>
-                  <span className="text-[9px] font-mono bg-cyan-950 text-cyan-300 px-1.5 py-0.2 rounded border border-cyan-800">
+                  <span className="text-[9px] font-mono bg-emerald-950 text-[#D8B879] px-1.5 py-0.2 rounded border border-emerald-800">
                     13 Lang
                   </span>
                 </Link>
@@ -75,10 +75,10 @@ export const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/calculators/jcb-fuel-cost"
-                  className="hover:text-amber-400 transition-colors flex items-center justify-between"
+                  className="hover:text-[#D8B879] transition-colors flex items-center justify-between"
                 >
                   <span>JCB Diesel Cost Calculator</span>
-                  <span className="text-[9px] font-mono bg-amber-950 text-amber-300 px-1.5 py-0.2 rounded border border-amber-800">
+                  <span className="text-[9px] font-mono bg-[#10271C] text-[#D8B879] px-1.5 py-0.2 rounded border border-[#D8B879]/30">
                     3DX
                   </span>
                 </Link>
@@ -86,10 +86,10 @@ export const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/tools/50kb-photo"
-                  className="hover:text-pink-400 transition-colors flex items-center justify-between"
+                  className="hover:text-[#D8B879] transition-colors flex items-center justify-between"
                 >
                   <span>50KB Photo Resizer</span>
-                  <span className="text-[9px] font-mono bg-pink-950 text-pink-300 px-1.5 py-0.2 rounded border border-pink-800">
+                  <span className="text-[9px] font-mono bg-[#10271C] text-[#A8C5AC] px-1.5 py-0.2 rounded border border-emerald-500/20">
                     UPSC/SSC
                   </span>
                 </Link>
@@ -97,26 +97,26 @@ export const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/tools/fast-inpainting-watermark-remover"
-                  className="hover:text-rose-400 transition-colors flex items-center justify-between"
+                  className="hover:text-[#D8B879] transition-colors flex items-center justify-between"
                 >
                   <span>Inpainting Watermark Remover</span>
-                  <span className="text-[9px] font-mono bg-rose-950 text-rose-300 px-1.5 py-0.2 rounded border border-rose-800">
+                  <span className="text-[9px] font-mono bg-[#10271C] text-[#D8B879] px-1.5 py-0.2 rounded border border-emerald-500/20">
                     AI
                   </span>
                 </Link>
               </li>
               <li>
-                <Link to="/calculators/cent-to-sqft" className="hover:text-emerald-400 transition-colors">
+                <Link to="/calculators/cent-to-sqft" className="hover:text-[#D8B879] transition-colors">
                   Cent ↔ Sq.ft Land Converter
                 </Link>
               </li>
               <li>
-                <Link to="/calculators/solar-panel" className="hover:text-cyan-400 transition-colors">
+                <Link to="/calculators/solar-panel" className="hover:text-[#D8B879] transition-colors">
                   PM Surya Ghar Solar Calculator
                 </Link>
               </li>
               <li>
-                <Link to="/tools/orbit-audio-studio" className="hover:text-violet-400 transition-colors">
+                <Link to="/tools/orbit-audio-studio" className="hover:text-[#D8B879] transition-colors">
                   Orbit Audio Studio & Reverb
                 </Link>
               </li>

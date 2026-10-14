@@ -63,23 +63,23 @@ export const Header: React.FC = () => {
         <div
           className={`max-w-7xl mx-auto rounded-2xl transition-all duration-300 ${
             isScrolled
-              ? 'bg-[#090A0F]/90 dark:bg-[#090A0F]/90 backdrop-blur-2xl border border-white/[0.12] shadow-2xl shadow-black/50'
-              : 'bg-[#11131F]/80 dark:bg-[#11131F]/80 backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/20'
+              ? 'bg-[#07130E]/95 dark:bg-[#07130E]/95 backdrop-blur-2xl border border-emerald-500/25 shadow-2xl shadow-emerald-950/60'
+              : 'bg-[#10271C]/85 dark:bg-[#10271C]/85 backdrop-blur-xl border border-emerald-500/20 shadow-lg shadow-emerald-950/30'
           }`}
         >
           <div className="px-3.5 sm:px-5 h-16 flex items-center justify-between gap-2 sm:gap-4">
             {/* Left: Brand Mark & Logo */}
             <Link
               to="/"
-              className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-xl p-1"
+              className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8B879] rounded-xl p-1"
               aria-label="IndiaTools Homepage"
             >
               {/* Brand Icon with Indian tricolor micro hairline */}
-              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-cyan-600 text-white shadow-md shadow-indigo-600/30 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 border border-white/20">
+              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#16865D] via-[#10271C] to-[#07130E] text-[#F3F0E5] shadow-md shadow-emerald-900/40 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 border border-emerald-500/30">
                 <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
                 <svg
                   viewBox="0 0 24 24"
-                  className="w-5 h-5 text-white"
+                  className="w-5 h-5 text-[#F3F0E5]"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -95,11 +95,11 @@ export const Header: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold tracking-tight text-lg text-white font-sans">
-                  India<span className="text-cyan-400">Tools</span>
+                <span className="font-extrabold tracking-tight text-lg text-[#F3F0E5] font-sans">
+                  India<span className="text-[#D8B879]">Tools</span>
                 </span>
-                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/80 font-bold uppercase tracking-wider">
-                  PRO
+                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-[#10271C] text-[#D8B879] border border-[#D8B879]/30 font-bold uppercase tracking-wider">
+                  NATURE-TECH
                 </span>
               </div>
             </Link>
@@ -110,8 +110,8 @@ export const Header: React.FC = () => {
                 to="/"
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                   location.pathname === '/'
-                    ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                    ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
+                    : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
                 }`}
               >
                 {t('nav.home', 'Home')}
@@ -121,8 +121,8 @@ export const Header: React.FC = () => {
                 to="/tools"
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                   location.pathname === '/tools'
-                    ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                    ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
+                    : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
                 }`}
               >
                 {t('nav.allTools', 'Explore Tools')}
@@ -130,11 +130,11 @@ export const Header: React.FC = () => {
 
               <a
                 href="#creative-assets"
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04] transition-colors flex items-center gap-1.5"
               >
                 <span>Creative Hub</span>
-                <span className="text-[9px] font-mono font-bold bg-violet-950 text-violet-300 border border-violet-800 px-1.5 py-0.2 rounded uppercase">
-                  NEW
+                <span className="text-[9px] font-mono font-bold bg-emerald-950 text-[#D8B879] border border-emerald-800 px-1.5 py-0.2 rounded uppercase">
+                  5 Presets
                 </span>
               </a>
 
@@ -142,8 +142,8 @@ export const Header: React.FC = () => {
                 to="/categories"
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                   location.pathname === '/categories'
-                    ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                    ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
+                    : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
                 }`}
               >
                 {t('nav.categories', 'Categories')}
@@ -153,12 +153,12 @@ export const Header: React.FC = () => {
                 to="/calculators/indian-cheque-studio"
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                   location.pathname.includes('indian-cheque-studio')
-                    ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                    ? 'text-[#D8B879] bg-[#16865D]/30 border border-[#D8B879]/40'
+                    : 'text-[#A8C5AC] hover:text-[#F3F0E5] hover:bg-white/[0.04]'
                 }`}
               >
                 <span>Cheque Studio</span>
-                <span className="text-[9px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 px-1.5 py-0.2 rounded uppercase">
+                <span className="text-[9px] font-mono font-bold bg-[#16865D] text-[#F3F0E5] border border-emerald-400/40 px-1.5 py-0.2 rounded uppercase">
                   13 Lang
                 </span>
               </Link>
@@ -170,13 +170,13 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsSearchOpen(true)}
                 type="button"
-                className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-slate-300 hover:text-white transition-all text-xs font-mono group cursor-pointer"
+                className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#07130E]/80 hover:bg-[#163628] border border-emerald-500/25 text-[#A8C5AC] hover:text-[#F3F0E5] transition-all text-xs font-mono group cursor-pointer shadow-xs"
                 aria-label="Search tools with Command Palette (Ctrl+K)"
               >
-                <Search className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <Search className="w-3.5 h-3.5 text-[#D8B879] group-hover:scale-110 transition-transform" />
                 <span className="hidden sm:inline font-sans text-xs">{t('nav.search', 'Search')}</span>
-                <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] text-slate-400 bg-black/40 px-1.5 py-0.5 rounded border border-white/[0.08]">
-                  <Command className="w-2.5 h-2.5" />
+                <kbd className="hidden sm:flex items-center gap-0.5 text-[10px] text-[#D8B879] bg-black/40 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  <Command className="w-2.5 h-2.5 text-[#A8C5AC]" />
                   <span>K</span>
                 </kbd>
               </button>
@@ -191,7 +191,7 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 type="button"
-                className="md:hidden p-2 rounded-xl text-slate-300 hover:text-white bg-white/[0.05] border border-white/[0.1] cursor-pointer"
+                className="md:hidden p-2 rounded-xl text-[#A8C5AC] hover:text-[#F3F0E5] bg-[#10271C] border border-emerald-500/20 cursor-pointer"
                 aria-label="Toggle navigation menu"
               >
                 {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -207,32 +207,32 @@ export const Header: React.FC = () => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="md:hidden border-t border-white/[0.08] px-4 py-3 space-y-3 bg-[#090A0F]/95 rounded-b-2xl"
+                className="md:hidden border-t border-emerald-500/20 px-4 py-3 space-y-3 bg-[#07130E]/98 rounded-b-2xl"
               >
                 <div className="flex flex-col gap-1">
                   <Link
                     to="/"
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/[0.05]"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#F3F0E5] hover:bg-white/[0.05]"
                   >
                     {t('nav.home', 'Home')}
                   </Link>
                   <Link
                     to="/tools"
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/[0.05] flex items-center justify-between"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#A8C5AC] hover:bg-white/[0.05] flex items-center justify-between"
                   >
-                    <span>{t('nav.allTools', 'Explore All Tools')}</span>
-                    <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
+                    <span>{t('nav.allTools', 'Explore All Garden Tools')}</span>
+                    <span className="text-xs font-mono font-bold text-[#D8B879] bg-[#10271C] px-2 py-0.5 rounded border border-emerald-500/30">
                       {TOOLS.length}
                     </span>
                   </Link>
                   <a
                     href="#creative-assets"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-violet-300 hover:bg-white/[0.05] flex items-center justify-between"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#D8B879] hover:bg-white/[0.05] flex items-center justify-between"
                   >
-                    <span>🎨 Creative Asset Hub</span>
-                    <span className="text-[10px] font-mono font-bold bg-violet-950 text-violet-300 border border-violet-800 px-1.5 py-0.5 rounded">
-                      Free Downloads
+                    <span>🌿 Creative Hub</span>
+                    <span className="text-[10px] font-mono font-bold bg-[#10271C] text-[#D8B879] border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                      5 Presets
                     </span>
                   </a>
                   <Link
