@@ -3256,7 +3256,7 @@ export const TOOLS: ToolDefinition[] = [
         answer: 'Because encryption is cryptographically authentic AES-256, it is impossible to recover or bypass without the password. We recommend noting down your passwords or using our password generator and saving them securely.'
       }
     ],
-    relatedSlugs: ['image-to-pdf', 'passport-photo-maker', 'image-compressor-upsc-ssc', 'compress-image-to-20kb'],
+    relatedSlugs: ['image-to-pdf', 'zero-knowledge-file-vault', 'smart-document-scanner', 'scan-to-print'],
     seo: {
       title: 'Batch PDF Password Vault & Permissions Manager | IndiaTools',
       metaDescription: 'Protect PDFs with AES-256 encryption, configure printing & copying permissions, or batch-decrypt documents 100% locally in your browser. Zero file uploads.',
@@ -3341,7 +3341,7 @@ export const TOOLS: ToolDefinition[] = [
         answer: 'While our chunked streaming handles large files efficiently, browser memory constraints require accumulating the final output file as a Blob for standard downloads. For extremely large multi-gigabyte files, ensure your device has sufficient RAM.'
       }
     ],
-    relatedSlugs: ['batch-pdf-password-vault', 'image-to-pdf', 'passport-photo-maker', 'clearcut-ai'],
+    relatedSlugs: ['batch-pdf-password-vault', 'image-to-pdf', 'invisible-document-watermarker', 'clearcut-ai'],
     seo: {
       title: 'Zero-Knowledge File Encrypter & Decrypter Online | IndiaTools',
       metaDescription: 'Encrypt and decrypt files locally with password-based AES-256-GCM authenticated encryption. Create and open secure .vault files in your browser without uploading your documents.',
