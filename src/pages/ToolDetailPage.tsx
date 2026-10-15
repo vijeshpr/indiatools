@@ -81,6 +81,7 @@ import { SmartDocumentScannerTool } from '../imageTools/SmartDocumentScannerTool
 import { BatchImageWatermarkerTool } from '../imageTools/BatchImageWatermarkerTool'
 import { FastInpaintingWatermarkRemoverTool } from '../imageTools/FastInpaintingWatermarkRemoverTool'
 import { ScanToPrintTool } from '../imageTools/ScanToPrintTool'
+import { NameSlipMakerTool } from '../imageTools/NameSlipMakerTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -161,6 +162,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'fast-inpainting-watermark-remover': FastInpaintingWatermarkRemoverTool,
   'scan-to-print': ScanToPrintTool,
   'lucky-draw-team-splitter': LuckyDrawTeamSplitterTool,
+  'name-slip-maker': NameSlipMakerTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

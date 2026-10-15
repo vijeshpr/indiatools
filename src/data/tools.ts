@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 26,
+    toolCount: 27,
   },
   audio: {
     id: 'audio',
@@ -4060,6 +4060,94 @@ export const TOOLS: ToolDefinition[] = [
         'റാൻഡം ടീം ജനറേറ്റർ'
       ],
       canonicalPath: '/tools/lucky-draw-team-splitter'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'name-slip-maker',
+    slug: 'name-slip-maker',
+    title: 'Free Name Slip Maker for Kids – School Name Label Generator Online India | IndiaTools',
+    shortTitle: 'Name Slip Maker',
+    description: 'Design and print personalized school name slips for notebooks, textbooks and bags. Upload child photos, 1-click background removal, 12+ cute templates and A4 PDF layouts.',
+    detailedDescription: 'Free online school name slip generator for Indian parents, students, and teachers. Upload up to 30 photos with instant in-browser background removal, choose from 12+ premium kid-friendly templates (Space, Dino, Unicorn, Superhero, Academic, Floral, Sports), customize school name, class, section, roll number, blood group, and print perfectly aligned A4 sheets with cutting guidelines.',
+    category: 'create',
+    categoryLabel: 'Create',
+    iconName: 'FileImage',
+    color: '#EC4899',
+    badge: 'Popular',
+    tags: [
+      'name slip maker',
+      'school name labels',
+      'kids notebook stickers',
+      'photo background removal',
+      'printable name slips a4',
+      'school sticker generator'
+    ],
+    searchKeywords: [
+      'name slip maker',
+      'school name slip generator',
+      'notebook name label',
+      'name slip for kids',
+      'printable name slips a4',
+      'school label maker online',
+      'नेम स्लिप मेकर',
+      'സ്കൂൾ നെയിം സ്ലിപ്പ്'
+    ],
+    formulaExplanation: 'Calculates the optimal row and column packing on standard international A4 paper, incorporating 5mm safety margins and 4mm scissor cutting gutters.',
+    assumptions: [
+      'Standard A4 paper dimensions (210mm × 297mm) with 5mm printable safety margins',
+      'Zero remote image uploads; all background removal and rendering happens 100% in-browser',
+      'High-resolution PDF generation with embedded vector font and image streams at 300 DPI print quality',
+      'Multi-student sequential packing optimizes sticker paper utilization with zero waste'
+    ],
+    exampleCalculation: {
+      title: 'Notebook Name Slip Sheet Calculation',
+      inputs: {
+        'Student Count': '1 Student',
+        'Copies Requested': '10 Labels',
+        'Slip Size': 'Medium (80mm × 45mm)'
+      },
+      outputs: {
+        'Total A4 Sheets': '1 Page',
+        'Slips per Sheet': '10 Slips',
+        'Print Layout': '2 Columns × 5 Rows',
+        'Margin / Gutters': '5mm Border, 4mm Cut Guidelines'
+      },
+      explanation: 'Generates a perfectly aligned 2-column by 5-row sticker sheet on standard A4 paper with scissor cutting guidelines and student photo.'
+    },
+    faqs: [
+      {
+        question: 'How many name slips fit on a single A4 sheet?',
+        answer: 'Depending on the size selected, you can print 21 Small slips (65×35mm), 10 Standard Medium slips (80×45mm), or 8 Large slips (95×55mm) on one A4 sheet with 5mm margins.'
+      },
+      {
+        question: 'How does client-side background removal work?',
+        answer: 'Background removal runs 100% inside your web browser using client-side AI/WebAssembly. Photos never leave your device or get uploaded to cloud servers.'
+      },
+      {
+        question: 'Can I create slips for multiple children in one session?',
+        answer: 'Yes! Use the "Add Another Student" button to configure labels for siblings or students with different classes, schools, and photos, and print all sequentially in one PDF.'
+      },
+      {
+        question: 'Are Indian regional languages supported on the name slips?',
+        answer: 'Yes, all fields fully support Hindi, Malayalam, Tamil, Telugu, Kannada, Bengali, Marathi, Gujarati, Punjabi, Odia, Urdu, and English.'
+      }
+    ],
+    relatedSlugs: ['lucky-draw-team-splitter', 'passport-photo', 'qr-code-generator', 'image-to-pdf'],
+    seo: {
+      title: 'Free Name Slip Maker for Kids – School Name Label Generator Online India | IndiaTools',
+      metaDescription: 'Create beautiful printable school name slips for kids notebooks, textbooks and bags. Multiple photo upload, 1-click background removal, 12+ cute templates and perfect A4 PDF layout.',
+      keywords: [
+        'name slip maker',
+        'school name slip generator',
+        'notebook name label',
+        'name slip for kids',
+        'printable name slips a4',
+        'school labels india',
+        'नेम स्लिप मेकर',
+        'സ്കൂൾ നെയിം സ്ലിപ്പ്'
+      ],
+      canonicalPath: '/tools/name-slip-maker'
     },
     type: 'image-tool'
   }

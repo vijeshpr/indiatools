@@ -3048,4 +3048,694 @@
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/hi/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/ml/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/ta/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/te/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/kn/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/bn/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/mr/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/gu/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/pa/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/or/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/as/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/ur/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/sa/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/kok/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/mai/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/ne/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/ks/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/sd/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/doi/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/mni/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/brx/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/sat/tools/name-slip-maker</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
+  </url>
 </urlset>

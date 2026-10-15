@@ -93,6 +93,8 @@ export function App() {
                 <Route path="/calculators/fast-inpainting-watermark-remover" element={<Navigate to="/tools/fast-inpainting-watermark-remover" replace />} />
                 <Route path="/scan-to-print" element={<Navigate to="/tools/scan-to-print" replace />} />
                 <Route path="/calculators/scan-to-print" element={<Navigate to="/tools/scan-to-print" replace />} />
+                <Route path="/name-slip-maker" element={<Navigate to="/tools/name-slip-maker" replace />} />
+                <Route path="/calculators/name-slip-maker" element={<Navigate to="/tools/name-slip-maker" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

@@ -238,7 +238,7 @@ describe('Lucky Draw Wheel & Random Team Splitter Test Suite', () => {
   // 5. REGISTRY, ROUTING & SITEMAP INTEGRATION
   describe('Registry & Production Architecture', () => {
     it('is registered in TOOLS array as tool #67', () => {
-      assert.strictEqual(TOOLS.length, 67)
+      assert.strictEqual(TOOLS.length, 68)
       const tool = getToolBySlug('lucky-draw-team-splitter')
       assert.ok(tool !== undefined, 'lucky-draw-team-splitter not found in TOOLS')
       assert.strictEqual(tool.category, 'create')
@@ -247,8 +247,8 @@ describe('Lucky Draw Wheel & Random Team Splitter Test Suite', () => {
       assert.ok(tool.seo.title.endsWith('| IndiaTools'), 'Title must end with | IndiaTools')
     })
 
-    it('has CATEGORIES.create.toolCount set to 26', () => {
-      assert.strictEqual(CATEGORIES.create.toolCount, 26)
+    it('has CATEGORIES.create.toolCount set to 27', () => {
+      assert.strictEqual(CATEGORIES.create.toolCount, 27)
     })
 
     it('is mapped in ToolDetailPage.tsx TOOL_COMPONENTS', () => {
@@ -261,10 +261,10 @@ describe('Lucky Draw Wheel & Random Team Splitter Test Suite', () => {
       assert.ok(appCode.includes('/calculators/lucky-draw-team-splitter'))
     })
 
-    it('sitemap.xml contains 170 URLs including all 23 Lucky Draw URLs', () => {
+    it('sitemap.xml contains 193 URLs including all 23 Lucky Draw URLs', () => {
       const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
       const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-      assert.strictEqual(locs.length, 170)
+      assert.strictEqual(locs.length, 193)
 
       // Canonical URL
       assert.ok(locs.includes('https://indiatools-rho.vercel.app/tools/lucky-draw-team-splitter'))

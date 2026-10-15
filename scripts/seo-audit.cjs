@@ -204,10 +204,35 @@ async function runAudit() {
   }
   check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English (Lucky Draw)', allLuckyHreflangsInSitemap);
 
+  // 3h. Name Slip Maker for Kids Multilingual Sitemaps & Hreflang Audit (23 languages)
+  const nameSlipModule = await import('../src/i18n/nameSlipI18n.ts');
+  const nameSlipLocalesList = Object.keys(nameSlipModule.NAME_SLIP_TOOL_I18N);
+  check('Name Slip Maker Dataset: Exactly 23 languages configured', nameSlipLocalesList.length === 23, `Found ${nameSlipLocalesList.length}`);
+
+  let allNameSlipInSitemap = true;
+  for (const loc of nameSlipLocalesList) {
+    const urlPath = loc === 'en' ? '/tools/name-slip-maker' : `/${loc}/tools/name-slip-maker`;
+    if (!sitemapXml.includes(`https://indiatools-rho.vercel.app${urlPath}`)) {
+      allNameSlipInSitemap = false;
+      console.error(`Missing Name Slip Maker localized URL in sitemap: ${urlPath}`);
+    }
+  }
+  check('sitemap.xml: Contains all 23 Name Slip Maker language URLs', allNameSlipInSitemap);
+
+  let allNameSlipHreflangsInSitemap = true;
+  for (const loc of nameSlipLocalesList) {
+    const bcp47 = nameSlipModule.NAME_SLIP_LOCALES[loc].bcp47;
+    if (!sitemapXml.includes(`hreflang="${bcp47}"`)) {
+      allNameSlipHreflangsInSitemap = false;
+      console.error(`Missing hreflang="${bcp47}" in sitemap.xml for Name Slip Maker`);
+    }
+  }
+  check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English (Name Slip Maker)', allNameSlipHreflangsInSitemap);
+
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 67 unique tools', tools.length === 67, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 68 unique tools', tools.length === 68, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;
@@ -274,7 +299,7 @@ async function runAudit() {
   // 6b. Sitemap Quality & Production Host Integrity
   const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   const dupes = locs.filter((item, index) => locs.indexOf(item) !== index);
-  check('sitemap.xml: Exactly 170 production URLs with zero duplicates', locs.length === 170 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
+  check('sitemap.xml: Exactly 193 production URLs with zero duplicates', locs.length === 193 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
   const nonProd = locs.filter(u => !u.startsWith('https://indiatools-rho.vercel.app/'));
   check('sitemap.xml: 100% of URLs use canonical production domain https://indiatools-rho.vercel.app', nonProd.length === 0, `${nonProd.length} non-production URLs`);
   const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);

@@ -31,6 +31,7 @@ const goldMod = loadTs('src/i18n/goldToolI18n.ts');
 const friendshipMod = loadTs('src/i18n/friendshipCostI18n.ts');
 const repairMod = loadTs('src/i18n/repairVsReplaceI18n.ts');
 const luckyMod = loadTs('src/i18n/luckyDrawTeamI18n.ts');
+const nameSlipMod = loadTs('src/i18n/nameSlipI18n.ts');
 
 const TOOLS = toolsMod.TOOLS;
 const CATEGORIES = toolsMod.CATEGORIES;
@@ -42,6 +43,8 @@ const REPAIR_TOOL_I18N = repairMod.REPAIR_TOOL_I18N;
 const REPAIR_LOCALES = repairMod.REPAIR_LOCALES;
 const LUCKY_TOOL_I18N = luckyMod.LUCKY_TOOL_I18N;
 const LUCKY_LOCALES = luckyMod.LUCKY_LOCALES;
+const NAME_SLIP_TOOL_I18N = nameSlipMod.NAME_SLIP_TOOL_I18N;
+const NAME_SLIP_LOCALES = nameSlipMod.NAME_SLIP_LOCALES;
 
 const templatePath = path.join('dist', 'index.html');
 if (!fs.existsSync(templatePath)) {
@@ -900,7 +903,88 @@ for (const fullUrl of sitemapUrls) {
     };
   }
 
-  // 11. Individual Calculator & Image Tools (all 67 tools)
+  // 10e. Multilingual Name Slip Maker for Kids localized routes
+  else if (urlPath.includes('name-slip-maker')) {
+    const langMatch = urlPath.match(/^\/([a-z]{2,3})\/tools\/name-slip-maker/);
+    const langKey = langMatch ? langMatch[1] : 'en';
+    const slipContent = NAME_SLIP_TOOL_I18N[langKey] || NAME_SLIP_TOOL_I18N['en'];
+
+    meta = {
+      title: slipContent.title,
+      description: slipContent.metaDescription,
+      canonicalUrl: langKey === 'en'
+        ? `${BASE_URL}/tools/name-slip-maker`
+        : `${BASE_URL}/${langKey}/tools/name-slip-maker`
+    };
+
+    hreflangs = Object.keys(NAME_SLIP_TOOL_I18N).map(code => ({
+      lang: NAME_SLIP_LOCALES[code].bcp47,
+      href: code === 'en'
+        ? `${BASE_URL}/tools/name-slip-maker`
+        : `${BASE_URL}/${code}/tools/name-slip-maker`
+    }));
+    hreflangs.push({
+      lang: 'x-default',
+      href: `${BASE_URL}/tools/name-slip-maker`
+    });
+
+    bodyContent = `
+      <div style="margin-bottom: 16px;">
+        <a href="/category/create" style="color: #94A3B8; text-decoration: none; font-size: 0.85rem;">← Create & Interactive Tools</a>
+      </div>
+      <article dir="${slipContent.dir || 'ltr'}">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #EC4899; text-transform: uppercase;">22 INDIAN LANGUAGES • CLIENT-SIDE AI BG REMOVAL • A4 PRINT READY</span>
+        <h1 style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF; margin: 8px 0;">${escapeHtml(slipContent.h1)}</h1>
+        <p style="font-size: 1rem; color: #CBD5E1; line-height: 1.6; max-width: 800px; margin-bottom: 24px;">${escapeHtml(slipContent.subtitle)}</p>
+
+        <section style="background: #181126; border: 1px solid rgba(236,72,153,0.25); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 12px;">Premium School Name Slips – Print on Standard A4 Sticker Sheets</h2>
+          <p style="color: #94A3B8; line-height: 1.7; font-size: 0.9rem;">
+            Designed for Indian school parents and educators. Upload child photos with zero-cloud client-side AI background removal, customize student details (Name, Class, Roll No, School, Phone, Blood Group) in any Indian script, choose from 12 kid-friendly cartoon templates, and auto-pack 8, 10, or 21 labels per A4 page with cutting guides.
+          </p>
+        </section>
+
+        <section style="background: #0D0E1A; border: 1px solid rgba(236,72,153,0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 16px;">Frequently Asked Questions</h2>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            ${(slipContent.faqs || []).map(faq => `
+              <div>
+                <h3 style="font-size: 1rem; color: #F472B6; margin: 0 0 6px 0;">${escapeHtml(faq.question)}</h3>
+                <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.6; margin: 0;">${escapeHtml(faq.answer)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      </article>
+    `;
+
+    jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          name: slipContent.h1,
+          description: slipContent.metaDescription,
+          url: meta.canonicalUrl,
+          applicationCategory: "UtilityApplication",
+          operatingSystem: "All"
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: (slipContent.faqs || []).map(f => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer
+            }
+          }))
+        }
+      ]
+    };
+  }
+
+  // 11. Individual Calculator & Image Tools (all 68 tools)
   else {
     const tool = TOOLS.find(t => t.seo.canonicalPath === urlPath);
     if (!tool) {
