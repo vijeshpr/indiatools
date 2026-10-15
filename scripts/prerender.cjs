@@ -28,11 +28,14 @@ console.log('Loading datasets for static prerendering...');
 const toolsMod = loadTs('src/data/tools.ts');
 const chequeMod = loadTs('src/data/chequeSeoData.ts');
 const goldMod = loadTs('src/i18n/goldToolI18n.ts');
+const friendshipMod = loadTs('src/i18n/friendshipCostI18n.ts');
 
 const TOOLS = toolsMod.TOOLS;
 const CATEGORIES = toolsMod.CATEGORIES;
 const CHEQUE_SEO_LANGUAGES = chequeMod.CHEQUE_SEO_LANGUAGES;
 const GOLD_TOOL_I18N = goldMod.GOLD_TOOL_I18N;
+const FRIENDSHIP_TOOL_I18N = friendshipMod.FRIENDSHIP_TOOL_I18N;
+const FRIENDSHIP_LOCALES = friendshipMod.FRIENDSHIP_LOCALES;
 
 const templatePath = path.join('dist', 'index.html');
 if (!fs.existsSync(templatePath)) {
@@ -193,7 +196,7 @@ for (const fullUrl of sitemapUrls) {
         <h1 style="font-size: 2.5rem; font-weight: 900; color: #FFFFFF; margin: 16px 0 10px;">Practical Calculators for Real-Life Indian Problems</h1>
         <p style="font-size: 1.1rem; color: #CBD5E1; max-width: 750px; margin: 0 auto 30px; line-height: 1.6;">Automotive mileage, civil construction material estimators, DISCOM electricity slabs, salary take-home calculators, and 100% private in-browser document utilities.</p>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-          <a href="/tools" style="background: #10B981; color: #041009; font-weight: 700; text-decoration: none; padding: 12px 24px; border-radius: 12px;">Explore All 64 Tools</a>
+          <a href="/tools" style="background: #10B981; color: #041009; font-weight: 700; text-decoration: none; padding: 12px 24px; border-radius: 12px;">Explore All 65 Tools</a>
           <a href="/popular" style="background: #1E293B; color: #FFFFFF; font-weight: 700; text-decoration: none; padding: 12px 24px; border-radius: 12px; border: 1px solid #334155;">Popular Calculators</a>
         </div>
       </section>
@@ -267,7 +270,7 @@ for (const fullUrl of sitemapUrls) {
       title: isPopular ? 'Popular Tools & Calculators | IndiaTools' : 'All Tools & Calculators – Free Online Toolbox | IndiaTools',
       description: isPopular
         ? 'Discover the most popular Indian online calculators and image tools for vehicle mileage, JCB fuel, 50KB photos, and electricity bills.'
-        : 'Browse all 64 practical online calculators and tools for vehicle costs, civil construction, power bills, salary tax, and image compression.',
+        : 'Browse all 65 practical online calculators and tools for vehicle costs, civil construction, power bills, salary tax, and image compression.',
       canonicalUrl: `${BASE_URL}${urlPath}`
     };
     bodyContent = `
@@ -418,7 +421,7 @@ for (const fullUrl of sitemapUrls) {
         </div>
       </section>
       <div style="text-align: center; margin-top: 20px;">
-        <a href="/tools" style="background: #10B981; color: #041009; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 12px; display: inline-block;">Explore All 64 Tools & Calculators →</a>
+        <a href="/tools" style="background: #10B981; color: #041009; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 12px; display: inline-block;">Explore All 65 Tools & Calculators →</a>
       </div>
     `;
   }
@@ -643,7 +646,90 @@ for (const fullUrl of sitemapUrls) {
     };
   }
 
-  // 11. Individual Calculator & Image Tools (all 64 tools)
+  // 10b. Multilingual Friendship & Relationship Cost Calculator localized routes
+  else if (urlPath.includes('friendship-relationship-cost')) {
+    const langMatch = urlPath.match(/^\/([a-z]{2,3})\/calculators\/friendship-relationship-cost/);
+    const langKey = langMatch ? langMatch[1] : 'en';
+    const friendshipContent = FRIENDSHIP_TOOL_I18N[langKey] || FRIENDSHIP_TOOL_I18N['en'];
+
+    meta = {
+      title: friendshipContent.title,
+      description: friendshipContent.metaDescription,
+      canonicalUrl: langKey === 'en'
+        ? `${BASE_URL}/calculators/friendship-relationship-cost`
+        : `${BASE_URL}/${langKey}/calculators/friendship-relationship-cost`
+    };
+
+    hreflangs = Object.keys(FRIENDSHIP_TOOL_I18N).map(code => ({
+      lang: FRIENDSHIP_LOCALES[code].bcp47,
+      href: code === 'en'
+        ? `${BASE_URL}/calculators/friendship-relationship-cost`
+        : `${BASE_URL}/${code}/calculators/friendship-relationship-cost`
+    }));
+    hreflangs.push({
+      lang: 'x-default',
+      href: `${BASE_URL}/calculators/friendship-relationship-cost`
+    });
+
+    bodyContent = `
+      <div style="margin-bottom: 16px;">
+        <a href="/category/money" style="color: #94A3B8; text-decoration: none; font-size: 0.85rem;">← Finance & Relationship Tools</a>
+      </div>
+      <article dir="${friendshipContent.dir || 'ltr'}">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #10B981; text-transform: uppercase;">22 INDIAN LANGUAGES • CLIENT-SIDE PRIVACY</span>
+        <h1 style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF; margin: 8px 0;">${escapeHtml(friendshipContent.h1)}</h1>
+        <p style="font-size: 1rem; color: #CBD5E1; line-height: 1.6; max-width: 800px; margin-bottom: 24px;">${escapeHtml(friendshipContent.subtitle)}</p>
+
+        <section style="background: #0E261B; border: 1px solid rgba(16,185,129,0.25); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 12px;">Calculation Logic & Social Budgeting Principles</h2>
+          <p style="color: #94A3B8; line-height: 1.7; font-size: 0.9rem;">
+            Annual Cash Outflow = (Meetups Count × Cost per Meetup) + Annual Gifts & Festivals + Annual Trips Share + Annual Digital Subscriptions & Deliveries.<br>
+            Total Hours Invested = (Meetups Count × Hours/Meetup) + (Calls/Wk × 52) + (Messaging/Day × 365) + Vacation Days Hours.<br>
+            Opportunity Cost of Time = Total Annual Hours × Hourly Rate (kept strictly separate from out-of-pocket cash).
+          </p>
+        </section>
+
+        <section style="background: #0A1E15; border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 16px;">Frequently Asked Questions</h2>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            ${(friendshipContent.faqs || []).map(faq => `
+              <div>
+                <h3 style="font-size: 1rem; color: #D8B879; margin: 0 0 6px 0;">${escapeHtml(faq.question)}</h3>
+                <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.6; margin: 0;">${escapeHtml(faq.answer)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      </article>
+    `;
+
+    jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          name: friendshipContent.h1,
+          description: friendshipContent.metaDescription,
+          url: meta.canonicalUrl,
+          applicationCategory: "UtilityApplication",
+          operatingSystem: "All"
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: (friendshipContent.faqs || []).map(f => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer
+            }
+          }))
+        }
+      ]
+    };
+  }
+
+  // 11. Individual Calculator & Image Tools (all 65 tools)
   else {
     const tool = TOOLS.find(t => t.seo.canonicalPath === urlPath);
     if (!tool) {

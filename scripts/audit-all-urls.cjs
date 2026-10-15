@@ -78,13 +78,13 @@ TOOLS.forEach(tool => {
   }
 });
 if (totalIssues === 0) {
-  logPass('All 64 tools have valid categories, valid SEO titles, and canonical paths.');
+  logPass(`All ${TOOLS.length} tools have valid categories, valid SEO titles, and canonical paths.`);
 }
 
 // ==========================================
 // CHECK 2: SITEMAP & PRERENDERED HTML AUDIT FOR EVERY URL
 // ==========================================
-console.log('\n--- CHECK 2: SITEMAP & PRERENDERED HTML AUDIT (101 URLs) ---');
+console.log(`\n--- CHECK 2: SITEMAP & PRERENDERED HTML AUDIT (${sitemapUrls.length} URLs) ---`);
 const distDir = path.resolve('dist');
 const seenTitles = new Map();
 const seenCanonicals = new Set();
@@ -230,7 +230,7 @@ scanDir(imageToolsDir);
 console.log('\n========================================');
 console.log(`TOTAL AUDIT ISSUES FOUND: ${totalIssues}`);
 if (totalIssues === 0) {
-  console.log('🌟 ALL 101 URLS AND 64 TOOL MODULES PASSED COMPLETE AUDIT WITHOUT ERROR!');
+  console.log(`🌟 ALL ${sitemapUrls.length} URLS AND ${TOOLS.length} TOOL MODULES PASSED COMPLETE AUDIT WITHOUT ERROR!`);
 } else {
   console.log(`⚠️ FOUND ${totalIssues} ISSUES ACROSS CODEBASE & SITEMAP:`);
   report.forEach((r, idx) => {

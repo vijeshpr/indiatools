@@ -48,7 +48,7 @@ describe('Fast Inpainting Watermark Remover & Object Eraser Test Suite', () => {
     assert.ok(tool.searchKeywords.length >= 10, 'Search keywords should include regional phrases')
     assert.ok(tool.faqs.length >= 5, 'Must provide at least 5 FAQs')
     assert.strictEqual(CATEGORIES.create.toolCount, 25, 'Category create tool count must be 25')
-    assert.strictEqual(TOOLS.length, 64, 'Total tools in registry must be 64')
+    assert.strictEqual(TOOLS.length, 65, 'Total tools in registry must be 65')
   })
 
   describe('Alexandru Telea Fast Marching Inpainting Algorithm', () => {

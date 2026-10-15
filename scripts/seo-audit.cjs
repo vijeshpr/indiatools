@@ -129,10 +129,35 @@ async function runAudit() {
   }
   check('sitemap.xml: Contains all 11 Gold Exchange language URLs', allGoldInSitemap);
 
+  // 3e. Friendship Cost Multilingual Sitemaps & Hreflang Audit (23 languages)
+  const friendshipModule = await import('../src/i18n/friendshipCostI18n.ts');
+  const friendshipLocales = Object.keys(friendshipModule.FRIENDSHIP_TOOL_I18N);
+  check('Friendship Cost Dataset: Exactly 23 languages configured', friendshipLocales.length === 23, `Found ${friendshipLocales.length}`);
+
+  let allFriendshipInSitemap = true;
+  for (const loc of friendshipLocales) {
+    const urlPath = loc === 'en' ? '/calculators/friendship-relationship-cost' : `/${loc}/calculators/friendship-relationship-cost`;
+    if (!sitemapXml.includes(`https://indiatools-rho.vercel.app${urlPath}`)) {
+      allFriendshipInSitemap = false;
+      console.error(`Missing Friendship Cost localized URL in sitemap: ${urlPath}`);
+    }
+  }
+  check('sitemap.xml: Contains all 23 Friendship Cost language URLs', allFriendshipInSitemap);
+
+  let allFriendshipHreflangsInSitemap = true;
+  for (const loc of friendshipLocales) {
+    const bcp47 = friendshipModule.FRIENDSHIP_LOCALES[loc].bcp47;
+    if (!sitemapXml.includes(`hreflang="${bcp47}"`)) {
+      allFriendshipHreflangsInSitemap = false;
+      console.error(`Missing hreflang="${bcp47}" in sitemap.xml for Friendship Cost`);
+    }
+  }
+  check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English', allFriendshipHreflangsInSitemap);
+
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 64 unique tools', tools.length === 64, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 65 unique tools', tools.length === 65, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;
@@ -199,7 +224,7 @@ async function runAudit() {
   // 6b. Sitemap Quality & Production Host Integrity
   const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   const dupes = locs.filter((item, index) => locs.indexOf(item) !== index);
-  check('sitemap.xml: Exactly 101 production URLs with zero duplicates', locs.length === 101 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
+  check('sitemap.xml: Exactly 124 production URLs with zero duplicates', locs.length === 124 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
   const nonProd = locs.filter(u => !u.startsWith('https://indiatools-rho.vercel.app/'));
   check('sitemap.xml: 100% of URLs use canonical production domain https://indiatools-rho.vercel.app', nonProd.length === 0, `${nonProd.length} non-production URLs`);
   const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);

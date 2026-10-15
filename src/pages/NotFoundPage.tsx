@@ -87,7 +87,7 @@ export const NotFoundPage: React.FC = () => {
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm shadow-lg shadow-emerald-950/40 transition-all cursor-pointer"
           >
             <Compass className="w-4 h-4" />
-            <span>Browse All 64 Tools</span>
+            <span>Browse All 65 Tools</span>
           </Link>
 
           <Link

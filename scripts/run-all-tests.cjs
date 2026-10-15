@@ -1,9 +1,8 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-console.log('=== RUNNING ALL 23 TEST SUITES IN tests/ DIRECTORY ===\n');
-
 const files = fs.readdirSync('tests').filter(f => f.endsWith('.ts'));
+console.log(`=== RUNNING ALL ${files.length} TEST SUITES IN tests/ DIRECTORY ===\n`);
 let passed = 0;
 let failed = 0;
 

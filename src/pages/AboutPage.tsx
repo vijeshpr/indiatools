@@ -113,7 +113,7 @@ export const AboutPage: React.FC = () => {
             to="/tools"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
           >
-            <span>Explore All 64 Tools & Calculators</span>
+            <span>Explore All 65 Tools & Calculators</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

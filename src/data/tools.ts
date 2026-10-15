@@ -43,7 +43,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#8B5CF6',
     gradient: 'from-purple-500/20 via-indigo-500/10 to-transparent',
     icon: 'IndianRupee',
-    toolCount: 9,
+    toolCount: 10,
   },
   land: {
     id: 'land',
@@ -3797,6 +3797,88 @@ export const TOOLS: ToolDefinition[] = [
       canonicalPath: '/tools/scan-to-print'
     },
     type: 'image-tool'
+  },
+  {
+    id: 'friendship-relationship-cost',
+    slug: 'friendship-relationship-cost',
+    title: 'Friendship & Relationship Maintenance Cost Calculator',
+    shortTitle: 'Friendship Cost',
+    description: 'Calculate the estimated annual money and time invested in maintaining friendships and relationships, including gifts, dining, travel, and digital treats.',
+    detailedDescription: 'Understand the real economic and temporal commitment in your closest bonds. Breaks down meetup dining, birthday and festival gifts, holiday trips, shared subscriptions, and time investment with 100% private in-browser computation.',
+    category: 'money',
+    categoryLabel: 'Finance & Relationships',
+    badge: 'Popular',
+    iconName: 'HeartHandshake',
+    color: '#8B5CF6',
+    tags: ['friendship cost', 'relationship maintenance', 'social budget', 'gifts budget', 'money calculator', 'time investment'],
+    searchKeywords: [
+      'friendship cost calculator',
+      'relationship cost calculator',
+      'how much do friends cost per year',
+      'dating cost calculator india',
+      'social budget calculator',
+      'best friend annual spending',
+      'दोस्ती का खर्च कैलकुलेटर',
+      'സൗഹൃദ ചിലവ്'
+    ],
+    formulaExplanation: 'Annual Cash Outflow = (Meetups Count × Cost per Meetup) + Annual Gifts & Festivals + Annual Trips Share + Annual Digital & Shared Treats. Total Hours = (Meetups Count × Hours/Meetup) + (Calls/Wk × 52) + (Messaging/Day × 365) + Vacation Days Hours. Opportunity Cost = Total Annual Hours × Hourly Rate.',
+    assumptions: [
+      'Weekly meetups correspond to 52 annual outings; bi-weekly corresponds to 26 outings; monthly corresponds to 12 outings.',
+      'Vacation time calculation allocates 8 active awake hours per vacation day.',
+      'Economic time opportunity cost is strictly separated from out-of-pocket cash spending.',
+      'Calculations operate 100% client-side in browser memory with zero cloud storage.'
+    ],
+    exampleCalculation: {
+      title: 'College Best Friends Annual Spending',
+      inputs: {
+        'Relationship': 'Best Friend (3 Years)',
+        'Hangout Frequency': 'Weekly (~52x/yr)',
+        'Food & Cafe per Meetup': '₹250',
+        'Entertainment per Meetup': '₹100',
+        'Travel per Meetup': '₹60',
+        'Birthday & Festival Gifts': '₹1,700/yr',
+        'Annual Trip Share': '₹4,500'
+      },
+      outputs: {
+        'Total Annual Cash Spend': '₹29,480',
+        'Monthly Average Budget': '₹2,457',
+        'Total Hours Invested': '441 Hours (~18.4 Full Days)'
+      },
+      explanation: 'Weekly cafe outings at ₹410 per session total ₹21,320 annually. Adding ₹1,700 for gifts, ₹1,960 in shared subscriptions and deliveries, and a ₹4,500 getaway yields ₹29,480 per year with 441 hours spent together.'
+    },
+    faqs: [
+      {
+        question: 'Why calculate friendship and relationship maintenance costs?',
+        answer: 'It is not about placing a monetary value on human bonds — it is about financial transparency and mindful budgeting. Unplanned cafe bills, birthday treats, and spontaneous outings can easily add up to tens of thousands of rupees annually.'
+      },
+      {
+        question: 'Is my personal relationship or financial data saved on any server?',
+        answer: 'No. All calculations are performed 100% locally in your device browser using JavaScript. No names, numbers, or relationship data are ever transmitted or stored.'
+      },
+      {
+        question: 'How is the time opportunity value calculated?',
+        answer: 'It multiplies your annual hours spent by an optional hourly income rate to illustrate the economic depth of your time investment. It is strictly separated from cash outflow.'
+      }
+    ],
+    relatedSlugs: ['in-hand-salary', 'percentage-calculator', 'trip-cost', 'road-trip-planner', 'daily-wage'],
+    seo: {
+      title: 'Friendship Cost Calculator – Yearly Money & Time Cost | IndiaTools',
+      metaDescription: 'Calculate the estimated annual money and time you invest in friendships and relationships. Interactive breakdown of dining, gifts, trips, subscriptions, and hours spent.',
+      keywords: [
+        'friendship cost calculator',
+        'relationship cost calculator',
+        'friendship cost calculator india',
+        'how much does a friend cost per year',
+        'social spending calculator',
+        'dating expense calculator',
+        'दोस्ती का खर्च',
+        'സൗഹൃദ ചിലവ് കാൽക്കുലേറ്റർ',
+        'நட்பு செலவு கால்குலேட்டர்',
+        'స్నేహం ఖర్చు'
+      ],
+      canonicalPath: '/calculators/friendship-relationship-cost'
+    },
+    type: 'calculator'
   }
 ]
 
