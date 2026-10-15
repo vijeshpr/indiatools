@@ -92,7 +92,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, index = 0 }) => {
 
         {/* Title */}
         <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1 mb-1.5 tracking-tight">
-          {tool.title}
+          <Link to={path} className="hover:underline focus:outline-none">
+            {tool.title}
+          </Link>
         </h3>
 
         {/* Description */}

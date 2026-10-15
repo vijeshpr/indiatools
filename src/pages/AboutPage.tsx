@@ -80,13 +80,40 @@ export const AboutPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Categories Directory Links for Googlebot & Users */}
+        <div className="pt-4 border-t border-slate-200">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold mb-4 text-center">
+            Explore Calculators By Sector:
+          </h3>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Link to="/category/drive" className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-medium transition-colors">
+              🚗 Vehicle & Fuel
+            </Link>
+            <Link to="/category/build" className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-medium transition-colors">
+              🏗️ Civil Construction
+            </Link>
+            <Link to="/category/power" className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-medium transition-colors">
+              ⚡ Electricity & Solar
+            </Link>
+            <Link to="/category/money" className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-medium transition-colors">
+              💰 Salary, Tax & Finance
+            </Link>
+            <Link to="/category/land" className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-medium transition-colors">
+              📐 Land & Property
+            </Link>
+            <Link to="/category/create" className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-medium transition-colors">
+              🎨 Documents & Media
+            </Link>
+          </div>
+        </div>
+
         {/* Call to action */}
         <div className="text-center pt-4">
           <Link
             to="/tools"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
           >
-            <span>Explore All 43 Tools</span>
+            <span>Explore All 64 Tools & Calculators</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

@@ -190,6 +190,11 @@ export const TOOLS: ToolDefinition[] = [
         question: 'Why does my real mileage differ from ARAI claimed mileage?',
         answer: 'ARAI ratings are derived in laboratory test conditions with zero wind, no AC, and gentle speeds. Real-world Indian traffic with stop-and-go driving and air-conditioning is typically 15% to 30% lower.',
       },
+    
+      {
+        question: "How does AC usage and tire pressure impact real vehicle mileage in India?",
+        answer: "Running air conditioning continuously in city bumper-to-bumper traffic reduces fuel economy by roughly 10% to 15%. Under-inflated tyres increase rolling resistance, causing an additional 3% to 5% mileage drop. Maintaining recommended PSI and moderate AC settings yields measurable fuel savings.",
+      },
     ],
     relatedSlugs: ['fuel-cost', 'trip-cost', 'jcb-fuel-cost', 'monthly-vehicle-running-cost'],
     seo: {
@@ -226,6 +231,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Does vehicle speed affect fuel consumption?',
         answer: 'Yes. Most petrol and diesel passenger vehicles achieve peak efficiency between 65 km/h and 85 km/h in top gear. Speeds above 100 km/h drastically increase aerodynamic drag.',
+      },
+    
+      {
+        question: "How should I budget fuel costs for round trips with elevation changes or ghat sections?",
+        answer: "Ghat and hill roads (like Western Ghats or Himalayan routes) typically increase fuel consumption by 20% to 35% on the uphill climb due to lower gear operation. Add a 15% safety buffer to your one-way mileage estimate when planning ghat road trips.",
+      },
+      {
+        question: "Is CNG significantly cheaper per kilometer than petrol in Indian cities?",
+        answer: "Yes. In most Indian metros, CNG costs roughly ₹2.20 to ₹3.00 per km compared to ₹5.50 to ₹7.50 per km for petrol hatchbacks, delivering 50% to 60% lower fuel running costs despite lower boot space.",
       },
     ],
     relatedSlugs: ['vehicle-mileage', 'trip-cost', 'monthly-vehicle-running-cost'],
@@ -264,6 +278,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'Are FASTag return journey discounts accounted for?',
         answer: 'National Highways Authority of India (NHAI) provides a 25% to 50% discount on return tolls within 24 hours at specific toll plazas.',
       },
+    
+      {
+        question: "How does FASTag toll deduction work for round trips within 24 hours?",
+        answer: "Most National Highway (NHAI) toll plazas provide an automatic 25% to 50% discount on the return toll if the vehicle passes back through the same toll plaza within 24 hours. The discounted fare is debited automatically from your FASTag account.",
+      },
+      {
+        question: "What is an ideal per-person expense split formula for long distance road trips?",
+        answer: "Calculate Total Trip Budget = Fuel Cost + FASTag Tolls + State Border Entry Permits (if applicable) + Parking Charges. Divide this sum equally among passengers, excluding the designated vehicle owner/driver from incidental tyre maintenance reserves if agreed upon.",
+      },
     ],
     relatedSlugs: ['vehicle-mileage', 'fuel-cost', 'jcb-fuel-cost'],
     seo: {
@@ -300,6 +323,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'What is the biggest component of vehicle ownership cost in India?',
         answer: 'For financed vehicles, the loan EMI typically accounts for 50-60% of total monthly expense, followed by fuel (25-35%), insurance (5-8%), and scheduled periodic servicing.',
+      },
+    
+      {
+        question: "What is the true total monthly cost of owning a car in India beyond fuel?",
+        answer: "Beyond fuel, monthly vehicle ownership comprises loan EMI (if financed), comprehensive insurance annualized to a monthly reserve (approx ₹1,200–₹2,500/mo), scheduled service maintenance reserve (₹800–₹1,500/mo), and parking/cleaning fees. Fuel typically accounts for only 40% to 55% of true running costs.",
+      },
+      {
+        question: "How much annual depreciation should I account for in my monthly car budget?",
+        answer: "New cars in India depreciate roughly 15% to 20% in their first year, and 10% to 12% annually in subsequent years. For a ₹10 Lakh vehicle, factoring ₹8,000 to ₹10,000 monthly for depreciation protects your replacement capital.",
       },
     ],
     relatedSlugs: ['vehicle-mileage', 'fuel-cost', 'petrol-vs-diesel', 'ev-vs-petrol'],
@@ -338,6 +370,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'Should I buy a diesel car if my monthly running is under 1,000 km?',
         answer: 'No. At under 1,000 km/month, you will not recover the higher diesel purchase price and insurance premium before 7-8 years. Modern BS6 diesel engines also face DPF clogging during short city commutes.',
       },
+    
+      {
+        question: "What is the 10-year diesel rule and how does it affect vehicle breakeven in India?",
+        answer: "Under National Green Tribunal (NGT) rules in Delhi-NCR, diesel vehicles cannot operate past 10 years, compared to 15 years for petrol vehicles. If you drive in NCR or plan to resell there, the 5-year shorter lifespan significantly increases diesel depreciation and raises the required breakeven driving distance.",
+      },
+      {
+        question: "Why do modern BS6 diesel cars have issues with short city commutes?",
+        answer: "BS6 diesel cars feature Diesel Particulate Filters (DPF) that require sustained exhaust temperatures (typically 20+ minutes of highway driving at 60+ km/h) to regenerate and burn off soot. Exclusively driving short city hops causes DPF clogging warnings and frequent service visits.",
+      },
     ],
     relatedSlugs: ['vehicle-mileage', 'ev-vs-petrol', 'monthly-vehicle-running-cost'],
     seo: {
@@ -374,6 +415,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'How much does it cost to fully charge an electric car at home in India?',
         answer: 'A typical 30-40 kWh battery (e.g. Tata Nexon EV) takes roughly 30 to 40 electricity units to charge from 10% to 100%. At an average domestic tariff of ₹7.00/unit, a full charge costs just ₹210 to ₹280 for a real-world range of ~250 km.',
+      },
+    
+      {
+        question: "What is the real cost per kilometer for an Electric Vehicle when charged at home in India?",
+        answer: "Charging at home at standard domestic electricity rates (₹6 to ₹8 per kWh), an EV consuming 14 kWh per 100 km costs roughly ₹0.85 to ₹1.15 per km. If charged via rooftop solar, the effective fuel cost drops to near zero.",
+      },
+      {
+        question: "How does AC and high summer heat affect Indian EV driving range?",
+        answer: "In peak Indian summer (38°C to 45°C), running cabin cooling and battery thermal management reduces real-world EV driving range by approximately 15% to 22% compared to moderate 25°C weather.",
       },
     ],
     relatedSlugs: ['monthly-vehicle-running-cost', 'petrol-vs-diesel', 'electricity-cost', 'solar-panel'],
@@ -412,6 +462,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'What is the average diesel consumption of a JCB 3DX in India?',
         answer: 'A standard JCB 3DX Backhoe Loader typically consumes 4.2 to 5.2 litres per hour in mixed earthmoving and loading applications. Hard trenching in rocky terrain can push this to 5.8 L/hr.',
       },
+    
+      {
+        question: "What is the difference between idle throttle and heavy trenching diesel consumption on a JCB 3DX?",
+        answer: "During light idle or backhoe positioning, a JCB 3DX consumes approximately 3.5 to 4.5 litres of diesel per hour. Under heavy trenching, rock digging, or front-bucket loading in high gear, consumption rises to 6.5 to 8.0 litres per hour.",
+      },
+      {
+        question: "What is the standard payment convention for JCB hiring in India: Wet Lease vs Dry Lease?",
+        answer: "In a Wet Lease, the machine owner provides both diesel and operator; the client pays a flat hourly rate (e.g. ₹1,100 to ₹1,400/hr). In a Dry Lease, the client supplies diesel and pays a lower machine rental rate (e.g. ₹650 to ₹850/hr) plus the operator's daily allowance (bata/bhatta).",
+      },
     ],
     relatedSlugs: ['construction-cost', 'fuel-cost', 'vehicle-mileage'],
     seo: {
@@ -448,6 +507,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'When should I do a major service instead of a minor service?',
         answer: 'Minor services (engine oil + oil filter + general inspection) occur every 10,000 km or 1 year. Major services occur every 20,000-30,000 km and include air filters, cabin AC filter, coolant flush, brake fluid, and spark plugs.',
+      },
+    
+      {
+        question: "How often should engine oil be replaced in Indian driving conditions?",
+        answer: "For conventional mineral engine oil, change every 5,000 to 7,500 km or 6 months. For modern full-synthetic oils, replace every 10,000 to 15,000 km or 1 year. Severe stop-and-go dusty conditions warrant replacement towards the earlier threshold.",
+      },
+      {
+        question: "What hidden wear components should I budget for every 30,000 to 40,000 km?",
+        answer: "At 30,000 to 40,000 km, budget for front brake pad replacement (₹2,500–₹5,000), brake fluid flush, spark plugs (for petrol), cabin AC pollen filter, and wheel alignment with tire rotation.",
       },
     ],
     relatedSlugs: ['vehicle-mileage', 'monthly-vehicle-running-cost', 'fuel-cost'],
@@ -488,6 +556,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How much cement is required for 1,000 sq.ft RCC slab in India?',
         answer: 'For a standard 5-inch thick RCC roof slab using M20 grade concrete (1:1.5:3 mix), you need approximately 400 to 440 cement bags per 1,000 sq.ft of slab area.',
       },
+    
+      {
+        question: "What is the difference between OPC and PPC cement for residential construction?",
+        answer: "PPC (Portland Pozzolana Cement) produces lower heat of hydration, resists cracks, and is ideal for wall plastering, masonry, and foundation work. OPC 53 grade provides higher early strength, making it preferable for RCC columns, beams, and slabs where rapid formwork removal is needed.",
+      },
+      {
+        question: "Why is a dry-to-wet volume factor of 1.33 used in cement plaster calculations?",
+        answer: "Dry cement and sand contain micro-voids between particles. When water is mixed, voids collapse and the volume shrinks by approximately 30% to 33%. Therefore, 1.33 times the finished plaster volume is needed in raw dry materials.",
+      },
     ],
     relatedSlugs: ['concrete-calculator', 'brick-calculator', 'construction-cost', 'tile-calculator'],
     seo: {
@@ -524,6 +601,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'What is the standard concrete grade for residential roof slabs in India?',
         answer: 'M20 grade (1 part cement : 1.5 parts fine sand : 3 parts 20mm coarse aggregate) is the standard minimum grade specified by IS 456 for residential reinforced cement concrete (RCC) roof slabs and columns.',
+      },
+    
+      {
+        question: "What are the standard mix ratios for M15, M20, and M25 concrete in India?",
+        answer: "As per IS 456 standards: M15 is 1:2:4 (Cement : Sand : Aggregate), used for PCC and non-structural levelling. M20 is 1:1.5:3, the minimum recommended grade for residential RCC slabs and beams. M25 is 1:1:2, recommended for heavy-load columns and footings.",
+      },
+      {
+        question: "How many days must an RCC slab be cured with water in Indian weather?",
+        answer: "Under Indian Standard IS 456, RCC slabs using OPC cement must be water-cured for a minimum of 7 days, and 10 to 14 days when using PPC or blended cements, especially during hot, dry summer weather to prevent shrinkage cracks.",
       },
     ],
     relatedSlugs: ['cement-calculator', 'construction-cost', 'brick-calculator'],
@@ -562,6 +648,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How do AAC blocks compare with traditional red clay bricks in cost?',
         answer: 'AAC blocks (600 × 200 × 150 mm) are 50% lighter, require 75% less joint mortar, and reduce structural dead weight. While individual blocks seem pricier, overall finished wall cost is 15-20% lower than red clay bricks.',
       },
+    
+      {
+        question: "How many red bricks are needed for a 9-inch wall versus a 4.5-inch partition wall per 100 sq.ft?",
+        answer: "For standard Indian red clay bricks (190 x 90 x 90 mm with 10mm mortar): a 9-inch load-bearing wall requires approximately 950 to 1,000 bricks per 100 sq.ft. A 4.5-inch partition wall requires approximately 480 to 500 bricks per 100 sq.ft.",
+      },
+      {
+        question: "Are AAC blocks cheaper than red bricks for multi-storey residential construction?",
+        answer: "Yes. While individual AAC blocks cost more, their larger size (600 x 200 x 150 mm) reduces joint mortar consumption by 70%, cuts construction labour time by half, and significantly reduces structural dead load on concrete columns.",
+      },
     ],
     relatedSlugs: ['cement-calculator', 'concrete-calculator', 'construction-cost'],
     seo: {
@@ -598,6 +693,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Why should I always add 10% extra tiles for wastage?',
         answer: 'Diagonal cuts around door frames, pipes, room borders, and accidental chipping during transportation require extra stock. If you run short, finding the identical color shade and manufacturing batch is often impossible.',
+      },
+    
+      {
+        question: "How much tile wastage should I order for square rooms versus diagonal patterns?",
+        answer: "For straight standard grid patterns in square or rectangular rooms, add 5% to 8% extra for cutting wastage. For diagonal layouts, herringbone patterns, or rooms with multiple offsets, add 10% to 15% extra.",
+      },
+      {
+        question: "What is the difference between ceramic and vitrified floor tiles?",
+        answer: "Vitrified tiles are hydraulic-pressed, non-porous (water absorption < 0.05%), highly durable, and ideal for heavy-traffic living rooms and hallways. Ceramic tiles have higher porosity (3-10%) and are best suited for indoor bathroom and kitchen walls.",
       },
     ],
     relatedSlugs: ['cement-calculator', 'paint-calculator', 'construction-cost'],
@@ -636,6 +740,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How many square feet does 1 litre of emulsion paint cover?',
         answer: 'On smooth putty-finished walls, 1 litre of premium acrylic emulsion covers approximately 240-260 sq.ft for 1 coat, and 120-140 sq.ft for 2 coats.',
       },
+    
+      {
+        question: "How many square feet does 1 litre of interior emulsion paint cover in India?",
+        answer: "One litre of quality interior acrylic emulsion covers approximately 120 to 140 sq.ft for a single coat, or 60 to 75 sq.ft for two coats on smooth, primed walls. Freshly plastered unprimed walls absorb more paint and reduce coverage.",
+      },
+      {
+        question: "Is applying wall putty and primer mandatory before painting fresh walls?",
+        answer: "Yes. Fresh cement plaster has high alkalinity and micro-porosity. Two coats of white cement-based wall putty followed by an acrylic primer seal moisture, level surface undulations, and prevent paint flaking or color patchiness.",
+      },
     ],
     relatedSlugs: ['tile-calculator', 'construction-cost', 'cement-calculator'],
     seo: {
@@ -673,6 +786,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'What is the average construction cost per sq.ft in India?',
         answer: 'Basic/economy construction costs around ₹1,450 to ₹1,650/sq.ft. Standard quality residential construction averages ₹1,800 to ₹2,100/sq.ft. High-end premium architectural construction ranges from ₹2,400 to ₹3,500+/sq.ft.',
       },
+    
+      {
+        question: "What is the average house construction cost per square foot in India in 2026?",
+        answer: "For standard residential construction (G+1), civil construction costs range from ₹1,650 to ₹1,950 per sq.ft for basic finish, ₹2,000 to ₹2,500 per sq.ft for premium finish (branded vitrified tiles, teakwood doors, branded sanitaryware), and ₹2,800+ per sq.ft for luxury specifications.",
+      },
+      {
+        question: "How is the total construction budget typically divided across building materials and labor?",
+        answer: "Typically: Steel and Cement account for 30–35%, Sand, Aggregate, Bricks and Stone for 15–18%, Finishing (tiles, paint, sanitaryware, electrical) for 25–28%, and Construction Labour for 22–25% of total civil cost.",
+      },
     ],
     relatedSlugs: ['cement-calculator', 'concrete-calculator', 'brick-calculator', 'jcb-fuel-cost'],
     seo: {
@@ -709,6 +831,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'What is the difference between Wet Hire and Dry Hire of earthmoving machines?',
         answer: 'In Wet Hire, the quoted hourly rate includes machine, operator, and diesel fuel. In Dry Hire, you only pay for the machine and operator, and you must supply your own diesel at the construction site.',
+      },
+    
+      {
+        question: "What is the typical hourly rental rate for a 20-ton heavy excavator in India?",
+        answer: "A 20-ton tracked excavator typically rents for ₹2,200 to ₹2,800 per hour on a wet lease (including diesel and operator). If contracted on a dry lease, rates are ₹1,200 to ₹1,600 per hour plus diesel (consuming 16–22 litres/hour under load).",
+      },
+      {
+        question: "What extra charges apply when hiring heavy earthmoving machinery for site work?",
+        answer: "Expect trailer mobilization/demobilization charges for transporting the excavator to and from the site (₹8,000 to ₹25,000 depending on distance), plus operator daily food allowance (₹300–₹500/day).",
       },
     ],
     relatedSlugs: ['jcb-fuel-cost', 'construction-cost'],
@@ -749,6 +880,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How do electricity tariff slabs work in India?',
         answer: 'Most state electricity boards use progressive telescopic slabs. For example, the first 100 units may cost ₹3.80/unit, units from 101-250 cost ₹5.80/unit, and units above 250 cost ₹7.60+/unit.',
       },
+    
+      {
+        question: "What are telescopic electricity slabs and how do they affect power bills in India?",
+        answer: "In telescopic billing (used by most state DISCOMs), units consumed within earlier brackets (e.g. 0–100 units) are charged at lower rates, while subsequent units (101–200, 201–500) are charged progressively higher. Crossing higher slab thresholds substantially increases your total bill.",
+      },
+      {
+        question: "How do I calculate the monthly running cost of any home electrical appliance?",
+        answer: "Multiply wattage by daily hours and divide by 1,000 to get daily kWh (units): (Watts × Hours) ÷ 1000. Multiply by 30 days and your DISCOM's average unit rate (e.g. ₹7.50/unit) to find total monthly electricity expense.",
+      },
     ],
     relatedSlugs: ['ac-electricity-cost', 'fan-electricity-cost', 'inverter-backup', 'solar-panel'],
     seo: {
@@ -785,6 +925,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Why does setting the AC to 24°C save significant money?',
         answer: 'Bureau of Energy Efficiency (BEE) data indicates that every 1°C increase in AC thermostat setting reduces compressor power consumption by 6%. Moving from 18°C to 24°C saves roughly 24% to 30% electricity.',
+      },
+    
+      {
+        question: "How much electricity does a 1.5 Ton 5-Star Inverter AC consume per hour in India?",
+        answer: "A 1.5 Ton 5-Star Inverter AC with an ISEER rating above 5.0 consumes roughly 0.75 to 0.95 units (kWh) per hour once the room reaches the set temperature (24°C). A 3-Star non-inverter AC consumes 1.4 to 1.6 units per hour under identical heat load.",
+      },
+      {
+        question: "Why does the Bureau of Energy Efficiency (BEE) recommend setting AC temperature to 24°C?",
+        answer: "Every 1°C increase in AC thermostat setting (e.g. from 18°C to 24°C) saves approximately 6% in compressor electricity consumption while maintaining comfortable human thermal conditions.",
       },
     ],
     relatedSlugs: ['electricity-cost', 'fan-electricity-cost', 'solar-panel'],
@@ -823,6 +972,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'Do BLDC fans run longer on home inverters?',
         answer: 'Yes! Because a BLDC fan consumes only 28W compared to 75W for an induction fan, your inverter battery backup duration for fans is more than doubled during power cuts.',
       },
+    
+      {
+        question: "How much money does a BLDC ceiling fan save compared to an ordinary induction fan per year?",
+        answer: "A standard induction ceiling fan consumes 75W, while a BLDC fan consumes only 28W at full speed. Running 14 hours daily at ₹7.50 per unit, a BLDC fan saves approximately ₹1,800 per year per fan, paying for itself in under two years.",
+      },
+      {
+        question: "Can I use an existing wall regulator switch with a remote-controlled BLDC fan?",
+        answer: "No. BLDC fans have internal microcontroller speed drivers. Your old wall resistance or electronic regulator should either be bypassed or kept at full step (step 5) to prevent voltage modulation that could damage the motor driver.",
+      },
     ],
     relatedSlugs: ['electricity-cost', 'ac-electricity-cost', 'inverter-backup'],
     seo: {
@@ -859,6 +1017,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Why should I never fully drain a lead-acid tubular battery?',
         answer: 'Draining lead-acid batteries below 20% charge causes deep sulfation on the lead plates, permanently destroying battery capacity and shortening lifespan.',
+      },
+    
+      {
+        question: "How long will a 150Ah 12V battery run basic household loads during a power cut?",
+        answer: "A 150Ah 12V battery stores 1,800 Watt-hours of energy. At 80% inverter conversion efficiency and 70% depth of discharge, it delivers ~1,000 Wh usable energy. Running 2 fans (150W) and 3 LED bulbs (30W) totaling 180W, it provides roughly 5.5 hours of uninterrupted backup.",
+      },
+      {
+        question: "What is the difference between a Tall Tubular battery and a Flat Plate inverter battery?",
+        answer: "Tall tubular batteries are designed for frequent, deep power cuts (common in rural and tier-2 Indian cities), offering a lifespan of 5 to 7 years with minimal water loss. Flat plate batteries are cheaper but last only 2.5 to 3.5 years under frequent discharges.",
       },
     ],
     relatedSlugs: ['electricity-cost', 'solar-panel', 'fan-electricity-cost'],
@@ -897,6 +1064,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'What is the PM Surya Ghar Muft Bijli Yojana subsidy for residential homes?',
         answer: 'Under the PM Surya Ghar scheme: 1 kW systems receive ₹30,000; 2 kW systems receive ₹60,000; and 3 kW or larger rooftop systems receive the maximum ceiling subsidy of ₹78,000.',
       },
+    
+      {
+        question: "What subsidy is provided under PM Surya Ghar Muft Bijli Yojana in 2026?",
+        answer: "Under the central PM Surya Ghar scheme, rooftop residential solar systems receive up to ₹30,000 for 1 kW systems, ₹60,000 for 2 kW systems, and a maximum of ₹78,000 for 3 kW and higher systems, credited directly to the homeowner's bank account.",
+      },
+      {
+        question: "How much rooftop area is required to install a 3 kW solar power system in India?",
+        answer: "Each 1 kW of solar capacity requires approximately 80 to 100 square feet of shadow-free rooftop area. A 3 kW setup with modern 540W mono-PERC panels requires approximately 250 to 300 square feet of south-facing roof space.",
+      },
     ],
     relatedSlugs: ['electricity-cost', 'inverter-backup', 'ac-electricity-cost'],
     seo: {
@@ -933,6 +1109,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'What is the Indian Standard per capita water consumption recommendation?',
         answer: 'Bureau of Indian Standards (IS 1172:1993) recommends 135 litres per head per day for communities with full flushing systems (drinking: 5L, cooking: 5L, bathing: 55L, flushing: 30L, washing clothes/utensils: 40L).',
+      },
+    
+      {
+        question: "What is the standard daily water requirement per person for Indian households?",
+        answer: "According to the Bureau of Indian Standards (BIS 1172), standard domestic water consumption is 135 litres per capita per day (LPCD) for residential buildings with full flushing systems. A family of 4 requires roughly 540 to 600 litres daily.",
+      },
+      {
+        question: "What should be the ratio between an underground sump and an overhead water tank?",
+        answer: "Best engineering practice recommends sizing the underground sump for 1.5 to 2 days of reserve water (approx 1,000 to 1,500 litres for a 4-person family) and the overhead tank for 1 day of supply (1,000 litres) to safeguard against municipal supply disruptions.",
       },
     ],
     relatedSlugs: ['construction-cost', 'electricity-cost'],
@@ -971,6 +1156,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How do I know if my LPG cylinder has a gas leak or high burn rate?',
         answer: 'A normal yellow-orange flame indicates incomplete combustion and wastes gas. A crisp blue flame indicates efficient combustion. Ensure stove burners are regularly descaled and free from food residue.',
       },
+    
+      {
+        question: "How many days should a 14.2 kg domestic LPG cylinder last for a 4-member family in India?",
+        answer: "For a typical 4-member Indian family preparing three cooked meals and daily tea, a standard 14.2 kg LPG cylinder lasts approximately 28 to 35 days. Using pressure cookers and covered lids extends cylinder life by 15% to 20%.",
+      },
+      {
+        question: "Is cooking with an induction cooktop cheaper than using domestic LPG in India?",
+        answer: "At non-subsidized LPG cylinder rates (₹850–₹950 per cylinder) and average electricity tariffs of ₹6.50 to ₹7.50 per unit, induction cooking costs roughly equal or 10% less than LPG per meal, because induction transfers 85% of heat directly to cookware versus 40–50% for gas flames.",
+      },
     ],
     relatedSlugs: ['electricity-cost', 'inverter-backup'],
     seo: {
@@ -1007,6 +1201,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'How much diesel does a 5 kVA vs 15 kVA generator consume per hour?',
         answer: 'At typical 70-75% electrical load: a 5 kVA silent portable generator burns ~1.2 to 1.4 L/hr, while a 15 kVA 3-phase generator burns ~3.2 to 3.6 L/hr.',
+      },
+    
+      {
+        question: "How much diesel does a 5 kVA and 10 kVA generator consume per hour in India?",
+        answer: "A 5 kVA diesel generator running at 75% load consumes approximately 1.2 to 1.5 litres of diesel per hour. A 10 kVA DG set consumes approximately 2.4 to 2.8 litres per hour under standard electrical loads.",
+      },
+      {
+        question: "Can I run a 1.5 Ton AC on a 5 kVA residential diesel generator?",
+        answer: "Yes. A 1.5 Ton Inverter AC draws roughly 1,500W to 1,800W during startup. A 5 kVA generator (supplying ~4,000W running power) comfortably handles one 1.5 Ton AC alongside basic lighting and refrigeration loads.",
       },
     ],
     relatedSlugs: ['electricity-cost', 'inverter-backup', 'jcb-fuel-cost'],
@@ -1109,6 +1312,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'Why is monthly in-hand salary significantly lower than CTC ÷ 12?',
         answer: 'Cost to Company (CTC) includes non-cash benefits: Employer PF contribution (12% of basic), gratuity provision (~4.81% of basic), health insurance premiums, performance bonus, and tax deductions (TDS).',
       },
+    
+      {
+        question: "How is salary hike percentage calculated on Fixed Base CTC vs Total CTC?",
+        answer: "Always evaluate hike percentage on your Fixed Gross component rather than inflated Total CTC. Many corporate offers inflate Total CTC by adding joining bonuses, variable performance incentives (which are not guaranteed), and employer EPF/gratuity contributions.",
+      },
+      {
+        question: "What is the statutory gratuity formula and when does an employee qualify in India?",
+        answer: "Under the Payment of Gratuity Act 1972, gratuity is payable after completing 5 continuous years of service: Gratuity = (15 × Last Drawn Basic Salary × Tenured Years) ÷ 26.",
+      },
     ],
     relatedSlugs: ['in-hand-salary', 'emi-calculator', 'sip-calculator', 'experience-calculator'],
     seo: {
@@ -1145,6 +1357,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Is salary up to ₹7.75 Lakhs completely tax-free under the New Tax Regime?',
         answer: 'Yes! With the enhanced ₹75,000 standard deduction and Section 87A rebate, any salaried professional earning up to ₹7.75 Lakhs pays zero income tax.',
+      },
+    
+      {
+        question: "What is the key difference between New Tax Regime (115BAC) and Old Tax Regime for FY 2025-26?",
+        answer: "The New Tax Regime offers lower slab tax rates and a standard deduction of ₹75,000 with a tax rebate up to ₹7 Lakhs taxable income (meaning zero tax up to ₹7.75 Lakhs for salaried individuals), but disallows deductions under 80C, 80D, and HRA. The Old Regime is beneficial only if you have large home loan interest and 80C/80D deductions exceeding ₹3.5 Lakhs.",
+      },
+      {
+        question: "What mandatory deductions reduce CTC to actual in-hand take-home salary in India?",
+        answer: "The primary statutory deductions are: Employee Provident Fund (EPF - 12% of Basic), Professional Tax (₹200/month in most states), and Tax Deducted at Source (TDS/Income Tax).",
       },
     ],
     relatedSlugs: ['salary-hike', 'emi-calculator', 'sip-calculator'],
@@ -1183,6 +1404,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How do extra principal prepayments reduce home loan tenure?',
         answer: 'Paying just 1 extra EMI every year or increasing your EMI by 5% annually can reduce a 20-year home loan by over 4 to 5 years, saving lakhs in interest.',
       },
+    
+      {
+        question: "What is the difference between reducing balance interest and flat rate loan interest?",
+        answer: "In reducing balance EMI, interest is calculated only on the remaining unpaid loan principal each month, meaning your interest portion decreases over time. In flat interest rates, interest is calculated on the original borrowed principal for the entire tenure, making a 7% flat rate equivalent to an 11%–12% reducing rate.",
+      },
+      {
+        question: "Does RBI permit pre-payment penalties on home loans for individual borrowers?",
+        answer: "Under Reserve Bank of India (RBI) regulations, banks and NBFCs cannot charge pre-payment or foreclosure penalties on floating-rate home loans taken by individual borrowers.",
+      },
     ],
     relatedSlugs: ['in-hand-salary', 'sip-calculator', 'salary-hike'],
     seo: {
@@ -1219,6 +1449,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'What is the formula to calculate reverse / inclusive GST from total amount?',
         answer: 'To remove GST from an inclusive price: Base Price = Total Amount ÷ (1 + GST_Rate / 100). For example, ₹1,180 at 18% GST gives Base = ₹1,180 ÷ 1.18 = ₹1,000 (GST is ₹180).',
+      },
+    
+      {
+        question: "How do I calculate GST when the price already includes tax (GST Inclusive)?",
+        answer: "Use the formula: Base Price = Total Amount ÷ (1 + (GST% ÷ 100)) and GST Amount = Total Amount - Base Price. For example, for ₹1,180 with 18% GST: Base is 1180 ÷ 1.18 = ₹1,000, and GST is ₹180.",
+      },
+      {
+        question: "What is the split between CGST and SGST for intra-state supply of goods in India?",
+        answer: "For sales within the same state (intra-state), GST is split equally between the Central Government (CGST) and State Government (SGST). For example, an 18% GST item carries 9% CGST and 9% SGST. For inter-state sales, full 18% IGST is charged.",
       },
     ],
     relatedSlugs: ['in-hand-salary', 'emi-calculator'],
@@ -1257,6 +1496,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'What is a realistic long-term return rate for equity mutual funds in India?',
         answer: 'Over 10 to 15 year rolling periods, broad Indian equity indices (Nifty 50, BSE Sensex) and diversified flexicap funds have historically delivered 12% to 14% annualized returns (CAGR).',
       },
+    
+      {
+        question: "What is the impact of an annual 10% Step-Up on a monthly Systematic Investment Plan (SIP)?",
+        answer: "Increasing your monthly SIP amount by 10% each year (in line with annual salary increments) can almost double your final wealth accumulation over a 15-to-20-year horizon compared to a fixed static SIP, due to compounding on growing contributions.",
+      },
+      {
+        question: "How are equity mutual fund long-term capital gains (LTCG) taxed in India?",
+        answer: "For equity mutual funds held longer than 12 months, long-term capital gains exceeding ₹1.25 Lakh in a financial year are taxed at 12.5% without indexation benefits (as revised in Budget 2024).",
+      },
     ],
     relatedSlugs: ['in-hand-salary', 'emi-calculator', 'salary-hike'],
     seo: {
@@ -1293,6 +1541,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'How do background verification (BGV) companies calculate total experience?',
         answer: 'BGV companies cross-reference your Provident Fund (UAN / EPFO) service history dates against relieving and service letters.',
+      },
+    
+      {
+        question: "How are employment gap periods calculated in total professional work experience?",
+        answer: "Total relevant work experience sums the exact days between joining and relieving dates for each employment stint, subtracting any intermediate gap months where you were unemployed or on unpaid sabbaticals.",
+      },
+      {
+        question: "Does probation period count toward total work experience and gratuity eligibility?",
+        answer: "Yes. In Indian labour law and corporate HR policy, the probation period counts fully toward total employment tenure, annual increment appraisals, and statutory gratuity calculation.",
       },
     ],
     relatedSlugs: ['salary-hike', 'in-hand-salary'],
@@ -1333,6 +1590,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How many square feet is exactly 1 cent in Kerala and Tamil Nadu?',
         answer: '1 Cent is legally and mathematically defined as 435.6 square feet (40.4686 square metres). There are exactly 100 cents in 1 acre (43,560 sq.ft).',
       },
+    
+      {
+        question: "How many square feet are in 1 Cent of land in Kerala and Tamil Nadu?",
+        answer: "Exactly 435.6 square feet. Therefore, 10 Cents equal 4,356 sq.ft, and 100 Cents equal 1 Acre (43,560 sq.ft). This conversion is standard across revenue land records in Kerala, Tamil Nadu, and coastal Karnataka.",
+      },
+      {
+        question: "How does 1 Cent convert into Guntha and Ground in Indian property measurements?",
+        answer: "1 Cent = 0.4046 Guntha (where 1 Guntha = 1,089 sq.ft, standard in Maharashtra and Karnataka). 1 Ground (standard in Chennai real estate) equals 2,400 sq.ft, meaning 1 Ground is approximately equal to 5.51 Cents.",
+      },
     ],
     relatedSlugs: ['acre-converter', 'carpet-area', 'construction-cost'],
     seo: {
@@ -1369,6 +1635,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'How many cents and gunthas are in 1 acre?',
         answer: '1 Acre equals exactly 100 Cents in South India, and exactly 40 Gunthas in Maharashtra, Karnataka, and Telangana.',
+      },
+    
+      {
+        question: "How many Bighas are in 1 Acre in Uttar Pradesh, Bihar, and Rajasthan?",
+        answer: "Unlike Cents (which are fixed nationwide at 435.6 sq.ft), Bigha sizes vary by state. In Uttar Pradesh and Bihar, 1 Pucca Bigha is typically 27,225 sq.ft (meaning 1 Acre ≈ 1.6 Bighas). In Rajasthan, 1 Bigha is approximately 17,424 sq.ft (1 Acre ≈ 2.5 Bighas).",
+      },
+      {
+        question: "What is the exact square yard and square meter equivalent of 1 Acre?",
+        answer: "1 Acre = 4,840 square yards (gaj) = 4,046.86 square meters = 43,560 square feet = 100 Cents = 40.46 Gunthas.",
       },
     ],
     relatedSlugs: ['cent-to-sqft', 'carpet-area', 'construction-cost'],
@@ -1407,6 +1682,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'What is RERA Carpet Area definition in India?',
         answer: 'Under the Real Estate (Regulation and Development) Act (RERA), Carpet Area is defined as the net usable floor area of an apartment, excluding the area covered by external walls, areas under services shafts, and common terraces, but including the area covered by internal partition walls.',
       },
+    
+      {
+        question: "What is RERA Carpet Area and what is strictly included and excluded?",
+        answer: "Under RERA (Real Estate Regulatory Authority), Carpet Area is the net usable floor area inside an apartment's inner walls, including internal kitchen and bathroom areas. It strictly excludes external walls, common service shafts, balconies, verandahs, and exclusive terraces.",
+      },
+      {
+        question: "What is super built-up area and what is a normal loading factor in Indian apartments?",
+        answer: "Super Built-Up Area includes the carpet area plus a proportional share of common building areas (lobbies, staircases, lift shafts, clubhouse). The loading factor is typically 25% to 35%: Super Built-Up Area = Carpet Area × (1 + Loading%).",
+      },
     ],
     relatedSlugs: ['cent-to-sqft', 'construction-cost', 'acre-converter'],
     seo: {
@@ -1443,6 +1727,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Why is multiplying average length by average width incorrect for irregular plots?',
         answer: 'The common "average method" [(A+C)/2 × (B+D)/2] always overestimates the actual area for non-rectangular plots, causing buyers to overpay. Triangulation with a diagonal measurement is mathematically exact.',
+      },
+    
+      {
+        question: "How do you calculate the area of an irregular 4-sided (quadrilateral) land plot?",
+        answer: "Divide the quadrilateral into two triangles by measuring the diagonal line between two opposite corners. Measure all four boundaries (a, b, c, d) and the diagonal (e). Apply Heron's Formula Area = √(s(s-a)(s-b)(s-c)) to both triangles and sum their areas.",
+      },
+      {
+        question: "How much buffer should be subtracted for road widening or municipal setbacks in Indian plots?",
+        answer: "Most local municipal corporation master plans require front building setbacks of 3 to 5 meters from the road centerline. Verify your local development authority setback rules before drawing building footprint plans.",
       },
     ],
     relatedSlugs: ['cent-to-sqft', 'acre-converter', 'construction-cost'],
@@ -1483,6 +1776,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'Why do Indian government job portals require photos under 50KB?',
         answer: 'Millions of candidates apply simultaneously to exams like SSC, UPSC, and Railway boards. Low file size limits ensure national servers do not crash under storage load.',
       },
+    
+      {
+        question: "What are the exact photo specifications for SSC and UPSC online application forms?",
+        answer: "SSC and UPSC forms require a recent passport photo sized between 20KB and 50KB in JPEG format, with dimensions of 3.5 cm width by 4.5 cm height (approx 138 x 177 pixels at 100 DPI) against a clean white or light grey background.",
+      },
+      {
+        question: "Is your photo compressor safe for sensitive government identity documents?",
+        answer: "Yes. All compression and resizing on IndiaTools is processed 100% locally inside your web browser via HTML5 Canvas. Your photo is never uploaded to any cloud server, ensuring complete identity privacy.",
+      },
     ],
     relatedSlugs: ['100kb-photo', 'signature-resizer', 'exact-kb-compressor', 'passport-photo'],
     seo: {
@@ -1519,6 +1821,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Will compressing my marksheet to 100KB make the text unreadable?',
         answer: 'Our algorithm optimizes color palette quantisation while keeping text line contrast sharp, ensuring examination roll numbers and grades remain clearly readable.',
+      },
+    
+      {
+        question: "Which competitive exams in India require a photo file size between 50KB and 100KB?",
+        answer: "Exams like IBPS PO/Clerk, State Public Service Commissions (MPSC, KPSC, TNPSC), and several state university entrance portals require photographs compressed strictly under 100KB with minimum 200 DPI resolution.",
+      },
+      {
+        question: "How can I reduce image size to under 100KB without making my face blurry?",
+        answer: "Ensure the source image is captured in good lighting. Resize the pixel dimensions to 600 x 600 pixels first, then apply progressive JPEG compression at 80%–85% quality to reduce file size below 100KB while preserving facial clarity.",
       },
     ],
     relatedSlugs: ['50kb-photo', 'exact-kb-compressor', 'image-to-pdf'],
@@ -1557,6 +1868,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How does exact KB compression work in the browser?',
         answer: 'Our algorithm performs iterative binary search across compression quality parameters and pixel densities until the exported byte length matches your requested target file size.',
       },
+    
+      {
+        question: "How does the exact KB compressor achieve a target file size without multiple manual attempts?",
+        answer: "The tool utilizes a binary search quantization algorithm running inside your browser. It tests JPEG compression quality matrices iteratively until the final exported Blob matches your requested target KB threshold within a 1% tolerance.",
+      },
+      {
+        question: "Why does converting a PNG file to JPEG reduce file size so dramatically?",
+        answer: "PNG is a lossless compression format that stores every pixel color value exactly, making it heavy for photographic images. JPEG uses lossy discrete cosine transform compression that discards imperceptible high-frequency color variations, shrinking files by 70% to 90%.",
+      },
     ],
     relatedSlugs: ['50kb-photo', 'signature-resizer', 'passport-photo'],
     seo: {
@@ -1593,6 +1913,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'What is the standard signature size for UPSC, SSC, and Banking exams?',
         answer: 'Most national exam portals mandate signature files to be between 10KB and 20KB, in JPEG format, with dimensions around 140 × 60 pixels, signed with black or blue ink on clean white paper.',
+      },
+    
+      {
+        question: "What are the standard signature dimensions and file sizes for Indian competitive exam portals?",
+        answer: "Most portals (UPSC, SSC, NTA, IBPS) require candidate signatures in black ink on white paper, sized between 10KB and 20KB, with rectangular dimensions of 3.5 cm width by 1.5 cm height (approx 140 x 60 pixels).",
+      },
+      {
+        question: "Why do government exam portals reject signatures with shadows or dark borders?",
+        answer: "Automated optical inspection systems at examination centers crop and match signatures against hall tickets. Shadows, yellow lighting, or textured background paper fail automated OCR threshold checks, leading to application rejection.",
       },
     ],
     relatedSlugs: ['50kb-photo', 'exact-kb-compressor', 'passport-photo'],
@@ -1631,6 +1960,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'What are official Indian passport photo dimensions and rules?',
         answer: 'The Ministry of External Affairs mandates 35mm × 45mm (3.5cm × 4.5cm) size. The face should be centered, occupying 70% to 80% of the photo, with a plain white or off-white background.',
       },
+    
+      {
+        question: "What is the official photograph size for Indian Passport Renewal under Ministry of External Affairs rules?",
+        answer: "The Ministry of External Affairs (Passport Seva) requires photos sized 2 x 2 inches (51 x 51 mm) with a plain white background, full frontal face view, eyes open, neutral expression, and facial coverage occupying 70% to 80% of the photograph height.",
+      },
+      {
+        question: "Are spectacles and headgear allowed in Indian passport photos?",
+        answer: "Spectacles with tinted lenses or glare reflections are strictly prohibited. Daily prescription glasses with clear transparent lenses are acceptable if frames do not obscure the eyes. Religious headgear is permitted provided the entire face from chin to forehead is visible.",
+      },
     ],
     relatedSlugs: ['50kb-photo', 'signature-resizer', 'exact-kb-compressor'],
     seo: {
@@ -1667,6 +2005,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Are my confidential documents (Aadhaar, PAN) safe when using this tool?',
         answer: 'Yes, 100% safe. The PDF is assembled inside your browser’s Javascript memory using the HTML5 Canvas API. The file is never uploaded to any cloud server or database.',
+      },
+    
+      {
+        question: "How do I combine multiple Aadhaar, PAN, and certificate images into a single A4 PDF under 2MB?",
+        answer: "Add your scanned images in order. Select A4 portrait page sizing. The tool automatically rescales images to fit standard A4 margins and compresses embedded JPEG streams to produce a crisp multi-page PDF suitable for government portal uploads.",
+      },
+      {
+        question: "Can I rearrange the order of pages before generating the PDF?",
+        answer: "Yes. Drag and drop or use the page positioning controls to arrange front and back sides of identity cards in sequence before compiling the PDF.",
       },
     ],
     relatedSlugs: ['50kb-photo', '100kb-photo', 'exact-kb-compressor'],
@@ -1705,6 +2052,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'How are toll expenses estimated on Indian highways?',
         answer: 'Tolls average between ₹1.40 and ₹2.20 per kilometer on 4-lane and 6-lane NHAI expressways. The tool allows exact manual toll inputs or standard highway rule-of-thumb projections.',
       },
+    
+      {
+        question: "How should I calculate highway FASTag toll budgets across Indian National Highways?",
+        answer: "On average, four-wheeler toll rates on 4-lane and 6-lane NHAI highways range from ₹1.80 to ₹2.60 per kilometer. Budgeting approximately ₹2.20 per km of highway travel provides an accurate FASTag toll estimate for most national corridors.",
+      },
+      {
+        question: "How much buffer should be added for mountain or ghat road trip travel time in India?",
+        answer: "In ghat and winding hill sections, average vehicle speeds drop from 75 km/h to 30–40 km/h. Plan travel times based on 35 km/h rather than highway GPS estimates and add 30 minutes for every 50 km of mountain ascent.",
+      },
     ],
     relatedSlugs: ['fuel-cost', 'trip-cost', 'vehicle-mileage'],
     seo: {
@@ -1742,6 +2098,15 @@ export const TOOLS: ToolDefinition[] = [
         question: 'What is the statutory overtime rate in India?',
         answer: 'Under Section 59 of the Indian Factories Act 1948, overtime must be paid at double the ordinary rate of wages (2.0x).',
       },
+    
+      {
+        question: "How is overtime pay calculated under the Indian Factories Act?",
+        answer: "Under the Factories Act 1948, any worker who works more than 9 hours in any day or more than 48 hours in any week is entitled to overtime wages at twice the ordinary rate of daily wages (Overtime Rate = 2 × Standard Hourly Wage).",
+      },
+      {
+        question: "How do you calculate the per-day wage for monthly salaried workers in India?",
+        answer: "Standard industrial practice calculates daily wage by dividing gross monthly salary by 26 working days (excluding 4 weekly off-days): Daily Wage = Monthly Salary ÷ 26.",
+      },
     ],
     relatedSlugs: ['salary-hike', 'in-hand-salary', 'experience-calculator'],
     seo: {
@@ -1778,6 +2143,15 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'How is a 20% discount calculated on ₹1,500?',
         answer: '20% of 1500 = (1500 × 20) ÷ 100 = ₹300. The discounted price is 1500 - 300 = ₹1,200.',
+      },
+    
+      {
+        question: "What is the difference between percentage change and percentage point change?",
+        answer: "If an interest rate increases from 5% to 6%, it has increased by 1 percentage point, but the percentage increase is 20% ((6 - 5) ÷ 5 × 100). Confusing the two is a frequent error in finance, taxation, and business reporting.",
+      },
+      {
+        question: "How do I calculate the original price before a festive percentage discount was applied?",
+        answer: "To reverse a discount: Original Price = Discounted Price ÷ (1 - (Discount% ÷ 100)). For example, an item bought at ₹800 after a 20% discount had an original MRP of 800 ÷ 0.80 = ₹1,000.",
       },
     ],
     relatedSlugs: ['gst-calculator', 'emi-calculator', 'sip-calculator'],
@@ -2036,7 +2410,12 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Which formats are supported for editing and conversion?',
         answer: 'You can open JPG, PNG, WebP, AVIF, and BMP images, and export clean files in JPG, PNG, or WebP formats.'
-      }
+      },
+    
+      {
+        question: "What is the difference between image aspect ratio resizing and image cropping?",
+        answer: "Resizing changes the pixel dimensions of the entire image (which can cause stretching if aspect ratio is unlocked). Cropping cuts off unwanted outer edges while keeping remaining pixels at their original 1:1 natural proportions.",
+      },
     ],
     relatedSlugs: ['50kb-photo', 'exact-kb-compressor', 'clearcut-ai', 'qr-code-generator'],
     seo: {
@@ -2084,7 +2463,12 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'Can I replace the removed background with white or custom colors?',
         answer: 'Yes! You can export a pure transparent PNG or select from studio background color presets (white, black, navy, studio blue, or any custom hex color).'
-      }
+      },
+    
+      {
+        question: "How does in-browser AI background removal work without uploading photos to a server?",
+        answer: "The tool runs a lightweight deep learning segmentation model (RMBG / ONNX) directly inside your web browser using WebAssembly (WASM) and WebGL/WebGPU acceleration. Pixels are segmented locally on your GPU/CPU with 100% data privacy.",
+      },
     ],
     relatedSlugs: ['pixelcraft', '50kb-photo', 'signature-resizer', 'passport-photo'],
     seo: {
