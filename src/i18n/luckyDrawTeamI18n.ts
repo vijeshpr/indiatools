@@ -260,6 +260,11 @@ export interface LuckyToolContent {
     noWinnersYet: string
     clearHistory: string
     tooManyWarning: string
+    gameOver?: string
+    lastRemaining?: string
+    finalRoundComplete?: string
+    resetRoster?: string
+    viewResults?: string
   }
   teamLabels: {
     splitBy: string
@@ -325,7 +330,12 @@ export const LUCKY_TOOL_I18N: Record<LuckyLangCode, LuckyToolContent> = {
       "winnerHistory": "Draw History",
       "noWinnersYet": "No winners drawn yet in this session.",
       "clearHistory": "Clear History",
-      "tooManyWarning": "When list exceeds 40 names, wheel labels are optimized for clarity. Full roster appears beside the wheel."
+      "tooManyWarning": "When list exceeds 40 names, wheel labels are optimized for clarity. Full roster appears beside the wheel.",
+      "gameOver": "GAME OVER",
+      "lastRemaining": "Final Remaining Participant",
+      "finalRoundComplete": "Final Round Complete!",
+      "resetRoster": "Play Again (Reset Roster)",
+      "viewResults": "Finish Game & View Standings"
     },
     "teamLabels": {
       "splitBy": "Split Method",
@@ -406,7 +416,12 @@ export const LUCKY_TOOL_I18N: Record<LuckyLangCode, LuckyToolContent> = {
       "winnerHistory": "विजेता इतिहास",
       "noWinnersYet": "अभी तक कोई विजेता नहीं चुना गया है।",
       "clearHistory": "इतिहास मिटाएं",
-      "tooManyWarning": "40 से अधिक नाम होने पर पहिए पर नाम संक्षिप्त दिखते हैं। पूरी सूची बगल में उपलब्ध है।"
+      "tooManyWarning": "40 से अधिक नाम होने पर पहिए पर नाम संक्षिप्त दिखते हैं। पूरी सूची बगल में उपलब्ध है।",
+      "gameOver": "गेम ओवर (GAME OVER)",
+      "lastRemaining": "अंतिम शेष प्रतिभागी",
+      "finalRoundComplete": "अंतिम राउंड समाप्त!",
+      "resetRoster": "फिर से खेलें (रोस्टर रीसेट करें)",
+      "viewResults": "गेम समाप्त करें और परिणाम देखें"
     },
     "teamLabels": {
       "splitBy": "विभाजन का तरीका",
@@ -479,7 +494,12 @@ export const LUCKY_TOOL_I18N: Record<LuckyLangCode, LuckyToolContent> = {
       "winnerHistory": "വിജയികളുടെ വിവരങ്ങൾ",
       "noWinnersYet": "ഇതുവരെ ആരും തിരഞ്ഞെടുക്കപ്പെട്ടിട്ടില്ല.",
       "clearHistory": "ചരിത്രം മായ്ക്കുക",
-      "tooManyWarning": "40ൽ കൂടുതൽ ആളുകളുണ്ടെങ്കിൽ വീലിൽ പേരുകൾ ചുരുക്കി കാണിക്കും."
+      "tooManyWarning": "40ൽ കൂടുതൽ ആളുകളുണ്ടെങ്കിൽ വീലിൽ പേരുകൾ ചുരുക്കി കാണിക്കും.",
+      "gameOver": "ഗെയിം ഓവർ (GAME OVER)",
+      "lastRemaining": "അവസാനം അവശേഷിച്ചയാൾ",
+      "finalRoundComplete": "അവസാന റൗണ്ട് പൂർത്തിയായി!",
+      "resetRoster": "വീണ്ടും കളിക്കുക (ലിസ്റ്റ് പുനഃസ്ഥാപിക്കുക)",
+      "viewResults": "ഗെയിം പൂർത്തിയാക്കി ഫലം കാണുക"
     },
     "teamLabels": {
       "splitBy": "ടീം തിരിക്കുന്ന വിധം",

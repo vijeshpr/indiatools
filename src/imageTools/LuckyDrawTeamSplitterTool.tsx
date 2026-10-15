@@ -169,6 +169,50 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
     }
   }, [rememberList, rawText, soundEnabled])
 
+  // Saved roster snapshot for resetting the game after elimination
+  const savedRosterRef = useRef<string>(rawText)
+
+  // Backup roster whenever user updates names, but only if no winners have been drawn yet
+  useEffect(() => {
+    if (winnerHistory.length === 0 && rawText.trim().length > 0) {
+      savedRosterRef.current = rawText
+    }
+  }, [rawText, winnerHistory.length])
+
+  // Game Over Condition: When removeWinnerOnDraw is active and only 1 participant remains after previous draws
+  const isGameOver = useMemo(() => {
+    return Boolean(
+      removeWinnerOnDraw &&
+      winnerHistory.length > 0 &&
+      participants.length <= 1
+    )
+  }, [removeWinnerOnDraw, winnerHistory.length, participants.length])
+
+  // Identify the sole remaining participant when isGameOver or when participants.length === 1
+  const finalParticipant = useMemo(() => {
+    if (participants.length === 1) return participants[0]
+    return null
+  }, [participants])
+
+  // When drawing between the last 2 people, identify the other person who will remain
+  const otherRemainingParticipant = useMemo(() => {
+    if (participants.length === 2 && activeWinner) {
+      const winnerIdx = participants.findIndex(
+        p => p.trim().toLowerCase() === activeWinner.trim().toLowerCase()
+      )
+      if (winnerIdx !== -1) {
+        const otherIdx = winnerIdx === 0 ? 1 : 0
+        return participants[otherIdx]
+      }
+    }
+    return null
+  }, [participants, activeWinner])
+
+  // Is this the penultimate draw (drawing between 2 remaining people with remove-winner active)?
+  const isPenultimateDraw = Boolean(
+    removeWinnerOnDraw && participants.length === 2 && activeWinner
+  )
+
   // Audio synthesizer using Web Audio API
   const playClickSound = useCallback(() => {
     if (!soundEnabled) return
@@ -283,7 +327,7 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
       ctx.moveTo(0, 0)
       ctx.arc(0, 0, radius, startAngle, endAngle)
       ctx.closePath()
-      ctx.fillStyle = color
+      ctx.fillStyle = count === 1 && isGameOver ? '#F59E0B' : color
       ctx.fill()
 
       // Segment Border
@@ -311,7 +355,9 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
       ctx.shadowBlur = 4
 
       let name = participants[i]
-      if (count > 30 && name.length > 14) {
+      if (count === 1 && isGameOver) {
+        name = `🏆 ${name} (Final)`
+      } else if (count > 30 && name.length > 14) {
         name = name.substring(0, 12) + '…'
       } else if (name.length > 20) {
         name = name.substring(0, 18) + '…'
@@ -326,7 +372,7 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
     // Outer Ring
     ctx.beginPath()
     ctx.arc(center, center, radius, 0, Math.PI * 2)
-    ctx.strokeStyle = '#0F172A'
+    ctx.strokeStyle = isGameOver ? '#F59E0B' : '#0F172A'
     ctx.lineWidth = 8
     ctx.stroke()
 
@@ -335,16 +381,16 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
     ctx.arc(center, center, 36, 0, Math.PI * 2)
     ctx.fillStyle = '#0F172A'
     ctx.fill()
-    ctx.strokeStyle = '#8B5CF6'
+    ctx.strokeStyle = isGameOver ? '#F59E0B' : '#8B5CF6'
     ctx.lineWidth = 4
     ctx.stroke()
 
     // Inner Center Dot
     ctx.beginPath()
     ctx.arc(center, center, 14, 0, Math.PI * 2)
-    ctx.fillStyle = '#C084FC'
+    ctx.fillStyle = isGameOver ? '#FDE68A' : '#C084FC'
     ctx.fill()
-  }, [participants])
+  }, [participants, isGameOver])
 
   // Redraw when participants or rotation change
   useEffect(() => {
@@ -354,6 +400,26 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
   // Handle Wheel Spin Action
   const handleSpinWheel = () => {
     if (isSpinning || participants.length === 0) return
+
+    // Guard: When remove winner is enabled, do NOT spin when only 1 or 0 participants remain
+    if (removeWinnerOnDraw && participants.length <= 1) {
+      if (winnerHistory.length > 0) {
+        showToast(
+          activeLocale === 'ml'
+            ? 'ഗെയിം ഓവർ! എല്ലാ നറുക്കെടുപ്പുകളും പൂർത്തിയായി.'
+            : 'Game Over! All participants have been drawn.',
+          'info'
+        )
+      } else {
+        showToast(
+          activeLocale === 'ml'
+            ? 'വിജയിയെ ഒഴിവാക്കി കറക്കാൻ കുറഞ്ഞത് 2 പേരുകൾ ചേർക്കുക.'
+            : 'Add at least 2 participants for Lucky Draw with winner removal.',
+          'info'
+        )
+      }
+      return
+    }
 
     const spinResult = calculateWheelSpin(participants, currentWheelRotation, 6)
     if (!spinResult) return
@@ -496,6 +562,40 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
       showToast(`${activeWinner} removed from wheel`, 'info')
     }
     setActiveWinner(null)
+  }
+
+  // Reset roster to the initial participant list before removals started
+  const handleResetRoster = () => {
+    const fallbackText = SAMPLE_PRESETS.cricket_squad.participants.join('\n')
+    const textToRestore = savedRosterRef.current.trim().length > 0 ? savedRosterRef.current : fallbackText
+    setRawText(textToRestore)
+    setWinnerHistory([])
+    setActiveWinner(null)
+    setShowWinnerModal(false)
+    showToast(
+      activeLocale === 'ml'
+        ? 'ലിസ്റ്റ് പുനഃസ്ഥാപിച്ചു! പുതിയ കളി തുടങ്ങാം.'
+        : 'Roster reset! Ready for a new lucky draw.',
+      'success'
+    )
+  }
+
+  // Copy full Game Over results to clipboard
+  const handleCopyGameResults = async () => {
+    let text = `🏆 IndiaTools Lucky Draw Results\n\n`
+    winnerHistory.forEach(w => {
+      text += `Round #${w.spinNumber}: ${w.name} (${w.timeFormatted})\n`
+    })
+    if (participants.length === 1) {
+      text += `🏆 Final Remaining Participant: ${participants[0]}\n`
+    }
+    text += `\nDraw completed with IndiaTools: https://indiatools-rho.vercel.app${canonicalPath}`
+    try {
+      await navigator.clipboard.writeText(text)
+      showToast('Game results copied to clipboard!', 'success')
+    } catch {
+      showToast('Could not copy results', 'info')
+    }
   }
 
   // Participant Management Handlers
@@ -963,6 +1063,51 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
             {activeMode === 'wheel' && (
               <div className="space-y-6">
                 <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 relative flex flex-col items-center">
+                  {/* Game Over Banner when only 1 participant remains in elimination mode */}
+                  {isGameOver && (
+                    <div className="w-full mb-6 p-5 rounded-2xl bg-gradient-to-r from-amber-950/80 via-purple-950/70 to-slate-900 border-2 border-amber-500/60 text-center shadow-2xl relative overflow-hidden">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-black tracking-wider uppercase mb-2 border border-amber-500/30">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{t.wheelLabels.gameOver || 'GAME OVER'} • ALL DRAWS COMPLETE</span>
+                      </div>
+
+                      {finalParticipant && (
+                        <div className="my-2">
+                          <span className="text-[11px] text-slate-300 uppercase tracking-widest font-semibold block mb-0.5">
+                            {t.wheelLabels.lastRemaining || 'Final Remaining Participant'}
+                          </span>
+                          <div className="text-2xl sm:text-3xl font-black text-amber-400 drop-shadow-md">
+                            🎉 {finalParticipant}
+                          </div>
+                        </div>
+                      )}
+
+                      <p className="text-xs text-slate-300 max-w-md mx-auto my-3 leading-relaxed">
+                        {activeLocale === 'ml'
+                          ? 'എല്ലാ നറുക്കെടുപ്പുകളും കഴിഞ്ഞു! വീലിൽ അവസാനമായി 1 വ്യക്തി മാത്രമാണ് അവശേഷിക്കുന്നത്. പുതിയ കളി ആരംഭിക്കാൻ ലിസ്റ്റ് പുനഃസ്ഥാപിക്കുക.'
+                          : 'All lucky draw rounds have concluded! Only 1 participant remains on the wheel. Spin is disabled. Reset the roster to start a new game.'}
+                      </p>
+
+                      <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+                        <button
+                          onClick={handleResetRoster}
+                          className="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg shadow-purple-950/60 transition hover:scale-105 active:scale-95"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          <span>{t.wheelLabels.resetRoster || 'Play Again (Reset Roster)'}</span>
+                        </button>
+
+                        <button
+                          onClick={handleCopyGameResults}
+                          className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-700 transition"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy Full Results</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Wheel Pointer Arrow */}
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none">
                     <div className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[24px] border-t-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.8)]" />
@@ -978,11 +1123,36 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
                     {/* Central Spin Button Overlay */}
                     <button
                       onClick={handleSpinWheel}
-                      disabled={isSpinning || participants.length === 0}
-                      className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-purple-700 via-indigo-600 to-purple-500 hover:from-purple-600 hover:to-indigo-500 disabled:opacity-50 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-purple-950/80 border-4 border-slate-900 flex flex-col items-center justify-center transition-all hover:scale-105 active:scale-95 z-10"
+                      disabled={isSpinning || participants.length === 0 || (removeWinnerOnDraw && participants.length <= 1)}
+                      className={`absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl border-4 border-slate-900 flex flex-col items-center justify-center transition-all z-10 ${
+                        isGameOver
+                          ? 'bg-gradient-to-tr from-amber-700 via-rose-700 to-amber-600 shadow-amber-950/80 cursor-not-allowed opacity-90'
+                          : 'bg-gradient-to-tr from-purple-700 via-indigo-600 to-purple-500 hover:from-purple-600 hover:to-indigo-500 disabled:opacity-50 shadow-purple-950/80 hover:scale-105 active:scale-95'
+                      }`}
                     >
-                      <Sparkles className="w-4 h-4 mb-0.5 text-amber-300 animate-pulse" />
-                      <span>{isSpinning ? 'SPIN...' : 'SPIN'}</span>
+                      {isGameOver ? (
+                        <>
+                          <CheckCircle2 className="w-5 h-5 mb-0.5 text-amber-300" />
+                          <span className="text-[10px] sm:text-xs leading-tight font-black text-center text-amber-200">
+                            GAME<br />OVER
+                          </span>
+                        </>
+                      ) : isSpinning ? (
+                        <>
+                          <Sparkles className="w-4 h-4 mb-0.5 text-amber-300 animate-pulse" />
+                          <span>SPIN...</span>
+                        </>
+                      ) : removeWinnerOnDraw && participants.length === 1 && winnerHistory.length === 0 ? (
+                        <>
+                          <Users className="w-4 h-4 mb-0.5 text-amber-300" />
+                          <span className="text-[10px] font-bold">NEED 2+</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mb-0.5 text-amber-300 animate-pulse" />
+                          <span>SPIN</span>
+                        </>
+                      )}
                     </button>
                   </div>
 
@@ -1087,6 +1257,17 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
                           </span>
                         </div>
                       ))}
+
+                      {/* Final Remaining Participant Tag in History */}
+                      {isGameOver && finalParticipant && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-slate-950 border border-amber-400/50 text-xs shadow-md">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          <span className="text-amber-300 font-bold">
+                            {t.wheelLabels.lastRemaining || 'Remaining'}:
+                          </span>
+                          <span className="text-white font-black">{finalParticipant}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1382,21 +1563,51 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
                   {activeWinner}
                 </h3>
 
+                {/* Penultimate Round Notification */}
+                {isPenultimateDraw && otherRemainingParticipant && (
+                  <div className="bg-amber-500/15 border border-amber-500/30 rounded-2xl p-3 mb-4 text-xs text-amber-200 text-left flex items-start gap-2.5">
+                    <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="block text-amber-300 font-bold mb-0.5">
+                        {t.wheelLabels.finalRoundComplete || 'Final Round Complete!'}
+                      </strong>
+                      <span className="text-slate-300 text-[11px]">
+                        {activeLocale === 'ml'
+                          ? 'ഈ വിജയിയെ ഒഴിവാക്കിയാൽ അവസാനമായി അവശേഷിക്കുന്നത്:'
+                          : 'Excluding this winner leaves the last remaining participant:'}
+                      </span>
+                      <span className="block text-white font-bold text-xs mt-0.5">
+                        🏆 {otherRemainingParticipant}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-xs text-slate-400 mb-6 leading-relaxed">
                   Drawn using browser cryptographically strong randomness.
                 </p>
 
                 <div className="space-y-2">
-                  <button
-                    onClick={() => {
-                      handleCloseWinnerModal(false)
-                      setTimeout(handleSpinWheel, 200)
-                    }}
-                    className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>{t.wheelLabels.spinAgain}</span>
-                  </button>
+                  {isPenultimateDraw ? (
+                    <button
+                      onClick={() => handleCloseWinnerModal(true)}
+                      className="w-full bg-gradient-to-r from-amber-600 via-purple-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-purple-950/60 transition"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                      <span>{t.wheelLabels.viewResults || 'Finish Game & View Standings'}</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        handleCloseWinnerModal(false)
+                        setTimeout(handleSpinWheel, 200)
+                      }}
+                      className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>{t.wheelLabels.spinAgain}</span>
+                    </button>
+                  )}
 
                   <button
                     onClick={async () => {
@@ -1413,7 +1624,7 @@ export const LuckyDrawTeamSplitterTool: React.FC = () => {
                     <span>{t.wheelLabels.copyWinner}</span>
                   </button>
 
-                  {removeWinnerOnDraw && (
+                  {removeWinnerOnDraw && !isPenultimateDraw && (
                     <button
                       onClick={() => handleCloseWinnerModal(true)}
                       className="w-full text-rose-400 hover:text-rose-300 text-xs py-2 transition"

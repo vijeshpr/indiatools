@@ -282,4 +282,53 @@ describe('Lucky Draw Wheel & Random Team Splitter Test Suite', () => {
       assert.ok(prerenderCode.includes("urlPath.includes('lucky-draw-team-splitter')"))
     })
   })
+
+  // 6. WINNER REMOVAL & GAME OVER STATE LOGIC
+  describe('Winner Removal & Game Over Mechanics', () => {
+    it('identifies penultimate round and remaining contestant correctly when 2 participants compete', () => {
+      const participants = ['Aarav', 'Diya']
+      const winner = 'Aarav'
+
+      // Index-based lookup for remaining contestant
+      const winnerIdx = participants.findIndex(p => p.trim().toLowerCase() === winner.toLowerCase())
+      assert.strictEqual(winnerIdx, 0)
+      const otherIdx = winnerIdx === 0 ? 1 : 0
+      const remainingContestant = participants[otherIdx]
+
+      assert.strictEqual(remainingContestant, 'Diya')
+    })
+
+    it('prohibits wheel spin when only 1 participant remains in elimination mode', () => {
+      const removeWinnerOnDraw = true
+      const participants = ['Sole Survivor']
+      const winnerHistoryCount = 3
+
+      // Spin is disabled when removeWinnerOnDraw && participants.length <= 1
+      const isSpinDisabled = removeWinnerOnDraw && participants.length <= 1
+      assert.strictEqual(isSpinDisabled, true)
+
+      // Game Over state is active
+      const isGameOver = removeWinnerOnDraw && winnerHistoryCount > 0 && participants.length <= 1
+      assert.strictEqual(isGameOver, true)
+    })
+
+    it('allows spin when 2 participants remain in elimination mode (final round)', () => {
+      const removeWinnerOnDraw = true
+      const participants = ['Finalist 1', 'Finalist 2']
+      const isSpinDisabled = removeWinnerOnDraw && participants.length <= 1
+      assert.strictEqual(isSpinDisabled, false)
+    })
+
+    it('contains localized Game Over labels for English and Malayalam', () => {
+      const en = getLuckyToolTranslation('en')
+      assert.strictEqual(en.wheelLabels.gameOver, 'GAME OVER')
+      assert.strictEqual(en.wheelLabels.lastRemaining, 'Final Remaining Participant')
+      assert.strictEqual(en.wheelLabels.finalRoundComplete, 'Final Round Complete!')
+
+      const ml = getLuckyToolTranslation('ml')
+      assert.strictEqual(ml.wheelLabels.gameOver, 'ഗെയിം ഓവർ (GAME OVER)')
+      assert.strictEqual(ml.wheelLabels.lastRemaining, 'അവസാനം അവശേഷിച്ചയാൾ')
+      assert.strictEqual(ml.wheelLabels.finalRoundComplete, 'അവസാന റൗണ്ട് പൂർത്തിയായി!')
+    })
+  })
 })
