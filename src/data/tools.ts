@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 25,
+    toolCount: 26,
   },
   audio: {
     id: 'audio',
@@ -3973,6 +3973,95 @@ export const TOOLS: ToolDefinition[] = [
       canonicalPath: '/calculators/repair-vs-replace'
     },
     type: 'calculator'
+  },
+  {
+    id: 'lucky-draw-team-splitter',
+    slug: 'lucky-draw-team-splitter',
+    title: 'Lucky Draw Wheel & Random Team Generator | IndiaTools',
+    shortTitle: 'Lucky Draw Wheel',
+    description: 'Spin a colorful lucky draw wheel to pick a random winner or split names into balanced teams. Free online random name picker for classrooms, clubs, parties and events.',
+    detailedDescription: 'Free online interactive spinning wheel and balanced random team generator. Features cryptographically sound randomness, configurable spin duration, sound effects, winner history, and round-robin team distribution with zero server uploads.',
+    category: 'create',
+    categoryLabel: 'Create',
+    iconName: 'Dices',
+    color: '#8B5CF6',
+    tags: [
+      'lucky draw wheel',
+      'random team generator',
+      'wheel of names',
+      'random picker',
+      'team splitter',
+      'classroom picker',
+      'spin wheel online'
+    ],
+    searchKeywords: [
+      'lucky draw wheel',
+      'random team generator',
+      'spin the wheel online',
+      'random name picker',
+      'team splitter',
+      'wheel of names india',
+      'लकी ड्रॉ पहिया',
+      'റാൻഡം ടീം ജനറേറ്റർ',
+      'குழு பிரிப்பான்'
+    ],
+    badge: 'Popular',
+    formulaExplanation: 'Winner angle calculated via wheel geometry: TargetAngle = PointerAngle(270) - WinnerSegmentCenter + MicroJitter. Team splitting uses round-robin distribution over Fisher-Yates shuffled arrays using crypto.getRandomValues, ensuring size differential between any two teams is at most 1.',
+    assumptions: [
+      '100% private in-browser client-side Web Crypto and Canvas execution',
+      'Zero participant names or raffle results uploaded or retained remotely',
+      'Balanced round-robin distribution guarantees team sizes differ by no more than one participant',
+      'HTML5 Canvas exports high-resolution 2x DPR PNG cards without server-side rendering'
+    ],
+    exampleCalculation: {
+      title: 'Classroom Random Team Split',
+      inputs: {
+        'Total Participants': '15',
+        'Number of Teams': '4',
+        'Mode': 'By Number of Teams'
+      },
+      outputs: {
+        'Team Distribution': '3 teams of 4 members, 1 team of 3 members',
+        'Max Size Difference': '1 participant',
+        'Randomness Source': 'crypto.getRandomValues'
+      },
+      explanation: '15 students are shuffled using browser cryptographic randomness and distributed across 4 teams, guaranteeing equitable group sizes without bias.'
+    },
+    faqs: [
+      {
+        question: 'How is the lucky draw winner selected?',
+        answer: 'The winner is chosen using browser-native cryptographically strong randomness (crypto.getRandomValues). The wheel stopping angle is calculated so that the needle accurately points to the selected segment.'
+      },
+      {
+        question: 'How does the random team splitter balance groups?',
+        answer: 'It uses a round-robin algorithm over a freshly shuffled list. Team sizes never differ by more than one participant, ensuring maximum fairness.'
+      },
+      {
+        question: 'Are participant names stored or sent to any server?',
+        answer: 'No. All names, wheel physics, and team splits are processed entirely in your web browser. Nothing is ever uploaded or tracked.'
+      },
+      {
+        question: 'Can I remove the winner from subsequent spins?',
+        answer: 'Yes! Toggle the "Remove winner from wheel for next spin" option. When enabled, the winning name is automatically excluded from the wheel for subsequent draws.'
+      }
+    ],
+    relatedSlugs: ['satisfying-relax-game', 'qr-code-generator', 'pixelcraft', 'ai-token-calculator'],
+    seo: {
+      title: 'Lucky Draw Wheel & Random Team Generator | IndiaTools',
+      metaDescription: 'Spin a colorful lucky draw wheel to pick a random winner or split names into balanced teams. Free online random name picker for classrooms, clubs, parties and events.',
+      keywords: [
+        'lucky draw wheel',
+        'random team generator',
+        'spin the wheel online',
+        'random name picker',
+        'team splitter',
+        'wheel of names india',
+        'लकी ड्रॉ पहिया',
+        'റാൻഡം ടീം ജനറേറ്റർ'
+      ],
+      canonicalPath: '/tools/lucky-draw-team-splitter'
+    },
+    type: 'image-tool'
   }
 ];
 

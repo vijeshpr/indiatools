@@ -46,6 +46,7 @@ import { ExperienceTool } from '../calculators/ExperienceTool'
 import { IndianChequeStudioTool } from '../calculators/IndianChequeStudioTool'
 import { GoldExchangeCalculatorTool } from '../calculators/GoldExchangeCalculatorTool'
 import { FriendshipRelationshipCostTool } from '../calculators/FriendshipRelationshipCostTool'
+import { LuckyDrawTeamSplitterTool } from '../imageTools/LuckyDrawTeamSplitterTool'
 import { RepairVsReplaceTool } from '../calculators/RepairVsReplaceTool'
 
 // Land & Survey Calculators
@@ -159,6 +160,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'batch-image-watermarker': BatchImageWatermarkerTool,
   'fast-inpainting-watermark-remover': FastInpaintingWatermarkRemoverTool,
   'scan-to-print': ScanToPrintTool,
+  'lucky-draw-team-splitter': LuckyDrawTeamSplitterTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

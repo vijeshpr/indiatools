@@ -179,10 +179,35 @@ async function runAudit() {
   }
   check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English (Repair vs Replace)', allRepairHreflangsInSitemap);
 
+  // 3g. Lucky Draw Wheel Multilingual Sitemaps & Hreflang Audit (23 languages)
+  const luckyModule = await import('../src/i18n/luckyDrawTeamI18n.ts');
+  const luckyLocalesList = Object.keys(luckyModule.LUCKY_TOOL_I18N);
+  check('Lucky Draw Dataset: Exactly 23 languages configured', luckyLocalesList.length === 23, `Found ${luckyLocalesList.length}`);
+
+  let allLuckyInSitemap = true;
+  for (const loc of luckyLocalesList) {
+    const urlPath = loc === 'en' ? '/tools/lucky-draw-team-splitter' : `/${loc}/tools/lucky-draw-team-splitter`;
+    if (!sitemapXml.includes(`https://indiatools-rho.vercel.app${urlPath}`)) {
+      allLuckyInSitemap = false;
+      console.error(`Missing Lucky Draw localized URL in sitemap: ${urlPath}`);
+    }
+  }
+  check('sitemap.xml: Contains all 23 Lucky Draw language URLs', allLuckyInSitemap);
+
+  let allLuckyHreflangsInSitemap = true;
+  for (const loc of luckyLocalesList) {
+    const bcp47 = luckyModule.LUCKY_LOCALES[loc].bcp47;
+    if (!sitemapXml.includes(`hreflang="${bcp47}"`)) {
+      allLuckyHreflangsInSitemap = false;
+      console.error(`Missing hreflang="${bcp47}" in sitemap.xml for Lucky Draw`);
+    }
+  }
+  check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English (Lucky Draw)', allLuckyHreflangsInSitemap);
+
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 66 unique tools', tools.length === 66, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 67 unique tools', tools.length === 67, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;
@@ -249,7 +274,7 @@ async function runAudit() {
   // 6b. Sitemap Quality & Production Host Integrity
   const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   const dupes = locs.filter((item, index) => locs.indexOf(item) !== index);
-  check('sitemap.xml: Exactly 147 production URLs with zero duplicates', locs.length === 147 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
+  check('sitemap.xml: Exactly 170 production URLs with zero duplicates', locs.length === 170 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
   const nonProd = locs.filter(u => !u.startsWith('https://indiatools-rho.vercel.app/'));
   check('sitemap.xml: 100% of URLs use canonical production domain https://indiatools-rho.vercel.app', nonProd.length === 0, `${nonProd.length} non-production URLs`);
   const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);

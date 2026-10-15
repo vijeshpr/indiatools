@@ -266,7 +266,7 @@ describe('Friendship & Relationship Cost Calculator Suite', () => {
   // 4. REGISTRY & ROUTING INTEGRITY
   describe('Tool Registry & Sitemap Integration', () => {
     it('is registered in TOOLS array as tool #65', () => {
-      assert.strictEqual(TOOLS.length, 66)
+      assert.strictEqual(TOOLS.length, 67)
       const tool = getToolBySlug('friendship-relationship-cost')
       assert(tool, 'Tool friendship-relationship-cost must exist in TOOLS')
       assert.strictEqual(tool.category, 'money')

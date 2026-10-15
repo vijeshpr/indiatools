@@ -30,6 +30,7 @@ const chequeMod = loadTs('src/data/chequeSeoData.ts');
 const goldMod = loadTs('src/i18n/goldToolI18n.ts');
 const friendshipMod = loadTs('src/i18n/friendshipCostI18n.ts');
 const repairMod = loadTs('src/i18n/repairVsReplaceI18n.ts');
+const luckyMod = loadTs('src/i18n/luckyDrawTeamI18n.ts');
 
 const TOOLS = toolsMod.TOOLS;
 const CATEGORIES = toolsMod.CATEGORIES;
@@ -39,6 +40,8 @@ const FRIENDSHIP_TOOL_I18N = friendshipMod.FRIENDSHIP_TOOL_I18N;
 const FRIENDSHIP_LOCALES = friendshipMod.FRIENDSHIP_LOCALES;
 const REPAIR_TOOL_I18N = repairMod.REPAIR_TOOL_I18N;
 const REPAIR_LOCALES = repairMod.REPAIR_LOCALES;
+const LUCKY_TOOL_I18N = luckyMod.LUCKY_TOOL_I18N;
+const LUCKY_LOCALES = luckyMod.LUCKY_LOCALES;
 
 const templatePath = path.join('dist', 'index.html');
 if (!fs.existsSync(templatePath)) {
@@ -815,7 +818,89 @@ for (const fullUrl of sitemapUrls) {
     };
   }
 
-  // 11. Individual Calculator & Image Tools (all 66 tools)
+  // 10d. Multilingual Lucky Draw Wheel & Random Team Splitter localized routes
+  else if (urlPath.includes('lucky-draw-team-splitter')) {
+    const langMatch = urlPath.match(/^\/([a-z]{2,3})\/tools\/lucky-draw-team-splitter/);
+    const langKey = langMatch ? langMatch[1] : 'en';
+    const luckyContent = LUCKY_TOOL_I18N[langKey] || LUCKY_TOOL_I18N['en'];
+
+    meta = {
+      title: luckyContent.title,
+      description: luckyContent.metaDescription,
+      canonicalUrl: langKey === 'en'
+        ? `${BASE_URL}/tools/lucky-draw-team-splitter`
+        : `${BASE_URL}/${langKey}/tools/lucky-draw-team-splitter`
+    };
+
+    hreflangs = Object.keys(LUCKY_TOOL_I18N).map(code => ({
+      lang: LUCKY_LOCALES[code].bcp47,
+      href: code === 'en'
+        ? `${BASE_URL}/tools/lucky-draw-team-splitter`
+        : `${BASE_URL}/${code}/tools/lucky-draw-team-splitter`
+    }));
+    hreflangs.push({
+      lang: 'x-default',
+      href: `${BASE_URL}/tools/lucky-draw-team-splitter`
+    });
+
+    bodyContent = `
+      <div style="margin-bottom: 16px;">
+        <a href="/category/create" style="color: #94A3B8; text-decoration: none; font-size: 0.85rem;">← Create & Interactive Tools</a>
+      </div>
+      <article dir="${luckyContent.dir || 'ltr'}">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #8B5CF6; text-transform: uppercase;">22 INDIAN LANGUAGES • CRYPTOGRAPHIC RANDOMNESS • 100% PRIVATE</span>
+        <h1 style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF; margin: 8px 0;">${escapeHtml(luckyContent.h1)}</h1>
+        <p style="font-size: 1rem; color: #CBD5E1; line-height: 1.6; max-width: 800px; margin-bottom: 24px;">${escapeHtml(luckyContent.subtitle)}</p>
+
+        <section style="background: #0E1726; border: 1px solid rgba(139,92,246,0.25); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 12px;">Interactive Modes: Lucky Draw & Random Team Splitter</h2>
+          <p style="color: #94A3B8; line-height: 1.7; font-size: 0.9rem;">
+            Lucky Draw Spinning Wheel: Decelerates over a configurable duration (3s - 10s) and lands on the exact slice chosen by browser Web Crypto randomness (crypto.getRandomValues). Includes optional sound effects, winner history tracking, and automatic winner removal for subsequent draws.<br>
+            Random Team Splitter: Supports splitting by total team count or target group size using a round-robin shuffle that guarantees group sizes differ by no more than one participant. Includes interactive participant reassignments and PNG/print exports.
+          </p>
+        </section>
+
+        <section style="background: #090D14; border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 16px;">Frequently Asked Questions</h2>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            ${(luckyContent.faqs || []).map(faq => `
+              <div>
+                <h3 style="font-size: 1rem; color: #A78BFA; margin: 0 0 6px 0;">${escapeHtml(faq.question)}</h3>
+                <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.6; margin: 0;">${escapeHtml(faq.answer)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      </article>
+    `;
+
+    jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          name: luckyContent.h1,
+          description: luckyContent.metaDescription,
+          url: meta.canonicalUrl,
+          applicationCategory: "UtilityApplication",
+          operatingSystem: "All"
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: (luckyContent.faqs || []).map(f => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer
+            }
+          }))
+        }
+      ]
+    };
+  }
+
+  // 11. Individual Calculator & Image Tools (all 67 tools)
   else {
     const tool = TOOLS.find(t => t.seo.canonicalPath === urlPath);
     if (!tool) {

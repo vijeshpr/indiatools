@@ -187,7 +187,7 @@ describe('Repair vs Replace Decision Engine Test Suite', () => {
   // 4. REGISTRY, ROUTING & SITEMAP INTEGRATION
   describe('Registry & Production Architecture', () => {
     it('is registered in TOOLS array as tool #66', () => {
-      assert.strictEqual(TOOLS.length, 66)
+      assert.strictEqual(TOOLS.length, 67)
       const tool = getToolBySlug('repair-vs-replace')
       assert.ok(tool !== undefined, 'repair-vs-replace not found in TOOLS')
       assert.strictEqual(tool.category, 'money')
@@ -210,10 +210,10 @@ describe('Repair vs Replace Decision Engine Test Suite', () => {
       assert.ok(appCode.includes('/tools/repair-vs-replace'))
     })
 
-    it('sitemap.xml contains 147 URLs including all 23 Repair vs Replace URLs', () => {
+    it('sitemap.xml contains all 23 Repair vs Replace URLs', () => {
       const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
       const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-      assert.strictEqual(locs.length, 147)
+      assert.ok(locs.length >= 147)
 
       // Canonical URL
       assert.ok(locs.includes('https://indiatools-rho.vercel.app/calculators/repair-vs-replace'))

@@ -13,7 +13,7 @@ describe('Satisfying Relax Game Suite', () => {
     assert.equal(tool.seo.canonicalPath, '/calculators/satisfying-relax-game')
     assert.ok(tool.title.endsWith('| IndiaTools'), 'Title should end with | IndiaTools')
     assert.equal(tool.faqs.length, 3, 'Should have 3 FAQ items')
-    assert.equal(CATEGORIES.create.toolCount, 25, 'Create category toolCount must be 25')
+    assert.equal(CATEGORIES.create.toolCount, 26, 'Create category toolCount must be 25')
   })
 
   it('should have complete translations for en, ml, hi, ta, te, kn', () => {
