@@ -5,8 +5,11 @@ import { calculateFuelCost, FuelCostResult } from '../lib/calculations'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { FuelCostUI } from '../i18n/tools/fuelCostI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { FuelCostUI, fuelCostTranslations } from '../i18n/tools/fuelCostI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('fuel-cost', fuelCostTranslations)
 
 export const FuelCostTool: React.FC = () => {
   const tool = getToolBySlug('fuel-cost')!
@@ -210,7 +213,7 @@ ${ui.calculatedOn}`
                 </span>
               </div>
               <p className="mt-2 text-xs text-orange-300/90 font-mono">
-                {ui.fuelRequirementSummary
+                {(ui.fuelRequirementSummary || 'Requires {litres} L @ ₹{price}/L')
                   .replace('{litres}', results.totalFuelNeededL.toString())
                   .replace('{price}', fuelPrice.toString())}
               </p>

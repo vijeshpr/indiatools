@@ -5,8 +5,11 @@ import { calculateTripCost, TripCostResult } from '../lib/calculations'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { TripCostUI } from '../i18n/tools/tripCostI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { TripCostUI, tripCostTranslations } from '../i18n/tools/tripCostI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('trip-cost', tripCostTranslations)
 
 export const TripCostTool: React.FC = () => {
   const tool = getToolBySlug('trip-cost')!

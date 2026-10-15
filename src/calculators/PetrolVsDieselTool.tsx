@@ -5,8 +5,11 @@ import { calculatePetrolVsDiesel, PetrolVsDieselResult } from '../lib/calculatio
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { PetrolVsDieselUI } from '../i18n/tools/petrolVsDieselI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { PetrolVsDieselUI, petrolVsDieselTranslations } from '../i18n/tools/petrolVsDieselI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('petrol-vs-diesel', petrolVsDieselTranslations)
 
 export const PetrolVsDieselTool: React.FC = () => {
   const tool = getToolBySlug('petrol-vs-diesel')!
@@ -211,7 +214,7 @@ ${ui.calculatedOn}`
                 <span className="text-xl text-neutral-400 font-normal"> {ui.months}</span>
               </div>
               <p className="text-xs text-neutral-400 mt-2">
-                {ui.breakevenDescription.replace('{breakevenKm}', result.breakevenKm.toLocaleString('en-IN'))}
+                {(ui.breakevenDescription || 'Breakeven is achieved after driving {breakevenKm} km').replace('{breakevenKm}', result.breakevenKm.toLocaleString('en-IN'))}
               </p>
             </div>
 

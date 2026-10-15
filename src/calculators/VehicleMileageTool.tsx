@@ -5,8 +5,11 @@ import { calculateMileage, MileageResult } from '../lib/calculations'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { VehicleMileageUI } from '../i18n/tools/vehicleMileageI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { VehicleMileageUI, vehicleMileageTranslations } from '../i18n/tools/vehicleMileageI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('vehicle-mileage', vehicleMileageTranslations)
 
 export const VehicleMileageTool: React.FC = () => {
   const tool = getToolBySlug('vehicle-mileage')!
@@ -25,11 +28,11 @@ export const VehicleMileageTool: React.FC = () => {
   }, [distanceKm, fuelLitres, fuelPrice])
 
   const localizedRating = useMemo(() => {
-    if (distanceKm <= 0 || fuelLitres <= 0) return ui.invalidInputsRating
-    if (results.rating === 'exceptional') return ui.exceptionalRating
-    if (results.rating === 'good') return ui.goodRating
-    if (results.rating === 'moderate') return ui.moderateRating
-    return ui.heavyRating
+    if (distanceKm <= 0 || fuelLitres <= 0) return ui?.invalidInputsRating || 'Invalid'
+    if (results.rating === 'exceptional') return ui?.exceptionalRating || 'Exceptional'
+    if (results.rating === 'good') return ui?.goodRating || 'Good'
+    if (results.rating === 'moderate') return ui?.moderateRating || 'Moderate'
+    return ui?.heavyRating || 'Heavy'
   }, [results.rating, distanceKm, fuelLitres, ui])
 
   const handleReset = () => {
@@ -208,7 +211,7 @@ ${ui.calculatedOn}`
                 <span>{ui.fuelEconomyAnalytics}</span>
               </span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                {localizedRating.split(' ')[0]}
+                {(localizedRating || 'Good').split(' ')[0]}
               </span>
             </div>
 
@@ -222,7 +225,7 @@ ${ui.calculatedOn}`
                 <span className="text-lg font-bold text-orange-400">KM / L</span>
               </div>
               <p className="mt-2 text-xs text-neutral-400">
-                {localizedRating}
+                {localizedRating || ''}
               </p>
             </div>
 

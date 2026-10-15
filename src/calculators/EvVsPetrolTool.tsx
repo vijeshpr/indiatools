@@ -5,8 +5,11 @@ import { calculateEvVsPetrol, EvVsPetrolResult } from '../lib/calculations'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { EvVsPetrolUI } from '../i18n/tools/evVsPetrolI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { EvVsPetrolUI, evVsPetrolTranslations } from '../i18n/tools/evVsPetrolI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('ev-vs-petrol', evVsPetrolTranslations)
 
 export const EvVsPetrolTool: React.FC = () => {
   const tool = getToolBySlug('ev-vs-petrol')!
@@ -222,7 +225,7 @@ ${ui.calculatedOn}`
                 <span className="text-white font-mono font-bold">{result.breakevenYears} {ui.years} ({result.breakevenKm.toLocaleString('en-IN')} km)</span>
               </div>
               <p className="text-[11px] text-neutral-500">
-                {ui.breakevenFootnote.replace('{monthlyKm}', monthlyKm.toLocaleString('en-IN'))}
+                {(ui.breakevenFootnote || 'Breakeven calculated at {monthlyKm} km/month').replace('{monthlyKm}', monthlyKm.toLocaleString('en-IN'))}
               </p>
             </div>
           </motion.div>

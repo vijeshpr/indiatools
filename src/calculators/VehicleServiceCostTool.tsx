@@ -5,8 +5,11 @@ import { calculateVehicleServiceCost, VehicleServiceResult } from '../lib/calcul
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { VehicleServiceCostUI } from '../i18n/tools/vehicleServiceCostI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { VehicleServiceCostUI, vehicleServiceCostTranslations } from '../i18n/tools/vehicleServiceCostI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('vehicle-service-cost', vehicleServiceCostTranslations)
 
 export const VehicleServiceCostTool: React.FC = () => {
   const tool = getToolBySlug('vehicle-service-cost')!
@@ -41,7 +44,7 @@ export const VehicleServiceCostTool: React.FC = () => {
     return `${ui.resultSummaryTitle}
 - ${ui.vehicleSegmentText}: ${vehicleType.toUpperCase()}
 - ${ui.currentOdometerText}: ${odometerKm.toLocaleString('en-IN')} km
-- ${ui.serviceLevelText}: ${serviceType.toUpperCase()} (${ui.everyKmInterval.replace('{km}', result.serviceIntervalKm.toLocaleString('en-IN'))})
+- ${ui.serviceLevelText}: ${serviceType.toUpperCase()} (${(ui.everyKmInterval || 'Every {km} km').replace('{km}', result.serviceIntervalKm.toLocaleString('en-IN'))})
 --------------------------------------------------
 ${ui.estimatedBillText}: ₹${result.estimatedTotal.toLocaleString('en-IN')}
 ${ui.costBreakdownText}:
@@ -179,7 +182,7 @@ ${ui.calculatedOn}`
                 {ui.estimatedInvoice}
               </span>
               <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                {ui.everyKmInterval.replace('{km}', result.serviceIntervalKm.toLocaleString('en-IN'))}
+                {(ui.everyKmInterval || 'Every {km} km').replace('{km}', result.serviceIntervalKm.toLocaleString('en-IN'))}
               </span>
             </div>
 

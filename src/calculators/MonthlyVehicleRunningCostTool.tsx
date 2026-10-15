@@ -5,8 +5,11 @@ import { calculateMonthlyVehicleRunningCost, MonthlyVehicleRunningCostResult } f
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { MonthlyVehicleRunningCostUI } from '../i18n/tools/monthlyVehicleRunningCostI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { MonthlyVehicleRunningCostUI, monthlyVehicleRunningCostTranslations } from '../i18n/tools/monthlyVehicleRunningCostI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('monthly-vehicle-running-cost', monthlyVehicleRunningCostTranslations)
 
 export const MonthlyVehicleRunningCostTool: React.FC = () => {
   const tool = getToolBySlug('monthly-vehicle-running-cost')!
@@ -286,7 +289,7 @@ ${ui.calculatedOn}`
               <span>{ui.tcoInsightTitle}</span>
             </div>
             <p>
-              {ui.tcoInsightDesc.replace('{costPerKm}', result.costPerKm.toString())}
+              {(ui.tcoInsightDesc || 'Running cost is ₹{costPerKm}/km').replace('{costPerKm}', result.costPerKm.toString())}
             </p>
           </div>
         </div>

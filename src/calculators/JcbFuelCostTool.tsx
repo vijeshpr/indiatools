@@ -9,8 +9,11 @@ import {
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useI18n } from '../i18n/I18nContext'
-import { useToolTranslations } from '../i18n/toolTranslations'
-import { JcbFuelCostUI } from '../i18n/tools/jcbFuelCostI18n'
+import { registerToolTranslations, useToolTranslations } from '../i18n/toolTranslations'
+import { JcbFuelCostUI, jcbFuelCostTranslations } from '../i18n/tools/jcbFuelCostI18n'
+
+// Defensive safety registration in case bundle is imported before or after registry initialization
+registerToolTranslations('jcb-fuel-cost', jcbFuelCostTranslations)
 
 export const JcbFuelCostTool: React.FC = () => {
   const tool = getToolBySlug('jcb-fuel-cost')!
@@ -242,7 +245,7 @@ ${ui.calculatedOn}`
               </div>
               <div className="mt-2 flex items-center gap-3 text-xs text-amber-300/90 font-mono">
                 <span>
-                  {ui.burnSummaryText
+                  {(ui.burnSummaryText || '{litres} L/day • ₹{hourlyCost}/hr')
                     .replace('{litres}', results.dailyFuelLitres.toString())
                     .replace('{hourlyCost}', results.hourlyFuelCost.toString())}
                 </span>
@@ -297,7 +300,7 @@ ${ui.calculatedOn}`
                   ₹{results.monthlyFuelCost.toLocaleString('en-IN')}
                 </p>
                 <span className="text-[11px] text-amber-300/80">
-                  {ui.perMonthLitres.replace('{litres}', results.monthlyFuelLitres.toString())}
+                  {(ui.perMonthLitres || '({litres} L/mo)').replace('{litres}', results.monthlyFuelLitres.toString())}
                 </span>
               </div>
             </div>

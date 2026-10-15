@@ -50,6 +50,9 @@ export function getToolTranslations<T = Record<string, string>>(
   if (!bundle) {
     // Defensive fallback: prevent app-level white screen if a tool's dictionary hasn't loaded yet
     console.warn(`[i18n] Translations for tool "${toolSlug}" have not been registered yet. Using fallback.`)
+    const safeUiProxy = new Proxy({} as any, {
+      get: (_target, prop) => (typeof prop === 'string' ? prop : ''),
+    })
     return {
       meta: {
         title: toolSlug,
@@ -57,7 +60,7 @@ export function getToolTranslations<T = Record<string, string>>(
         h1: toolSlug,
         subtitle: '',
       },
-      ui: {} as T,
+      ui: safeUiProxy as T,
       formulaExplanation: undefined,
       assumptions: [],
       example: undefined,
