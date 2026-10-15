@@ -62,6 +62,7 @@ export function App() {
                 <Route path="/:langCode/tools/gold-exchange-calculator" element={<GoldExchangeCalculatorTool />} />
                 <Route path="/:langCode/calculators/gold-exchange-calculator" element={<LocalizedGoldRedirect />} />
                 <Route path="/tools/friendship-relationship-cost" element={<Navigate to="/calculators/friendship-relationship-cost" replace />} />
+                <Route path="/tools/repair-vs-replace" element={<Navigate to="/calculators/repair-vs-replace" replace />} />
                 <Route path="/:langCode/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/:langCode/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/qr-code-generator" element={<Navigate to="/calculators/qr-code-generator" replace />} />

@@ -154,10 +154,35 @@ async function runAudit() {
   }
   check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English', allFriendshipHreflangsInSitemap);
 
+  // 3f. Repair vs Replace Multilingual Sitemaps & Hreflang Audit (23 languages)
+  const repairModule = await import('../src/i18n/repairVsReplaceI18n.ts');
+  const repairLocalesList = Object.keys(repairModule.REPAIR_TOOL_I18N);
+  check('Repair vs Replace Dataset: Exactly 23 languages configured', repairLocalesList.length === 23, `Found ${repairLocalesList.length}`);
+
+  let allRepairInSitemap = true;
+  for (const loc of repairLocalesList) {
+    const urlPath = loc === 'en' ? '/calculators/repair-vs-replace' : `/${loc}/calculators/repair-vs-replace`;
+    if (!sitemapXml.includes(`https://indiatools-rho.vercel.app${urlPath}`)) {
+      allRepairInSitemap = false;
+      console.error(`Missing Repair vs Replace localized URL in sitemap: ${urlPath}`);
+    }
+  }
+  check('sitemap.xml: Contains all 23 Repair vs Replace language URLs', allRepairInSitemap);
+
+  let allRepairHreflangsInSitemap = true;
+  for (const loc of repairLocalesList) {
+    const bcp47 = repairModule.REPAIR_LOCALES[loc].bcp47;
+    if (!sitemapXml.includes(`hreflang="${bcp47}"`)) {
+      allRepairHreflangsInSitemap = false;
+      console.error(`Missing hreflang="${bcp47}" in sitemap.xml for Repair vs Replace`);
+    }
+  }
+  check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English (Repair vs Replace)', allRepairHreflangsInSitemap);
+
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 65 unique tools', tools.length === 65, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 66 unique tools', tools.length === 66, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;
@@ -224,7 +249,7 @@ async function runAudit() {
   // 6b. Sitemap Quality & Production Host Integrity
   const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   const dupes = locs.filter((item, index) => locs.indexOf(item) !== index);
-  check('sitemap.xml: Exactly 124 production URLs with zero duplicates', locs.length === 124 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
+  check('sitemap.xml: Exactly 147 production URLs with zero duplicates', locs.length === 147 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
   const nonProd = locs.filter(u => !u.startsWith('https://indiatools-rho.vercel.app/'));
   check('sitemap.xml: 100% of URLs use canonical production domain https://indiatools-rho.vercel.app', nonProd.length === 0, `${nonProd.length} non-production URLs`);
   const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);

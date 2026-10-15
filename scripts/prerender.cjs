@@ -29,6 +29,7 @@ const toolsMod = loadTs('src/data/tools.ts');
 const chequeMod = loadTs('src/data/chequeSeoData.ts');
 const goldMod = loadTs('src/i18n/goldToolI18n.ts');
 const friendshipMod = loadTs('src/i18n/friendshipCostI18n.ts');
+const repairMod = loadTs('src/i18n/repairVsReplaceI18n.ts');
 
 const TOOLS = toolsMod.TOOLS;
 const CATEGORIES = toolsMod.CATEGORIES;
@@ -36,6 +37,8 @@ const CHEQUE_SEO_LANGUAGES = chequeMod.CHEQUE_SEO_LANGUAGES;
 const GOLD_TOOL_I18N = goldMod.GOLD_TOOL_I18N;
 const FRIENDSHIP_TOOL_I18N = friendshipMod.FRIENDSHIP_TOOL_I18N;
 const FRIENDSHIP_LOCALES = friendshipMod.FRIENDSHIP_LOCALES;
+const REPAIR_TOOL_I18N = repairMod.REPAIR_TOOL_I18N;
+const REPAIR_LOCALES = repairMod.REPAIR_LOCALES;
 
 const templatePath = path.join('dist', 'index.html');
 if (!fs.existsSync(templatePath)) {
@@ -729,7 +732,90 @@ for (const fullUrl of sitemapUrls) {
     };
   }
 
-  // 11. Individual Calculator & Image Tools (all 65 tools)
+  // 10c. Multilingual Repair vs Replace Decision Engine localized routes
+  else if (urlPath.includes('repair-vs-replace')) {
+    const langMatch = urlPath.match(/^\/([a-z]{2,3})\/calculators\/repair-vs-replace/);
+    const langKey = langMatch ? langMatch[1] : 'en';
+    const repairContent = REPAIR_TOOL_I18N[langKey] || REPAIR_TOOL_I18N['en'];
+
+    meta = {
+      title: repairContent.title,
+      description: repairContent.metaDescription,
+      canonicalUrl: langKey === 'en'
+        ? `${BASE_URL}/calculators/repair-vs-replace`
+        : `${BASE_URL}/${langKey}/calculators/repair-vs-replace`
+    };
+
+    hreflangs = Object.keys(REPAIR_TOOL_I18N).map(code => ({
+      lang: REPAIR_LOCALES[code].bcp47,
+      href: code === 'en'
+        ? `${BASE_URL}/calculators/repair-vs-replace`
+        : `${BASE_URL}/${code}/calculators/repair-vs-replace`
+    }));
+    hreflangs.push({
+      lang: 'x-default',
+      href: `${BASE_URL}/calculators/repair-vs-replace`
+    });
+
+    bodyContent = `
+      <div style="margin-bottom: 16px;">
+        <a href="/category/money" style="color: #94A3B8; text-decoration: none; font-size: 0.85rem;">← Salary & Finance Tools</a>
+      </div>
+      <article dir="${repairContent.dir || 'ltr'}">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #8B5CF6; text-transform: uppercase;">22 INDIAN LANGUAGES • 50% RULE • ZERO CLOUD UPLOADS</span>
+        <h1 style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF; margin: 8px 0;">${escapeHtml(repairContent.h1)}</h1>
+        <p style="font-size: 1rem; color: #CBD5E1; line-height: 1.6; max-width: 800px; margin-bottom: 24px;">${escapeHtml(repairContent.subtitle)}</p>
+
+        <section style="background: #0E1726; border: 1px solid rgba(139,92,246,0.25); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 12px;">Methodology & Financial Evaluation Principles</h2>
+          <p style="color: #94A3B8; line-height: 1.7; font-size: 0.9rem;">
+            The 50% Rule: If the estimated repair cost exceeds 50% of the price of a brand-new replacement, AND the item has already exceeded 50% of its typical category lifespan, replacement is generally favored.<br>
+            Equal-Horizon Cost (36 Months): Normalizes both options across a 36-month timeline, including expected secondary failures and monthly maintenance.<br>
+            Break-Even Timeline: Calculates exactly how many months the repaired item must survive to economically justify the repair outlay over replacing today.
+          </p>
+        </section>
+
+        <section style="background: #090D14; border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin-bottom: 16px;">Frequently Asked Questions</h2>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            ${(repairContent.faqs || []).map(faq => `
+              <div>
+                <h3 style="font-size: 1rem; color: #A78BFA; margin: 0 0 6px 0;">${escapeHtml(faq.question)}</h3>
+                <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.6; margin: 0;">${escapeHtml(faq.answer)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      </article>
+    `;
+
+    jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          name: repairContent.h1,
+          description: repairContent.metaDescription,
+          url: meta.canonicalUrl,
+          applicationCategory: "UtilityApplication",
+          operatingSystem: "All"
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: (repairContent.faqs || []).map(f => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer
+            }
+          }))
+        }
+      ]
+    };
+  }
+
+  // 11. Individual Calculator & Image Tools (all 66 tools)
   else {
     const tool = TOOLS.find(t => t.seo.canonicalPath === urlPath);
     if (!tool) {

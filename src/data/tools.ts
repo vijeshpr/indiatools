@@ -43,7 +43,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#8B5CF6',
     gradient: 'from-purple-500/20 via-indigo-500/10 to-transparent',
     icon: 'IndianRupee',
-    toolCount: 10,
+    toolCount: 11,
   },
   land: {
     id: 'land',
@@ -3879,8 +3879,102 @@ export const TOOLS: ToolDefinition[] = [
       canonicalPath: '/calculators/friendship-relationship-cost'
     },
     type: 'calculator'
+  },
+  {
+    id: 'repair-vs-replace',
+    slug: 'repair-vs-replace',
+    title: 'Repair vs Replace Decision Engine – Compare Costs & Risks',
+    shortTitle: 'Repair vs Replace',
+    description: 'Evaluate repair vs replace decisions for smartphones, laptops, appliances, vehicles, and furniture. Transparent lifecycle costs, break-even months, and risk heuristics.',
+    detailedDescription: 'Deciding whether to repair an aging or damaged item or replace it with a new model is one of the most frequent financial dilemmas Indian households face. This decision engine models initial cash outlay, 36-month equalized lifecycle costs, category-specific failure risk heuristics, break-even months, and the economic opportunity cost of downtime.',
+    category: 'money',
+    categoryLabel: 'Salary & Finance',
+    iconName: 'Scale',
+    color: '#8B5CF6',
+    tags: [
+      'repair vs replace',
+      'cost comparison',
+      'financial decision',
+      '50% rule',
+      'break-even calculator',
+      'electronics repair',
+      'lifecycle cost'
+    ],
+    searchKeywords: [
+      'repair vs replace',
+      'should i repair or replace',
+      'phone repair or buy new',
+      'laptop screen repair cost',
+      'ac compressor repair vs replace',
+      'car clutch repair cost',
+      '50 percent rule repair',
+      'मरम्मत बनाम नया',
+      'റിപ്പയർ vs റീപ്ലേസ്',
+      'பழுதுபார்ப்பு vs புதியது'
+    ],
+    badge: 'Flagship',
+    formulaExplanation: 'Evaluates the 50% Rule: RepairCost / ReplacementPrice > 0.5 AND ItemAge / ExpectedLife > 0.5. 36-Month Horizon Cost = Normalized Amortization + Projected Repeat Failure Probabilities + Cumulative Ongoing Maintenance. Break-Even Period = RepairCost / (ReplacementCostPerMonth - RepairMonthlyMaintenance). Downtime Inconvenience Cost = ServiceVisits x HandlingHours x HourlyRate + DowntimeDays x TimeValue.',
+    assumptions: [
+      '36-month equalized timeline normalizes disparate product lifespans without penalizing shorter post-repair durations.',
+      'Heuristic failure probability models category-specific component vulnerability (e.g. smartphone screens vs motherboard power circuits).',
+      'Economic opportunity cost of downtime is strictly separated from direct out-of-pocket cash expenses.',
+      'Calculations operate 100% locally in browser memory with zero cloud telemetry or data retention.'
+    ],
+    exampleCalculation: {
+      title: 'Smartphone Screen Repair vs Replace',
+      inputs: {
+        'Item Category': 'Smartphone',
+        'Repair Cost': '₹4,500',
+        'New Replacement Price': '₹18,000',
+        'Item Age': '24 Months'
+      },
+      outputs: {
+        'Verdict': 'REPAIR (High Confidence)',
+        'Break-Even Horizon': '8.2 Months',
+        '36-Month Lifecycle Savings': '₹6,200',
+        'Failure Risk Heuristic': '15%'
+      },
+      explanation: 'Repairing the smartphone screen is economically superior because the repair cost is only 25% of the replacement price (well below the 50% Rule threshold) and the device has adequate remaining lifespan.'
+    },
+    faqs: [
+      {
+        question: 'What is the 50% Rule in repair vs replace decisions?',
+        answer: 'The 50% Rule states that if the repair cost exceeds 50% of the cost of a new replacement, AND the item has already lived through more than 50% of its expected lifespan, replacement is almost always the smarter financial decision.'
+      },
+      {
+        question: 'How is the 36-month equal-horizon lifecycle cost calculated?',
+        answer: 'Because repaired items usually last fewer months than brand new items, a direct upfront cost comparison is misleading. We normalize both options across a 36-month baseline, including anticipated secondary repairs and ongoing monthly maintenance.'
+      },
+      {
+        question: 'Is my personal financial or product data saved on any server?',
+        answer: 'No. All calculations are performed 100% locally in your device browser using JavaScript. No names, numbers, or item data are ever transmitted or stored remotely.'
+      },
+      {
+        question: 'How is downtime and inconvenience cost calculated?',
+        answer: 'Downtime cost calculates your personal time value during repair shop visits and days without the product, multiplied by your optional hourly rate. It is displayed as a separate hassle metric and never mixed into pure cash outlays.'
+      }
+    ],
+    relatedSlugs: ['emi-calculator', 'percentage-calculator', 'in-hand-salary', 'gold-exchange-calculator', 'friendship-relationship-cost'],
+    seo: {
+      title: 'Repair vs Replace Calculator – Compare Costs & Risks | IndiaTools',
+      metaDescription: 'Evaluate repair vs replace decisions for smartphones, laptops, appliances, vehicles, and furniture. Transparent lifecycle costs, break-even months, and risk heuristics.',
+      keywords: [
+        'repair vs replace calculator',
+        'repair or replace decision engine',
+        '50 percent rule repair',
+        'phone repair vs new phone',
+        'laptop repair cost calculator',
+        'ac repair or replace india',
+        'car repair vs replace',
+        'break even repair calculator',
+        'मरम्मत बनाम नया कैलकुलेटर',
+        'റിപ്പയർ കാൽക്കുലേറ്റർ'
+      ],
+      canonicalPath: '/calculators/repair-vs-replace'
+    },
+    type: 'calculator'
   }
-]
+];
 
 export function getToolBySlug(slug: string): ToolDefinition | undefined {
   return TOOLS.find((t) => t.slug === slug)

@@ -46,6 +46,7 @@ import { ExperienceTool } from '../calculators/ExperienceTool'
 import { IndianChequeStudioTool } from '../calculators/IndianChequeStudioTool'
 import { GoldExchangeCalculatorTool } from '../calculators/GoldExchangeCalculatorTool'
 import { FriendshipRelationshipCostTool } from '../calculators/FriendshipRelationshipCostTool'
+import { RepairVsReplaceTool } from '../calculators/RepairVsReplaceTool'
 
 // Land & Survey Calculators
 import { CentToSqftTool } from '../calculators/CentToSqftTool'
@@ -124,6 +125,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'indian-cheque-studio': IndianChequeStudioTool,
   'gold-exchange-calculator': GoldExchangeCalculatorTool,
   'friendship-relationship-cost': FriendshipRelationshipCostTool,
+  'repair-vs-replace': RepairVsReplaceTool,
 
   // Land & Survey
   'cent-to-sqft': CentToSqftTool,

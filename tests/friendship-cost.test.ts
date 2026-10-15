@@ -266,13 +266,13 @@ describe('Friendship & Relationship Cost Calculator Suite', () => {
   // 4. REGISTRY & ROUTING INTEGRITY
   describe('Tool Registry & Sitemap Integration', () => {
     it('is registered in TOOLS array as tool #65', () => {
-      assert.strictEqual(TOOLS.length, 65)
+      assert.strictEqual(TOOLS.length, 66)
       const tool = getToolBySlug('friendship-relationship-cost')
       assert(tool, 'Tool friendship-relationship-cost must exist in TOOLS')
       assert.strictEqual(tool.category, 'money')
       assert.strictEqual(tool.seo.canonicalPath, '/calculators/friendship-relationship-cost')
       assert(tool.seo.title.endsWith('| IndiaTools'))
-      assert.strictEqual(CATEGORIES.money.toolCount, 10)
+      assert.strictEqual(CATEGORIES.money.toolCount, 11)
     })
 
     it('has all 23 language URLs in public/sitemap.xml', () => {
