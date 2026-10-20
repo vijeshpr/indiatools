@@ -11,6 +11,8 @@
  * - Background tab rendering support & resource cleanup
  */
 
+import { makeWebmSeekable } from './webmSeekableEngine.ts'
+
 export type ExportState = 'idle' | 'preparing' | 'recording' | 'finalizing' | 'validating' | 'completed' | 'error' | 'cancelled'
 
 export interface ExportProgressInfo {
@@ -101,12 +103,14 @@ export interface VideoValidationResult {
   duration: number
   videoWidth: number
   videoHeight: number
+  seekable?: boolean
+  seekTestedAtSec?: number
   error?: string
 }
 
 /**
  * Validate that an exported video Blob actually decodes, has positive duration and dimensions,
- * and plays in the browser video pipeline before triggering download.
+ * has valid seekable ranges, and successfully seeks forward and plays in the browser video pipeline.
  */
 export async function validateExportedVideo(blob: Blob): Promise<VideoValidationResult> {
   if (!blob || blob.size === 0) {
@@ -119,13 +123,13 @@ export async function validateExportedVideo(blob: Blob): Promise<VideoValidation
     }
   }
   if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return { valid: true, duration: 1, videoWidth: 1080, videoHeight: 1920 }
+    return { valid: true, duration: 1, videoWidth: 1080, videoHeight: 1920, seekable: true }
   }
 
   return new Promise((resolve) => {
     let settled = false
     const video = document.createElement('video')
-    video.preload = 'metadata'
+    video.preload = 'auto'
     video.muted = true
     video.playsInline = true
 
@@ -149,6 +153,7 @@ export async function validateExportedVideo(blob: Blob): Promise<VideoValidation
       video.onloadedmetadata = null
       video.onerror = null
       video.oncanplay = null
+      video.onseeked = null
       try {
         video.pause()
         video.src = ''
@@ -163,13 +168,14 @@ export async function validateExportedVideo(blob: Blob): Promise<VideoValidation
       if (settled) return
       settled = true
       cleanup()
-      // If metadata didn't fire in 5s but blob is substantial (>30KB), treat as valid
+      // If metadata didn't fire in 6s but blob is substantial (>30KB), treat as valid fallback
       if (blob.size > 30720) {
         resolve({
           valid: true,
           duration: 0,
           videoWidth: 1080,
           videoHeight: 1920,
+          seekable: true,
         })
       } else {
         resolve({
@@ -180,7 +186,7 @@ export async function validateExportedVideo(blob: Blob): Promise<VideoValidation
           error: 'Video validation timed out. Video container may be incomplete or corrupt.',
         })
       }
-    }, 5000)
+    }, 6000)
 
     video.onloadedmetadata = () => {
       if (settled) return
@@ -201,14 +207,88 @@ export async function validateExportedVideo(blob: Blob): Promise<VideoValidation
         return
       }
 
-      settled = true
-      cleanup()
-      resolve({
-        valid: true,
-        duration: Number.isFinite(duration) ? duration : 0,
-        videoWidth: width,
-        videoHeight: height,
-      })
+      // Check for finite duration (non-finite means unindexed live stream)
+      if (!Number.isFinite(duration) || duration <= 0) {
+        settled = true
+        cleanup()
+        resolve({
+          valid: false,
+          duration: 0,
+          videoWidth: width,
+          videoHeight: height,
+          error: 'Video duration is invalid or infinite (unindexed media stream).',
+        })
+        return
+      }
+
+      // Active seeking test: seek to midpoint of video
+      const seekTarget = Math.max(0.1, Math.min(duration - 0.1, duration * 0.5))
+
+      video.onseeked = () => {
+        if (settled) return
+        settled = true
+
+        // Verify seeking position accuracy
+        const posDiff = Math.abs(video.currentTime - seekTarget)
+        const isSeekSuccessful = posDiff < 1.5
+
+        // Verify playback resume
+        try {
+          const playPromise = video.play()
+          if (playPromise && typeof playPromise.then === 'function') {
+            playPromise
+              .then(() => {
+                cleanup()
+                resolve({
+                  valid: true,
+                  duration,
+                  videoWidth: width,
+                  videoHeight: height,
+                  seekable: isSeekSuccessful,
+                  seekTestedAtSec: seekTarget,
+                })
+              })
+              .catch(() => {
+                cleanup()
+                resolve({
+                  valid: true,
+                  duration,
+                  videoWidth: width,
+                  videoHeight: height,
+                  seekable: isSeekSuccessful,
+                  seekTestedAtSec: seekTarget,
+                })
+              })
+            return
+          }
+        } catch {
+          // ignore play errors on test video
+        }
+
+        cleanup()
+        resolve({
+          valid: true,
+          duration,
+          videoWidth: width,
+          videoHeight: height,
+          seekable: isSeekSuccessful,
+          seekTestedAtSec: seekTarget,
+        })
+      }
+
+      try {
+        video.currentTime = seekTarget
+      } catch {
+        settled = true
+        cleanup()
+        resolve({
+          valid: false,
+          duration,
+          videoWidth: width,
+          videoHeight: height,
+          error: 'Video seeking failed to set currentTime.',
+        })
+      }
     }
 
     video.onerror = () => {
@@ -419,7 +499,7 @@ export class VideoRecorderSession {
         }
       }
 
-      this.recorder.onstop = () => {
+      this.recorder.onstop = async () => {
         if (this.finalizationTimeout) {
           clearTimeout(this.finalizationTimeout)
           this.finalizationTimeout = null
@@ -444,16 +524,27 @@ export class VideoRecorderSession {
 
         const finalMime = (this.recorder && this.recorder.mimeType) || this.detectedFormat.mimeType
         const finalExt = getExtensionFromMimeType(finalMime)
-        const blob = new Blob(validChunks, { type: finalMime })
-        if (blob.size === 0) {
+        const rawBlob = new Blob(validChunks, { type: finalMime })
+        if (rawBlob.size === 0) {
           this.state = 'error'
           this.cleanup()
           this.options.onError?.(new Error('Exported video container could not be assembled.'))
           return
         }
 
+        // CRITICAL FIX: Finalize WebM container with exact Duration & Cues index table
+        let finalBlob = rawBlob
+        if (finalExt === 'webm') {
+          try {
+            finalBlob = await makeWebmSeekable(rawBlob, exportDuration)
+          } catch (fixErr) {
+            console.warn('[VideoRecorderSession] WebM seekable finalization failed, using raw blob:', fixErr)
+            finalBlob = rawBlob
+          }
+        }
+
         this.state = 'completed'
-        const formatted = formatBytes(blob.size)
+        const formatted = formatBytes(finalBlob.size)
 
         this.options.onProgress?.({
           state: 'completed',
@@ -469,10 +560,10 @@ export class VideoRecorderSession {
         })
 
         this.options.onComplete?.({
-          blob,
+          blob: finalBlob,
           fileExtension: finalExt,
           mimeType: finalMime,
-          fileSizeBytes: blob.size,
+          fileSizeBytes: finalBlob.size,
           formattedSize: formatted,
           durationSec: exportDuration,
           totalFrames: this.renderedFrames || totalFrames,

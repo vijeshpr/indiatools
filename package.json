@@ -19,6 +19,7 @@
     "@types/three": "^0.186.0",
     "autoprefixer": "^10.6.1",
     "canvas-confetti": "^1.9.4",
+    "fix-webm-duration": "^1.0.6",
     "framer-motion": "^13.4.6",
     "jszip": "^3.10.2",
     "lucide-react": "^1.49.0",

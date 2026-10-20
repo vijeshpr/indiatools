@@ -36,6 +36,13 @@ import {
   DEFAULT_PIXEL_DISPERSION_CONFIG,
   PixelDispersionConfig,
 } from '../src/lib/video/audioVisualizerTypes.ts'
+import {
+  makeWebmBufferSeekable,
+  makeWebmSeekable,
+  scanWebmClusters,
+  buildCuesElement,
+  inspectWebmMetadata,
+} from '../src/lib/video/webmSeekableEngine.ts'
 
 describe('Audio Spectrum & Waveform Video Generator Suite', () => {
   it('should be correctly registered in TOOLS registry', () => {
@@ -296,7 +303,7 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
     assert.ok(emptyRes.error?.includes('empty'))
   })
 
-  it('should manage VideoRecorderSession lifecycle with Triple-Guard finalization', () => {
+  it('should manage VideoRecorderSession lifecycle with Triple-Guard finalization', async () => {
     // Mock MediaStreamTrack
     class MockTrack {
       stopped = false
@@ -406,6 +413,9 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
       // Guard A Test: updateAudioPosition reaching threshold (10 - 0.08 = 9.92)
       // When audio reaches 9.95s, Guard A fires automatically!
       session.updateAudioPosition(9.95)
+
+      // Allow async onstop & makeWebmSeekable processing to complete
+      await new Promise((resolve) => setTimeout(resolve, 20))
 
       assert.strictEqual(session.getState(), 'completed')
       assert.ok(completedResult !== null, 'onComplete should have been called')
@@ -807,5 +817,223 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
         '9:16'
       )
     }, 'Disabled engine exited cleanly')
+  })
+
+  it('should scan WebM clusters and build compliant Cues seek points', () => {
+    function concatBytes(arrays: Uint8Array[]): Uint8Array {
+      let len = 0
+      for (const a of arrays) len += a.length
+      const res = new Uint8Array(len)
+      let p = 0
+      for (const a of arrays) {
+        res.set(a, p)
+        p += a.length
+      }
+      return res
+    }
+
+    function makeElem(id: number[], data: Uint8Array): Uint8Array {
+      const len = data.length
+      let vint: Uint8Array
+      if (len < 0x7f) vint = new Uint8Array([0x80 | len])
+      else vint = new Uint8Array([0x40 | (len >> 8), len & 0xff])
+      return concatBytes([new Uint8Array(id), vint, data])
+    }
+
+    // 1. EBML Header
+    const docType = makeElem([0x42, 0x82], new TextEncoder().encode('webm'))
+    const ebml = makeElem([0x1a, 0x45, 0xdf, 0xa3], docType)
+
+    // 2. Info & Tracks
+    const timeScale = makeElem([0x2a, 0xd7, 0xb1], new Uint8Array([0x0f, 0x42, 0x40]))
+    const info = makeElem([0x15, 0x49, 0xa9, 0x66], timeScale)
+    const tracks = makeElem([0x16, 0x54, 0xae, 0x6b], new Uint8Array([0xae, 0x83, 0xd7, 0x81, 0x01]))
+
+    // 3. Three Clusters at 0ms, 5000ms, 10000ms
+    const c1Time = makeElem([0xe7], new Uint8Array([0]))
+    const c1 = makeElem([0x1f, 0x43, 0xb6, 0x75], c1Time)
+
+    const c2Time = makeElem([0xe7], new Uint8Array([0x13, 0x88])) // 5000ms
+    const c2 = makeElem([0x1f, 0x43, 0xb6, 0x75], c2Time)
+
+    const c3Time = makeElem([0xe7], new Uint8Array([0x27, 0x10])) // 10000ms
+    const c3 = makeElem([0x1f, 0x43, 0xb6, 0x75], c3Time)
+
+    const segmentPayload = concatBytes([info, tracks, c1, c2, c3])
+    const segmentUnknown = new Uint8Array([
+      0x18, 0x53, 0x80, 0x67,
+      0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+    ])
+
+    const rawWebm = concatBytes([ebml, segmentUnknown, segmentPayload])
+
+    // Scan
+    const scanned = scanWebmClusters(rawWebm)
+    assert.ok(scanned, 'Cluster scanner must successfully parse WebM')
+    assert.strictEqual(scanned.clusters.length, 3, 'Must detect exactly 3 clusters')
+    assert.strictEqual(scanned.clusters[0].timecode, 0)
+    assert.strictEqual(scanned.clusters[1].timecode, 5000)
+    assert.strictEqual(scanned.clusters[2].timecode, 10000)
+
+    // Build Cues
+    const cues = buildCuesElement(scanned.clusters, 1)
+    assert.ok(cues.length > 0, 'Cues element must be non-empty')
+    // Must start with Cues tag [0x1C, 0x53, 0xBB, 0x6B]
+    assert.strictEqual(cues[0], 0x1c)
+    assert.strictEqual(cues[1], 0x53)
+    assert.strictEqual(cues[2], 0xbb)
+    assert.strictEqual(cues[3], 0x6b)
+  })
+
+  it('should inject accurate Duration and Cues for 10-second export', () => {
+    function concatBytes(arrays: Uint8Array[]): Uint8Array {
+      let len = 0
+      for (const a of arrays) len += a.length
+      const res = new Uint8Array(len)
+      let p = 0
+      for (const a of arrays) {
+        res.set(a, p)
+        p += a.length
+      }
+      return res
+    }
+
+    function makeElem(id: number[], data: Uint8Array): Uint8Array {
+      const len = data.length
+      let vint: Uint8Array
+      if (len < 0x7f) vint = new Uint8Array([0x80 | len])
+      else vint = new Uint8Array([0x40 | (len >> 8), len & 0xff])
+      return concatBytes([new Uint8Array(id), vint, data])
+    }
+
+    const docType = makeElem([0x42, 0x82], new TextEncoder().encode('webm'))
+    const ebml = makeElem([0x1a, 0x45, 0xdf, 0xa3], docType)
+    const timeScale = makeElem([0x2a, 0xd7, 0xb1], new Uint8Array([0x0f, 0x42, 0x40]))
+    const info = makeElem([0x15, 0x49, 0xa9, 0x66], timeScale)
+    const tracks = makeElem([0x16, 0x54, 0xae, 0x6b], new Uint8Array([0xae, 0x83, 0xd7, 0x81, 0x01]))
+
+    const c1 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0])))
+    const c2 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0x13, 0x88]))) // 5000ms
+    const c3 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0x27, 0x10]))) // 10000ms
+
+    const segmentPayload = concatBytes([info, tracks, c1, c2, c3])
+    const segmentUnknown = new Uint8Array([
+      0x18, 0x53, 0x80, 0x67,
+      0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+    ])
+
+    const rawWebm = concatBytes([ebml, segmentUnknown, segmentPayload])
+
+    // Remux to seekable 10-second WebM
+    const seekableWebm = makeWebmBufferSeekable(rawWebm, 10.0)
+    assert.ok(seekableWebm.length > rawWebm.length, 'Fixed WebM should include injected Duration and Cues')
+
+    // Inspect
+    const inspected = inspectWebmMetadata(seekableWebm)
+    assert.strictEqual(inspected.isWebm, true, 'Must remain valid WebM')
+    assert.strictEqual(inspected.hasDuration, true, 'Must have Duration element')
+    assert.strictEqual(inspected.durationSec, 10, 'Duration must equal 10.0 seconds')
+    assert.strictEqual(inspected.hasCues, true, 'Must have Cues seek table')
+    assert.ok(inspected.cueCount >= 3, 'Must contain CuePoints for all clusters')
+    assert.strictEqual(inspected.isSegmentSizeDefined, true, 'Segment size must be defined and finite')
+  })
+
+  it('should accurately index and support seek points for 30-second export (25%, 50%, 75%)', () => {
+    function concatBytes(arrays: Uint8Array[]): Uint8Array {
+      let len = 0
+      for (const a of arrays) len += a.length
+      const res = new Uint8Array(len)
+      let p = 0
+      for (const a of arrays) {
+        res.set(a, p)
+        p += a.length
+      }
+      return res
+    }
+
+    function makeElem(id: number[], data: Uint8Array): Uint8Array {
+      const len = data.length
+      let vint: Uint8Array
+      if (len < 0x7f) vint = new Uint8Array([0x80 | len])
+      else vint = new Uint8Array([0x40 | (len >> 8), len & 0xff])
+      return concatBytes([new Uint8Array(id), vint, data])
+    }
+
+    const docType = makeElem([0x42, 0x82], new TextEncoder().encode('webm'))
+    const ebml = makeElem([0x1a, 0x45, 0xdf, 0xa3], docType)
+    const timeScale = makeElem([0x2a, 0xd7, 0xb1], new Uint8Array([0x0f, 0x42, 0x40]))
+    const info = makeElem([0x15, 0x49, 0xa9, 0x66], timeScale)
+    const tracks = makeElem([0x16, 0x54, 0xae, 0x6b], new Uint8Array([0xae, 0x83, 0xd7, 0x81, 0x01]))
+
+    // Clusters at 0ms, 7500ms (25%), 15000ms (50%), 22500ms (75%), 30000ms (100%)
+    const c0 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0])))
+    const c25 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0x1d, 0x4c]))) // 7500ms
+    const c50 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0x3a, 0x98]))) // 15000ms
+    const c75 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0x57, 0xe4]))) // 22500ms
+    const c100 = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0x75, 0x30]))) // 30000ms
+
+    const segmentPayload = concatBytes([info, tracks, c0, c25, c50, c75, c100])
+    const segmentUnknown = new Uint8Array([
+      0x18, 0x53, 0x80, 0x67,
+      0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+    ])
+
+    const rawWebm = concatBytes([ebml, segmentUnknown, segmentPayload])
+
+    // Remux to 30.0s seekable
+    const seekableWebm = makeWebmBufferSeekable(rawWebm, 30.0)
+    const inspected = inspectWebmMetadata(seekableWebm)
+
+    assert.strictEqual(inspected.durationSec, 30, 'Duration must be exactly 30 seconds')
+    assert.strictEqual(inspected.hasCues, true, 'Must have Cues seek index')
+    assert.ok(inspected.cueCount >= 5, 'Must have at least 5 CuePoints')
+    assert.strictEqual(inspected.isSegmentSizeDefined, true, 'Segment size must be defined')
+  })
+
+  it('should convert Blob via makeWebmSeekable asynchronously', async () => {
+    function concatBytes(arrays: Uint8Array[]): Uint8Array {
+      let len = 0
+      for (const a of arrays) len += a.length
+      const res = new Uint8Array(len)
+      let p = 0
+      for (const a of arrays) {
+        res.set(a, p)
+        p += a.length
+      }
+      return res
+    }
+
+    function makeElem(id: number[], data: Uint8Array): Uint8Array {
+      const len = data.length
+      let vint: Uint8Array
+      if (len < 0x7f) vint = new Uint8Array([0x80 | len])
+      else vint = new Uint8Array([0x40 | (len >> 8), len & 0xff])
+      return concatBytes([new Uint8Array(id), vint, data])
+    }
+
+    const docType = makeElem([0x42, 0x82], new TextEncoder().encode('webm'))
+    const ebml = makeElem([0x1a, 0x45, 0xdf, 0xa3], docType)
+    const timeScale = makeElem([0x2a, 0xd7, 0xb1], new Uint8Array([0x0f, 0x42, 0x40]))
+    const info = makeElem([0x15, 0x49, 0xa9, 0x66], timeScale)
+    const tracks = makeElem([0x16, 0x54, 0xae, 0x6b], new Uint8Array([0xae, 0x83, 0xd7, 0x81, 0x01]))
+    const cluster = makeElem([0x1f, 0x43, 0xb6, 0x75], makeElem([0xe7], new Uint8Array([0])))
+
+    const segmentPayload = concatBytes([info, tracks, cluster])
+    const segmentUnknown = new Uint8Array([
+      0x18, 0x53, 0x80, 0x67,
+      0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+    ])
+
+    const rawWebm = concatBytes([ebml, segmentUnknown, segmentPayload])
+    const rawBlob = new Blob([rawWebm.buffer as ArrayBuffer], { type: 'video/webm' })
+
+    const seekableBlob = await makeWebmSeekable(rawBlob, 15.0)
+    assert.ok(seekableBlob.size > rawBlob.size, 'Seekable blob must have metadata appended')
+
+    const buf = new Uint8Array(await seekableBlob.arrayBuffer())
+    const inspected = inspectWebmMetadata(buf)
+    assert.strictEqual(inspected.hasDuration, true)
+    assert.strictEqual(inspected.durationSec, 15)
+    assert.strictEqual(inspected.hasCues, true)
   })
 })
