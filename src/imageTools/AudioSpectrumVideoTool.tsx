@@ -391,6 +391,9 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     textLayers: INITIAL_TEXT_LAYERS,
     selectedLayerId: 'layer-title',
 
+    visualizerEnabled: true,
+    photoVisible: true,
+
     branding: {
       enabled: false,
       text: 'Made with IndiaTools',
@@ -400,10 +403,15 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     },
   })
 
+  const [visualizerEnabled, setVisualizerEnabled] = useState<boolean>(true)
+  const [photoVisible, setPhotoVisible] = useState<boolean>(true)
+
   // Keep state.effects in sync with effect config states
   useEffect(() => {
     setState((prev) => ({
       ...prev,
+      visualizerEnabled,
+      photoVisible,
       lighting: lightingConfig,
       smoke: smokeConfig,
       particleUniverse: universeConfig,
@@ -411,13 +419,22 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       dottedMatrix: dottedMatrixConfig,
       pixelDispersion: pixelDispersionConfig,
     }))
-  }, [lightingConfig, smokeConfig, universeConfig, shockwaveConfig, dottedMatrixConfig, pixelDispersionConfig])
+  }, [
+    visualizerEnabled,
+    photoVisible,
+    lightingConfig,
+    smokeConfig,
+    universeConfig,
+    shockwaveConfig,
+    dottedMatrixConfig,
+    pixelDispersionConfig,
+  ])
 
   // -------------------------------------------------------------
   // STUDIO WORKSPACE NAVIGATION & UI TOGGLES
   // -------------------------------------------------------------
   const [activeTab, setActiveTab] = useState<
-    'visualizers' | 'combos' | 'dotted-matrix' | 'dispersion' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity'
+    'visualizers' | 'combos' | 'dispersion' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity' | 'dotted-matrix'
   >('visualizers')
   const [visualizerCategory, setVisualizerCategory] = useState<string>('all')
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ml')
@@ -1375,6 +1392,159 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     return VISUALIZER_ENGINES.filter((e) => e.category === visualizerCategory)
   }, [visualizerCategory])
 
+  // Active state helpers for text layers & layer manager
+  const areTextLayersVisible = useMemo(() => {
+    return state.textLayers.some((l) => l.visible !== false)
+  }, [state.textLayers])
+
+  const toggleAllTextLayers = useCallback(() => {
+    const target = !state.textLayers.some((l) => l.visible !== false)
+    setState((prev) => ({
+      ...prev,
+      textLayers: prev.textLayers.map((l) => ({ ...l, visible: target })),
+    }))
+    showToast(target ? 'Text layers visible.' : 'Text layers hidden.', 'info')
+  }, [state.textLayers, showToast])
+
+  const activeEffectsList = useMemo(() => {
+    const activePresetIndex = VISUALIZER_ENGINES.findIndex((e) => e.id === state.activePreset)
+    const activePresetObj = VISUALIZER_ENGINES[activePresetIndex]
+    const presetLabel = activePresetObj ? `#${activePresetIndex + 1} ${activePresetObj.name}` : state.activePreset
+
+    return [
+      {
+        id: 'visualizer',
+        name: 'Visualizer Waveform',
+        subtitle: `Preset: ${presetLabel}`,
+        enabled: visualizerEnabled,
+        icon: Activity,
+        accentColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+        toggle: () => {
+          setVisualizerEnabled((v) => !v)
+          showToast(!visualizerEnabled ? 'Visualizer wave enabled' : 'Visualizer wave hidden', 'info')
+        },
+      },
+      {
+        id: 'dispersion',
+        name: 'Sand / Ember Dissolve',
+        subtitle: 'Audio-reactive particle pixel dispersion',
+        enabled: pixelDispersionConfig.enabled,
+        icon: Flame,
+        accentColor: 'text-orange-400 bg-orange-500/10 border-orange-500/30',
+        toggle: () => {
+          setPixelDispersionConfig((p) => ({ ...p, enabled: !p.enabled }))
+          showToast(!pixelDispersionConfig.enabled ? 'Sand / Ember Dissolve enabled' : 'Sand / Ember Dissolve disabled', 'info')
+        },
+      },
+      {
+        id: 'bass-waves',
+        name: 'Liquid Concentric Bass Waves',
+        subtitle:
+          state.activePreset === 'dotted-harmonic-matrix'
+            ? 'Concentric audio ripples on Preset #14'
+            : 'Available on Preset #14 (Dotted Matrix)',
+        enabled: state.activePreset === 'dotted-harmonic-matrix' && (dottedMatrixConfig.bassWaveReactivity ?? 85) > 0,
+        icon: Waves,
+        accentColor: 'text-sky-400 bg-sky-500/10 border-sky-500/30',
+        toggle: () => {
+          if (state.activePreset !== 'dotted-harmonic-matrix') {
+            setState((p) => ({ ...p, activePreset: 'dotted-harmonic-matrix' }))
+            setDottedMatrixConfig((p) => ({ ...p, bassWaveReactivity: 85 }))
+            showToast('Activated Preset #14 with Liquid Bass Waves!', 'success')
+          } else {
+            const isWaveOn = (dottedMatrixConfig.bassWaveReactivity ?? 85) > 0
+            setDottedMatrixConfig((p) => ({ ...p, bassWaveReactivity: isWaveOn ? 0 : 85 }))
+            showToast(isWaveOn ? 'Bass Waves turned off' : 'Bass Waves turned on', 'info')
+          }
+        },
+      },
+      {
+        id: 'lighting',
+        name: 'Concert Beat Light Show',
+        subtitle: 'Stage strobes, flashes & lasers',
+        enabled: lightingConfig.enabled,
+        icon: Zap,
+        accentColor: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+        toggle: () => {
+          setLightingConfig((p) => ({ ...p, enabled: !p.enabled }))
+          showToast(!lightingConfig.enabled ? 'Beat Light Show enabled' : 'Beat Light Show disabled', 'info')
+        },
+      },
+      {
+        id: 'smoke',
+        name: 'Audio Smoke Atmosphere',
+        subtitle: 'Volumetric drifting smoke simulation',
+        enabled: smokeConfig.enabled,
+        icon: Wind,
+        accentColor: 'text-rose-400 bg-rose-500/10 border-rose-500/30',
+        toggle: () => {
+          setSmokeConfig((p) => ({ ...p, enabled: !p.enabled }))
+          showToast(!smokeConfig.enabled ? 'Audio Smoke enabled' : 'Audio Smoke disabled', 'info')
+        },
+      },
+      {
+        id: 'particles',
+        name: 'Cosmic Particle Universe',
+        subtitle: '3D starfield & ambient dust',
+        enabled: universeConfig.enabled,
+        icon: Radio,
+        accentColor: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+        toggle: () => {
+          setUniverseConfig((p) => ({ ...p, enabled: !p.enabled }))
+          showToast(!universeConfig.enabled ? 'Particle Universe enabled' : 'Particle Universe disabled', 'info')
+        },
+      },
+      {
+        id: 'shockwaves',
+        name: 'Bass Shockwave Rings',
+        subtitle: 'Expanding impact rings on kick transients',
+        enabled: shockwaveConfig.enabled,
+        icon: Disc,
+        accentColor: 'text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/30',
+        toggle: () => {
+          setShockwaveConfig((p) => ({ ...p, enabled: !p.enabled }))
+          showToast(!shockwaveConfig.enabled ? 'Bass Shockwaves enabled' : 'Bass Shockwaves disabled', 'info')
+        },
+      },
+      {
+        id: 'photo',
+        name: 'Photo / Album Backdrop',
+        subtitle: photoName || 'Center artwork / specimen',
+        enabled: photoVisible,
+        icon: ImageIcon,
+        accentColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+        toggle: () => {
+          setPhotoVisible((v) => !v)
+          showToast(!photoVisible ? 'Photo backdrop visible' : 'Photo backdrop hidden', 'info')
+        },
+      },
+      {
+        id: 'typography',
+        name: 'Song Title & Typography',
+        subtitle: `${state.textLayers.filter((l) => l.visible !== false).length} of ${state.textLayers.length} text layers visible`,
+        enabled: areTextLayersVisible,
+        icon: Type,
+        accentColor: 'text-violet-400 bg-violet-500/10 border-violet-500/30',
+        toggle: toggleAllTextLayers,
+      },
+    ]
+  }, [
+    visualizerEnabled,
+    pixelDispersionConfig.enabled,
+    lightingConfig.enabled,
+    smokeConfig.enabled,
+    universeConfig.enabled,
+    shockwaveConfig.enabled,
+    dottedMatrixConfig.bassWaveReactivity,
+    state.activePreset,
+    photoVisible,
+    photoName,
+    areTextLayersVisible,
+    state.textLayers,
+    showToast,
+    toggleAllTextLayers,
+  ])
+
   const renderDottedMatrixControls = (isDedicatedTab: boolean = false) => (
     <div
       className={`space-y-4 ${
@@ -2162,26 +2332,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  setActiveTab('dotted-matrix')
-                  if (state.activePreset !== 'dotted-harmonic-matrix') {
-                    setState((prev) => ({ ...prev, activePreset: 'dotted-harmonic-matrix' }))
-                    showToast('Activated Dotted Harmonic Matrix visualizer!', 'info')
-                  }
-                }}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'dotted-matrix'
-                    ? 'bg-gradient-to-r from-cyan-500/25 to-blue-500/25 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40'
-                    : 'text-cyan-400 hover:text-cyan-200 hover:bg-cyan-950/40 border border-cyan-900/60'
-                }`}
-              >
-                <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-                <span className="font-bold">✨ Photo Halftone & Wave</span>
-                <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded bg-cyan-400 text-black tracking-wider">
-                  FEATURED
-                </span>
-              </button>
-              <button
-                onClick={() => {
                   setActiveTab('dispersion')
                   if (!pixelDispersionConfig.enabled) {
                     setPixelDispersionConfig((p) => ({ ...p, enabled: true }))
@@ -2272,42 +2422,40 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 <Gauge className="w-4 h-4" />
                 DSP Reactivity
               </button>
+              {/* LAST TAB: PHOTO HALFTONE MATRIX & CONCENTRIC BASS WAVES (#14) */}
+              <button
+                onClick={() => {
+                  setActiveTab('dotted-matrix')
+                  if (state.activePreset !== 'dotted-harmonic-matrix') {
+                    setState((prev) => ({ ...prev, activePreset: 'dotted-harmonic-matrix' }))
+                    showToast('Activated Dotted Harmonic Matrix visualizer!', 'info')
+                  }
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeTab === 'dotted-matrix'
+                    ? 'bg-gradient-to-r from-cyan-500/25 to-blue-500/25 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40'
+                    : state.activePreset === 'dotted-harmonic-matrix'
+                    ? 'text-cyan-400 hover:text-cyan-200 hover:bg-cyan-950/40 border border-cyan-500/40'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                <span className="font-bold">✨ Photo Halftone Matrix</span>
+                <span
+                  className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded tracking-wider ${
+                    state.activePreset === 'dotted-harmonic-matrix'
+                      ? 'bg-cyan-400 text-slate-950'
+                      : 'bg-slate-800 text-slate-300'
+                  }`}
+                >
+                  {state.activePreset === 'dotted-harmonic-matrix' ? '✔ ACTIVE' : '#14'}
+                </span>
+              </button>
             </div>
 
             {/* TAB 1: 20 VISUALIZERS */}
             {activeTab === 'visualizers' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                {/* PROMINENT SPOTLIGHT BANNER: DOTTED HARMONIC MATRIX */}
-                <div className="relative overflow-hidden rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/70 via-slate-900/90 to-blue-950/60 p-4 shadow-xl shadow-cyan-950/40">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-cyan-400 text-slate-950 tracking-wider">
-                          🔥 FEATURED VISUALIZER #14
-                        </span>
-                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                          Dotted Harmonic Matrix & Bass Wave
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
-                        Converts uploaded photos into luminous halftone particle dots that physically undulate and ripple in concentric liquid waves with music bass kicks!
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setState((p) => ({ ...p, activePreset: 'dotted-harmonic-matrix' }))
-                        setActiveTab('dotted-matrix')
-                        showToast('Activated Dotted Harmonic Matrix with Bass Waves!', 'success')
-                      }}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-md shadow-cyan-500/25 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Apply & Configure Wave
-                    </button>
-                  </div>
-                </div>
-
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {['all', 'radial', 'linear', 'cinematic', 'minimal', 'hud', 'particle'].map((cat) => (
                     <button
@@ -2324,7 +2472,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[460px] overflow-y-auto pr-1">
                   {filteredVisualizers.map((engine) => {
                     const isSelected = state.activePreset === engine.id
                     return (
@@ -2354,15 +2502,23 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   })}
                 </div>
 
-                {/* DEDICATED INSPECTOR: DOTTED HARMONIC MATRIX (Section 14) */}
-                {state.activePreset === 'dotted-harmonic-matrix' && renderDottedMatrixControls(false)}
-              </div>
-            )}
-
-            {/* TAB: DEDICATED PHOTO HALFTONE & BASS WAVE MATRIX */}
-            {activeTab === 'dotted-matrix' && (
-              <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                {renderDottedMatrixControls(true)}
+                {state.activePreset === 'dotted-harmonic-matrix' && (
+                  <div className="p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-500/30 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+                      <span className="text-slate-300">
+                        <strong className="text-cyan-300">Preset #14 (Dotted Harmonic Matrix)</strong> is active. You can customize the halftone dots and liquid waves in the last tab.
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('dotted-matrix')}
+                      className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition-all shrink-0 flex items-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Open Halftone Tab →
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -3444,6 +3600,13 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* TAB 8 (LAST TAB): DEDICATED PHOTO HALFTONE & BASS WAVE MATRIX (PRESET #14) */}
+            {activeTab === 'dotted-matrix' && (
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1 animate-in fade-in duration-200">
+                {renderDottedMatrixControls(true)}
+              </div>
+            )}
           </div>
 
           {/* RIGHT COLUMN: Master Live Preview & Timeline Transport (5 cols) */}
@@ -3569,6 +3732,125 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     className="w-20 accent-cyan-500 h-1 bg-slate-800 rounded-lg"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* ACTIVE EFFECTS STACK & LAYER MANAGER (Side Tick / Untick Controls) */}
+            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl space-y-3.5">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                    Active Effects Stack
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    {activeEffectsList.filter((e) => e.enabled).length} / {activeEffectsList.length} Active
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      setVisualizerEnabled(true)
+                      setPixelDispersionConfig((p) => ({ ...p, enabled: true }))
+                      setLightingConfig((p) => ({ ...p, enabled: true }))
+                      setSmokeConfig((p) => ({ ...p, enabled: true }))
+                      setUniverseConfig((p) => ({ ...p, enabled: true }))
+                      setShockwaveConfig((p) => ({ ...p, enabled: true }))
+                      setPhotoVisible(true)
+                      if (state.activePreset === 'dotted-harmonic-matrix') {
+                        setDottedMatrixConfig((p) => ({ ...p, bassWaveReactivity: 85 }))
+                      }
+                      setState((p) => ({
+                        ...p,
+                        textLayers: p.textLayers.map((l) => ({ ...l, visible: true })),
+                      }))
+                      showToast('All effects enabled!', 'success')
+                    }}
+                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all"
+                    title="Enable All Visual Effects"
+                  >
+                    All ON
+                  </button>
+                  <button
+                    onClick={() => {
+                      setVisualizerEnabled(true)
+                      setPhotoVisible(true)
+                      setPixelDispersionConfig((p) => ({ ...p, enabled: false }))
+                      setLightingConfig((p) => ({ ...p, enabled: false }))
+                      setSmokeConfig((p) => ({ ...p, enabled: false }))
+                      setUniverseConfig((p) => ({ ...p, enabled: false }))
+                      setShockwaveConfig((p) => ({ ...p, enabled: false }))
+                      showToast('Minimalist mode: Background atmospheric effects disabled.', 'info')
+                    }}
+                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
+                    title="Keep only wave and photo"
+                  >
+                    Minimal
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Tick to enable, untick to remove effect from preview & video export:</span>
+              </div>
+
+              <div className="space-y-1.5 max-h-[340px] overflow-y-auto pr-1">
+                {activeEffectsList.map((effect) => {
+                  const Icon = effect.icon
+                  return (
+                    <div
+                      key={effect.id}
+                      onClick={effect.toggle}
+                      className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
+                        effect.enabled
+                          ? 'bg-slate-800/60 border-slate-700/80 hover:bg-slate-800'
+                          : 'bg-slate-950/40 border-slate-900/80 opacity-60 hover:opacity-90'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {/* Checkbox with tick mark */}
+                        <div
+                          className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all shrink-0 ${
+                            effect.enabled
+                              ? 'bg-cyan-500 border-cyan-400 text-slate-950 font-black shadow-sm shadow-cyan-500/50'
+                              : 'bg-slate-900 border-slate-700 text-transparent'
+                          }`}
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        </div>
+
+                        <div className={`p-1.5 rounded-lg border shrink-0 ${effect.accentColor}`}>
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+
+                        <div className="min-w-0">
+                          <span
+                            className={`text-xs font-semibold block truncate ${
+                              effect.enabled ? 'text-white' : 'text-slate-400'
+                            }`}
+                          >
+                            {effect.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block truncate">
+                            {effect.subtitle}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 ml-2">
+                        <span
+                          className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-full ${
+                            effect.enabled
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              : 'bg-slate-800 text-slate-500 border border-slate-700'
+                          }`}
+                        >
+                          {effect.enabled ? '✔ Active' : '✕ Disabled'}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>

@@ -154,7 +154,9 @@ export function renderStudioComposition(
   }
 
   // 5. Layer 3: Render Photo / Album Artwork Composition Layer
-  drawPhotoCompositionLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+  if (state.photoVisible !== false) {
+    drawPhotoCompositionLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+  }
 
   // 5.5 SPECIAL FX #1: Audio-Reactive Particle Pixel Dispersion ("Sand / Ember Dissolve")
   if (state.pixelDispersion && state.pixelDispersion.enabled) {
@@ -179,29 +181,31 @@ export function renderStudioComposition(
   }
 
   // 7. Layer 5: Render One of the 20 Visualizer Engines
-  const currentPhotoForVisualizer = photoImages[state.activePhotoIndex] || photoImages[0] || null
-  renderVisualizerEngine(state.activePreset, {
-    ctx,
-    width,
-    height,
-    freqData,
-    timeData,
-    bands,
-    palette,
-    currentTime,
-    peakManager,
-    barCount: state.barCount,
-    sensitivity: state.sensitivity,
-    bassReactivity: state.bassSensitivity,
-    glowStrength: 1.2,
-    spinSpeed: 0.35,
-    centerX,
-    centerY,
-    primaryRadius,
-    enableVinylRotation: state.enableVinylRotation,
-    currentPhoto: currentPhotoForVisualizer,
-    dottedMatrixConfig: state.dottedMatrix,
-  })
+  if (state.visualizerEnabled !== false) {
+    const currentPhotoForVisualizer = photoImages[state.activePhotoIndex] || photoImages[0] || null
+    renderVisualizerEngine(state.activePreset, {
+      ctx,
+      width,
+      height,
+      freqData,
+      timeData,
+      bands,
+      palette,
+      currentTime,
+      peakManager,
+      barCount: state.barCount,
+      sensitivity: state.sensitivity,
+      bassReactivity: state.bassSensitivity,
+      glowStrength: 1.2,
+      spinSpeed: 0.35,
+      centerX,
+      centerY,
+      primaryRadius,
+      enableVinylRotation: state.enableVinylRotation,
+      currentPhoto: currentPhotoForVisualizer,
+      dottedMatrixConfig: state.dottedMatrix,
+    })
+  }
 
   // 8. Layer 6: Bass Shockwaves & Concentric Energy Rings
   if (state.shockwaves && state.shockwaves.enabled) {

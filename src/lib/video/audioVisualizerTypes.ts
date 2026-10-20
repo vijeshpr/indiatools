@@ -562,12 +562,14 @@ export interface CompositionState {
   // Photo & Slideshow
   photos: PhotoAsset[]
   activePhotoIndex: number
+  photoVisible?: boolean
   imageLayoutMode: ImageLayoutMode
   slideshowTransition: 'crossfade' | 'zoom' | 'slide' | 'none'
   slideshowSpeed: number // seconds per slide
   enableVinylRotation: boolean
 
   // Particles & Effects
+  visualizerEnabled?: boolean
   particlePreset: ParticlePresetType
   fx: CinematicFxConfig
 
