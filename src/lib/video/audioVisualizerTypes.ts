@@ -481,6 +481,21 @@ export interface ShockwaveConfig {
   color: string
 }
 
+export type DottedMatrixDensity = 'fine' | 'balanced' | 'bold'
+export type DottedMatrixHalftoneMode = 'photo-dots' | 'luminance-size' | 'neon-tint'
+export type DottedMatrixRecoverySpeed = 'slow' | 'balanced' | 'fast'
+
+export interface DottedMatrixConfig {
+  density: DottedMatrixDensity
+  halftoneMode: DottedMatrixHalftoneMode
+  liquidSpreadIntensity: number // 0 - 100
+  recoverySpeed: DottedMatrixRecoverySpeed
+  dotSizeScale: number // 50 - 200 (%)
+  glowIntensity: number // 0 - 100 (%)
+  ambientFlowIntensity: number // 0 - 100 (%)
+  backgroundDarkness: number // 0 - 100 (%)
+}
+
 export interface CompositionState {
   version: 2
   aspectRatio: AspectRatio
@@ -520,11 +535,12 @@ export interface CompositionState {
   particlePreset: ParticlePresetType
   fx: CinematicFxConfig
 
-  // Advanced Visual FX (Lights, Smoke, Particle Universe, Shockwaves)
+  // Advanced Visual FX (Lights, Smoke, Particle Universe, Shockwaves, Dotted Matrix)
   lighting?: LightShowConfig
   smoke?: SmokeConfig
   particleUniverse?: ParticleUniverseConfig
   shockwaves?: ShockwaveConfig
+  dottedMatrix?: DottedMatrixConfig
 
   // Typography Layers
   textLayers: TypographyLayer[]

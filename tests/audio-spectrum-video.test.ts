@@ -23,6 +23,12 @@ import {
 } from '../src/lib/video/audioVisualizerTypes.ts'
 import { STUDIO_TEMPLATES, STUDIO_TEMPLATE_LIST } from '../src/lib/video/studioTemplates.ts'
 import { getGraphemeClusters, getWordSegments } from '../src/lib/video/typographyEngine.ts'
+import {
+  getSpacingFromDensity,
+  parseColor,
+  DottedHarmonicMatrixEngine,
+  DEFAULT_DOTTED_MATRIX_CONFIG,
+} from '../src/lib/video/dottedHarmonicMatrixEngine.ts'
 
 describe('Audio Spectrum & Waveform Video Generator Suite', () => {
   it('should be correctly registered in TOOLS registry', () => {
@@ -391,5 +397,149 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
       ;(globalThis as any).MediaRecorder = origMediaRecorder
       ;(globalThis as any).MediaStream = origMediaStream
     }
+  })
+
+  it('should calculate accurate grid spacing and parse colors for Dotted Harmonic Matrix', () => {
+    // Spacing calculations
+    const fineSpacing = getSpacingFromDensity('fine', 1080, 1920)
+    const balancedSpacing = getSpacingFromDensity('balanced', 1080, 1920)
+    const boldSpacing = getSpacingFromDensity('bold', 1080, 1920)
+
+    assert.ok(fineSpacing < balancedSpacing, 'Fine density must be tighter than balanced')
+    assert.ok(balancedSpacing < boldSpacing, 'Balanced density must be tighter than bold')
+    assert.strictEqual(fineSpacing, 15)
+    assert.strictEqual(balancedSpacing, 24)
+    assert.strictEqual(boldSpacing, 38)
+
+    // Color parser
+    const hexFull = parseColor('#06b6d4')
+    assert.strictEqual(hexFull.r, 6)
+    assert.strictEqual(hexFull.g, 182)
+    assert.strictEqual(hexFull.b, 212)
+
+    const hexShort = parseColor('#fff')
+    assert.strictEqual(hexShort.r, 255)
+    assert.strictEqual(hexShort.g, 255)
+    assert.strictEqual(hexShort.b, 255)
+
+    const rgbStr = parseColor('rgb(255, 100, 50)')
+    assert.strictEqual(rgbStr.r, 255)
+    assert.strictEqual(rgbStr.g, 100)
+    assert.strictEqual(rgbStr.b, 50)
+  })
+
+  it('should render Dotted Harmonic Matrix with halftone sampling and liquid spring physics', () => {
+    const engine = new DottedHarmonicMatrixEngine()
+    assert.ok(engine)
+
+    // Mock CanvasRenderingContext2D
+    const mockCtx = {
+      save: () => {},
+      restore: () => {},
+      fillRect: () => {},
+      beginPath: () => {},
+      arc: () => {},
+      ellipse: () => {},
+      fill: () => {},
+      fillStyle: '',
+      shadowColor: '',
+      shadowBlur: 0,
+    } as any
+
+    const palette = THEME_PALETTES['neon-cyber']
+    const freqData = new Uint8Array(1024).fill(120)
+    const timeData = new Uint8Array(1024).fill(128)
+    const bands = {
+      subBass: 0.8,
+      bass: 0.75,
+      lowMid: 0.4,
+      mid: 0.5,
+      highMid: 0.3,
+      treble: 0.2,
+      overall: 0.6,
+      energy: 0.6,
+      transientIntensity: 0.8,
+      isBeatHit: true,
+      flux: 0.5,
+    }
+
+    // Render frame 1 (Initial grid allocation + beat ripple spawn)
+    engine.render({
+      ctx: mockCtx,
+      width: 1080,
+      height: 1920,
+      freqData,
+      timeData,
+      bands,
+      palette,
+      currentTime: 1.0,
+      peakManager: new PeakHoldManager(),
+      barCount: 64,
+      sensitivity: 1.25,
+      bassReactivity: 1.35,
+      glowStrength: 1.0,
+      spinSpeed: 0.35,
+      centerX: 540,
+      centerY: 960,
+      primaryRadius: 280,
+      dottedMatrixConfig: {
+        ...DEFAULT_DOTTED_MATRIX_CONFIG,
+        liquidSpreadIntensity: 80,
+      },
+    })
+
+    // Render frame 2 (Physics update + spring recovery)
+    engine.render({
+      ctx: mockCtx,
+      width: 1080,
+      height: 1920,
+      freqData,
+      timeData,
+      bands: { ...bands, isBeatHit: false },
+      palette,
+      currentTime: 1.05,
+      peakManager: new PeakHoldManager(),
+      barCount: 64,
+      sensitivity: 1.25,
+      bassReactivity: 1.35,
+      glowStrength: 1.0,
+      spinSpeed: 0.35,
+      centerX: 540,
+      centerY: 960,
+      primaryRadius: 280,
+      dottedMatrixConfig: {
+        ...DEFAULT_DOTTED_MATRIX_CONFIG,
+        liquidSpreadIntensity: 80,
+      },
+    })
+
+    // Zero spread mode test
+    engine.render({
+      ctx: mockCtx,
+      width: 1080,
+      height: 1920,
+      freqData,
+      timeData,
+      bands,
+      palette,
+      currentTime: 1.1,
+      peakManager: new PeakHoldManager(),
+      barCount: 64,
+      sensitivity: 1.25,
+      bassReactivity: 1.35,
+      glowStrength: 1.0,
+      spinSpeed: 0.35,
+      centerX: 540,
+      centerY: 960,
+      primaryRadius: 280,
+      dottedMatrixConfig: {
+        ...DEFAULT_DOTTED_MATRIX_CONFIG,
+        liquidSpreadIntensity: 0,
+      },
+    })
+
+    // Reset clean test
+    engine.reset()
+    assert.ok(true, 'Engine reset executed cleanly without errors')
   })
 })

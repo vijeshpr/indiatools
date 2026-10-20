@@ -159,6 +159,7 @@ export function renderStudioComposition(
   }
 
   // 7. Layer 5: Render One of the 20 Visualizer Engines
+  const currentPhotoForVisualizer = photoImages[state.activePhotoIndex] || photoImages[0] || null
   renderVisualizerEngine(state.activePreset, {
     ctx,
     width,
@@ -178,6 +179,8 @@ export function renderStudioComposition(
     centerY,
     primaryRadius,
     enableVinylRotation: state.enableVinylRotation,
+    currentPhoto: currentPhotoForVisualizer,
+    dottedMatrixConfig: state.dottedMatrix,
   })
 
   // 8. Layer 6: Bass Shockwaves & Concentric Energy Rings
@@ -334,6 +337,11 @@ function drawPhotoCompositionLayer(
   bands: DetailedAudioBands,
   currentTime: number
 ) {
+  // Dotted Harmonic Matrix renders the photo directly through the full-screen halftone dots
+  if (state.activePreset === 'dotted-harmonic-matrix') {
+    return
+  }
+
   const currentPhoto = photoImages[state.activePhotoIndex] || photoImages[0]
   const centerX = width / 2
   const centerY = state.aspectRatio === '9:16' ? height * 0.45 : height / 2

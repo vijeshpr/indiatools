@@ -8,8 +8,10 @@ import {
   DetailedAudioBands,
   ThemeColors,
   VisualizerPreset,
+  DottedMatrixConfig,
 } from './audioVisualizerTypes.ts'
 import { PeakHoldManager } from './audioDspEngine.ts'
+import { studioDottedMatrixEngine } from './dottedHarmonicMatrixEngine.ts'
 
 export interface VisualizerRenderContext {
   ctx: CanvasRenderingContext2D
@@ -30,6 +32,8 @@ export interface VisualizerRenderContext {
   centerY: number
   primaryRadius: number
   enableVinylRotation?: boolean
+  currentPhoto?: HTMLImageElement | null
+  dottedMatrixConfig?: DottedMatrixConfig
 }
 
 /**
@@ -639,35 +643,10 @@ export function drawGlowingRibbonTrails(rc: VisualizerRenderContext) {
 }
 
 // -------------------------------------------------------------
-// 14. Dotted Harmonic Matrix
+// 14. Dotted Harmonic Matrix (Full-Screen Photo Halftone + Liquid Dispersion)
 // -------------------------------------------------------------
 export function drawDottedHarmonicMatrix(rc: VisualizerRenderContext) {
-  const { ctx, width, height, freqData, palette, sensitivity } = rc
-
-  ctx.save()
-  const cols = 24
-  const rows = 12
-  const stepX = width / (cols + 1)
-  const stepY = (height * 0.4) / rows
-  const startY = height * 0.55
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const sampleIdx = Math.floor(((r * cols + c) / (rows * cols)) * (freqData.length * 0.7))
-      const mag = ((freqData[sampleIdx] || 0) / 255) * sensitivity
-      const radius = Math.max(1.5, mag * 8)
-
-      const px = (c + 1) * stepX
-      const py = startY + r * stepY
-
-      ctx.fillStyle = mag > 0.6 ? palette.accent : mag > 0.3 ? palette.primary : 'rgba(255,255,255,0.15)'
-      ctx.beginPath()
-      ctx.arc(px, py, radius, 0, Math.PI * 2)
-      ctx.fill()
-    }
-  }
-
-  ctx.restore()
+  studioDottedMatrixEngine.render(rc)
 }
 
 // -------------------------------------------------------------
