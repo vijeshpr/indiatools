@@ -45,6 +45,8 @@ import {
   HelpCircle,
   Check,
   SlidersHorizontal,
+  RefreshCw,
+  FolderOpen,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -61,6 +63,7 @@ import {
   StudioTemplateId,
   ParticlePresetType,
   TextAnimationStyle,
+  ImageLayoutMode,
   ASPECT_RATIOS,
   THEME_PALETTES,
   SUPPORTED_LANGUAGES,
@@ -79,7 +82,6 @@ import {
   formatTimecode,
   getSupportedVideoMimeType,
 } from '../lib/video/videoExportEngine'
-import { decodeAudioFile } from '../lib/audio/audioProcessor'
 import {
   generateVisualizerDemoSpecimen,
   DEMO_TRACKS,
@@ -197,9 +199,14 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const tool = getToolBySlug('audio-spectrum-waveform-video-generator')!
   const { showToast } = useToast()
 
-  // Audio Playback & Decoding State
+  // -------------------------------------------------------------
+  // AUDIO STATE (File, Buffer, Playback, Time, Drag & Drop)
+  // -------------------------------------------------------------
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null)
+  const [audioFileName, setAudioFileName] = useState<string>('')
+  const [audioDuration, setAudioDuration] = useState<number>(16)
+  const [audioFileSize, setAudioFileSize] = useState<number>(0)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
   const [currentTime, setCurrentTime] = useState<number>(0)
   const [duration, setDuration] = useState<number>(16)
@@ -207,10 +214,25 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const [isMuted, setIsMuted] = useState<boolean>(false)
   const [isLooping, setIsLooping] = useState<boolean>(true)
   const [isLoadingAudio, setIsLoadingAudio] = useState<boolean>(false)
-  const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false)
-  const [audioTitle, setAudioTitle] = useState<string>('Golden Hour Reflections')
+  const [isAudioDragOver, setIsAudioDragOver] = useState<boolean>(false)
 
-  // Composition State
+  // -------------------------------------------------------------
+  // PHOTO STATE (File, Image Element, Thumbnail, Layout, Drag & Drop)
+  // -------------------------------------------------------------
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const [photoName, setPhotoName] = useState<string>('')
+  const [photoDimensions, setPhotoDimensions] = useState<{ width: number; height: number } | null>(null)
+  const [photoImages, setPhotoImages] = useState<HTMLImageElement[]>([])
+  const [isPhotoDragOver, setIsPhotoDragOver] = useState<boolean>(false)
+  const [photoZoom, setPhotoZoom] = useState<number>(1.0)
+  const [photoOffsetY, setPhotoOffsetY] = useState<number>(0)
+  const [photoDarkness, setPhotoDarkness] = useState<number>(35)
+  const [showPhotoFineTune, setShowPhotoFineTune] = useState<boolean>(false)
+
+  // -------------------------------------------------------------
+  // COMPOSITION ENGINE STATE
+  // -------------------------------------------------------------
   const [state, setState] = useState<CompositionState>({
     version: 2,
     aspectRatio: '9:16',
@@ -238,7 +260,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
     photos: [],
     activePhotoIndex: 0,
-    imageLayoutMode: 'album-disc',
+    imageLayoutMode: 'fullscreen-cinematic',
     slideshowTransition: 'crossfade',
     slideshowSpeed: 4,
     enableVinylRotation: true,
@@ -268,14 +290,18 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     },
   })
 
-  // Studio UI Navigation State
-  const [activeTab, setActiveTab] = useState<'visualizers' | 'templates' | 'typography' | 'fx' | 'media'>('visualizers')
+  // -------------------------------------------------------------
+  // STUDIO WORKSPACE NAVIGATION & UI TOGGLES
+  // -------------------------------------------------------------
+  const [activeTab, setActiveTab] = useState<'visualizers' | 'templates' | 'typography' | 'fx'>('visualizers')
   const [visualizerCategory, setVisualizerCategory] = useState<string>('all')
   const [templateCategory, setTemplateCategory] = useState<string>('all')
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ml')
   const [showSafeZones, setShowSafeZones] = useState<boolean>(false)
 
-  // Export State
+  // -------------------------------------------------------------
+  // VIDEO EXPORT MODAL STATE
+  // -------------------------------------------------------------
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false)
   const [isRecording, setIsRecording] = useState<boolean>(false)
   const [targetExportLength, setTargetExportLength] = useState<'15s' | '30s' | '60s' | 'full'>('15s')
@@ -286,10 +312,9 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     remainingSec: number
   }>({ percent: 0, elapsedSec: 0, remainingSec: 0 })
 
-  // Photo image DOM element cache
-  const [photoImages, setPhotoImages] = useState<HTMLImageElement[]>([])
-
-  // Engine references
+  // -------------------------------------------------------------
+  // AUDIO & CANVAS REFS
+  // -------------------------------------------------------------
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
@@ -305,8 +330,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const particleManagerRef = useRef<AtmosphericParticleManager>(new AtmosphericParticleManager('floating-dust', 60))
   const recorderSessionRef = useRef<VideoRecorderSession | null>(null)
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const photoInputRef = useRef<HTMLInputElement | null>(null)
+  const audioFileInputRef = useRef<HTMLInputElement | null>(null)
+  const photoFileInputRef = useRef<HTMLInputElement | null>(null)
 
   // Load Google Fonts on component mount
   useEffect(() => {
@@ -352,15 +377,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }
   }, [volume, isMuted])
 
-  // FFT tuning listener
-  useEffect(() => {
-    if (analyserRef.current) {
-      analyserRef.current.fftSize = state.fftSize
-      analyserRef.current.smoothingTimeConstant = state.smoothing
-    }
-  }, [state.fftSize, state.smoothing])
-
-  // Stop audio playback
+  // Stop audio playback safely
   const stopAllAudio = useCallback(() => {
     if (activeSourceRef.current) {
       try {
@@ -434,10 +451,9 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }
   }, [isPlaying, pauseAudio, playFromOffset])
 
-  // Spacebar hotkey for Play/Pause
+  // Hotkey Spacebar for Play/Pause
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input or textarea
       if (
         document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA' ||
@@ -456,48 +472,62 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleTogglePlay])
 
-  // Handle Seek scrubber
-  const handleSeek = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const targetSec = parseFloat(e.target.value)
-      setCurrentTime(targetSec)
-      playbackStartOffsetRef.current = targetSec
-      if (isPlaying) {
-        playFromOffset(targetSec)
-      }
-    },
-    [isPlaying, playFromOffset]
-  )
-
-  // Handle Audio File Selection
-  const handleLoadAudioFile = useCallback(
+  // -------------------------------------------------------------
+  // AUDIO UPLOAD HANDLERS (Rock-solid local decodeAudioData)
+  // -------------------------------------------------------------
+  const handleProcessAudioFile = useCallback(
     async (file: File) => {
+      if (!file) return
+
       stopAllAudio()
       setIsLoadingAudio(true)
+
       try {
-        const { buffer } = await decodeAudioFile(file)
+        const arrayBuffer = await file.arrayBuffer()
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+        const ctx = new AudioCtx()
+
+        let decodedBuffer: AudioBuffer
+        try {
+          // slice(0) avoids detached arrayBuffer memory errors across browsers
+          const bufferCopy = arrayBuffer.slice(0)
+          decodedBuffer = await new Promise<AudioBuffer>((resolve, reject) => {
+            ctx.decodeAudioData(bufferCopy, resolve, reject).catch?.(reject)
+          })
+        } finally {
+          try {
+            await ctx.close()
+          } catch {}
+        }
+
         setAudioFile(file)
-        setAudioBuffer(buffer)
-        setDuration(buffer.duration)
+        setAudioBuffer(decodedBuffer)
+        setAudioFileName(file.name)
+        setAudioFileSize(file.size)
+        setAudioDuration(decodedBuffer.duration)
+        setDuration(decodedBuffer.duration)
         setCurrentTime(0)
         playbackStartOffsetRef.current = 0
 
-        const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
-        setAudioTitle(cleanName)
+        const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
 
-        // Update layer title
+        // Update title layer
         setState((prev) => ({
           ...prev,
-          duration: buffer.duration,
-          trimEnd: buffer.duration,
+          duration: decodedBuffer.duration,
+          trimEnd: decodedBuffer.duration,
           textLayers: prev.textLayers.map((l) =>
-            l.id === 'layer-title' ? { ...l, text: cleanName } : l
+            l.id === 'layer-title' ? { ...l, text: cleanTitle } : l
           ),
         }))
 
-        showToast(`Loaded ${file.name} (${formatTimeDisplay(buffer.duration)})`, 'success')
+        showToast(`Audio Loaded: ${file.name} (${formatTimeDisplay(decodedBuffer.duration)})`, 'success')
       } catch (err: any) {
-        showToast(err.message || 'Failed to decode audio file.', 'error')
+        showToast(
+          err.message ||
+            'Could not decode audio. Please ensure the file is an uncorrupted MP3, WAV, AAC, M4A, or OGG file.',
+          'error'
+        )
       } finally {
         setIsLoadingAudio(false)
       }
@@ -505,75 +535,191 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     [stopAllAudio, showToast]
   )
 
-  // Handle Demo Track Selection
-  const handleLoadDemo = useCallback(
-    async (genre: DemoAudioGenre) => {
+  const handleAudioFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleProcessAudioFile(e.target.files[0])
+    }
+  }
+
+  const handleRemoveAudio = useCallback(() => {
+    stopAllAudio()
+    setAudioFile(null)
+    setAudioBuffer(null)
+    setAudioFileName('')
+    setAudioFileSize(0)
+    setDuration(16)
+    setCurrentTime(0)
+    playbackStartOffsetRef.current = 0
+    showToast('Audio track removed.', 'info')
+  }, [stopAllAudio, showToast])
+
+  // Demo audio track generator
+  const handleLoadDemoTrack = useCallback(
+    async (genre: DemoAudioGenre = 'synthwave') => {
       stopAllAudio()
       setIsLoadingAudio(true)
       try {
         const demoMeta = DEMO_TRACKS.find((t) => t.id === genre) || DEMO_TRACKS[0]
-        showToast(`Generating instant ${demoMeta.name}...`, 'info')
+        showToast(`Synthesizing ${demoMeta.name}...`, 'info')
         const file = await generateVisualizerDemoSpecimen(genre)
-        await handleLoadAudioFile(file)
+        await handleProcessAudioFile(file)
 
-        // Apply matching template
-        if (genre === 'synthwave') {
-          applyStudioTemplate('neon-night')
-        } else if (genre === 'lofi') {
-          applyStudioTemplate('lofi-night')
-        } else {
-          applyStudioTemplate('cinematic-portrait')
-        }
+        if (genre === 'synthwave') applyStudioTemplate('neon-night')
+        else if (genre === 'lofi') applyStudioTemplate('lofi-night')
+        else applyStudioTemplate('cinematic-portrait')
 
-        showToast(`Sample track ready! Press Play or Spacebar to watch.`, 'success')
+        showToast('Demo specimen ready! Click Play or Spacebar.', 'success')
       } catch (err: any) {
         showToast('Could not synthesize sample track.', 'error')
       } finally {
         setIsLoadingAudio(false)
       }
     },
-    [stopAllAudio, handleLoadAudioFile, showToast]
+    [stopAllAudio, handleProcessAudioFile, showToast]
   )
 
-  // Handle Artwork Photo Selection
-  const handlePhotoUpload = useCallback(
-    (files: FileList | null) => {
-      if (!files || files.length === 0) return
+  // -------------------------------------------------------------
+  // PHOTO UPLOAD HANDLERS (JPG, PNG, WebP with local preview)
+  // -------------------------------------------------------------
+  const handleProcessPhotoFile = useCallback(
+    (file: File) => {
+      if (!file) return
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file (JPG, PNG, WebP).', 'error')
+        return
+      }
 
-      const newPhotos: PhotoAsset[] = []
-      const newImages: HTMLImageElement[] = []
+      if (photoUrl) {
+        URL.revokeObjectURL(photoUrl)
+      }
 
-      Array.from(files).forEach((file, index) => {
-        const url = URL.createObjectURL(file)
-        const img = new Image()
-        img.src = url
-        img.onload = () => {
-          setPhotoImages((prev) => [...prev, img])
-        }
+      const url = URL.createObjectURL(file)
+      const img = new Image()
+      img.onload = () => {
+        setPhotoFile(file)
+        setPhotoUrl(url)
+        setPhotoName(file.name)
+        setPhotoDimensions({ width: img.naturalWidth || 1080, height: img.naturalHeight || 1080 })
+        setPhotoImages([img])
 
-        newPhotos.push({
-          id: `photo-${Date.now()}-${index}`,
+        const newPhotoAsset: PhotoAsset = {
+          id: `photo-${Date.now()}`,
           file,
           url,
           name: file.name,
-          width: 1080,
-          height: 1080,
-          duration: 4,
-          crop: { x: 0, y: 0, zoom: 1, rotation: 0 },
+          width: img.naturalWidth || 1080,
+          height: img.naturalHeight || 1080,
+          duration: 16,
+          crop: { x: 0, y: photoOffsetY, zoom: photoZoom, rotation: photoDarkness },
           filters: { brightness: 100, contrast: 100, saturation: 100, warmth: 0, vignette: 0 },
-        })
-      })
+        }
 
-      setState((prev) => ({
-        ...prev,
-        photos: [...prev.photos, ...newPhotos],
-      }))
-      showToast(`${files.length} photo(s) added successfully!`, 'success')
+        setState((prev) => ({
+          ...prev,
+          photos: [newPhotoAsset],
+          activePhotoIndex: 0,
+        }))
+
+        showToast(`Photo Loaded: ${file.name}`, 'success')
+      }
+
+      img.onerror = () => {
+        showToast('Failed to load image file. Please try another photo.', 'error')
+      }
+
+      img.src = url
     },
-    [showToast]
+    [photoUrl, photoOffsetY, photoZoom, photoDarkness, showToast]
   )
 
-  // Apply One-Click Studio Template
+  const handlePhotoFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleProcessPhotoFile(e.target.files[0])
+    }
+  }
+
+  const handleRemovePhoto = useCallback(() => {
+    if (photoUrl) {
+      URL.revokeObjectURL(photoUrl)
+    }
+    setPhotoFile(null)
+    setPhotoUrl(null)
+    setPhotoName('')
+    setPhotoDimensions(null)
+    setPhotoImages([])
+    setState((prev) => ({
+      ...prev,
+      photos: [],
+      activePhotoIndex: 0,
+    }))
+    showToast('Photo removed.', 'info')
+  }, [photoUrl, showToast])
+
+  // Generate Sample Artwork Canvas in 1 click
+  const handleLoadSampleArtwork = useCallback(() => {
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = 1080
+    tempCanvas.height = 1080
+    const ctx = tempCanvas.getContext('2d')
+    if (!ctx) return
+
+    // Draw radiant aesthetic artwork
+    const grad = ctx.createRadialGradient(540, 540, 50, 540, 540, 600)
+    grad.addColorStop(0, '#f97316')
+    grad.addColorStop(0.4, '#8b5cf6')
+    grad.addColorStop(0.8, '#06b6d4')
+    grad.addColorStop(1, '#090a0f')
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, 1080, 1080)
+
+    // Cosmic stardust specks
+    ctx.fillStyle = '#ffffff'
+    for (let i = 0; i < 200; i++) {
+      const rx = Math.random() * 1080
+      const ry = Math.random() * 1080
+      const r = Math.random() * 3 + 1
+      ctx.globalAlpha = Math.random() * 0.8 + 0.2
+      ctx.beginPath()
+      ctx.arc(rx, ry, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    ctx.globalAlpha = 1.0
+
+    tempCanvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], 'Sample_Cosmic_Artwork.png', { type: 'image/png' })
+        handleProcessPhotoFile(file)
+      }
+    }, 'image/png')
+  }, [handleProcessPhotoFile])
+
+  // Sync photo zoom & darkness into composition state
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      photos: prev.photos.map((p, idx) =>
+        idx === 0
+          ? {
+              ...p,
+              crop: { x: 0, y: photoOffsetY, zoom: photoZoom, rotation: photoDarkness },
+            }
+          : p
+      ),
+    }))
+  }, [photoZoom, photoOffsetY, photoDarkness])
+
+  // Change image presentation layout mode
+  const handleSetImageLayoutMode = (mode: ImageLayoutMode) => {
+    setState((prev) => ({
+      ...prev,
+      imageLayoutMode: mode,
+      backgroundMode: mode === 'album-disc' ? 'blurred-cover' : prev.backgroundMode,
+    }))
+  }
+
+  // -------------------------------------------------------------
+  // STUDIO TEMPLATES & INDIC LANGUAGE
+  // -------------------------------------------------------------
   const applyStudioTemplate = useCallback(
     (templateId: StudioTemplateId) => {
       const t = STUDIO_TEMPLATES[templateId]
@@ -606,7 +752,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     [currentLanguage, showToast]
   )
 
-  // Language switcher: updates template text to native scripts
   const handleSwitchLanguage = useCallback(
     (lang: SupportedLanguage) => {
       setCurrentLanguage(lang)
@@ -640,32 +785,14 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           }),
         }))
       }
-      showToast(`Switched typography script to ${fontMeta.nativeName} (${fontMeta.name})`, 'info')
+      showToast(`Switched typography to ${fontMeta.nativeName} (${fontMeta.name})`, 'info')
     },
     [state.activeTemplateId, showToast]
   )
 
-  // Clean up on component unmount
-  useEffect(() => {
-    return () => {
-      stopAllAudio()
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-      if (recorderSessionRef.current) {
-        recorderSessionRef.current.cancel()
-      }
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        try {
-          audioContextRef.current.close()
-        } catch {
-          // ignore
-        }
-      }
-    }
-  }, [stopAllAudio])
-
-  // Canvas Main Render Loop (60 FPS)
+  // -------------------------------------------------------------
+  // CANVAS RENDER LOOP (60 FPS with A/V sync)
+  // -------------------------------------------------------------
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -689,7 +816,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       const height = canvas.height
       const nowSec = performance.now() / 1000
 
-      // Compute precise current playback time
       let renderTime = currentTime
       if (isPlaying && audioContextRef.current) {
         const elapsed = audioContextRef.current.currentTime - playbackStartTimeRef.current
@@ -697,12 +823,11 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         setCurrentTime(renderTime)
       }
 
-      // Extract frequency and time domain data from Web Audio Analyser
       if (analyserRef.current && isPlaying) {
         analyserRef.current.getByteFrequencyData(freqData)
         analyserRef.current.getByteTimeDomainData(timeData)
       } else {
-        // Idle breathing visualizer movement when audio is paused
+        // Idle gentle breathing animation when audio is paused
         for (let i = 0; i < freqData.length; i++) {
           freqData[i] = Math.max(0, Math.sin(nowSec * 2.2 + i * 0.12) * 32 + 18)
         }
@@ -711,10 +836,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         }
       }
 
-      // Advanced DSP 6-band logarithmic envelope analysis
       const bands = dspAnalyzerRef.current.analyze(freqData, renderTime)
 
-      // Master Studio Composition Frame Rendering
       const compositionStateSnapshot: CompositionState = {
         ...state,
         currentTime: renderTime,
@@ -734,7 +857,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         height
       )
 
-      // Optional Safe-Zones Guide Overlay (Reels / Shorts engagement buttons and caption safety)
       if (showSafeZones && state.aspectRatio === '9:16') {
         drawReelsSafeZoneOverlay(ctx, width, height)
       }
@@ -752,11 +874,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }
   }, [state, isPlaying, duration, photoImages, showSafeZones])
 
-  // Helper: Draw Safe-Zones Overlay
   const drawReelsSafeZoneOverlay = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.save()
-
-    // Semi-transparent safe zone bounding guide
     ctx.strokeStyle = 'rgba(239, 68, 68, 0.75)'
     ctx.lineWidth = 3
     ctx.setLineDash([8, 8])
@@ -768,29 +887,22 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
     ctx.strokeRect(safeLeft, safeTop, safeRight - safeLeft, safeBottom - safeTop)
 
-    // Instagram Reels icons zone (Right Side)
     ctx.fillStyle = 'rgba(239, 68, 68, 0.18)'
     ctx.fillRect(safeRight, safeTop, width - safeRight, safeBottom - safeTop)
-
-    // Bottom caption zone
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.18)'
     ctx.fillRect(0, safeBottom, width, height - safeBottom)
-
-    // Header profile zone
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.18)'
     ctx.fillRect(0, 0, width, safeTop)
 
-    // Text label
     ctx.setLineDash([])
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 24px sans-serif'
     ctx.textAlign = 'center'
     ctx.fillText('⚡ REELS / SHORTS SAFE ZONE (Keep text inside dashed box)', width / 2, safeTop - 20)
-
     ctx.restore()
   }
 
-  // Handle Video Recording & Export Execution
+  // -------------------------------------------------------------
+  // VIDEO RECORDING & EXPORT EXECUTION
+  // -------------------------------------------------------------
   const handleStartExport = useCallback(async () => {
     const canvas = canvasRef.current
     if (!canvas) {
@@ -799,7 +911,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }
 
     if (!audioBuffer) {
-      showToast('Please upload an audio track or load a demo before exporting.', 'error')
+      showToast('Please upload an audio track or pick a demo before exporting.', 'error')
       return
     }
 
@@ -810,7 +922,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       return
     }
 
-    // Determine target seconds
     let targetSeconds = audioBuffer.duration
     if (targetExportLength === '15s') targetSeconds = Math.min(15, audioBuffer.duration)
     else if (targetExportLength === '30s') targetSeconds = Math.min(30, audioBuffer.duration)
@@ -839,7 +950,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         setIsRecording(false)
         stopAllAudio()
 
-        const cleanTitle = (audioTitle || 'music_video').replace(/[^a-zA-Z0-9_-]/g, '_')
+        const cleanTitle = (audioFileName || 'music_video').replace(/[^a-zA-Z0-9_-]/g, '_')
         const filename = `IndiaTools_${cleanTitle}_${state.activePreset}_${state.aspectRatio.replace(':', 'x')}.${ext}`
         downloadBlob(blob, filename)
 
@@ -855,13 +966,10 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     })
 
     recorderSessionRef.current = session
-
-    // Rewind to 0 and begin capture
     await playFromOffset(0)
     session.start()
-  }, [audioBuffer, targetExportLength, exportFps, audioTitle, state.activePreset, state.aspectRatio, getAudioContext, playFromOffset, stopAllAudio, showToast])
+  }, [audioBuffer, targetExportLength, exportFps, audioFileName, state.activePreset, state.aspectRatio, getAudioContext, playFromOffset, stopAllAudio, showToast])
 
-  // Cancel video export
   const handleCancelExport = useCallback(() => {
     if (recorderSessionRef.current) {
       recorderSessionRef.current.cancel()
@@ -876,7 +984,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     return state.textLayers.find((l) => l.id === state.selectedLayerId) || state.textLayers[0]
   }, [state.textLayers, state.selectedLayerId])
 
-  // Update selected typography layer property
   const updateSelectedLayer = (updates: Partial<TypographyLayer>) => {
     if (!selectedLayer) return
     setState((prev) => ({
@@ -887,13 +994,11 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }))
   }
 
-  // Filtered visualizers
   const filteredVisualizers = useMemo(() => {
     if (visualizerCategory === 'all') return VISUALIZER_ENGINES
     return VISUALIZER_ENGINES.filter((e) => e.category === visualizerCategory)
   }, [visualizerCategory])
 
-  // Filtered templates
   const templateList = useMemo(() => {
     const all = Object.values(STUDIO_TEMPLATES)
     if (templateCategory === 'all') return all
@@ -903,7 +1008,358 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   return (
     <ToolPageLayout tool={tool}>
       <div className="space-y-6">
-        {/* Top Studio Bar */}
+        {/* ========================================================= */}
+        {/* 1. VISIBLE FIRST-USE 5-STEP INSTRUCTIONS BANNER           */}
+        {/* ========================================================= */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 backdrop-blur-xl shadow-xl">
+          <div className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5" />
+            Quick 5-Step Video Creator Workflow
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
+            <div className="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs shrink-0">
+                1
+              </span>
+              <div>
+                <span className="font-semibold text-white block">Upload Audio</span>
+                <span className="text-[11px] text-slate-400">MP3, WAV, AAC</span>
+              </div>
+            </div>
+            <div className="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center text-xs shrink-0">
+                2
+              </span>
+              <div>
+                <span className="font-semibold text-white block">Upload Photo</span>
+                <span className="text-[11px] text-slate-400">JPG, PNG, WebP</span>
+              </div>
+            </div>
+            <div className="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 font-bold flex items-center justify-center text-xs shrink-0">
+                3
+              </span>
+              <div>
+                <span className="font-semibold text-white block">Pick Visualizer</span>
+                <span className="text-[11px] text-slate-400">20 Styles Available</span>
+              </div>
+            </div>
+            <div className="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs shrink-0">
+                4
+              </span>
+              <div>
+                <span className="font-semibold text-white block">Lyrics & Style</span>
+                <span className="text-[11px] text-slate-400">5 Indic Languages</span>
+              </div>
+            </div>
+            <div className="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 font-bold flex items-center justify-center text-xs shrink-0">
+                5
+              </span>
+              <div>
+                <span className="font-semibold text-white block">Export Video</span>
+                <span className="text-[11px] text-slate-400">1080p Reels / Shorts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* 2. DEDICATED MEDIA ASSETS STATION (AUDIO & PHOTO UPLOADS) */}
+        {/* ========================================================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* ---------------- CARD A: AUDIO UPLOAD STATION ---------------- */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              setIsAudioDragOver(true)
+            }}
+            onDragLeave={() => setIsAudioDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setIsAudioDragOver(false)
+              if (e.dataTransfer.files?.[0]) handleProcessAudioFile(e.dataTransfer.files[0])
+            }}
+            className={`bg-slate-900/95 border-2 rounded-2xl p-5 shadow-xl transition-all ${
+              isAudioDragOver
+                ? 'border-emerald-500 bg-emerald-950/30'
+                : 'border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <input
+              ref={audioFileInputRef}
+              type="file"
+              accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac"
+              className="hidden"
+              onChange={handleAudioFileInputChange}
+            />
+
+            {!audioBuffer ? (
+              <div className="flex flex-col items-center justify-center text-center py-4 space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shadow-lg">
+                  <Music className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Upload Your Audio Song / Music</h3>
+                  <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                    MP3, WAV, AAC, M4A, or OGG. Processed 100% locally in your browser.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 flex-wrap justify-center">
+                  <button
+                    onClick={() => audioFileInputRef.current?.click()}
+                    disabled={isLoadingAudio}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/25 transition-all transform hover:scale-105"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {isLoadingAudio ? 'Decoding Audio...' : 'Choose Audio File'}
+                  </button>
+
+                  <button
+                    onClick={() => handleLoadDemoTrack('synthwave')}
+                    disabled={isLoadingAudio}
+                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all border border-slate-700"
+                    title="Synthesizes in-browser electronic beat specimen"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    Instant Demo Synth
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Audio Loaded State */
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Audio Loaded Ready
+                  </span>
+                  <span className="text-[11px] font-mono text-slate-400">
+                    {formatTimeDisplay(audioDuration)} • {(audioFileSize / (1024 * 1024)).toFixed(1)} MB
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleTogglePlay}
+                    className="p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all shrink-0"
+                    title={isPlaying ? 'Pause' : 'Play'}
+                  >
+                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-white truncate">{audioFileName}</div>
+                    <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1 mt-0.5">
+                      <span>{formatTimeDisplay(currentTime)}</span>
+                      <span>/</span>
+                      <span>{formatTimeDisplay(audioDuration)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+                  <button
+                    onClick={() => audioFileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all font-semibold"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                    Replace Audio
+                  </button>
+                  <button
+                    onClick={handleRemoveAudio}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-all font-semibold"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remove Audio
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ---------------- CARD B: PHOTO UPLOAD STATION ---------------- */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              setIsPhotoDragOver(true)
+            }}
+            onDragLeave={() => setIsPhotoDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setIsPhotoDragOver(false)
+              if (e.dataTransfer.files?.[0]) handleProcessPhotoFile(e.dataTransfer.files[0])
+            }}
+            className={`bg-slate-900/95 border-2 rounded-2xl p-5 shadow-xl transition-all ${
+              isPhotoDragOver
+                ? 'border-cyan-500 bg-cyan-950/30'
+                : 'border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <input
+              ref={photoFileInputRef}
+              type="file"
+              accept="image/*,.jpg,.jpeg,.png,.webp,.gif"
+              className="hidden"
+              onChange={handlePhotoFileInputChange}
+            />
+
+            {!photoFile ? (
+              <div className="flex flex-col items-center justify-center text-center py-4 space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30 shadow-lg">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Upload Your Photo / Cover Art</h3>
+                  <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                    JPG, PNG, or WebP. Used as real video background or spinning album art.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 flex-wrap justify-center">
+                  <button
+                    onClick={() => photoFileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-lg shadow-cyan-600/25 transition-all transform hover:scale-105"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Choose Photo File
+                  </button>
+
+                  <button
+                    onClick={handleLoadSampleArtwork}
+                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all border border-slate-700"
+                    title="Generates in-browser vibrant sample artwork"
+                  >
+                    <Palette className="w-3.5 h-3.5 text-cyan-400" />
+                    Use Sample Artwork
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Photo Loaded State */
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-cyan-400">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Photo Loaded Ready
+                  </span>
+                  <span className="text-[11px] font-mono text-slate-400">
+                    {photoDimensions ? `${photoDimensions.width} × ${photoDimensions.height}` : 'HD'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {photoUrl && (
+                    <img
+                      src={photoUrl}
+                      alt="Uploaded artwork preview"
+                      className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-md shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-white truncate">{photoName}</div>
+                    <div className="flex items-center gap-1 mt-1">
+                      <button
+                        onClick={() => handleSetImageLayoutMode('fullscreen-cinematic')}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                          state.imageLayoutMode === 'fullscreen-cinematic'
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Full Background
+                      </button>
+                      <button
+                        onClick={() => handleSetImageLayoutMode('album-disc')}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                          state.imageLayoutMode === 'album-disc'
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Vinyl Disc
+                      </button>
+                      <button
+                        onClick={() => handleSetImageLayoutMode('portrait-frame')}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                          state.imageLayoutMode === 'portrait-frame'
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Portrait Card
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Photo Zoom & Darkness Sliders Toggle */}
+                {showPhotoFineTune && (
+                  <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 space-y-2 text-xs">
+                    <div className="flex justify-between text-slate-300">
+                      <span>Zoom / Crop Scale</span>
+                      <span className="font-mono text-cyan-400">{(photoZoom * 100).toFixed(0)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.8"
+                      max="2.0"
+                      step="0.05"
+                      value={photoZoom}
+                      onChange={(e) => setPhotoZoom(parseFloat(e.target.value))}
+                      className="w-full accent-cyan-500 h-1 bg-slate-800 rounded"
+                    />
+
+                    <div className="flex justify-between text-slate-300 pt-1">
+                      <span>Dark Contrast Overlay</span>
+                      <span className="font-mono text-cyan-400">{photoDarkness}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="80"
+                      step="5"
+                      value={photoDarkness}
+                      onChange={(e) => setPhotoDarkness(parseInt(e.target.value))}
+                      className="w-full accent-cyan-500 h-1 bg-slate-800 rounded"
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => photoFileInputRef.current?.click()}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all font-semibold"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                      Replace
+                    </button>
+                    <button
+                      onClick={() => setShowPhotoFineTune(!showPhotoFineTune)}
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all"
+                    >
+                      <Sliders className="w-3.5 h-3.5" />
+                      {showPhotoFineTune ? 'Hide Adjustments' : 'Fit & Zoom'}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleRemovePhoto}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-all font-semibold"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remove
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* 3. TOOLBAR: ASPECT RATIO, SAFE-ZONES, FPS, EXPORT TRIGGER */}
+        {/* ========================================================= */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 backdrop-blur-xl shadow-2xl flex flex-wrap items-center justify-between gap-4">
           {/* Aspect Ratio selector */}
           <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
@@ -942,9 +1398,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             </button>
           </div>
 
-          {/* Center quick toggles */}
+          {/* Quick controls */}
           <div className="flex items-center gap-3">
-            {/* Safe-Zones toggle for 9:16 */}
             {state.aspectRatio === '9:16' && (
               <button
                 onClick={() => setShowSafeZones(!showSafeZones)}
@@ -960,7 +1415,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               </button>
             )}
 
-            {/* FPS Selector */}
             <div className="flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800 text-xs">
               <span className="px-2 text-slate-400 font-medium">FPS</span>
               {[30, 60].map((f) => (
@@ -976,7 +1430,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               ))}
             </div>
 
-            {/* Language Quick Switcher */}
             <div className="flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800 text-xs">
               {(['ml', 'en', 'te', 'kn', 'ta'] as SupportedLanguage[]).map((lang) => (
                 <button
@@ -1004,10 +1457,12 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           </button>
         </div>
 
-        {/* Workspace Split Layout: Controls on Left, Preview on Center/Right */}
+        {/* ========================================================= */}
+        {/* 4. WORKSPACE SPLIT: DEEP CUSTOMIZATION DOCK & LIVE CANVAS  */}
+        {/* ========================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT COLUMN: Tabbed Control Dock (7 cols) */}
-          <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-5 backdrop-blur-xl shadow-xl flex flex-col min-h-[680px]">
+          {/* LEFT COLUMN: Tabbed Dock (7 cols) */}
+          <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-5 backdrop-blur-xl shadow-xl flex flex-col min-h-[640px]">
             {/* Dock Tabs Header */}
             <div className="flex items-center gap-2 border-b border-slate-800 pb-3 mb-5 overflow-x-auto scrollbar-none">
               <button
@@ -1019,7 +1474,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 }`}
               >
                 <Activity className="w-4 h-4" />
-                20 Visualizers
+                20 Visualizer Styles
               </button>
               <button
                 onClick={() => setActiveTab('templates')}
@@ -1030,7 +1485,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 }`}
               >
                 <Sparkles className="w-4 h-4" />
-                20 Templates
+                20 Studio Presets
               </button>
               <button
                 onClick={() => setActiveTab('typography')}
@@ -1041,7 +1496,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 }`}
               >
                 <Type className="w-4 h-4" />
-                Typography & Lyrics
+                Indic Typography
               </button>
               <button
                 onClick={() => setActiveTab('fx')}
@@ -1054,23 +1509,11 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 <SlidersHorizontal className="w-4 h-4" />
                 Cinematic FX
               </button>
-              <button
-                onClick={() => setActiveTab('media')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'media'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Music className="w-4 h-4" />
-                Audio & Photo
-              </button>
             </div>
 
-            {/* TAB CONTENT 1: VISUALIZERS (20 Distinct Engines) */}
+            {/* TAB 1: 20 VISUALIZERS */}
             {activeTab === 'visualizers' && (
-              <div className="space-y-5 flex-1 overflow-y-auto pr-1">
-                {/* Category filter pills */}
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {['all', 'radial', 'linear', 'cinematic', 'minimal', 'hud', 'particle'].map((cat) => (
                     <button
@@ -1087,7 +1530,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   ))}
                 </div>
 
-                {/* Grid of Visualizer Engines */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1">
                   {filteredVisualizers.map((engine) => {
                     const isSelected = state.activePreset === engine.id
@@ -1118,11 +1560,10 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   })}
                 </div>
 
-                {/* Fine-Tuning Sliders for Current Engine */}
                 <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-4">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                     <Sliders className="w-3.5 h-3.5 text-cyan-400" />
-                    Fine-Tune Visualizer Dynamics
+                    Spectrum Dynamics
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
@@ -1155,45 +1596,14 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                         className="w-full accent-cyan-500"
                       />
                     </div>
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>FFT Bar Count</span>
-                        <span className="font-mono text-cyan-400">{state.barCount} bars</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="32"
-                        max="160"
-                        step="8"
-                        value={state.barCount}
-                        onChange={(e) => setState((p) => ({ ...p, barCount: parseInt(e.target.value) }))}
-                        className="w-full accent-cyan-500"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>DSP Smoothing</span>
-                        <span className="font-mono text-cyan-400">{state.smoothing.toFixed(2)}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.3"
-                        max="0.95"
-                        step="0.02"
-                        value={state.smoothing}
-                        onChange={(e) => setState((p) => ({ ...p, smoothing: parseFloat(e.target.value) }))}
-                        className="w-full accent-cyan-500"
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB CONTENT 2: 20 ONE-CLICK STUDIO TEMPLATES */}
+            {/* TAB 2: 20 STUDIO TEMPLATES */}
             {activeTab === 'templates' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                {/* Category filter */}
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {['all', 'Cinematic', 'Electronic', 'Mood', 'Indian Traditional', 'Minimal'].map((cat) => (
                     <button
@@ -1210,7 +1620,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   ))}
                 </div>
 
-                {/* Templates Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {templateList.map((tpl) => {
                     const isSelected = state.activeTemplateId === tpl.id
@@ -1236,11 +1645,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                         <p className="text-xs text-slate-400 line-clamp-2 mb-2 leading-relaxed">
                           {tpl.subtitle}
                         </p>
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
-                          <span className="capitalize">{tpl.theme.replace('-', ' ')}</span>
-                          <span>•</span>
-                          <span className="capitalize">{tpl.particlePreset.replace('-', ' ')}</span>
-                        </div>
                       </div>
                     )
                   })}
@@ -1248,129 +1652,33 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               </div>
             )}
 
-            {/* TAB CONTENT 3: MULTI-LANGUAGE TYPOGRAPHY & LYRICS */}
+            {/* TAB 3: INDIC TYPOGRAPHY */}
             {activeTab === 'typography' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                {/* 5 Languages Selector */}
                 <div>
                   <label className="text-xs font-semibold text-slate-400 block mb-2">
-                    Typography Script & Native Grapheme Cluster Engine:
+                    Script & Native Grapheme Engine:
                   </label>
                   <div className="grid grid-cols-5 gap-2">
-                    {(['ml', 'en', 'te', 'kn', 'ta'] as SupportedLanguage[]).map((lang) => {
-                      const isCurrent = currentLanguage === lang
-                      return (
-                        <button
-                          key={lang}
-                          onClick={() => handleSwitchLanguage(lang)}
-                          className={`p-2.5 rounded-xl border text-center transition-all ${
-                            isCurrent
-                              ? 'bg-amber-950/40 border-amber-500/60 text-amber-300 shadow-md shadow-amber-950/40 font-bold'
-                              : 'bg-slate-950/50 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <div className="text-sm">{SUPPORTED_LANGUAGES[lang].nativeName}</div>
-                          <div className="text-[10px] text-slate-500 uppercase">{SUPPORTED_LANGUAGES[lang].name}</div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Text Layers Selector */}
-                <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2 overflow-x-auto">
-                    {state.textLayers.map((layer) => (
+                    {(['ml', 'en', 'te', 'kn', 'ta'] as SupportedLanguage[]).map((lang) => (
                       <button
-                        key={layer.id}
-                        onClick={() => setState((p) => ({ ...p, selectedLayerId: layer.id }))}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                          selectedLayer?.id === layer.id
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                            : 'text-slate-400 hover:text-slate-200'
+                        key={lang}
+                        onClick={() => handleSwitchLanguage(lang)}
+                        className={`p-2.5 rounded-xl border text-center transition-all ${
+                          currentLanguage === lang
+                            ? 'bg-amber-950/40 border-amber-500/60 text-amber-300 shadow-md font-bold'
+                            : 'bg-slate-950/50 border-slate-800 text-slate-400 hover:text-white'
                         }`}
                       >
-                        {layer.name}
+                        <div className="text-sm">{SUPPORTED_LANGUAGES[lang].nativeName}</div>
+                        <div className="text-[10px] text-slate-500 uppercase">{SUPPORTED_LANGUAGES[lang].name}</div>
                       </button>
                     ))}
                   </div>
-                  <button
-                    onClick={() => {
-                      const newId = `layer-lyric-${Date.now()}`
-                      const newLayer: TypographyLayer = {
-                        id: newId,
-                        name: 'New Lyric Layer',
-                        text: currentLanguage === 'ml' ? 'ഹൃദയത്തിൽ തൊടുന്ന വരികൾ' : 'Melodic Acoustic Echo',
-                        language: currentLanguage,
-                        fontFamily: SUPPORTED_LANGUAGES[currentLanguage].defaultFont,
-                        fontSize: 32,
-                        fontWeight: 600,
-                        color: '#ffffff',
-                        align: 'center',
-                        xPercent: 50,
-                        yPercent: 70,
-                        letterSpacing: 1,
-                        lineHeight: 1.2,
-                        opacity: 1,
-                        rotation: 0,
-                        hasOutline: false,
-                        outlineColor: '#000000',
-                        outlineWidth: 2,
-                        hasShadow: true,
-                        shadowColor: 'rgba(0,0,0,0.8)',
-                        shadowBlur: 10,
-                        hasGlow: true,
-                        glowColor: 'rgba(234, 179, 8, 0.6)',
-                        glowIntensity: 12,
-                        animationStyle: 'cinematic-reveal',
-                        animationDuration: 1.2,
-                        startTime: 0,
-                        endTime: 9999,
-                        visible: true,
-                        locked: false,
-                        audioReactiveScale: true,
-                        audioReactiveGlow: true,
-                      }
-                      setState((p) => ({
-                        ...p,
-                        textLayers: [...p.textLayers, newLayer],
-                        selectedLayerId: newId,
-                      }))
-                      showToast('Lyric layer added.', 'success')
-                    }}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Layer
-                  </button>
                 </div>
 
-                {/* Selected Layer Inspector */}
                 {selectedLayer && (
                   <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase text-slate-400">
-                        Editing: {selectedLayer.name}
-                      </span>
-                      {selectedLayer.id.startsWith('layer-lyric') && (
-                        <button
-                          onClick={() => {
-                            setState((p) => ({
-                              ...p,
-                              textLayers: p.textLayers.filter((l) => l.id !== selectedLayer.id),
-                              selectedLayerId: p.textLayers[0]?.id || null,
-                            }))
-                            showToast('Layer deleted.', 'info')
-                          }}
-                          className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Delete
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Text Input (Supports Indic scripts directly) */}
                     <div>
                       <label className="text-xs text-slate-300 block mb-1">Text String (Unicode Indic Safe):</label>
                       <input
@@ -1378,11 +1686,10 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                         value={selectedLayer.text}
                         onChange={(e) => updateSelectedLayer({ text: e.target.value })}
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
-                        placeholder="Enter text in Malayalam, Telugu, Kannada, Tamil, or English..."
+                        placeholder="Song Title / Lyric..."
                       />
                     </div>
 
-                    {/* Font & Animation controls */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                       <div>
                         <label className="text-slate-300 block mb-1">Font Family:</label>
@@ -1400,7 +1707,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="text-slate-300 block mb-1">Motion Graphics Animation:</label>
+                        <label className="text-slate-300 block mb-1">Animation Style:</label>
                         <select
                           value={selectedLayer.animationStyle}
                           onChange={(e) => updateSelectedLayer({ animationStyle: e.target.value as TextAnimationStyle })}
@@ -1447,53 +1754,15 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                         />
                       </div>
                     </div>
-
-                    {/* Audio Reactivity Toggles */}
-                    <div className="flex items-center gap-4 pt-2 border-t border-slate-800 text-xs">
-                      <label className="flex items-center gap-2 cursor-pointer text-slate-300">
-                        <input
-                          type="checkbox"
-                          checked={selectedLayer.audioReactiveScale}
-                          onChange={(e) => updateSelectedLayer({ audioReactiveScale: e.target.checked })}
-                          className="accent-amber-500 rounded"
-                        />
-                        Bass Beat Pulse (Scale Bounce)
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer text-slate-300">
-                        <input
-                          type="checkbox"
-                          checked={selectedLayer.audioReactiveGlow}
-                          onChange={(e) => updateSelectedLayer({ audioReactiveGlow: e.target.checked })}
-                          className="accent-amber-500 rounded"
-                        />
-                        Treble Reactive Glow
-                      </label>
-                    </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* TAB CONTENT 4: CINEMATIC FX & BACKGROUND */}
+            {/* TAB 4: CINEMATIC FX */}
             {activeTab === 'fx' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                {/* Background Mode & Color Theme */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Background Mode:</label>
-                    <select
-                      value={state.backgroundMode}
-                      onChange={(e) => setState((p) => ({ ...p, backgroundMode: e.target.value as BackgroundMode }))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                    >
-                      <option value="blurred-cover">Blurred Cover Backdrop</option>
-                      <option value="cyber-grid">Cyberpunk 3D Perspective Grid</option>
-                      <option value="deep-space">Deep Celestial Space Gradient</option>
-                      <option value="dark-studio">Minimal Obsidian Studio</option>
-                      <option value="gradient-pulse">Audio-Reactive Bass Pulse</option>
-                    </select>
-                  </div>
-
                   <div>
                     <label className="text-xs font-semibold text-slate-300 block mb-1">Color Palette Theme:</label>
                     <select
@@ -1507,32 +1776,30 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                       <option value="aurora-emerald">Aurora Emerald</option>
                       <option value="matrix-glow">Matrix Hacker Green</option>
                       <option value="gold-luxury">Gold Luxury</option>
-                      <option value="monochrome-silver">Monochrome Silver Platinum</option>
+                      <option value="monochrome-silver">Monochrome Silver</option>
                       <option value="crimson-cinema">Crimson Cinema</option>
                       <option value="ocean-sapphire">Ocean Sapphire</option>
                       <option value="cherry-blossom">Cherry Blossom Pastel</option>
                     </select>
                   </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Atmospheric Particles:</label>
+                    <select
+                      value={state.particlePreset}
+                      onChange={(e) => setState((p) => ({ ...p, particlePreset: e.target.value as ParticlePresetType }))}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+                      <option value="floating-dust">Floating Dust Motes (Lo-Fi Acoustic)</option>
+                      <option value="rising-embers">Rising Flame Embers (Phonk / Trap)</option>
+                      <option value="monsoon-rain">Monsoon Rain Streaks (Kerala / Romantic)</option>
+                      <option value="cosmic-stardust">Cosmic Stardust (Ambient / Sci-Fi)</option>
+                      <option value="sakura-petals">Falling Sakura Petals</option>
+                      <option value="none">Disabled</option>
+                    </select>
+                  </div>
                 </div>
 
-                {/* Atmospheric Particles */}
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Atmospheric Particle Preset:</label>
-                  <select
-                    value={state.particlePreset}
-                    onChange={(e) => setState((p) => ({ ...p, particlePreset: e.target.value as ParticlePresetType }))}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  >
-                    <option value="floating-dust">Floating Dust Motes (Lo-Fi Acoustic)</option>
-                    <option value="rising-embers">Rising Flame Embers (Phonk / Trap)</option>
-                    <option value="monsoon-rain">Monsoon Rain Streaks (Kerala / Romantic)</option>
-                    <option value="cosmic-stardust">Cosmic Stardust (Ambient / Sci-Fi)</option>
-                    <option value="sakura-petals">Falling Sakura Petals</option>
-                    <option value="none">Disabled (Clean Minimal)</option>
-                  </select>
-                </div>
-
-                {/* Camera & Post-FX Sliders */}
                 <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-3.5">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                     <Film className="w-3.5 h-3.5 text-rose-400" />
@@ -1558,7 +1825,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
                     <div>
                       <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Bass Impact Camera Shake</span>
+                        <span>Bass Camera Shake</span>
                         <span className="font-mono text-rose-400">{state.fx.cameraBassShake}%</span>
                       </div>
                       <input
@@ -1572,274 +1839,14 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                         className="w-full accent-rose-500"
                       />
                     </div>
-
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Procedural Film Grain</span>
-                        <span className="font-mono text-rose-400">{state.fx.filmGrain}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={state.fx.filmGrain}
-                        onChange={(e) =>
-                          setState((p) => ({ ...p, fx: { ...p.fx, filmGrain: parseInt(e.target.value) } }))
-                        }
-                        className="w-full accent-rose-500"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Transient Chromatic Aberration</span>
-                        <span className="font-mono text-rose-400">{state.fx.chromaticAberration}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={state.fx.chromaticAberration}
-                        onChange={(e) =>
-                          setState((p) => ({ ...p, fx: { ...p.fx, chromaticAberration: parseInt(e.target.value) } }))
-                        }
-                        className="w-full accent-rose-500"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Cinematic Vignette</span>
-                        <span className="font-mono text-rose-400">{state.fx.vignette}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={state.fx.vignette}
-                        onChange={(e) =>
-                          setState((p) => ({ ...p, fx: { ...p.fx, vignette: parseInt(e.target.value) } }))
-                        }
-                        className="w-full accent-rose-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-slate-300 block mb-1">Color Grading LUT:</label>
-                      <select
-                        value={state.fx.colorGrading}
-                        onChange={(e) =>
-                          setState((p) => ({ ...p, fx: { ...p.fx, colorGrading: e.target.value as any } }))
-                        }
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-white"
-                      >
-                        <option value="neutral">Neutral Direct Pass</option>
-                        <option value="teal-orange">Teal & Orange Hollywood</option>
-                        <option value="vintage-warm">Vintage Golden Warmth</option>
-                        <option value="cyber-cool">Cyber Cool Neon Tint</option>
-                        <option value="noir">Classic Black & White Noir</option>
-                      </select>
-                    </div>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB CONTENT 5: AUDIO & PHOTO ASSETS */}
-            {activeTab === 'media' && (
-              <div className="space-y-5 flex-1 overflow-y-auto pr-1">
-                {/* Audio Upload Box */}
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Audio File (MP3, WAV, AAC, M4A, OGG, FLAC):
-                  </label>
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => {
-                      e.preventDefault()
-                      setIsDraggingOver(true)
-                    }}
-                    onDragLeave={() => setIsDraggingOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault()
-                      setIsDraggingOver(false)
-                      if (e.dataTransfer.files?.[0]) {
-                        handleLoadAudioFile(e.dataTransfer.files[0])
-                      }
-                    }}
-                    className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
-                      isDraggingOver
-                        ? 'border-emerald-500 bg-emerald-950/20'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-950/40 hover:bg-slate-900/40'
-                    }`}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="audio/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) handleLoadAudioFile(e.target.files[0])
-                      }}
-                    />
-                    <Upload className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                    <p className="text-sm font-semibold text-white mb-1">
-                      {audioFile ? audioFile.name : 'Click to Upload Audio or Drag & Drop'}
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      100% Client-Side. Never uploaded to any external server.
-                    </p>
-                  </div>
-                </div>
-
-                {/* 3 Instant Demo Audio Synthesizers */}
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    No Audio File? Synthesize Instant Demo Track (Zero External Assets):
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    {DEMO_TRACKS.map((t) => (
-                      <button
-                        key={t.id}
-                        disabled={isLoadingAudio}
-                        onClick={() => handleLoadDemo(t.id)}
-                        className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-950/20 text-left transition-all"
-                      >
-                        <div className="text-xs font-bold text-white mb-0.5 flex items-center gap-1.5">
-                          <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                          {t.name}
-                        </div>
-                        <div className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed">
-                          {t.description}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Artwork Photo Upload */}
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Cover Artwork / Center Photo:
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => photoInputRef.current?.click()}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-white hover:bg-slate-700 transition-all border border-slate-700"
-                    >
-                      <ImageIcon className="w-4 h-4 text-cyan-400" />
-                      Upload Cover Photo
-                    </button>
-                    <input
-                      ref={photoInputRef}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => handlePhotoUpload(e.target.files)}
-                    />
-                    <div className="text-xs text-slate-400">
-                      {photoImages.length > 0
-                        ? `${photoImages.length} photo(s) loaded`
-                        : 'Default geometric vinyl centerpiece active'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Photo Layout & Vinyl Settings */}
-                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <label className="text-slate-300 block mb-1">Image Presentation Layout:</label>
-                    <select
-                      value={state.imageLayoutMode}
-                      onChange={(e) => setState((p) => ({ ...p, imageLayoutMode: e.target.value as any }))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white"
-                    >
-                      <option value="album-disc">Circular Vinyl Disc</option>
-                      <option value="fullscreen-cinematic">Fullscreen Cinematic Background</option>
-                      <option value="portrait-frame">Vertical Floating Phone Frame</option>
-                      <option value="floating-card">2.5D Floating Card</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center">
-                    <label className="flex items-center gap-2 cursor-pointer text-slate-300 mt-4">
-                      <input
-                        type="checkbox"
-                        checked={state.enableVinylRotation}
-                        onChange={(e) => setState((p) => ({ ...p, enableVinylRotation: e.target.checked }))}
-                        className="accent-cyan-500 rounded"
-                      />
-                      Vinyl Record Slow Spin Animation
-                    </label>
-                  </div>
-                </div>
-
-                {/* Branding / Watermark Toggle */}
-                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-white block">Optional Branding / Watermark</span>
-                      <span className="text-[11px] text-slate-400">
-                        Never forced. 100% free with or without watermark.
-                      </span>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={state.branding.enabled}
-                        onChange={(e) =>
-                          setState((p) => ({
-                            ...p,
-                            branding: { ...p.branding, enabled: e.target.checked },
-                          }))
-                        }
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                    </label>
-                  </div>
-
-                  {state.branding.enabled && (
-                    <div className="grid grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-800">
-                      <div>
-                        <label className="text-slate-400 block mb-1">Primary Tag:</label>
-                        <input
-                          type="text"
-                          value={state.branding.text}
-                          onChange={(e) =>
-                            setState((p) => ({
-                              ...p,
-                              branding: { ...p.branding, text: e.target.value },
-                            }))
-                          }
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-slate-400 block mb-1">Subtitle:</label>
-                        <input
-                          type="text"
-                          value={state.branding.subtext}
-                          onChange={(e) =>
-                            setState((p) => ({
-                              ...p,
-                              branding: { ...p.branding, subtext: e.target.value },
-                            }))
-                          }
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* RIGHT COLUMN: Master Preview Viewport & Transport (5 cols) */}
+          {/* RIGHT COLUMN: Master Live Preview & Timeline Transport (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            {/* Master Preview Canvas Box */}
             <div className="bg-slate-950/90 border border-slate-800/90 rounded-2xl p-4 shadow-2xl backdrop-blur-xl flex flex-col items-center justify-center relative min-h-[480px]">
               <div className="relative max-h-[560px] w-full flex items-center justify-center overflow-hidden rounded-xl bg-black">
                 <canvas
@@ -1851,7 +1858,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   }}
                 />
 
-                {/* Floating Aspect & Status Badge */}
                 <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-[11px] font-mono text-slate-300 flex items-center gap-1.5">
                   <span
                     className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}
@@ -1862,21 +1868,19 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </div>
               </div>
 
-              {/* Timecode readout & Beat Indicator */}
               <div className="w-full mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-mono">
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-cyan-400" />
                   {formatTimecode(currentTime, state.fps)} / {formatTimecode(duration, state.fps)}
                 </span>
-                <span className="text-[11px] text-slate-500 font-sans">
-                  {audioTitle.length > 25 ? audioTitle.slice(0, 25) + '...' : audioTitle}
+                <span className="text-[11px] text-slate-500 font-sans truncate max-w-[180px]">
+                  {audioFileName || 'Waiting for audio track...'}
                 </span>
               </div>
             </div>
 
-            {/* Bottom Transport Controls Bar */}
+            {/* Bottom Timeline Transport */}
             <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl space-y-3">
-              {/* Audio Scrubber Timeline */}
               <div className="flex items-center gap-3">
                 <span className="text-xs font-mono text-slate-400 w-10 text-right">
                   {formatTimeDisplay(currentTime)}
@@ -1887,7 +1891,12 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   max={duration || 16}
                   step="0.05"
                   value={currentTime}
-                  onChange={handleSeek}
+                  onChange={(e) => {
+                    const sec = parseFloat(e.target.value)
+                    setCurrentTime(sec)
+                    playbackStartOffsetRef.current = sec
+                    if (isPlaying) playFromOffset(sec)
+                  }}
                   className="flex-1 accent-cyan-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
                 />
                 <span className="text-xs font-mono text-slate-400 w-10">
@@ -1895,12 +1904,16 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </span>
               </div>
 
-              {/* Playback Transport Buttons */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleTogglePlay}
-                    className="p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 transition-all transform hover:scale-105"
+                    disabled={!audioBuffer}
+                    className={`p-3 rounded-xl text-white shadow-lg transition-all transform hover:scale-105 ${
+                      !audioBuffer
+                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-cyan-500 to-blue-600 shadow-cyan-500/25'
+                    }`}
                     title={isPlaying ? 'Pause (Spacebar)' : 'Play (Spacebar)'}
                   >
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
@@ -1931,7 +1944,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Volume Slider & Mute */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsMuted(!isMuted)}
@@ -1961,7 +1973,9 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           </div>
         </div>
 
-        {/* Video Export Progress / Settings Modal */}
+        {/* ========================================================= */}
+        {/* 5. VIDEO EXPORT MODAL                                     */}
+        {/* ========================================================= */}
         {isExportModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
@@ -1987,7 +2001,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 )}
               </div>
 
-              {/* Export Parameters (When not yet recording) */}
               {!isRecording ? (
                 <div className="space-y-4">
                   <div>
@@ -2025,19 +2038,17 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-slate-400 block mb-0.5">Frame Rate:</span>
-                      <span className="font-bold text-white">{exportFps} FPS (Crisp Motion)</span>
+                      <span className="font-bold text-white">{exportFps} FPS</span>
                     </div>
                     <div>
                       <span className="text-slate-400 block mb-0.5">Format:</span>
                       <span className="font-bold text-white uppercase">
-                        .{getSupportedVideoMimeType().extension} (Browser Native)
+                        .{getSupportedVideoMimeType().extension}
                       </span>
                     </div>
                     <div>
                       <span className="text-slate-400 block mb-0.5">Watermark:</span>
-                      <span className="font-bold text-emerald-400">
-                        {state.branding.enabled ? 'Custom Tag Active' : 'None (100% Clean)'}
-                      </span>
+                      <span className="font-bold text-emerald-400">None (100% Clean)</span>
                     </div>
                   </div>
 
@@ -2058,14 +2069,12 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                /* Active Recording Progress View */
                 <div className="space-y-4 py-2">
                   <div className="flex items-center justify-between text-xs text-slate-300">
                     <span>Rendering Frame by Frame in Real-Time...</span>
                     <span className="font-mono text-emerald-400 font-bold">{exportProgress.percent}%</span>
                   </div>
 
-                  {/* Progress Bar */}
                   <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
                     <div
                       className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full rounded-full transition-all duration-300"
@@ -2077,10 +2086,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     <span>Elapsed: {exportProgress.elapsedSec}s</span>
                     <span>Remaining: ~{exportProgress.remainingSec}s</span>
                   </div>
-
-                  <p className="text-[11px] text-slate-500 text-center">
-                    Please keep this browser tab active. The video and audio are syncing in memory.
-                  </p>
 
                   <button
                     onClick={handleCancelExport}
@@ -2094,49 +2099,10 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           </div>
         )}
 
-        {/* Below-the-fold Comprehensive SEO Article & Knowledge Hub */}
+        {/* ========================================================= */}
+        {/* 6. BELOW-THE-FOLD COMPREHENSIVE SEO & KNOWLEDGE HUB       */}
+        {/* ========================================================= */}
         <div className="border-t border-slate-800 pt-10 space-y-12">
-          {/* 3-Step Quick Guide */}
-          <div>
-            <h2 className="text-xl font-bold text-white text-center mb-6">
-              How to Create an Audio Spectrum Video in 3 Easy Steps
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-                <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center text-sm border border-cyan-500/30">
-                  1
-                </div>
-                <h3 className="text-sm font-bold text-white">Upload Audio & Cover Photo</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Drop your MP3, WAV, or AAC song. Don’t have a file ready? Click any of the 3 instant
-                  algorithmic synthesizers (Synthwave, Lo-Fi, or Cinematic) to generate instant audio specimen.
-                </p>
-              </div>
-
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-                <div className="w-8 h-8 rounded-xl bg-violet-500/20 text-violet-400 font-bold flex items-center justify-center text-sm border border-violet-500/30">
-                  2
-                </div>
-                <h3 className="text-sm font-bold text-white">Select Visualizer & Indic Typography</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Choose from 20 mathematically distinct visualizers (Circular Pulse, Neon Segmented, HUD Ring,
-                  etc.) and type your lyrics or song title in Malayalam, Telugu, Kannada, Tamil, or English.
-                </p>
-              </div>
-
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-sm border border-emerald-500/30">
-                  3
-                </div>
-                <h3 className="text-sm font-bold text-white">Export Full HD Reel or Short</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Select your target length (15s, 30s, or Full Track) and hit Export Video. The MediaRecorder
-                  engine encodes the video with synchronized audio locally in your browser.
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Privacy & Zero-Watermark Guarantee */}
           <div className="bg-gradient-to-r from-emerald-950/30 via-slate-900 to-cyan-950/30 border border-emerald-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
@@ -2146,8 +2112,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               <div>
                 <h3 className="text-base font-bold text-white">100% Client-Side Private Video Studio</h3>
                 <p className="text-xs text-slate-400 max-w-xl leading-relaxed mt-0.5">
-                  Your audio tracks, personal photos, and lyrics never leave your device. All DSP frequency
-                  analysis, canvas motion rendering, and video encoding happen right inside your browser memory.
+                  Your audio files and personal photos never leave your device. All DSP frequency analysis,
+                  canvas motion rendering, and video encoding happen entirely inside your browser memory.
                 </p>
               </div>
             </div>
@@ -2164,19 +2130,19 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               {[
                 {
                   q: 'How do I create a music visualizer video for Instagram Reels and YouTube Shorts?',
-                  a: 'Simply choose the 9:16 aspect ratio in the top toolbar, upload your song, select a visualizer style like Circular Harmonic Spectrum or Dual-Ring, customize your song title, and hit Export Video. It encodes a vertical Full HD video ready to post directly on Instagram Reels, YouTube Shorts, or WhatsApp Status.',
+                  a: 'Choose the 9:16 aspect ratio in the toolbar, click Upload Audio to select your MP3 or WAV, click Upload Photo for your cover artwork, pick a visualizer preset like Circular Harmonic Spectrum, and click Export Video. Your vertical Full HD video will be ready in seconds.',
                 },
                 {
-                  q: 'Why does IndiaTools support Indic fonts (Malayalam, Telugu, Kannada, Tamil) without broken ligatures?',
-                  a: 'Unlike generic video generators that split characters with naive string methods, IndiaTools utilizes Intl.Segmenter with grapheme cluster granularity combined with Google Noto Indic Web Fonts. This ensures conjunct consonants, chillus, and dependent vowel signs render accurately without visual glitching.',
+                  q: 'Why does IndiaTools support Indic fonts without broken letters?',
+                  a: 'IndiaTools utilizes Intl.Segmenter with grapheme cluster granularity combined with Google Noto Indic Web Fonts. This ensures conjunct consonants, chillus, and dependent vowel signs in Malayalam, Telugu, Kannada, and Tamil render properly without broken ligatures.',
                 },
                 {
                   q: 'Is this audio spectrum video generator really 100% free with no watermark?',
-                  a: 'Yes! IndiaTools believes in unrestricted creative freedom for musicians, creators, and editors. By default, the output video has zero watermark. If you want to include branding, you can optionally enable the custom watermark toggle to show your own artist handle or channel name.',
+                  a: 'Yes! IndiaTools believes in unrestricted creative freedom for musicians, creators, and editors. By default, the output video has zero watermark.',
                 },
                 {
                   q: 'What audio file formats are supported?',
-                  a: 'You can upload MP3, WAV, AAC, M4A, OGG, and FLAC files. In addition, you can synthesize sample demo tracks directly in your browser with zero file uploads using our built-in Web Audio synthesizers.',
+                  a: 'You can upload MP3, WAV, AAC, M4A, OGG, and FLAC files. In addition, you can synthesize instant sample demo tracks directly in your browser with zero file uploads using our built-in Web Audio synthesizers.',
                 },
                 {
                   q: 'Can I export in 1080p Full HD at 60 FPS?',

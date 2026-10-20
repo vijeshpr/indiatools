@@ -281,13 +281,51 @@ function drawPhotoCompositionLayer(
   currentTime: number
 ) {
   const currentPhoto = photoImages[state.activePhotoIndex] || photoImages[0]
-  if (!currentPhoto || !currentPhoto.complete) return
-
   const centerX = width / 2
   const centerY = state.aspectRatio === '9:16' ? height * 0.45 : height / 2
   const primaryRadius = Math.min(width, height) * (state.aspectRatio === '9:16' ? 0.22 : 0.26)
 
   ctx.save()
+
+  // Graceful placeholder when no photo is uploaded yet
+  if (!currentPhoto || !currentPhoto.complete) {
+    if (state.imageLayoutMode === 'album-disc') {
+      ctx.translate(centerX, centerY)
+      if (state.enableVinylRotation) {
+        ctx.rotate(currentTime * 0.4)
+      }
+      // Outer Vinyl Record Lip
+      ctx.fillStyle = '#0d0e12'
+      ctx.beginPath()
+      ctx.arc(0, 0, primaryRadius * 1.04, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = palette.primary
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Vinyl groove circles
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)'
+      ctx.lineWidth = 1
+      for (let r = primaryRadius * 0.35; r < primaryRadius * 0.95; r += 14) {
+        ctx.beginPath()
+        ctx.arc(0, 0, r, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+
+      // Center Spindle Hole with Musical Note
+      ctx.fillStyle = palette.primary
+      ctx.beginPath()
+      ctx.arc(0, 0, primaryRadius * 0.22, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = '#090A0F'
+      ctx.font = `bold ${Math.round(primaryRadius * 0.2)}px sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('♫', 0, 0)
+    }
+    ctx.restore()
+    return
+  }
 
   if (state.imageLayoutMode === 'album-disc') {
     // Circular Vinyl Record with Groove Rings & Rotation
@@ -382,14 +420,21 @@ function drawPhotoCompositionLayer(
     ctx.roundRect(-size / 2, -size / 2, size, size, 18)
     ctx.stroke()
   } else if (state.imageLayoutMode === 'fullscreen-cinematic') {
-    // Fullscreen Image with subtle zoom
-    const zoom = 1 + Math.sin(currentTime * 0.15) * 0.04
-    ctx.translate(width / 2, height / 2)
+    // Fullscreen Image with subtle zoom and user adjustments
+    const userCrop = state.photos[state.activePhotoIndex]?.crop || { zoom: 1, y: 0, rotation: 35 }
+    const zoom = (1 + Math.sin(currentTime * 0.15) * 0.02) * (userCrop.zoom || 1.0)
+    const offsetY = userCrop.y || 0
+    ctx.translate(width / 2, height / 2 + offsetY)
     ctx.scale(zoom, zoom)
     const s = Math.max(width / currentPhoto.width, height / currentPhoto.height)
     const dw = currentPhoto.width * s
     const dh = currentPhoto.height * s
     ctx.drawImage(currentPhoto, -dw / 2, -dh / 2, dw, dh)
+
+    // Contrast overlay so visualizer and lyrics are crisp and readable
+    const darkness = (userCrop.rotation ?? 35) / 100
+    ctx.fillStyle = `rgba(9, 10, 15, ${darkness})`
+    ctx.fillRect(-dw / 2, -dh / 2, dw, dh)
   }
 
   ctx.restore()
