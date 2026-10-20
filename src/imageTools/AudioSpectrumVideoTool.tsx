@@ -34,6 +34,9 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Share2,
   Palette,
   Plus,
   Trash2,
@@ -494,6 +497,71 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
   const audioFileInputRef = useRef<HTMLInputElement | null>(null)
   const photoFileInputRef = useRef<HTMLInputElement | null>(null)
+
+  // Horizontal scroll navigation refs & smooth scroll handlers
+  const dockTabsScrollRef = useRef<HTMLDivElement | null>(null)
+  const categoryScrollRef = useRef<HTMLDivElement | null>(null)
+
+  const scrollDockTabs = useCallback((direction: 'left' | 'right') => {
+    dockTabsScrollRef.current?.scrollBy({
+      left: direction === 'left' ? -220 : 220,
+      behavior: 'smooth',
+    })
+  }, [])
+
+  const scrollCategories = useCallback((direction: 'left' | 'right') => {
+    categoryScrollRef.current?.scrollBy({
+      left: direction === 'left' ? -160 : 160,
+      behavior: 'smooth',
+    })
+  }, [])
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: VISUALIZER_ENGINES.length }
+    for (const eng of VISUALIZER_ENGINES) {
+      counts[eng.category] = (counts[eng.category] || 0) + 1
+    }
+    return counts
+  }, [])
+
+  const VISUALIZER_CATEGORIES = useMemo(
+    () => [
+      { id: 'all', label: 'All', count: categoryCounts['all'] || 20 },
+      { id: 'radial', label: 'Radial', count: categoryCounts['radial'] || 4 },
+      { id: 'linear', label: 'Linear', count: categoryCounts['linear'] || 4 },
+      { id: 'cinematic', label: 'Cinematic', count: categoryCounts['cinematic'] || 4 },
+      { id: 'minimal', label: 'Minimal', count: categoryCounts['minimal'] || 3 },
+      { id: 'hud', label: 'HUD', count: categoryCounts['hud'] || 3 },
+      { id: 'particle', label: 'Particle', count: categoryCounts['particle'] || 2 },
+    ],
+    [categoryCounts]
+  )
+
+  const handleCopyToolLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      showToast('Tool link copied to clipboard!', 'success')
+    } catch {
+      showToast('Failed to copy link', 'error')
+    }
+  }, [showToast])
+
+  const handleShareToolLink = useCallback(async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: tool?.title || 'IndiaTools Audio Spectrum Waveform Video Generator',
+          text: tool?.description || 'Free audio visualizer & waveform video generator',
+          url,
+        })
+        return
+      } catch {
+        // user dismissed share sheet
+      }
+    }
+    handleCopyToolLink()
+  }, [tool?.title, tool?.description, handleCopyToolLink])
 
   // Load Google Fonts on mount
   useEffect(() => {
@@ -1866,7 +1934,11 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   )
 
   return (
-    <ToolPageLayout tool={tool}>
+    <ToolPageLayout
+      tool={tool}
+      hideHeroHeader={true}
+      maxWidthClass="max-w-[1780px] w-full px-2 sm:px-4 lg:px-6"
+    >
       <div className="space-y-6">
         {/* ========================================================= */}
         {/* 1. VISIBLE FIRST-USE 5-STEP INSTRUCTIONS BANNER           */}
@@ -2312,164 +2384,229 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         </div>
 
         {/* ========================================================= */}
-        {/* 4. WORKSPACE SPLIT: DEEP CUSTOMIZATION DOCK & LIVE CANVAS  */}
+        {/* 4. WORKSPACE SPLIT: 3-COLUMN STUDIO LAYOUT                */}
         {/* ========================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT COLUMN: Tabbed Dock (7 cols) */}
-          <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-5 backdrop-blur-xl shadow-xl flex flex-col min-h-[660px]">
-            {/* Dock Tabs Header */}
-            <div className="flex items-center gap-2 border-b border-slate-800 pb-3 mb-5 overflow-x-auto scrollbar-none">
+        <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-5 items-start">
+          {/* LEFT COLUMN: Tabbed Dock (5 cols on xl, 6 cols on lg, 12 on mobile) */}
+          <div className="xl:col-span-5 lg:col-span-6 col-span-12 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-4 sm:p-5 backdrop-blur-xl shadow-xl flex flex-col min-h-[660px]">
+            {/* Dock Tabs Header with Smooth Horizontal Scrolling Controls */}
+            <div className="relative flex items-center gap-1.5 border-b border-slate-800 pb-3 mb-5">
               <button
-                onClick={() => setActiveTab('visualizers')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'visualizers'
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
+                type="button"
+                onClick={() => scrollDockTabs('left')}
+                className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/70 shrink-0 shadow-sm cursor-pointer"
+                title="Scroll tabs left"
+                aria-label="Scroll tabs left"
               >
-                <Activity className="w-4 h-4" />
-                20 Visualizers
+                <ChevronLeft className="w-4 h-4" />
               </button>
-              <button
-                onClick={() => {
-                  setActiveTab('dispersion')
-                  if (!pixelDispersionConfig.enabled) {
-                    setPixelDispersionConfig((p) => ({ ...p, enabled: true }))
-                    showToast('Enabled Particle Pixel Dispersion FX!', 'success')
-                  }
-                }}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'dispersion'
-                    ? 'bg-gradient-to-r from-amber-500/25 via-orange-500/25 to-rose-500/25 text-amber-300 border border-amber-400/50 shadow-lg shadow-orange-500/20 ring-1 ring-amber-400/40'
-                    : pixelDispersionConfig.enabled
-                    ? 'text-amber-400 hover:text-amber-200 hover:bg-amber-950/40 border border-amber-500/40'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
+
+              <div
+                ref={dockTabsScrollRef}
+                className="flex items-center gap-2 overflow-x-auto scrollbar-none scroll-smooth flex-1 py-0.5"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                <Flame className="w-4 h-4 text-orange-400 animate-pulse" />
-                <span className="font-bold">✨ Sand / Ember Dissolve</span>
-                <span
-                  className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded tracking-wider ${
-                    pixelDispersionConfig.enabled ? 'bg-orange-500 text-black' : 'bg-slate-800 text-slate-300'
+                <button
+                  onClick={() => setActiveTab('visualizers')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'visualizers'
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                   }`}
                 >
-                  {pixelDispersionConfig.enabled ? 'ON' : 'FX'}
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveTab('combos')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'combos'
-                    ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Sparkles className="w-4 h-4" />
-                12 Effect Combos
-              </button>
-              <button
-                onClick={() => setActiveTab('lighting')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'lighting'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Zap className="w-4 h-4" />
-                Beat Light Show
-              </button>
-              <button
-                onClick={() => setActiveTab('smoke')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'smoke'
-                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Wind className="w-4 h-4" />
-                Audio Smoke
-              </button>
-              <button
-                onClick={() => setActiveTab('particles')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'particles'
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Radio className="w-4 h-4" />
-                Particles & Waves
-              </button>
-              <button
-                onClick={() => setActiveTab('typography')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'typography'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Type className="w-4 h-4" />
-                Typography
-              </button>
-              <button
-                onClick={() => setActiveTab('reactivity')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'reactivity'
-                    ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Gauge className="w-4 h-4" />
-                DSP Reactivity
-              </button>
-              {/* LAST TAB: PHOTO HALFTONE MATRIX & CONCENTRIC BASS WAVES (#14) */}
-              <button
-                onClick={() => {
-                  setActiveTab('dotted-matrix')
-                  if (state.activePreset !== 'dotted-harmonic-matrix') {
-                    setState((prev) => ({ ...prev, activePreset: 'dotted-harmonic-matrix' }))
-                    showToast('Activated Dotted Harmonic Matrix visualizer!', 'info')
-                  }
-                }}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'dotted-matrix'
-                    ? 'bg-gradient-to-r from-cyan-500/25 to-blue-500/25 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40'
-                    : state.activePreset === 'dotted-harmonic-matrix'
-                    ? 'text-cyan-400 hover:text-cyan-200 hover:bg-cyan-950/40 border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-                <span className="font-bold">✨ Photo Halftone Matrix</span>
-                <span
-                  className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded tracking-wider ${
-                    state.activePreset === 'dotted-harmonic-matrix'
-                      ? 'bg-cyan-400 text-slate-950'
-                      : 'bg-slate-800 text-slate-300'
+                  <Activity className="w-4 h-4" />
+                  20 Visualizers
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('dispersion')
+                    if (!pixelDispersionConfig.enabled) {
+                      setPixelDispersionConfig((p) => ({ ...p, enabled: true }))
+                      showToast('Enabled Particle Pixel Dispersion FX!', 'success')
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'dispersion'
+                      ? 'bg-gradient-to-r from-amber-500/25 via-orange-500/25 to-rose-500/25 text-amber-300 border border-amber-400/50 shadow-lg shadow-orange-500/20 ring-1 ring-amber-400/40'
+                      : pixelDispersionConfig.enabled
+                      ? 'text-amber-400 hover:text-amber-200 hover:bg-amber-950/40 border border-amber-500/40'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                   }`}
                 >
-                  {state.activePreset === 'dotted-harmonic-matrix' ? '✔ ACTIVE' : '#14'}
-                </span>
+                  <Flame className="w-4 h-4 text-orange-400 animate-pulse" />
+                  <span className="font-bold">✨ Sand / Ember Dissolve</span>
+                  <span
+                    className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded tracking-wider ${
+                      pixelDispersionConfig.enabled ? 'bg-orange-500 text-black' : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    {pixelDispersionConfig.enabled ? 'ON' : 'FX'}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('combos')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'combos'
+                      ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  12 Effect Combos
+                </button>
+                <button
+                  onClick={() => setActiveTab('lighting')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'lighting'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Zap className="w-4 h-4" />
+                  Beat Light Show
+                </button>
+                <button
+                  onClick={() => setActiveTab('smoke')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'smoke'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Wind className="w-4 h-4" />
+                  Audio Smoke
+                </button>
+                <button
+                  onClick={() => setActiveTab('particles')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'particles'
+                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Radio className="w-4 h-4" />
+                  Particles & Waves
+                </button>
+                <button
+                  onClick={() => setActiveTab('typography')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'typography'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Type className="w-4 h-4" />
+                  Typography
+                </button>
+                <button
+                  onClick={() => setActiveTab('reactivity')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'reactivity'
+                      ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 shadow-md'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Gauge className="w-4 h-4" />
+                  DSP Reactivity
+                </button>
+                {/* LAST TAB: PHOTO HALFTONE MATRIX & CONCENTRIC BASS WAVES (#14) */}
+                <button
+                  onClick={() => {
+                    setActiveTab('dotted-matrix')
+                    if (state.activePreset !== 'dotted-harmonic-matrix') {
+                      setState((prev) => ({ ...prev, activePreset: 'dotted-harmonic-matrix' }))
+                      showToast('Activated Dotted Harmonic Matrix visualizer!', 'info')
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'dotted-matrix'
+                      ? 'bg-gradient-to-r from-cyan-500/25 to-blue-500/25 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40'
+                      : state.activePreset === 'dotted-harmonic-matrix'
+                      ? 'text-cyan-400 hover:text-cyan-200 hover:bg-cyan-950/40 border border-cyan-500/40'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                  <span className="font-bold">✨ Photo Halftone Matrix</span>
+                  <span
+                    className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded tracking-wider ${
+                      state.activePreset === 'dotted-harmonic-matrix'
+                        ? 'bg-cyan-400 text-slate-950'
+                        : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    {state.activePreset === 'dotted-harmonic-matrix' ? '✔ ACTIVE' : '#14'}
+                  </span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => scrollDockTabs('right')}
+                className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/70 shrink-0 shadow-sm cursor-pointer"
+                title="Scroll tabs right"
+                aria-label="Scroll tabs right"
+              >
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
             {/* TAB 1: 20 VISUALIZERS */}
             {activeTab === 'visualizers' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {['all', 'radial', 'linear', 'cinematic', 'minimal', 'hud', 'particle'].map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setVisualizerCategory(cat)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all ${
-                        visualizerCategory === cat
-                          ? 'bg-slate-800 text-white border border-slate-700'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+                {/* Horizontal Scrollable Category Filter Pills with Left/Right Buttons */}
+                <div className="relative flex items-center gap-1.5 pb-1">
+                  <button
+                    type="button"
+                    onClick={() => scrollCategories('left')}
+                    className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/70 shrink-0 shadow-sm cursor-pointer"
+                    title="Scroll categories left"
+                    aria-label="Scroll categories left"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  <div
+                    ref={categoryScrollRef}
+                    className="flex items-center gap-1.5 overflow-x-auto scrollbar-none scroll-smooth py-1 px-0.5 flex-1"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {VISUALIZER_CATEGORIES.map((cat) => {
+                      const isSelected = visualizerCategory === cat.id
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setVisualizerCategory(cat.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                            isSelected
+                              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
+                              : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-slate-800/80'
+                          }`}
+                        >
+                          <span className="capitalize">{cat.label}</span>
+                          <span
+                            className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                              isSelected
+                                ? 'bg-cyan-400 text-slate-950 font-bold'
+                                : 'bg-slate-800 text-slate-400'
+                            }`}
+                          >
+                            {cat.count}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => scrollCategories('right')}
+                    className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/70 shrink-0 shadow-sm cursor-pointer"
+                    title="Scroll categories right"
+                    aria-label="Scroll categories right"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[460px] overflow-y-auto pr-1">
@@ -3609,8 +3746,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             )}
           </div>
 
-          {/* RIGHT COLUMN: Master Live Preview & Timeline Transport (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
+          {/* CENTER COLUMN: Master Live Preview & Timeline Transport (4 cols on xl, 6 cols on lg, 12 on mobile) */}
+          <div className="xl:col-span-4 lg:col-span-6 col-span-12 flex flex-col gap-4">
             <div className="bg-slate-950/90 border border-slate-800/90 rounded-2xl p-4 shadow-2xl backdrop-blur-xl flex flex-col items-center justify-center relative min-h-[480px]">
               <div className="relative max-h-[560px] w-full flex items-center justify-center overflow-hidden rounded-xl bg-black">
                 <canvas
@@ -3673,7 +3810,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   <button
                     onClick={handleTogglePlay}
                     disabled={!audioBuffer}
-                    className={`p-3 rounded-xl text-white shadow-lg transition-all transform hover:scale-105 ${
+                    className={`p-3 rounded-xl text-white shadow-lg transition-all transform hover:scale-105 cursor-pointer ${
                       !audioBuffer
                         ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-cyan-500 to-blue-600 shadow-cyan-500/25'
@@ -3689,7 +3826,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                       playbackStartOffsetRef.current = 0
                       setCurrentTime(0)
                     }}
-                    className="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
+                    className="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all cursor-pointer"
                     title="Rewind to Start"
                   >
                     <RotateCcw className="w-4 h-4" />
@@ -3697,7 +3834,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
                   <button
                     onClick={() => setIsLooping(!isLooping)}
-                    className={`p-2.5 rounded-xl transition-all ${
+                    className={`p-2.5 rounded-xl transition-all cursor-pointer ${
                       isLooping
                         ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                         : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -3711,7 +3848,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsMuted(!isMuted)}
-                    className="p-2 rounded-lg text-slate-400 hover:text-white transition-all"
+                    className="p-2 rounded-lg text-slate-400 hover:text-white transition-all cursor-pointer"
                   >
                     {isMuted || volume === 0 ? (
                       <VolumeX className="w-4 h-4 text-rose-400" />
@@ -3734,9 +3871,12 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
 
+          {/* RIGHT COLUMN: Active Effects Stack & Layer Manager (3 cols on xl, 12 cols on lg/mobile) */}
+          <div className="xl:col-span-3 col-span-12 flex flex-col gap-4">
             {/* ACTIVE EFFECTS STACK & LAYER MANAGER (Side Tick / Untick Controls) */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl space-y-3.5">
+            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl space-y-3.5 xl:sticky xl:top-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
                   <Layers className="w-4 h-4 text-cyan-400" />
@@ -3766,7 +3906,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                       }))
                       showToast('All effects enabled!', 'success')
                     }}
-                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all"
+                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer"
                     title="Enable All Visual Effects"
                   >
                     All ON
@@ -3782,7 +3922,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                       setShockwaveConfig((p) => ({ ...p, enabled: false }))
                       showToast('Minimalist mode: Background atmospheric effects disabled.', 'info')
                     }}
-                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
+                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer"
                     title="Keep only wave and photo"
                   >
                     Minimal
@@ -3794,7 +3934,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 <span>Tick to enable, untick to remove effect from preview & video export:</span>
               </div>
 
-              <div className="space-y-1.5 max-h-[340px] overflow-y-auto pr-1">
+              <div className="space-y-1.5 max-h-[560px] overflow-y-auto pr-1">
                 {activeEffectsList.map((effect) => {
                   const Icon = effect.icon
                   return (
@@ -4216,6 +4356,68 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         {/* 6. BELOW-THE-FOLD COMPREHENSIVE SEO & KNOWLEDGE HUB       */}
         {/* ========================================================= */}
         <div className="border-t border-slate-800 pt-10 space-y-12">
+          {/* TOOL HERO HEADER & ACTIONS (Moved from Top of Page to Bottom) */}
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-3">
+                {/* Badges: Category, Flagship, Client-Side */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className="text-xs font-mono uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-md"
+                    style={{
+                      backgroundColor: `${tool?.color || '#06B6D4'}25`,
+                      color: tool?.color || '#22D3EE',
+                    }}
+                  >
+                    {tool?.categoryLabel || 'Create'}
+                  </span>
+
+                  {tool?.badge && (
+                    <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {tool.badge}
+                    </span>
+                  )}
+
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-0.5 rounded-md font-semibold">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>100% Client-Side</span>
+                  </div>
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
+                  {tool?.title || 'Free Audio Spectrum & Waveform Video Generator'}
+                </h1>
+
+                <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+                  {tool?.detailedDescription || tool?.description || 'Turn songs, beats, and podcasts into reactive music videos for YouTube, Instagram Reels, and TikTok with circular vinyl pulse, linear equalizer bars, glowing neon waveforms, and retro oscilloscopes.'}
+                </p>
+              </div>
+
+              {/* Actions: Copy & Share */}
+              <div className="flex items-center gap-3 shrink-0 self-start md:self-center">
+                <button
+                  onClick={handleCopyToolLink}
+                  type="button"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 transition-all shadow-md cursor-pointer"
+                  title="Copy generator link"
+                >
+                  <Copy className="w-4 h-4 text-cyan-400" />
+                  <span>Copy</span>
+                </button>
+
+                <button
+                  onClick={handleShareToolLink}
+                  type="button"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 transition-all shadow-lg shadow-indigo-600/25 cursor-pointer"
+                  title="Share this tool"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-gradient-to-r from-emerald-950/30 via-slate-900 to-cyan-950/30 border border-emerald-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="p-3.5 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
