@@ -187,7 +187,7 @@ describe('Repair vs Replace Decision Engine Test Suite', () => {
   // 4. REGISTRY, ROUTING & SITEMAP INTEGRATION
   describe('Registry & Production Architecture', () => {
     it('is registered in TOOLS array as tool #66', () => {
-      assert.strictEqual(TOOLS.length, 68)
+      assert.strictEqual(TOOLS.length, 69)
       const tool = getToolBySlug('repair-vs-replace')
       assert.ok(tool !== undefined, 'repair-vs-replace not found in TOOLS')
       assert.strictEqual(tool.category, 'money')

@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "اسڪول نالي واري سلپ ميڪر",
     description: "ٻارن جي ڪاپين، ڪتابن ۽ اسڪول ٻارن لاءِ سھڻيون نالي، ڪلاس ۽ تصوير واريون پرنٽ سلپس ٺاهيو."
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "آڊيو ٽو ويڊيو اسٽوڊيو",
+    description: "موسيقي ۽ آڊيو کي اسپيڪٽرم ويو فارم، تصويرن جي سلائيڊ شو ۽ ڪڻن سان وڊيوز ۾ تبديل ڪريو."
+  },
 }
 
 export default translations

@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "سکول نیم سلپ میکر",
     description: "بچن ہٕنٛز کاپیَن، کتابن تہٕ بستہٕ باپتھ تصویر، جماعت تہٕ مضمون والین خوبصورت سلپس کٔریو ڈیزائن۔"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "آڈیو ٹو ویڈیو سٹوڈیو",
+    description: "موسیقی تہٕ آڈیو سپیکٹرم ویوفارم، موشن فوٹو سلائڈ شو تہٕ پارٹیکلز سٟتؠ ویڈیو مَنٛز بدلیو۔"
+  },
 }
 
 export default translations

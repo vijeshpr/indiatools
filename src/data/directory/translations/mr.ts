@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "शालेय नेम स्लिप मेकर",
     description: "मुलांच्या फोटोचे बॅकग्राउंड काढून १२ गोंडस कार्टून थीममध्ये स्कूल नेम स्लिप्स बनवा आणि ए४ शीटवर प्रिंट करा."
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ऑडिओ टू व्हिडिओ स्टुडिओ",
+    description: "संगीत आणि ऑडिओ स्पेक्ट्रम वेव्हफॉर्म्स, मोशन फोटो स्लाइडशो आणि कणांसह सिनेमॅटिक व्हिडिओंमध्ये रूपांतरित करा."
+  },
 }
 
 export default translations

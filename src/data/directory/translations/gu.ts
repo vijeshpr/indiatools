@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "બાળકો માટે સ્કૂલ નેમ સ્લિપ મેકર",
     description: "બાળકોના ફોટાનું બેકગ્રાઉન્ડ હટાવી ૧૨ કાર્ટૂન થીમમાં સ્કૂલ નેમ સ્લિપ્સ બનાવો અને એ૪ સ્ટીકર શીટ પર પ્રિન્ટ કરો."
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ઑડિયો ટુ વિડિઓ સ્ટુડિયો",
+    description: "સંગીત અને ઑડિયોને સ્પેક્ટ્રમ વેવફોર્મ્સ, મોશન ફોટો સ્લાઇડશો અને કણો સાથે સિનેમેટિક વિડિઓમાં કન્વર્ટ કરો."
+  },
 }
 
 export default translations

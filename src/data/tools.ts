@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 27,
+    toolCount: 28,
   },
   audio: {
     id: 'audio',
@@ -4148,6 +4148,92 @@ export const TOOLS: ToolDefinition[] = [
         'സ്കൂൾ നെയിം സ്ലിപ്പ്'
       ],
       canonicalPath: '/tools/name-slip-maker'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'audio-to-video-studio',
+    slug: 'audio-to-video-studio',
+    title: 'Free Audio to Video Studio Online',
+    shortTitle: 'Audio to Video Studio',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Convert music and speech audio into cinematic videos with spectrum waveforms, motion photo slideshows, and particles.',
+    detailedDescription: 'Turn your songs, beats, and voice recordings into high-definition music videos. Features 12 cinematic procedural scenes, custom photo upload with Ken Burns motion, multi-image slideshows, audio-reactive spectrum waveforms, atmospheric particles, and seekable WebM video export with zero server uploads.',
+    iconName: 'Video',
+    badge: 'Flagship',
+    color: '#8B5CF6',
+    tags: [
+      'Audio to Video',
+      'Music Video Maker',
+      'Audio Visualizer',
+      'Slideshow Video',
+      'Video Generator',
+      'Spectrum Video'
+    ],
+    searchKeywords: [
+      'audio to video converter',
+      'music to video maker',
+      'audio to video studio',
+      'make video from audio online',
+      'photo audio video maker',
+      'free audio to video generator'
+    ],
+    formulaExplanation: 'Real-time Web Audio API FFT analysis drives HTML5 Canvas renderers, captured via MediaRecorder with synchronized audio and WebM seekable indexing.',
+    assumptions: [
+      '100% client-side in-browser Web Audio API and HTML5 Canvas processing',
+      'Synchronous media recording ensures sample-accurate audio and visual synchronization'
+    ],
+    exampleCalculation: {
+      title: 'Cinematic Music Video Render',
+      inputs: {
+        'Audio Track': 'Stereo MP3 / WAV (320 kbps)',
+        'Scene Style': 'Night City (Procedural Skyline & Reflections)',
+        'Aspect Ratio': '16:9 Landscape (1920x1080 Full HD)'
+      },
+      outputs: {
+        'Video Container': 'Seekable WebM (VP9 / VP8 + Opus)',
+        'Duration': 'Equal to full audio length',
+        'Privacy': '100% Local (0 bytes uploaded to cloud)'
+      },
+      explanation: 'Generates a broadcast-quality video with responsive spectrum bars, Ken Burns camera motion, and seekable duration cues.'
+    },
+    faqs: [
+      {
+        question: 'Are my audio files or photos uploaded to any server?',
+        answer: 'No. 100% of the audio decoding, Canvas visualizer rendering, and video recording takes place locally inside your web browser. No files are ever uploaded.'
+      },
+      {
+        question: 'What video aspect ratios and resolutions are supported?',
+        answer: 'Audio to Video Studio supports 16:9 (YouTube & Desktop), 9:16 (Instagram Reels, YouTube Shorts & TikTok), and 1:1 (Square Feed) in both 1080p Full HD and 720p Fast HD resolutions.'
+      },
+      {
+        question: 'Can I create a slideshow with multiple photos?',
+        answer: 'Yes! You can upload multiple photographs to create a synchronized slideshow with crossfade transitions, automatic timing based on audio duration, and subtle Ken Burns zoom and pan motion.'
+      },
+      {
+        question: 'Can I seek and scrub through the exported video file?',
+        answer: 'Yes. Our export engine injects full WebM duration and Cues indexing tables into the file container, ensuring media players like VLC and web browsers can scrub forward smoothly.'
+      }
+    ],
+    relatedSlugs: [
+      'audio-spectrum-waveform-video-generator',
+      'orbit-audio-studio',
+      'audio-converter',
+      'studio-master-spatial-suite'
+    ],
+    seo: {
+      title: 'Audio to Video Converter Online Free | IndiaTools',
+      metaDescription: 'Convert audio into cinematic music videos with animated visualizers, custom backgrounds, audio-reactive effects and downloadable video exports. Free browser-based tool.',
+      keywords: [
+        'audio to video converter online free',
+        'audio to video converter',
+        'music video maker online',
+        'convert audio to video with picture',
+        'audio to video studio',
+        'free audio visualizer video maker'
+      ],
+      canonicalPath: '/tools/audio-to-video-studio'
     },
     type: 'image-tool'
   }

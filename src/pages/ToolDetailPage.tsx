@@ -70,6 +70,7 @@ import { SatisfyingRelaxGameTool } from '../components/tools/SatisfyingRelaxGame
 import { AudioConverterTool } from '../imageTools/AudioConverterTool'
 import { OrbitAudioStudioTool } from '../imageTools/OrbitAudioStudioTool'
 import { AudioSpectrumVideoTool } from '../imageTools/AudioSpectrumVideoTool'
+import { AudioToVideoStudioTool } from '../imageTools/AudioToVideoStudioTool'
 import { DtsCinemaReverbTool } from '../imageTools/DtsCinemaReverbTool'
 import { VirtualSurroundUpmixerTool } from '../imageTools/VirtualSurroundUpmixerTool'
 import { StudioMasterSpatialSuiteTool } from '../imageTools/StudioMasterSpatialSuiteTool'
@@ -150,6 +151,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'audio-converter': AudioConverterTool,
   'orbit-audio-studio': OrbitAudioStudioTool,
   'audio-spectrum-waveform-video-generator': AudioSpectrumVideoTool,
+  'audio-to-video-studio': AudioToVideoStudioTool,
   'dts-cinema-theater-reverb': DtsCinemaReverbTool,
   'virtual-surround-upmixer': VirtualSurroundUpmixerTool,
   'studio-master-spatial-suite': StudioMasterSpatialSuiteTool,

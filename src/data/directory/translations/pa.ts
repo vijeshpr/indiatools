@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "ਬੱਚਿਆਂ ਦਾ ਸਕੂਲ ਨੇਮ ਸਲਿੱਪ ਮੇਕਰ",
     description: "ਬੱਚਿਆਂ ਦੀ ਫੋਟੋ ਦਾ ਪਿਛੋਕੜ ਹਟਾ ਕੇ 12 ਕਾਰਟੂਨ ਥੀਮਾਂ ਵਿੱਚ ਸਕੂਲ ਨੇਮ ਸਲਿੱਪਾਂ ਬਣਾਓ ਅਤੇ ਏ4 ਸ਼ੀਟ ਉੱਤੇ ਪ੍ਰਿੰਟ ਕਰੋ।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ਆਡੀਓ ਟੂ ਵੀਡੀਓ ਸਟੂਡੀਓ",
+    description: "ਸੰਗੀਤ ਅਤੇ ਆਡੀਓ ਨੂੰ ਸਪੈਕਟ੍ਰਮ ਵੇਵਫਾਰਮਾਂ, ਫੋਟੋ ਸਲਾਈਡਸ਼ੋਅ ਅਤੇ ਸਿਨੇਮੈਟਿਕ ਵੀਡੀਓਜ਼ ਵਿੱਚ ਬਦਲੋ।"
+  },
 }
 
 export default translations

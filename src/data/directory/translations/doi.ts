@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "स्कूल नेम स्लिप मेकर",
     description: "जुआकें दी कापियां-किताबें लेई फोटो, क्लास ते नांअ आह्‌लियां सोहनियां नेम स्लिपां बनाओ।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ऑडियो थुआ वीडियो स्टूडियो",
+    description: "संगीत ते ऑडियो गी स्पेक्ट्रम वेवफार्म, मोशन फोटो स्लाइडशो ते कन्ने सिनेमैटिक वीडियो च बदलो।"
+  },
 }
 
 export default translations

@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "स्कुल नेम स्लिप मेकर",
     description: "बालबालिकाका कापी, पुस्तक र झोलाका लागि आकर्षक तस्बिर, विषय र कक्षा सहितको निःशुल्क प्रिन्ट गर्न मिल्ने नेम स्लिप बनाउनुहोस्।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "अडियो टु भिडियो स्टुडियो",
+    description: "संगीत र अडियोलाई स्पेक्ट्रम वेभफर्म, मोसन फोटो स्लाइडशो र कणहरूसहित सिनेमेटिक भिडियोमा रूपान्तरण गर्नुहोस्।"
+  },
 }
 
 export default translations

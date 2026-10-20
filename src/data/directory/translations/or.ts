@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "ପିଲାଙ୍କ ସ୍କୁଲ ନେମ୍ ସ୍ଲିପ୍ ମେକର୍",
     description: "ପିଲାଙ୍କ ଫଟୋର ବ୍ୟାକଗ୍ରାଉଣ୍ଡ ହଟାଇ ୧୨ଟି ସୁନ୍ଦର କାର୍ଟୁନ୍ ଥିମରେ ସ୍କୁଲ ନେମ୍ ସ୍ଲିପ୍ ତିଆରି କରନ୍ତୁ ଓ ଏ୪ ଶୀଟରେ ପ୍ରିଣ୍ଟ ନିଅନ୍ତୁ।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ଅଡିଓ ଟୁ ଭିଡିଓ ଷ୍ଟୁଡିଓ",
+    description: "ସଙ୍ଗୀତ ଏବଂ ଅଡିଓକୁ ସ୍ପେକ୍ଟ୍ରମ୍ ୱେଭଫର୍ମ, ଫଟୋ ସ୍ଲାଇଡଶୋ ଏବଂ ସିନେମାଟିକ୍ ଭିଡିଓରେ ରୂପାନ୍ତର କରନ୍ତୁ।"
+  },
 }
 
 export default translations

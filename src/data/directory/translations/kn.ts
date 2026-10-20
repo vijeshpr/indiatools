@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "ಮಕ್ಕಳ ಶಾಲಾ ನೇಮ್ ಸ್ಲಿಪ್ ಮೇಕರ್",
     description: "ಮಕ್ಕಳ ಫೋಟೋ ಹಿನ್ನೆಲೆ ತೆಗೆದು, 12 ಕಾರ್ಟೂನ್ ಥೀಮ್‌ಗಳಲ್ಲಿ ಶಾಲಾ ನೇಮ್ ಸ್ಲಿಪ್ ತಯಾರಿಸಿ ಎ4 ಹಾಳೆಯಲ್ಲಿ ಪ್ರಿಂಟ್ ಮಾಡಿ."
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ಆಡಿಯೊ ಟು ವಿಡಿಯೋ ಸ್ಟುಡಿಯೋ",
+    description: "ಸಂಗೀತ ಮತ್ತು ಧ್ವನಿಯನ್ನು ಸ್ಪೆಕ್ಟ್ರಮ್ ವೇವ್‌ಫಾರ್ಮ್‌ಗಳು, ಚಲಿಸುವ ಫೋಟೋ ಸ್ಲೈಡ್‌ಶೋ ಮತ್ತು ಕಣಗಳೊಂದಿಗೆ ವೀಡಿಯೊಗಳಾಗಿ ಪರಿವರ್ತಿಸಿ."
+  },
 }
 
 export default translations

@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "बच्चा सभक स्कूल नेम स्लिप मेकर",
     description: "बच्चाक फोटोक बैकग्राउंड हटा कऽ १२ सुंदर कार्टून थीममे स्कूल नेम स्लिप बनाउ आ ए४ शीट पर प्रिंट करू।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ऑडियो टू वीडियो स्टूडियो",
+    description: "संगीत आ ऑडियो के स्पेक्ट्रम वेवफॉर्म, मोशन फोटो स्लाइडशो आ पार्टिकल्स संगे सिनेमाई वीडियो में बदलू।"
+  },
 }
 
 export default translations

@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "ᱤᱥᱠᱩᱞ ᱧᱩᱛᱩᱢ ᱥᱞᱤᱯ ᱵᱮᱱᱟᱣᱤᱡ",
     description: "ᱜᱤᱫᱽᱨᱟᱹ ᱠᱚᱣᱟᱜ ᱯᱚᱛᱚᱵ-ᱠᱷᱟᱛᱟ ᱞᱟᱹᱜᱤᱫ ᱪᱤᱛᱟᱹᱨ, ᱪᱟᱱᱟᱪ ᱟᱨ ᱧᱩᱛᱩᱢ ᱟᱱ ᱱᱟᱯᱟᱭ ᱥᱞᱤᱯ ᱵᱮᱱᱟᱣ ᱢᱮ᱾"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ᱚᱰᱤᱳ ᱴᱩ ᱵᱷᱤᱰᱤᱳ ᱥᱴᱩᱰᱤᱭᱳ",
+    description: "ᱥᱮᱨᱮᱧ ᱟᱨ ᱟᱲᱟᱝ ᱥᱯᱮᱠᱴᱨᱚᱢ ᱣᱮᱵᱷᱯᱷᱚᱨᱢ, ᱯᱷᱚᱴᱳ ᱥᱞᱟᱭᱤᱰᱥᱳ ᱟᱨ ᱠᱟᱹᱴᱤᱡ ᱠᱟᱹᱴᱤᱡ ᱠᱚ ᱥᱟᱶ ᱵᱷᱤᱰᱤᱳ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ᱾"
+  },
 }
 
 export default translations

@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "স্কুল নেম স্লিপ মেকার",
     description: "অঙাংশিংগী লাইরিক অমসুং লাইরিক পোটিনগীদমক ফোতো, ক্লাস অমসুং মিং য়াওবা নিংথিবা নেম স্লিপ শেম্মু।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ওদিও তু ভিদিও স্তুদিও",
+    description: "ঈশৈ অমসুং খোঞ্জেল স্পেক্ত্রম ৱেবফোর্ম, ফোতো স্লাইদশো অমসুং পার্তিকলসকা লোইননা ভিদিওদা ওন্থোকউ।"
+  },
 }
 
 export default translations

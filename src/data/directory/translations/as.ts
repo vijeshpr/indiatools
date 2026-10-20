@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "শিশুৰ স্কুল নেম শ্লিপ মেকাৰ",
     description: "শিশুৰ ছবিৰ পটভূমি আঁতৰাই ১২টা সুন্দৰ কাৰ্টুন থিমত স্কুল নেম শ্লিপ বনাওক আৰু এ৪ কাগজত প্ৰিণ্ট কৰক।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "অডিঅ' টু ভিডিঅ' ষ্টুডিঅ'",
+    description: "সংগীত আৰু অডিঅ'ক স্পেক্ট্ৰাম ৱেভফৰ্ম, মোচন ফটো শ্লাইডশ্ব' আৰু চিনেমেটিক ভিডিঅ'লৈ ৰূপান্তৰ কৰক।"
+  },
 }
 
 export default translations

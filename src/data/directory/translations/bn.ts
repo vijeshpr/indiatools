@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "বাচ্চাদের স্কুল নেম স্লিপ মেকার",
     description: "বাচ্চাদের ছবির ব্যাকগ্রাউন্ড সরিয়ে ১২টি সুন্দর কার্টুন থিমে স্কুল নেম স্লিপ তৈরি করুন ও এ৪ পাতায় প্রিন্ট নিন।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "অডিও টু ভিডিও স্টুডিও",
+    description: "সঙ্গীত ও অডিওকে স্পেকট্রাম ওয়েভফর্ম, মোশন ফটো স্লাইডশো এবং কণা সম্বলিত সিনেম্যাটিক ভিডিওতে রূপান্তর করুন।"
+  },
 }
 
 export default translations

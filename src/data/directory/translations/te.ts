@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "పిల్లల స్కూల్ నేమ్ స్లిప్ మేకర్",
     description: "పిల్లల ఫోటో బ్యాక్‌గ్రౌండ్ తొలగించి, 12 కార్టూన్ థీములలో స్కూల్ నేమ్ స్లిప్పులు తయారు చేసి ఏ4 షీట్‌పై ప్రింట్ తీసుకోండి."
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ఆడియో టు వీడియో స్టూడియో",
+    description: "సంగీతం మరియు ఆడియోను స్పెక్ట్రమ్ వేవ్‌ఫారమ్‌లు, ఫోటో స్లైడ్‌షోలు మరియు సినిమాటిక్ ఎఫెక్ట్‌లతో వీడియోలుగా మార్చండి."
+  },
 }
 
 export default translations

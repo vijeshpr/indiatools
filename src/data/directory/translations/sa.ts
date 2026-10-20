@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "बाल-विद्यालय-नामपत्र-जनकम्",
     description: "शिशोः चित्रस्य पृष्ठभूमिं विहाय १२ मनोहरेषु हास्य-विषयेषु नामपत्राणि निर्माय ए४ पत्रे मुद्रयतु।"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "ध्वनि-दृश्य स्टूडियो",
+    description: "सङ्गीतं ध्वनिं च तरङ्गदृश्यैः, चलचित्रैः, कणैः च सह चलचित्रे परिवर्तयतु।"
+  },
 }
 
 export default translations

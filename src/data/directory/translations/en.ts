@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "Name Slip Maker for Kids",
     description: "Design and print personalized school name slips with photo background removal, 12 kid themes, and A4 sticker sheet auto-packing in 23 languages."
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "Audio to Video Studio",
+    description: "Convert music and audio into cinematic videos with spectrum waveforms, motion photo slideshows, and particles in your browser."
+  },
 }
 
 export default translations

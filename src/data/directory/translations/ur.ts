@@ -272,7 +272,12 @@ export const translations: Record<string, DirectoryToolItem> = {
   'name-slip-maker': {
     name: "بچوں کا اسکول نیم سلپ میکر",
     description: "بچوں کی تصویر کا پس منظر ہٹا کر 12 خوبصورت کارٹون تھیمز میں اسکول نیم سلپس بنائیں اور اے 4 شیٹ پر پرنٹ کریں۔"
-  }
+  },
+
+  'audio-to-video-studio': {
+    name: "آڈیو ٹو ویڈیو اسٹوڈیو",
+    description: "موسیقی اور آڈیو کو اسپیکٹرم ویوفارمز، موشن فوٹو سلائیڈ شوز اور سینما کے اثرات والی ویڈیوز میں تبدیل کریں۔"
+  },
 }
 
 export default translations
