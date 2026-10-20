@@ -4,7 +4,7 @@
  * 5-Language Typography Studio, and MediaRecorder Export.
  */
 
-export type AspectRatio = '16:9' | '9:16' | '1:1'
+export type AspectRatio = '16:9' | '9:16' | '1:1' | '4:3' | '21:9'
 
 export interface VisualizerDimensions {
   width: number
@@ -17,6 +17,8 @@ export const ASPECT_RATIOS: Record<AspectRatio, VisualizerDimensions> = {
   '9:16': { width: 1080, height: 1920, aspectRatio: '9:16', label: '9:16 Reels / Shorts / TikTok / Status' },
   '1:1': { width: 1080, height: 1080, aspectRatio: '1:1', label: '1:1 Square / Instagram Post' },
   '16:9': { width: 1920, height: 1080, aspectRatio: '16:9', label: '16:9 YouTube / Landscape' },
+  '4:3': { width: 1440, height: 1080, aspectRatio: '4:3', label: '4:3 Classic Video' },
+  '21:9': { width: 2560, height: 1080, aspectRatio: '21:9', label: '21:9 Cinematic Ultrawide' },
 }
 
 export type SupportedLanguage = 'en' | 'ml' | 'te' | 'kn' | 'ta'
@@ -573,13 +575,14 @@ export interface CompositionState {
   particlePreset: ParticlePresetType
   fx: CinematicFxConfig
 
-  // Advanced Visual FX (Lights, Smoke, Particle Universe, Shockwaves, Dotted Matrix, Pixel Dispersion)
+  // Advanced Visual FX (Lights, Smoke, Particle Universe, Shockwaves, Dotted Matrix, Pixel Dispersion, Rainy Window)
   lighting?: LightShowConfig
   smoke?: SmokeConfig
   particleUniverse?: ParticleUniverseConfig
   shockwaves?: ShockwaveConfig
   dottedMatrix?: DottedMatrixConfig
   pixelDispersion?: PixelDispersionConfig
+  rainyWindow?: import('./rainyWindowEngine.ts').RainyWindowConfig
 
   // Typography Layers
   textLayers: TypographyLayer[]

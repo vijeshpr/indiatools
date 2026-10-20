@@ -53,12 +53,21 @@ import {
   Radio,
   Gauge,
   CloudRain,
+  Droplets,
   Feather,
   Wind,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
 import { useToast } from '../components/common/Toast'
+import {
+  RainyWindowConfig,
+  DEFAULT_RAINY_WINDOW_CONFIG,
+  RAINY_SCENE_PRESETS,
+  RainyScenePresetId,
+  RainIntensity,
+  WindowFrameStyle,
+} from '../lib/video/rainyWindowEngine.ts'
 import {
   AspectRatio,
   VisualizerPreset,
@@ -335,6 +344,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
   const [dottedMatrixConfig, setDottedMatrixConfig] = useState<DottedMatrixConfig>(DEFAULT_DOTTED_MATRIX_CONFIG)
   const [pixelDispersionConfig, setPixelDispersionConfig] = useState<PixelDispersionConfig>(DEFAULT_PIXEL_DISPERSION_CONFIG)
+  const [rainyWindowConfig, setRainyWindowConfig] = useState<RainyWindowConfig>(DEFAULT_RAINY_WINDOW_CONFIG)
 
   // -------------------------------------------------------------
   // MASTER COMPOSITION STATE
@@ -390,6 +400,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     shockwaves: shockwaveConfig,
     dottedMatrix: dottedMatrixConfig,
     pixelDispersion: pixelDispersionConfig,
+    rainyWindow: rainyWindowConfig,
 
     textLayers: INITIAL_TEXT_LAYERS,
     selectedLayerId: 'layer-title',
@@ -421,6 +432,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       shockwaves: shockwaveConfig,
       dottedMatrix: dottedMatrixConfig,
       pixelDispersion: pixelDispersionConfig,
+      rainyWindow: rainyWindowConfig,
     }))
   }, [
     visualizerEnabled,
@@ -431,13 +443,14 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     shockwaveConfig,
     dottedMatrixConfig,
     pixelDispersionConfig,
+    rainyWindowConfig,
   ])
 
   // -------------------------------------------------------------
   // STUDIO WORKSPACE NAVIGATION & UI TOGGLES
   // -------------------------------------------------------------
   const [activeTab, setActiveTab] = useState<
-    'visualizers' | 'combos' | 'dispersion' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity' | 'dotted-matrix'
+    'visualizers' | 'rainy-window' | 'combos' | 'dispersion' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity' | 'dotted-matrix'
   >('visualizers')
   const [visualizerCategory, setVisualizerCategory] = useState<string>('all')
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ml')
@@ -1481,6 +1494,18 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
     return [
       {
+        id: 'rainy-window',
+        name: 'Rainy Window Studio',
+        subtitle: `Preset: ${RAINY_SCENE_PRESETS.find((p) => p.id === rainyWindowConfig.scenePreset)?.name || 'Cozy Bedroom'}`,
+        enabled: rainyWindowConfig.enabled,
+        icon: CloudRain,
+        accentColor: 'text-sky-400 bg-sky-500/10 border-sky-500/30',
+        toggle: () => {
+          setRainyWindowConfig((p) => ({ ...p, enabled: !p.enabled }))
+          showToast(!rainyWindowConfig.enabled ? 'Rainy Window Studio enabled' : 'Rainy Window Studio disabled', 'info')
+        },
+      },
+      {
         id: 'visualizer',
         name: 'Visualizer Waveform',
         subtitle: `Preset: ${presetLabel}`,
@@ -1933,6 +1958,439 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     </div>
   )
 
+  const renderRainyWindowStudioControls = () => {
+    const isEn = currentLanguage === 'en'
+    const isMl = currentLanguage === 'ml'
+
+    const weatherModes: Array<{ id: RainIntensity; label: string; icon: any; desc: string }> = [
+      { id: 'drizzle', label: isMl ? 'ചാറ്റൽമഴ' : 'Drizzle', icon: Droplets, desc: 'Soft misty beads' },
+      { id: 'light', label: isMl ? 'നേർത്ത മഴ' : 'Light Rain', icon: CloudRain, desc: 'Gentle raindrops' },
+      { id: 'moderate', label: isMl ? 'സാധാരണ മഴ' : 'Moderate', icon: CloudRain, desc: 'Balanced rainfall' },
+      { id: 'heavy', label: isMl ? 'ശക്തമായ മഴ' : 'Heavy Rain', icon: CloudRain, desc: 'Dense rain streams' },
+      { id: 'storm', label: isMl ? 'കൊടുങ്കാറ്റ്' : 'Storm Mode', icon: Wind, desc: 'Wind, lightning & thunder' },
+    ]
+
+    const frameOptions: Array<{ id: WindowFrameStyle; label: string; desc: string }> = [
+      { id: 'cozy-wood', label: isMl ? 'മരച്ചട്ടക്കൂട്' : 'Cozy Wood Pane', desc: 'Warm mahogany framing' },
+      { id: 'french-pane', label: isMl ? 'ഫ്രഞ്ച് വിൻഡോ' : 'French Grid', desc: 'Classic 6-pane grid' },
+      { id: 'minimal-panorama', label: isMl ? 'മിനിമൽ ഗ്ലാസ്' : 'Minimalist Sill', desc: 'Clean panoramic glass' },
+      { id: 'loft-steel', label: isMl ? 'സ്റ്റീൽ ഗ്രിഡ്' : 'Loft Steel', desc: 'Modern industrial dark bars' },
+      { id: 'none', label: isMl ? 'ഫ്രെയിമില്ലാതെ' : 'Full Glass (None)', desc: 'Borderless window view' },
+    ]
+
+    return (
+      <div className="space-y-5 animate-in fade-in duration-200">
+        {/* Banner with Status & Quick Switch */}
+        <div className="bg-gradient-to-r from-sky-950/60 via-slate-900 to-blue-950/60 p-4 rounded-xl border border-sky-500/40 shadow-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                <CloudRain className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                  <span>{isMl ? 'റെയ്നി വിൻഡോ സ്റ്റുഡിയോ' : 'Rainy Window Visualizer Studio'}</span>
+                  <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono">
+                    {rainyWindowConfig.enabled ? 'ACTIVE' : 'READY'}
+                  </span>
+                </h3>
+                <p className="text-[11px] text-slate-300">
+                  {isMl ? 'സംഗീതത്തിനൊപ്പം പെയ്യുന്ന റിയലിസ്റ്റിക് മഴയും വിൻഡോ ഗ്ലാസും' : 'Cinematic rain on glass that naturally responds to your music'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setRainyWindowConfig((p) => ({ ...p, enabled: !p.enabled }))
+                showToast(!rainyWindowConfig.enabled ? 'Rainy Window Studio Enabled!' : 'Rainy Window Studio Disabled.', 'info')
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md ${
+                rainyWindowConfig.enabled
+                  ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-sky-500/30'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+              }`}
+            >
+              {rainyWindowConfig.enabled ? '✔ Studio ON' : 'Turn ON'}
+            </button>
+          </div>
+        </div>
+
+        {/* 1. Scene Presets (8 Presets) */}
+        <div>
+          <label className="text-xs font-bold text-slate-200 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+            <Compass className="w-3.5 h-3.5 text-sky-400" />
+            <span>{isMl ? 'സീൻ പ്രീസെറ്റുകൾ (8 എണ്ണം)' : 'Select Cinematic Scene Preset (8 Scenes)'}</span>
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto pr-1">
+            {RAINY_SCENE_PRESETS.map((scene) => {
+              const isSelected = rainyWindowConfig.scenePreset === scene.id
+              return (
+                <div
+                  key={scene.id}
+                  onClick={() => {
+                    setRainyWindowConfig((p) => ({
+                      ...p,
+                      enabled: true,
+                      scenePreset: scene.id,
+                      intensity: scene.defaultIntensity,
+                      windowFrameStyle: scene.defaultFrame,
+                    }))
+                    showToast(`Loaded ${scene.name}`, 'info')
+                  }}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    isSelected
+                      ? 'bg-sky-950/50 border-sky-400 shadow-md shadow-sky-950/60 ring-1 ring-sky-400/50'
+                      : 'bg-slate-950/50 border-slate-800/90 hover:border-slate-700 hover:bg-slate-800/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: scene.accentColor }}
+                      />
+                      <span className="text-xs font-bold text-white">{scene.name}</span>
+                    </div>
+                    {isSelected && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-sky-400 text-slate-950 uppercase">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400 line-clamp-1">{scene.subtitle}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* 2. Weather Rain Intensity Buttons */}
+        <div>
+          <label className="text-xs font-bold text-slate-200 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+            <Droplets className="w-3.5 h-3.5 text-sky-400" />
+            <span>{isMl ? 'മഴയുടെ ശക്തി (Rain Intensity)' : 'Rain Intensity & Weather Mode'}</span>
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {weatherModes.map((w) => {
+              const isSelected = rainyWindowConfig.intensity === w.id
+              const Icon = w.icon
+              return (
+                <button
+                  key={w.id}
+                  onClick={() => {
+                    let d = 70
+                    let s = 1.1
+                    let dropSz = 1.0
+                    let wind = 8
+                    if (w.id === 'drizzle') {
+                      d = 35; s = 0.8; dropSz = 0.7; wind = 3
+                    } else if (w.id === 'light') {
+                      d = 55; s = 1.0; dropSz = 0.85; wind = 5
+                    } else if (w.id === 'moderate') {
+                      d = 75; s = 1.2; dropSz = 1.0; wind = 8
+                    } else if (w.id === 'heavy') {
+                      d = 90; s = 1.6; dropSz = 1.3; wind = 15
+                    } else if (w.id === 'storm') {
+                      d = 100; s = 2.0; dropSz = 1.6; wind = 26
+                    }
+                    setRainyWindowConfig((p) => ({
+                      ...p,
+                      intensity: w.id,
+                      rainDensity: d,
+                      rainSpeed: s,
+                      dropletSize: dropSz,
+                      windAngle: wind,
+                    }))
+                  }}
+                  className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-sky-500/20 border-sky-400/80 text-white shadow-md'
+                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Icon className="w-3.5 h-3.5 text-sky-400" />
+                    <span className="text-xs font-bold">{w.label}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 block truncate">{w.desc}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* 3. Audio Reactivity Mode */}
+        <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-white block">
+                {isMl ? 'ഓഡിയോ റിയാക്റ്റിവിറ്റി മോഡ്' : 'Audio Reactivity Response Mode'}
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {isMl ? 'മ്യൂസിക്കിനനുസരിച്ച് മഴ പ്രതികരിക്കുന്ന രീതി' : 'How rain intensity and droplets sync with the track'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
+              <button
+                onClick={() => setRainyWindowConfig((p) => ({ ...p, mode: 'natural' }))}
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
+                  rainyWindowConfig.mode === 'natural'
+                    ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isMl ? 'നാച്ചുറൽ' : 'Natural Rain'}
+              </button>
+              <button
+                onClick={() => setRainyWindowConfig((p) => ({ ...p, mode: 'beat-reactive' }))}
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
+                  rainyWindowConfig.mode === 'beat-reactive'
+                    ? 'bg-gradient-to-r from-amber-500/25 to-sky-500/25 text-amber-300 border border-amber-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isMl ? 'ബീറ്റ് സിങ്ക്' : 'Beat Reactive'}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs">
+            <div>
+              <div className="flex justify-between text-slate-300 mb-1">
+                <span>{isMl ? 'റിയാക്റ്റിവിറ്റി ശക്തി:' : 'Reactivity Strength:'}</span>
+                <span className="font-mono text-sky-400 font-bold">{rainyWindowConfig.reactivityStrength}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={rainyWindowConfig.reactivityStrength}
+                onChange={(e) => setRainyWindowConfig((p) => ({ ...p, reactivityStrength: parseInt(e.target.value, 10) }))}
+                className="w-full accent-sky-400 h-1 bg-slate-800 rounded-lg cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between text-slate-300 mb-1">
+                <span>{isMl ? 'ബാസ് സെൻസിറ്റിവിറ്റി:' : 'Bass Sensitivity:'}</span>
+                <span className="font-mono text-sky-400 font-bold">{rainyWindowConfig.bassSensitivity.toFixed(1)}x</span>
+              </div>
+              <input
+                type="range"
+                min="0.5"
+                max="2.5"
+                step="0.1"
+                value={rainyWindowConfig.bassSensitivity}
+                onChange={(e) => setRainyWindowConfig((p) => ({ ...p, bassSensitivity: parseFloat(e.target.value) }))}
+                className="w-full accent-sky-400 h-1 bg-slate-800 rounded-lg cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between text-slate-300 mb-1">
+                <span>{isMl ? 'റിപ്പിൾ ഇഫക്റ്റ്:' : 'Puddle Ripples:'}</span>
+                <span className="font-mono text-sky-400 font-bold">{rainyWindowConfig.rippleIntensity}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={rainyWindowConfig.rippleIntensity}
+                onChange={(e) => setRainyWindowConfig((p) => ({ ...p, rippleIntensity: parseInt(e.target.value, 10) }))}
+                className="w-full accent-sky-400 h-1 bg-slate-800 rounded-lg cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Fine-Tuning Parameter Sliders Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'മഴത്തുള്ളികളുടെ സാന്ദ്രത:' : 'Rain Density:'}</span>
+              <span className="font-mono text-sky-400">{rainyWindowConfig.rainDensity}%</span>
+            </div>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={rainyWindowConfig.rainDensity}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, rainDensity: parseInt(e.target.value, 10) }))}
+              className="w-full accent-sky-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'മഴയുടെ വേഗത:' : 'Rain Falling Speed:'}</span>
+              <span className="font-mono text-sky-400">{rainyWindowConfig.rainSpeed.toFixed(1)}x</span>
+            </div>
+            <input
+              type="range"
+              min="0.5"
+              max="2.5"
+              step="0.1"
+              value={rainyWindowConfig.rainSpeed}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, rainSpeed: parseFloat(e.target.value) }))}
+              className="w-full accent-sky-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'കാറ്റിന്റെ ദിശ:' : 'Wind Angle:'}</span>
+              <span className="font-mono text-sky-400">{rainyWindowConfig.windAngle}°</span>
+            </div>
+            <input
+              type="range"
+              min="-40"
+              max="40"
+              value={rainyWindowConfig.windAngle}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, windAngle: parseInt(e.target.value, 10) }))}
+              className="w-full accent-sky-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'ഗ്ലാസിലെ തുള്ളികൾ:' : 'Glass Droplet Density:'}</span>
+              <span className="font-mono text-sky-400">{rainyWindowConfig.glassDropletDensity}%</span>
+            </div>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={rainyWindowConfig.glassDropletDensity}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, glassDropletDensity: parseInt(e.target.value, 10) }))}
+              className="w-full accent-sky-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'തുള്ളി ഒഴുകുന്ന വേഗത:' : 'Droplet Slide Speed:'}</span>
+              <span className="font-mono text-sky-400">{rainyWindowConfig.dropletSlideSpeed.toFixed(1)}x</span>
+            </div>
+            <input
+              type="range"
+              min="0.5"
+              max="2.5"
+              step="0.1"
+              value={rainyWindowConfig.dropletSlideSpeed}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, dropletSlideSpeed: parseFloat(e.target.value) }))}
+              className="w-full accent-sky-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'മുറിയിലെ വിളക്കിന്റെ ചൂട്:' : 'Warm Room Lamp Glow:'}</span>
+              <span className="font-mono text-amber-400">{rainyWindowConfig.warmLampGlow}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={rainyWindowConfig.warmLampGlow}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, warmLampGlow: parseInt(e.target.value, 10) }))}
+              className="w-full accent-amber-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'മൂടൽമഞ്ഞ് (Mist & Fog):' : 'Mist & Fog Intensity:'}</span>
+              <span className="font-mono text-sky-400">{rainyWindowConfig.mistIntensity}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={rainyWindowConfig.mistIntensity}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, mistIntensity: parseInt(e.target.value, 10) }))}
+              className="w-full accent-sky-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>{isMl ? 'പശ്ചാത്തല മങ്ങൽ (Blur):' : 'Background Outdoor Blur:'}</span>
+              <span className="font-mono text-sky-400">{rainyWindowConfig.bgBlur}px</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="16"
+              value={rainyWindowConfig.bgBlur}
+              onChange={(e) => setRainyWindowConfig((p) => ({ ...p, bgBlur: parseInt(e.target.value, 10) }))}
+              className="w-full accent-sky-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {/* 5. Window Frame Architectural Style */}
+        <div>
+          <label className="text-xs font-bold text-slate-200 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-sky-400" />
+            <span>{isMl ? 'ജനൽ ചട്ടക്കൂട് (Window Frame Style)' : 'Architectural Window Frame Overlay'}</span>
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {frameOptions.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setRainyWindowConfig((p) => ({ ...p, windowFrameStyle: f.id }))}
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                  rainyWindowConfig.windowFrameStyle === f.id
+                    ? 'bg-sky-500/20 border-sky-400/80 text-white shadow-md'
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <span className="text-xs font-bold block">{f.label}</span>
+                <span className="text-[10px] text-slate-400 block truncate">{f.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 6. Atmospheric Toggles & Reset */}
+        <div className="flex items-center justify-between pt-2 border-t border-slate-800 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rainyWindowConfig.lightningEnabled}
+                onChange={(e) => setRainyWindowConfig((p) => ({ ...p, lightningEnabled: e.target.checked }))}
+                className="accent-sky-500 rounded"
+              />
+              <span>{isMl ? 'മിന്നൽ വെളിച്ചം (Lightning)' : 'Lightning Flashes'}</span>
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rainyWindowConfig.condensationCornerFog}
+                onChange={(e) => setRainyWindowConfig((p) => ({ ...p, condensationCornerFog: e.target.checked }))}
+                className="accent-sky-500 rounded"
+              />
+              <span>{isMl ? 'കോണുകളിലെ ആവി (Corner Steam)' : 'Corner Condensation'}</span>
+            </label>
+          </div>
+
+          <button
+            onClick={() => {
+              setRainyWindowConfig(DEFAULT_RAINY_WINDOW_CONFIG)
+              showToast('Reset Rainy Window parameters to default.', 'info')
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer border border-slate-700"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
+            <span>{isMl ? 'റീസെറ്റ് ചെയ്യുക' : 'Reset Defaults'}</span>
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <ToolPageLayout
       tool={tool}
@@ -2324,6 +2782,28 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               <Tv className="w-3.5 h-3.5" />
               16:9 Landscape
             </button>
+            <button
+              onClick={() => setState((p) => ({ ...p, aspectRatio: '4:3' }))}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                state.aspectRatio === '4:3'
+                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <Tv className="w-3.5 h-3.5" />
+              4:3 Classic
+            </button>
+            <button
+              onClick={() => setState((p) => ({ ...p, aspectRatio: '21:9' }))}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                state.aspectRatio === '21:9'
+                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <Film className="w-3.5 h-3.5" />
+              21:9 Ultrawide
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -2416,6 +2896,32 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 >
                   <Activity className="w-4 h-4" />
                   20 Visualizers
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('rainy-window')
+                    if (!rainyWindowConfig.enabled) {
+                      setRainyWindowConfig((p) => ({ ...p, enabled: true }))
+                      showToast('Activated Rainy Window Studio!', 'success')
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeTab === 'rainy-window'
+                      ? 'bg-gradient-to-r from-sky-500/25 via-blue-500/25 to-indigo-500/25 text-sky-300 border border-sky-400/50 shadow-lg shadow-sky-500/20 ring-1 ring-sky-400/40'
+                      : rainyWindowConfig.enabled
+                      ? 'text-sky-400 hover:text-sky-200 hover:bg-sky-950/40 border border-sky-500/40'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <CloudRain className="w-4 h-4 text-sky-400 animate-pulse" />
+                  <span className="font-bold">🌧️ Rainy Window Studio</span>
+                  <span
+                    className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded tracking-wider ${
+                      rainyWindowConfig.enabled ? 'bg-sky-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    {rainyWindowConfig.enabled ? 'ON' : 'PRO'}
+                  </span>
                 </button>
                 <button
                   onClick={() => {
@@ -3738,6 +4244,13 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               </div>
             )}
 
+            {/* TAB: RAINY WINDOW STUDIO */}
+            {activeTab === 'rainy-window' && (
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1 animate-in fade-in duration-200">
+                {renderRainyWindowStudioControls()}
+              </div>
+            )}
+
             {/* TAB 8 (LAST TAB): DEDICATED PHOTO HALFTONE & BASS WAVE MATRIX (PRESET #14) */}
             {activeTab === 'dotted-matrix' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1 animate-in fade-in duration-200">
@@ -3755,7 +4268,15 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   className="max-h-[540px] w-auto h-auto object-contain rounded-lg shadow-2xl"
                   style={{
                     aspectRatio:
-                      state.aspectRatio === '9:16' ? '9/16' : state.aspectRatio === '1:1' ? '1/1' : '16/9',
+                      state.aspectRatio === '9:16'
+                        ? '9/16'
+                        : state.aspectRatio === '1:1'
+                        ? '1/1'
+                        : state.aspectRatio === '4:3'
+                        ? '4/3'
+                        : state.aspectRatio === '21:9'
+                        ? '21/9'
+                        : '16/9',
                   }}
                 />
 

@@ -39,6 +39,7 @@ import { AudioReactiveSmokeEngine } from './audioReactiveSmokeEngine.ts'
 import { ParticleUniverseEngine } from './particleUniverseEngine.ts'
 import { ShockwaveEngine } from './shockwaveEngine.ts'
 import { ParticlePixelDispersionEngine } from './particlePixelDispersionEngine.ts'
+import { RainyWindowStudioEngine, studioRainyWindowEngine } from './rainyWindowEngine.ts'
 
 // Re-export core DSP & effects for backward compatibility and test suites
 export {
@@ -52,6 +53,7 @@ export {
   ParticleUniverseEngine,
   ShockwaveEngine,
   ParticlePixelDispersionEngine,
+  RainyWindowStudioEngine,
 }
 export type { VisualizerParticle }
 
@@ -61,6 +63,7 @@ export const studioSmokeEngine = new AudioReactiveSmokeEngine()
 export const studioUniverseEngine = new ParticleUniverseEngine()
 export const studioShockwaveEngine = new ShockwaveEngine()
 export const studioPixelDispersionEngine = new ParticlePixelDispersionEngine()
+export { studioRainyWindowEngine }
 
 // Backward-compatible individual preset drawer aliases
 export const drawCircularPulse = (ctx: CanvasRenderingContext2D, width: number, height: number, freqData: Uint8Array, config: VisualizerConfig, palette: ThemeColors, bands: any, time: number, albumImage: HTMLImageElement | null) => {
@@ -144,23 +147,38 @@ export function renderStudioComposition(
   const centerX = width / 2
   const centerY = state.aspectRatio === '9:16' ? height * 0.45 : height / 2
   const primaryRadius = Math.min(width, height) * (state.aspectRatio === '9:16' ? 0.22 : 0.26)
+  const currentPhoto = photoImages[state.activePhotoIndex] || photoImages[0] || null
 
-  // 3. Layer 1: Render Background Layer
-  drawBackgroundLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+  // 3. Layer 1-3: Rainy Window Studio Engine OR Standard Background + Photo Layers
+  if (state.rainyWindow && state.rainyWindow.enabled) {
+    studioRainyWindowEngine.updateAndDraw(
+      ctx,
+      width,
+      height,
+      bands,
+      palette,
+      currentTime,
+      state.rainyWindow,
+      currentPhoto
+    )
+  } else {
+    // Standard Background Layer
+    drawBackgroundLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
 
-  // 4. Layer 2: Audio-Reactive Volumetric Smoke & Mist (Behind photo)
-  if (state.smoke && state.smoke.enabled) {
-    studioSmokeEngine.updateAndDraw(ctx, width, height, bands, currentTime, state.smoke)
-  }
+    // Volumetric Smoke & Mist (Behind photo)
+    if (state.smoke && state.smoke.enabled) {
+      studioSmokeEngine.updateAndDraw(ctx, width, height, bands, currentTime, state.smoke)
+    }
 
-  // 5. Layer 3: Render Photo / Album Artwork Composition Layer
-  if (state.photoVisible !== false) {
-    drawPhotoCompositionLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+    // Photo / Album Artwork Composition Layer
+    if (state.photoVisible !== false) {
+      drawPhotoCompositionLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+    }
   }
 
   // 5.5 SPECIAL FX #1: Audio-Reactive Particle Pixel Dispersion ("Sand / Ember Dissolve")
   if (state.pixelDispersion && state.pixelDispersion.enabled) {
-    const currentPhotoForDispersion = photoImages[state.activePhotoIndex] || photoImages[0] || null
+    const currentPhotoForDispersion = currentPhoto
     studioPixelDispersionEngine.updateAndDraw(
       ctx,
       width,

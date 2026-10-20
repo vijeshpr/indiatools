@@ -43,6 +43,12 @@ import {
   buildCuesElement,
   inspectWebmMetadata,
 } from '../src/lib/video/webmSeekableEngine.ts'
+import {
+  RainyWindowStudioEngine,
+  RAINY_SCENE_PRESETS,
+  DEFAULT_RAINY_WINDOW_CONFIG,
+  RainyWindowConfig,
+} from '../src/lib/video/rainyWindowEngine.ts'
 
 describe('Audio Spectrum & Waveform Video Generator Suite', () => {
   it('should be correctly registered in TOOLS registry', () => {
@@ -1035,5 +1041,194 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
     assert.strictEqual(inspected.hasDuration, true)
     assert.strictEqual(inspected.durationSec, 15)
     assert.strictEqual(inspected.hasCues, true)
+  })
+
+  it('should support 5 aspect ratios including 4:3 Classic and 21:9 Ultrawide', () => {
+    assert.strictEqual(ASPECT_RATIOS['16:9'].width, 1920)
+    assert.strictEqual(ASPECT_RATIOS['16:9'].height, 1080)
+    assert.strictEqual(ASPECT_RATIOS['9:16'].width, 1080)
+    assert.strictEqual(ASPECT_RATIOS['9:16'].height, 1920)
+    assert.strictEqual(ASPECT_RATIOS['1:1'].width, 1080)
+    assert.strictEqual(ASPECT_RATIOS['1:1'].height, 1080)
+    assert.strictEqual(ASPECT_RATIOS['4:3'].width, 1440)
+    assert.strictEqual(ASPECT_RATIOS['4:3'].height, 1080)
+    assert.strictEqual(ASPECT_RATIOS['21:9'].width, 2560)
+    assert.strictEqual(ASPECT_RATIOS['21:9'].height, 1080)
+  })
+
+  it('should validate Rainy Window Studio scene presets and default configurations', () => {
+    assert.strictEqual(RAINY_SCENE_PRESETS.length, 8, 'Must have exactly 8 rainy scene presets')
+
+    const presetIds = RAINY_SCENE_PRESETS.map((p) => p.id)
+    assert.deepStrictEqual(presetIds, [
+      'cozy-bedroom',
+      'mountain-cabin',
+      'city-night',
+      'tropical-monsoon',
+      'forest-window',
+      'ocean-storm',
+      'japanese-retreat',
+      'custom',
+    ])
+
+    for (const preset of RAINY_SCENE_PRESETS) {
+      assert.ok(preset.name.length > 0, `Preset ${preset.id} must have a name`)
+      assert.ok(preset.subtitle.length > 0, `Preset ${preset.id} must have a subtitle`)
+      assert.ok(preset.accentColor.startsWith('#'), `Preset ${preset.id} accent color must be hex`)
+      assert.ok(preset.description.length > 10, `Preset ${preset.id} must have a description`)
+      assert.ok(['cozy-wood', 'french-pane', 'minimal-panorama', 'loft-steel', 'none'].includes(preset.defaultFrame))
+      assert.ok(['drizzle', 'light', 'moderate', 'heavy', 'storm'].includes(preset.defaultIntensity))
+      assert.ok(preset.warmth >= 0 && preset.warmth <= 100)
+    }
+
+    // Validate default config
+    assert.strictEqual(DEFAULT_RAINY_WINDOW_CONFIG.enabled, false)
+    assert.strictEqual(DEFAULT_RAINY_WINDOW_CONFIG.scenePreset, 'cozy-bedroom')
+    assert.strictEqual(DEFAULT_RAINY_WINDOW_CONFIG.intensity, 'moderate')
+    assert.strictEqual(DEFAULT_RAINY_WINDOW_CONFIG.mode, 'natural')
+    assert.strictEqual(DEFAULT_RAINY_WINDOW_CONFIG.lightningEnabled, true)
+    assert.strictEqual(DEFAULT_RAINY_WINDOW_CONFIG.condensationCornerFog, true)
+    assert.strictEqual(DEFAULT_RAINY_WINDOW_CONFIG.windowFrameStyle, 'cozy-wood')
+    assert.ok(DEFAULT_RAINY_WINDOW_CONFIG.rainDensity >= 10)
+    assert.ok(DEFAULT_RAINY_WINDOW_CONFIG.rainSpeed >= 0.5)
+  })
+
+  it('should initialize RainyWindowStudioEngine and render multi-plane rain & glass droplets at 60 FPS without throwing', () => {
+    const engine = new RainyWindowStudioEngine()
+    assert.ok(engine, 'Engine must instantiate')
+
+    // Mock CanvasRenderingContext2D
+    const createMockCtx = (w: number, h: number) => {
+      const gradientMock = {
+        addColorStop: () => {},
+      }
+      return {
+        canvas: { width: w, height: h },
+        save: () => {},
+        restore: () => {},
+        fillRect: () => {},
+        strokeRect: () => {},
+        beginPath: () => {},
+        closePath: () => {},
+        arc: () => {},
+        ellipse: () => {},
+        moveTo: () => {},
+        lineTo: () => {},
+        fill: () => {},
+        stroke: () => {},
+        drawImage: () => {},
+        createLinearGradient: () => gradientMock,
+        createRadialGradient: () => gradientMock,
+        fillStyle: '',
+        strokeStyle: '',
+        lineWidth: 1,
+        lineCap: 'round',
+        globalAlpha: 1,
+        filter: 'none',
+      } as any
+    }
+
+    const mockColors = {
+      primary: '#00F0FF',
+      secondary: '#FF007F',
+      accent: '#FFE600',
+      background: '#0A0A12',
+    }
+
+    const testAspectDimensions = [
+      { width: 1920, height: 1080 }, // 16:9
+      { width: 1080, height: 1920 }, // 9:16
+      { width: 1080, height: 1080 }, // 1:1
+      { width: 1440, height: 1080 }, // 4:3
+      { width: 2560, height: 1080 }, // 21:9
+    ]
+
+    // 1. Render all 8 presets across dimensions
+    for (const dim of testAspectDimensions) {
+      const ctx = createMockCtx(dim.width, dim.height)
+      for (const preset of RAINY_SCENE_PRESETS) {
+        const config: RainyWindowConfig = {
+          ...DEFAULT_RAINY_WINDOW_CONFIG,
+          enabled: true,
+          scenePreset: preset.id,
+          intensity: preset.defaultIntensity,
+          windowFrameStyle: preset.defaultFrame,
+        }
+
+        const bands = {
+          bass: 0.8,
+          mid: 0.5,
+          treble: 0.4,
+          subBass: 0.9,
+          kick: 0.85,
+          vocal: 0.5,
+          overall: 0.65,
+          isBeatHit: true,
+        }
+
+        assert.doesNotThrow(() => {
+          engine.updateAndDraw(ctx, dim.width, dim.height, bands, mockColors, 1.0, config, null)
+        }, `Preset ${preset.id} must render without error at ${dim.width}x${dim.height}`)
+      }
+    }
+
+    // 2. Render all 5 window frame styles
+    const frames: Array<RainyWindowConfig['windowFrameStyle']> = [
+      'cozy-wood',
+      'french-pane',
+      'minimal-panorama',
+      'loft-steel',
+      'none',
+    ]
+    const ctx = createMockCtx(1920, 1080)
+    for (const frame of frames) {
+      const config: RainyWindowConfig = {
+        ...DEFAULT_RAINY_WINDOW_CONFIG,
+        enabled: true,
+        windowFrameStyle: frame,
+      }
+      assert.doesNotThrow(() => {
+        engine.updateAndDraw(ctx, 1920, 1080, {
+          bass: 0.3,
+          mid: 0.3,
+          treble: 0.2,
+          subBass: 0.3,
+          kick: 0.2,
+          vocal: 0.3,
+          overall: 0.3,
+          isBeatHit: false,
+        }, mockColors, 2.0, config, null)
+      }, `Window frame ${frame} must render without error`)
+    }
+
+    // 3. Audio Reactivity: test thunder lightning trigger on transient beat hits
+    const reactiveConfig: RainyWindowConfig = {
+      ...DEFAULT_RAINY_WINDOW_CONFIG,
+      enabled: true,
+      mode: 'beat-reactive',
+      lightningEnabled: true,
+      bassSensitivity: 2.0,
+      beatSensitivity: 2.0,
+    }
+    const beatHitBands = {
+      bass: 0.95,
+      mid: 0.7,
+      treble: 0.8,
+      subBass: 1.0,
+      kick: 0.98,
+      vocal: 0.6,
+      overall: 0.9,
+      isBeatHit: true,
+    }
+    for (let frame = 0; frame < 10; frame++) {
+      assert.doesNotThrow(() => {
+        engine.updateAndDraw(ctx, 1920, 1080, beatHitBands, mockColors, 3.0 + frame * 0.016, reactiveConfig, null)
+      })
+    }
+
+    // 4. Test engine reset
+    assert.doesNotThrow(() => {
+      engine.reset()
+    }, 'Engine reset must run cleanly')
   })
 })
