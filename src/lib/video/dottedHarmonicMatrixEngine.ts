@@ -53,6 +53,7 @@ export const DEFAULT_DOTTED_MATRIX_CONFIG: DottedMatrixConfig = {
   density: 'fine',
   halftoneMode: 'photo-dots',
   liquidSpreadIntensity: 65,
+  bassWaveReactivity: 85,
   recoverySpeed: 'balanced',
   dotSizeScale: 100,
   glowIntensity: 40,
@@ -162,9 +163,18 @@ export class DottedHarmonicMatrixEngine {
     } = rc
 
     const config = dottedMatrixConfig
+    const activePalette: ThemeColors = palette && palette.primary
+      ? palette
+      : {
+          primary: '#06b6d4',
+          secondary: '#8b5cf6',
+          accent: '#ec4899',
+          glow: 'rgba(6, 182, 212, 0.75)',
+          gradient: ['#06b6d4', '#8b5cf6', '#ec4899'],
+        }
 
     // 1. Maintain Grid allocation & Sample Cache
-    this.ensureGrid(width, height, config.density, currentPhoto || null, palette)
+    this.ensureGrid(width, height, config.density, currentPhoto || null, activePalette)
 
     if (this.dots.length === 0) return
 
@@ -183,14 +193,14 @@ export class DottedHarmonicMatrixEngine {
       this.ripples = []
     }
 
-    // 4. Update liquid physics simulation (Spring restoration, swirl, damping)
-    this.updatePhysics(dt, currentTime, config)
+    // 4. Update liquid physics simulation (Spring restoration, swirl, damping, and continuous concentric bass wave)
+    this.updatePhysics(dt, currentTime, config, bands, width, height)
 
     // 5. Update audio-reactive geometry (FFT mapping, bass expansion, luminance sizing)
     this.updateGeometry(freqData, bands, currentTime, sensitivity, config, width, height)
 
     // 6. Draw dots onto canvas
-    this.draw(ctx, width, height, palette, config, bands)
+    this.draw(ctx, width, height, activePalette, config, bands)
   }
 
   /**
@@ -216,8 +226,10 @@ export class DottedHarmonicMatrixEngine {
       rows !== this.cachedRows ||
       density !== this.cachedDensity ||
       spacing !== this.cachedSpacing
+    const primColor = palette?.primary || '#06b6d4'
+    const accColor = palette?.accent || '#ec4899'
     const paletteChanged =
-      palette.primary !== this.cachedPalettePrimary || palette.accent !== this.cachedPaletteAccent
+      primColor !== this.cachedPalettePrimary || accColor !== this.cachedPaletteAccent
 
     if (sizeChanged || this.dots.length === 0) {
       this.cachedCols = cols
@@ -329,16 +341,16 @@ export class DottedHarmonicMatrixEngine {
       this.synthesizeHarmonicGradient(cols, rows, palette)
     }
 
-    this.cachedPalettePrimary = palette.primary
-    this.cachedPaletteAccent = palette.accent
+    this.cachedPalettePrimary = palette?.primary || '#06b6d4'
+    this.cachedPaletteAccent = palette?.accent || '#ec4899'
   }
 
   /**
    * Full-screen harmonic gradient fallback when no photo is uploaded
    */
   private synthesizeHarmonicGradient(cols: number, rows: number, palette: ThemeColors) {
-    const prim = parseColor(palette.primary)
-    const acc = parseColor(palette.accent)
+    const prim = parseColor(palette?.primary || '#06b6d4')
+    const acc = parseColor(palette?.accent || '#ec4899')
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -401,9 +413,17 @@ export class DottedHarmonicMatrixEngine {
   }
 
   /**
-   * Spring restoration physics, ripple displacement, fluid damping, and ambient flow
+   * Spring restoration physics, ripple displacement, fluid damping, ambient flow,
+   * and audio-reactive concentric liquid wave displacement from center on bass hits.
    */
-  private updatePhysics(dt: number, currentTime: number, config: DottedMatrixConfig) {
+  private updatePhysics(
+    dt: number,
+    currentTime: number,
+    config: DottedMatrixConfig,
+    bands: DetailedAudioBands,
+    width: number,
+    height: number
+  ) {
     // Physical spring parameters
     let stiffness = 42
     let baseDamping = 0.88
@@ -417,6 +437,10 @@ export class DottedHarmonicMatrixEngine {
 
     const normalizedDamping = Math.pow(baseDamping, dt * 60)
     const ambientAmt = (config.ambientFlowIntensity / 100) * 1.6
+    const centerX = width * 0.5
+    const centerY = height * 0.5
+    const bassReactivity = ((config.bassWaveReactivity ?? 85) / 100)
+    const bassEnergy = bands ? Math.max(0, bands.bass * 0.75 + bands.subBass * 0.45) : 0
 
     // Advance ripples
     for (const rip of this.ripples) {
@@ -431,7 +455,7 @@ export class DottedHarmonicMatrixEngine {
     for (let i = 0; i < dotCount; i++) {
       const dot = this.dots[i]
 
-      // 1. Ripple displacement & swirl force
+      // 1. Transient ripple displacement & swirl force from beat epicenters
       if (activeRipples.length > 0) {
         for (const rip of activeRipples) {
           const dx = dot.currentX - rip.x
@@ -455,11 +479,35 @@ export class DottedHarmonicMatrixEngine {
         }
       }
 
-      // 2. Spring restoration toward original grid position (Hooke's Law)
+      // 2. Continuous Concentric Liquid Wave on Bass hits (Traveling water ripple undulation)
+      if (bassReactivity > 0 && bassEnergy > 0.02) {
+        const dx = dot.baseX - centerX
+        const dy = dot.baseY - centerY
+        const dist = Math.hypot(dx, dy)
+        const nx = dist > 1 ? dx / dist : 0
+        const ny = dist > 1 ? dy / dist : 1
+
+        // Traveling sinusoidal wave rolling outwards from center
+        const waveFreq = 0.015
+        const waveSpeed = 9.0
+        const wavePhase = dist * waveFreq - currentTime * waveSpeed
+        const waveSine = Math.sin(wavePhase)
+        const waveCos = Math.cos(wavePhase * 0.8)
+
+        // Radial outward push-and-pull wave modulated by bass power
+        const waveForce = waveSine * bassEnergy * 560 * bassReactivity
+        // Slight organic transverse swirl gives realistic liquid surface appearance
+        const swirlForce = waveCos * bassEnergy * 110 * bassReactivity
+
+        dot.vx += (nx * waveForce - ny * swirlForce) * dt
+        dot.vy += (ny * waveForce + nx * swirlForce) * dt
+      }
+
+      // 3. Spring restoration toward original grid position (Hooke's Law)
       dot.vx += (dot.baseX - dot.currentX) * stiffness * dt
       dot.vy += (dot.baseY - dot.currentY) * stiffness * dt
 
-      // 3. Subtle ambient sine flow field (preserves portrait clarity while adding life)
+      // 4. Subtle ambient sine flow field (preserves portrait clarity while adding life)
       if (ambientAmt > 0) {
         const flowX = Math.sin(dot.baseY * 0.012 + currentTime * 2.0) * ambientAmt
         const flowY = Math.cos(dot.baseX * 0.012 + currentTime * 2.0) * ambientAmt
@@ -467,7 +515,7 @@ export class DottedHarmonicMatrixEngine {
         dot.vy += flowY * 0.22
       }
 
-      // 4. Fluid damping and velocity integration
+      // 5. Fluid damping and velocity integration
       dot.vx = Math.max(-650, Math.min(650, dot.vx * normalizedDamping))
       dot.vy = Math.max(-650, Math.min(650, dot.vy * normalizedDamping))
 
@@ -496,6 +544,7 @@ export class DottedHarmonicMatrixEngine {
     const rows = this.cachedRows
     const centerX = width / 2
     const centerY = height / 2
+    const bassReactivity = ((config.bassWaveReactivity ?? 85) / 100)
 
     const dotCount = this.dots.length
     for (let i = 0; i < dotCount; i++) {
@@ -513,19 +562,21 @@ export class DottedHarmonicMatrixEngine {
       const binIdx = Math.floor(Math.abs(Math.sin(normX * Math.PI)) * (freqData.length * 0.55))
       const localMag = (freqData[binIdx] || 0) / 255
 
-      // Sub-bass & Bass center-out expanding ripple
+      // Sub-bass & Bass center-out expanding ripple synchronized with wave displacement
       const distCenter = Math.hypot(dot.baseX - centerX, dot.baseY - centerY) / Math.max(1, width * 0.5)
-      const bassWave = Math.sin(distCenter * 4.5 - currentTime * 3.8) * bands.bass
+      const wavePhase = distCenter * 4.5 - currentTime * 4.5
+      const waveSwell = Math.sin(wavePhase)
+      const bassWaveRadiusBoost = Math.max(0, waveSwell) * (bands.bass * 0.75 + bands.subBass * 0.4) * bassReactivity
 
       // High-frequency shimmer
       const trebleSparkle = bands.treble * (Math.sin(i * 13.7 + currentTime * 8) * 0.15)
 
       const audioScale =
         1 +
-        (bands.bass * 0.4 + localMag * 0.45 + Math.max(0, bassWave) * 0.25 + trebleSparkle) *
+        (bands.bass * 0.45 + localMag * 0.45 + bassWaveRadiusBoost * 0.7 + trebleSparkle) *
           (sensitivity / 1.5)
 
-      dot.targetRadius = Math.max(minRadius, Math.min(maxRadius * 1.35, baseRadius * audioScale))
+      dot.targetRadius = Math.max(minRadius, Math.min(maxRadius * 1.45, baseRadius * audioScale))
       // Smooth interpolation prevents jitter
       dot.radius += (dot.targetRadius - dot.radius) * 0.38
     }
@@ -595,7 +646,7 @@ export class DottedHarmonicMatrixEngine {
       // Velocity elongation: stretch moving dots along motion vector into liquid droplets
       const speed = Math.hypot(dot.vx, dot.vy)
       ctx.beginPath()
-      if (speed > 16) {
+      if (speed > 16 && typeof ctx.ellipse === 'function') {
         const angle = Math.atan2(dot.vy, dot.vx)
         const stretch = Math.min(2.2, 1 + speed * 0.012)
         ctx.ellipse(

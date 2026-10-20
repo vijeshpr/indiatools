@@ -489,6 +489,7 @@ export interface DottedMatrixConfig {
   density: DottedMatrixDensity
   halftoneMode: DottedMatrixHalftoneMode
   liquidSpreadIntensity: number // 0 - 100
+  bassWaveReactivity: number // 0 - 100 (%) Concentric wave displacement on bass hits
   recoverySpeed: DottedMatrixRecoverySpeed
   dotSizeScale: number // 50 - 200 (%)
   glowIntensity: number // 0 - 100 (%)

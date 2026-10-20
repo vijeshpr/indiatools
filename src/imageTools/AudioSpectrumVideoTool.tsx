@@ -407,7 +407,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   // STUDIO WORKSPACE NAVIGATION & UI TOGGLES
   // -------------------------------------------------------------
   const [activeTab, setActiveTab] = useState<
-    'visualizers' | 'combos' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity'
+    'visualizers' | 'combos' | 'dotted-matrix' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity'
   >('visualizers')
   const [visualizerCategory, setVisualizerCategory] = useState<string>('all')
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ml')
@@ -481,24 +481,32 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       analyser.fftSize = state.fftSize
       analyser.smoothingTimeConstant = audioDspTuning.smoothing
 
-      const gain = ctx.createGain()
-      gain.gain.value = isMuted ? 0 : volume
+      // 1. Monitor gain node: controlled by preview volume and mute buttons for user's speakers/headphones
+      const monitorGain = ctx.createGain()
+      monitorGain.gain.value = isMuted ? 0 : volume
+
+      // 2. Export gain node: strictly fixed at 1.0 (100% full volume) so exported video is NEVER muted or attenuated!
+      const exportGain = ctx.createGain()
+      exportGain.gain.value = 1.0
 
       const dest = ctx.createMediaStreamDestination()
 
-      analyser.connect(gain)
-      gain.connect(ctx.destination)
-      gain.connect(dest)
+      // Route audio graph
+      analyser.connect(monitorGain)
+      monitorGain.connect(ctx.destination)
+
+      analyser.connect(exportGain)
+      exportGain.connect(dest)
 
       audioContextRef.current = ctx
       analyserRef.current = analyser
-      gainNodeRef.current = gain
+      gainNodeRef.current = monitorGain
       destinationNodeRef.current = dest
     }
     return audioContextRef.current
   }, [state.fftSize, audioDspTuning.smoothing, isMuted, volume])
 
-  // Volume & Mute listener
+  // Volume & Mute listener (adjusts monitor gain for speaker preview only, never touches export audio)
   useEffect(() => {
     if (gainNodeRef.current && audioContextRef.current) {
       const val = isMuted ? 0 : volume
@@ -1301,6 +1309,326 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     return VISUALIZER_ENGINES.filter((e) => e.category === visualizerCategory)
   }, [visualizerCategory])
 
+  const renderDottedMatrixControls = (isDedicatedTab: boolean = false) => (
+    <div
+      className={`space-y-4 ${
+        isDedicatedTab
+          ? 'bg-slate-950/60 border border-slate-800/90 rounded-2xl p-5'
+          : 'bg-slate-950/80 border border-cyan-500/40 rounded-2xl p-4'
+      } animate-in fade-in duration-200`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <Sparkles className="w-5 h-5 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white block">
+                Photo Halftone & Concentric Bass Wave Matrix
+              </span>
+              <span className="text-[10px] font-mono uppercase bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-full font-bold">
+                PRESET #14
+              </span>
+            </div>
+            <span className="text-xs text-slate-400">
+              Transforms uploaded photos into luminous halftone dots that surge in liquid waves with music bass kicks
+            </span>
+          </div>
+        </div>
+        {state.activePreset !== 'dotted-harmonic-matrix' ? (
+          <button
+            onClick={() => {
+              setState((prev) => ({ ...prev, activePreset: 'dotted-harmonic-matrix' }))
+              showToast('Activated Dotted Harmonic Matrix visualizer!', 'success')
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shrink-0"
+          >
+            Activate Preset
+          </button>
+        ) : (
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            Live & Active
+          </span>
+        )}
+      </div>
+
+      {/* Photo & Specimen Quick Actions */}
+      <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div className="flex items-center gap-2 text-xs min-w-0">
+          <ImageIcon className="w-4 h-4 text-cyan-400 shrink-0" />
+          <span className="text-slate-300 shrink-0">Photo Source:</span>
+          {photoName ? (
+            <span className="font-semibold text-cyan-300 truncate max-w-[160px] sm:max-w-[240px]">
+              {photoName}
+            </span>
+          ) : (
+            <span className="text-slate-500 italic truncate">No custom photo (Using Neon Harmonic Matrix)</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => photoFileInputRef.current?.click()}
+            className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700"
+          >
+            Upload Photo
+          </button>
+          <button
+            onClick={handleLoadSampleArtwork}
+            className="px-2.5 py-1 rounded-lg text-xs font-medium bg-cyan-950 hover:bg-cyan-900 text-cyan-300 transition-all border border-cyan-800/60"
+          >
+            Load Sample Art
+          </button>
+        </div>
+      </div>
+
+      {/* PRIMARY CONTROLS: Concentric Bass Wave Reactivity */}
+      <div className="bg-gradient-to-r from-cyan-950/70 via-blue-950/40 to-slate-950/80 p-4 rounded-xl border border-cyan-500/40 shadow-lg shadow-cyan-950/30 space-y-2">
+        <div className="flex justify-between items-center text-xs">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-cyan-400" />
+            <span className="font-bold text-cyan-300 text-sm">
+              Bass Wave Reactivity (Liquid Undulation):
+            </span>
+          </div>
+          <span className="font-mono text-cyan-300 font-extrabold text-sm px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500/40">
+            {dottedMatrixConfig.bassWaveReactivity ?? 85}%
+          </span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={dottedMatrixConfig.bassWaveReactivity ?? 85}
+          onChange={(e) =>
+            setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+              ...prev,
+              bassWaveReactivity: parseInt(e.target.value, 10),
+            }))
+          }
+          className="w-full accent-cyan-400 h-2 bg-slate-800 rounded-lg cursor-pointer"
+        />
+        <div className="flex justify-between text-[11px] text-slate-400">
+          <span>0% (Static / Flat Grid)</span>
+          <span className="text-cyan-400 font-semibold">85% (Natural Concentric Water Waves)</span>
+          <span>100% (High Ocean Surge)</span>
+        </div>
+        <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
+          When the bass and sub-bass hit, dots physically displace outward in traveling sinusoidal ripples from the canvas center, swelling in brightness and radius!
+        </p>
+      </div>
+
+      {/* Control 2: Dot Density / Resolution */}
+      <div>
+        <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+          Dot Density / Grid Resolution:
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { id: 'fine', label: 'Fine Portrait', desc: 'Dense halftone for detailed faces' },
+            { id: 'balanced', label: 'Balanced', desc: 'Standard medium grid' },
+            { id: 'bold', label: 'Bold LED Dots', desc: 'Stadium concert LED wall feel' },
+          ].map((d) => (
+            <button
+              key={d.id}
+              onClick={() =>
+                setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+                  ...prev,
+                  density: d.id as DottedMatrixDensity,
+                }))
+              }
+              className={`p-2.5 rounded-xl border text-left transition-all ${
+                dottedMatrixConfig.density === d.id
+                  ? 'bg-cyan-950/60 border-cyan-500/70 text-white shadow-md shadow-cyan-950/40 ring-1 ring-cyan-500/40'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <span className="text-xs font-bold block">{d.label}</span>
+              <span className="text-[10px] text-slate-400 line-clamp-1">{d.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Control 3: Image Halftone Mode */}
+      <div>
+        <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+          Image Halftone Rendering Mode:
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { id: 'photo-dots', label: 'Photo Inside Dots', desc: 'True RGB photo color' },
+            { id: 'luminance-size', label: 'Luminance Sizing', desc: 'Brightness mapped radius' },
+            { id: 'neon-tint', label: 'Neon Tint Overlay', desc: 'Harmonic color grading' },
+          ].map((m) => (
+            <button
+              key={m.id}
+              onClick={() =>
+                setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+                  ...prev,
+                  halftoneMode: m.id as DottedMatrixHalftoneMode,
+                }))
+              }
+              className={`p-2.5 rounded-xl border text-left transition-all ${
+                dottedMatrixConfig.halftoneMode === m.id
+                  ? 'bg-cyan-950/60 border-cyan-500/70 text-white shadow-md shadow-cyan-950/40 ring-1 ring-cyan-500/40'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <span className="text-xs font-bold block">{m.label}</span>
+              <span className="text-[10px] text-slate-400 line-clamp-1">{m.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Control 4: Liquid Beat Spread Intensity */}
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs">
+          <span className="font-semibold text-slate-300">Beat Transient Swirl & Dispersion:</span>
+          <span className="font-mono text-cyan-400 font-bold">
+            {dottedMatrixConfig.liquidSpreadIntensity}%
+          </span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={dottedMatrixConfig.liquidSpreadIntensity}
+          onChange={(e) =>
+            setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+              ...prev,
+              liquidSpreadIntensity: parseInt(e.target.value, 10),
+            }))
+          }
+          className="w-full accent-cyan-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+        />
+        <span className="text-[10px] text-slate-400 block">
+          {dottedMatrixConfig.liquidSpreadIntensity === 0
+            ? '0% = Scattered beat dispersion off (clean wave only)'
+            : 'Heavy drum hits spawn localized epicenters that scatter dots outward'}
+        </span>
+      </div>
+
+      {/* Control 5: Fluid Viscosity / Spring Return Speed */}
+      <div>
+        <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+          Fluid Viscosity / Elastic Spring Return Speed:
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { id: 'slow', label: 'Smooth / Slow', desc: 'High fluid viscosity, rolling ripples' },
+            { id: 'balanced', label: 'Balanced', desc: 'Standard elastic spring' },
+            { id: 'fast', label: 'Fast / Snappy', desc: 'Rapid portrait reformation' },
+          ].map((s) => (
+            <button
+              key={s.id}
+              onClick={() =>
+                setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+                  ...prev,
+                  recoverySpeed: s.id as DottedMatrixRecoverySpeed,
+                }))
+              }
+              className={`p-2.5 rounded-xl border text-left transition-all ${
+                dottedMatrixConfig.recoverySpeed === s.id
+                  ? 'bg-cyan-950/60 border-cyan-500/70 text-white shadow-md shadow-cyan-950/40 ring-1 ring-cyan-500/40'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <span className="text-xs font-bold block">{s.label}</span>
+              <span className="text-[10px] text-slate-400 line-clamp-1">{s.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Control 6: Fine-Tuning Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-800 text-xs">
+        <div>
+          <div className="flex justify-between text-slate-300 mb-1">
+            <span>Dot Size:</span>
+            <span className="font-mono text-cyan-400">{dottedMatrixConfig.dotSizeScale}%</span>
+          </div>
+          <input
+            type="range"
+            min="50"
+            max="180"
+            value={dottedMatrixConfig.dotSizeScale}
+            onChange={(e) =>
+              setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+                ...prev,
+                dotSizeScale: parseInt(e.target.value, 10),
+              }))
+            }
+            className="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between text-slate-300 mb-1">
+            <span>Glow & Bloom:</span>
+            <span className="font-mono text-cyan-400">{dottedMatrixConfig.glowIntensity}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={dottedMatrixConfig.glowIntensity}
+            onChange={(e) =>
+              setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+                ...prev,
+                glowIntensity: parseInt(e.target.value, 10),
+              }))
+            }
+            className="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between text-slate-300 mb-1">
+            <span>Ambient Flow:</span>
+            <span className="font-mono text-cyan-400">{dottedMatrixConfig.ambientFlowIntensity}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={dottedMatrixConfig.ambientFlowIntensity}
+            onChange={(e) =>
+              setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+                ...prev,
+                ambientFlowIntensity: parseInt(e.target.value, 10),
+              }))
+            }
+            className="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between text-slate-300 mb-1">
+            <span>Darkness / Contrast:</span>
+            <span className="font-mono text-cyan-400">{dottedMatrixConfig.backgroundDarkness}%</span>
+          </div>
+          <input
+            type="range"
+            min="50"
+            max="100"
+            value={dottedMatrixConfig.backgroundDarkness}
+            onChange={(e) =>
+              setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
+                ...prev,
+                backgroundDarkness: parseInt(e.target.value, 10),
+              }))
+            }
+            className="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+          />
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <ToolPageLayout tool={tool}>
       <div className="space-y-6">
@@ -1767,6 +2095,26 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 20 Visualizers
               </button>
               <button
+                onClick={() => {
+                  setActiveTab('dotted-matrix')
+                  if (state.activePreset !== 'dotted-harmonic-matrix') {
+                    setState((prev) => ({ ...prev, activePreset: 'dotted-harmonic-matrix' }))
+                    showToast('Activated Dotted Harmonic Matrix visualizer!', 'info')
+                  }
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeTab === 'dotted-matrix'
+                    ? 'bg-gradient-to-r from-cyan-500/25 to-blue-500/25 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40'
+                    : 'text-cyan-400 hover:text-cyan-200 hover:bg-cyan-950/40 border border-cyan-900/60'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                <span className="font-bold">✨ Photo Halftone & Wave</span>
+                <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded bg-cyan-400 text-black tracking-wider">
+                  FEATURED
+                </span>
+              </button>
+              <button
                 onClick={() => setActiveTab('combos')}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   activeTab === 'combos'
@@ -1837,6 +2185,37 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             {/* TAB 1: 20 VISUALIZERS */}
             {activeTab === 'visualizers' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                {/* PROMINENT SPOTLIGHT BANNER: DOTTED HARMONIC MATRIX */}
+                <div className="relative overflow-hidden rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/70 via-slate-900/90 to-blue-950/60 p-4 shadow-xl shadow-cyan-950/40">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-cyan-400 text-slate-950 tracking-wider">
+                          🔥 FEATURED VISUALIZER #14
+                        </span>
+                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                          Dotted Harmonic Matrix & Bass Wave
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
+                        Converts uploaded photos into luminous halftone particle dots that physically undulate and ripple in concentric liquid waves with music bass kicks!
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setState((p) => ({ ...p, activePreset: 'dotted-harmonic-matrix' }))
+                        setActiveTab('dotted-matrix')
+                        showToast('Activated Dotted Harmonic Matrix with Bass Waves!', 'success')
+                      }}
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-md shadow-cyan-500/25 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Apply & Configure Wave
+                    </button>
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {['all', 'radial', 'linear', 'cinematic', 'minimal', 'hud', 'particle'].map((cat) => (
                     <button
@@ -1884,213 +2263,14 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </div>
 
                 {/* DEDICATED INSPECTOR: DOTTED HARMONIC MATRIX (Section 14) */}
-                {state.activePreset === 'dotted-harmonic-matrix' && (
-                  <div className="bg-slate-950/80 border border-cyan-500/40 rounded-2xl p-4 space-y-4 animate-in fade-in duration-200">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                      <div className="flex items-center gap-2">
-                        <Grid className="w-4 h-4 text-cyan-400" />
-                        <div>
-                          <span className="text-xs font-bold text-white block">
-                            Dotted Harmonic Matrix Controls
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            Full-screen photo halftone + audio-reactive liquid dispersion
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono uppercase bg-cyan-950/60 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full">
-                        Interactive Matrix
-                      </span>
-                    </div>
+                {state.activePreset === 'dotted-harmonic-matrix' && renderDottedMatrixControls(false)}
+              </div>
+            )}
 
-                    {/* Control 1: Dot Density / Resolution */}
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                        Dot Density / Resolution:
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: 'fine', label: 'Fine Portrait', desc: 'Dense halftone for faces' },
-                          { id: 'balanced', label: 'Balanced', desc: 'Standard medium grid' },
-                          { id: 'bold', label: 'Bold LED Dots', desc: 'Stadium LED wall feel' },
-                        ].map((d) => (
-                          <button
-                            key={d.id}
-                            onClick={() =>
-                              setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
-                                ...prev,
-                                density: d.id as DottedMatrixDensity,
-                              }))
-                            }
-                            className={`p-2 rounded-xl border text-left transition-all ${
-                              dottedMatrixConfig.density === d.id
-                                ? 'bg-cyan-950/50 border-cyan-500/60 text-white shadow-md shadow-cyan-950/40 ring-1 ring-cyan-500/30'
-                                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
-                            }`}
-                          >
-                            <span className="text-xs font-bold block">{d.label}</span>
-                            <span className="text-[10px] text-slate-400 line-clamp-1">{d.desc}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Control 2: Image Halftone Mode */}
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                        Image Halftone Rendering Mode:
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: 'photo-dots', label: 'Photo Inside Dots', desc: 'True RGB photo color' },
-                          { id: 'luminance-size', label: 'Luminance Sizing', desc: 'Brightness mapped radius' },
-                          { id: 'neon-tint', label: 'Neon Tint Overlay', desc: 'Harmonic color grading' },
-                        ].map((m) => (
-                          <button
-                            key={m.id}
-                            onClick={() =>
-                              setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
-                                ...prev,
-                                halftoneMode: m.id as DottedMatrixHalftoneMode,
-                              }))
-                            }
-                            className={`p-2 rounded-xl border text-left transition-all ${
-                              dottedMatrixConfig.halftoneMode === m.id
-                                ? 'bg-cyan-950/50 border-cyan-500/60 text-white shadow-md shadow-cyan-950/40 ring-1 ring-cyan-500/30'
-                                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
-                            }`}
-                          >
-                            <span className="text-xs font-bold block">{m.label}</span>
-                            <span className="text-[10px] text-slate-400 line-clamp-1">{m.desc}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Control 3: Liquid Spread Intensity */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="font-semibold text-slate-300">Liquid Spread Intensity:</span>
-                        <span className="font-mono text-cyan-400 font-bold">
-                          {dottedMatrixConfig.liquidSpreadIntensity}%
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={dottedMatrixConfig.liquidSpreadIntensity}
-                        onChange={(e) =>
-                          setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
-                            ...prev,
-                            liquidSpreadIntensity: parseInt(e.target.value, 10),
-                          }))
-                        }
-                        className="w-full accent-cyan-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
-                      />
-                      <span className="text-[10px] text-slate-400 block">
-                        {dottedMatrixConfig.liquidSpreadIntensity === 0
-                          ? '0% = Beat scattering disabled (stable audio-reactive halftone matrix)'
-                          : 'Beat hits trigger localized ripples that swirl dots into liquid droplets'}
-                      </span>
-                    </div>
-
-                    {/* Control 4: Fluid Viscosity / Spring Return Speed */}
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                        Fluid Viscosity / Spring Return Speed:
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: 'slow', label: 'Smooth / Slow', desc: 'High viscosity, liquid wave' },
-                          { id: 'balanced', label: 'Balanced', desc: 'Standard elastic spring' },
-                          { id: 'fast', label: 'Fast / Snappy', desc: 'Rapid portrait reformation' },
-                        ].map((s) => (
-                          <button
-                            key={s.id}
-                            onClick={() =>
-                              setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
-                                ...prev,
-                                recoverySpeed: s.id as DottedMatrixRecoverySpeed,
-                              }))
-                            }
-                            className={`p-2 rounded-xl border text-left transition-all ${
-                              dottedMatrixConfig.recoverySpeed === s.id
-                                ? 'bg-cyan-950/50 border-cyan-500/60 text-white shadow-md shadow-cyan-950/40 ring-1 ring-cyan-500/30'
-                                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
-                            }`}
-                          >
-                            <span className="text-xs font-bold block">{s.label}</span>
-                            <span className="text-[10px] text-slate-400 line-clamp-1">{s.desc}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Additional Tuning Grid: Dot Scale, Glow, Ambient Flow */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 border-t border-slate-800 text-xs">
-                      <div>
-                        <div className="flex justify-between text-slate-300 mb-1">
-                          <span>Dot Size Scale:</span>
-                          <span className="font-mono text-cyan-400">{dottedMatrixConfig.dotSizeScale}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="50"
-                          max="180"
-                          value={dottedMatrixConfig.dotSizeScale}
-                          onChange={(e) =>
-                            setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
-                              ...prev,
-                              dotSizeScale: parseInt(e.target.value, 10),
-                            }))
-                          }
-                          className="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
-                        />
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-slate-300 mb-1">
-                          <span>Glow & Bloom:</span>
-                          <span className="font-mono text-cyan-400">{dottedMatrixConfig.glowIntensity}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={dottedMatrixConfig.glowIntensity}
-                          onChange={(e) =>
-                            setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
-                              ...prev,
-                              glowIntensity: parseInt(e.target.value, 10),
-                            }))
-                          }
-                          className="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
-                        />
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-slate-300 mb-1">
-                          <span>Ambient Flow:</span>
-                          <span className="font-mono text-cyan-400">{dottedMatrixConfig.ambientFlowIntensity}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={dottedMatrixConfig.ambientFlowIntensity}
-                          onChange={(e) =>
-                            setDottedMatrixConfig((prev: DottedMatrixConfig) => ({
-                              ...prev,
-                              ambientFlowIntensity: parseInt(e.target.value, 10),
-                            }))
-                          }
-                          className="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+            {/* TAB: DEDICATED PHOTO HALFTONE & BASS WAVE MATRIX */}
+            {activeTab === 'dotted-matrix' && (
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                {renderDottedMatrixControls(true)}
               </div>
             )}
 

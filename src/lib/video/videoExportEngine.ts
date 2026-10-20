@@ -60,13 +60,17 @@ export function getSupportedVideoMimeType(): { mimeType: string; extension: stri
     return { mimeType: 'video/webm', extension: 'webm', label: 'WebM' }
   }
 
+  // Prioritize formats with guaranteed audio track encoding (Opus / AAC).
+  // Note: Never use video/mp4;codecs=avc1 without an audio codec, as Chromium drops the audio track!
   const preferredFormats = [
-    { mime: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4', label: 'MP4 (H.264 / AAC)' },
-    { mime: 'video/mp4;codecs=avc1', ext: 'mp4', label: 'MP4 (H.264)' },
-    { mime: 'video/mp4', ext: 'mp4', label: 'MP4' },
+    // 1. WebM with Opus: Universally supported across Chromium (Chrome, Edge, Brave, Opera) & Firefox with full audio
     { mime: 'video/webm;codecs=vp9,opus', ext: 'webm', label: 'WebM (VP9 / Opus)' },
     { mime: 'video/webm;codecs=vp8,opus', ext: 'webm', label: 'WebM (VP8 / Opus)' },
     { mime: 'video/webm', ext: 'webm', label: 'WebM' },
+    // 2. MP4 with AAC: Native Apple Safari (macOS / iOS)
+    { mime: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4', label: 'MP4 (H.264 / AAC)' },
+    { mime: 'video/mp4;codecs=avc1,opus', ext: 'mp4', label: 'MP4 (H.264 / Opus)' },
+    { mime: 'video/mp4', ext: 'mp4', label: 'MP4' },
   ]
 
   for (const fmt of preferredFormats) {
@@ -220,10 +224,13 @@ export class VideoRecorderSession {
       }
 
       // 2. Combine Canvas video track + Web Audio destination audio track
-      const audioTrack = audioDestination.stream.getAudioTracks()[0]
+      const audioTracks = audioDestination.stream.getAudioTracks()
       const tracks: MediaStreamTrack[] = [videoTrack]
-      if (audioTrack) {
-        tracks.push(audioTrack)
+      if (audioTracks.length > 0) {
+        for (const track of audioTracks) {
+          track.enabled = true
+          tracks.push(track)
+        }
       }
 
       this.combinedStream = new MediaStream(tracks)

@@ -542,4 +542,102 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
     engine.reset()
     assert.ok(true, 'Engine reset executed cleanly without errors')
   })
+
+  it('should support concentric bass wave reactivity in Dotted Harmonic Matrix', () => {
+    assert.strictEqual(
+      DEFAULT_DOTTED_MATRIX_CONFIG.bassWaveReactivity,
+      85,
+      'Default bassWaveReactivity should be calibrated to 85%'
+    )
+
+    const engine = new DottedHarmonicMatrixEngine()
+    const mockCtx = {
+      save: () => {},
+      restore: () => {},
+      fillRect: () => {},
+      beginPath: () => {},
+      arc: () => {},
+      ellipse: () => {},
+      fill: () => {},
+      fillStyle: '',
+      shadowBlur: 0,
+      shadowColor: '',
+      createRadialGradient: () => ({ addColorStop: () => {} }),
+    } as any
+
+    const freqData = new Uint8Array(256).fill(120)
+    const timeData = new Uint8Array(256).fill(128)
+    const heavyBassBands: DetailedAudioBands = {
+      subBass: 0.95,
+      bass: 0.92,
+      mids: 0.4,
+      treble: 0.3,
+      overall: 0.7,
+      isBeatHit: true,
+      subBassDb: -2,
+      bassDb: -3,
+      midsDb: -12,
+      trebleDb: -16,
+      peakVolumeDb: -1,
+    }
+
+    // Render with 100% bass wave reactivity
+    assert.doesNotThrow(() => {
+      engine.render({
+        ctx: mockCtx,
+        width: 1080,
+        height: 1920,
+        freqData,
+        timeData,
+        bands: heavyBassBands,
+        palette: THEME_PALETTES['neon-cyber'],
+        currentTime: 2.5,
+        peakManager: new PeakHoldManager(),
+        barCount: 64,
+        sensitivity: 1.5,
+        bassReactivity: 1.5,
+        glowStrength: 1.0,
+        spinSpeed: 0.35,
+        centerX: 540,
+        centerY: 960,
+        primaryRadius: 280,
+        dottedMatrixConfig: {
+          ...DEFAULT_DOTTED_MATRIX_CONFIG,
+          bassWaveReactivity: 100,
+        },
+      })
+    }, 'Concentric bass wave rendering executed cleanly with 100% reactivity')
+  })
+
+  it('should guarantee audio track codec in getSupportedVideoMimeType to prevent silent/muted exports', () => {
+    const origWindow = (globalThis as any).window
+    const origMediaRecorder = (globalThis as any).MediaRecorder
+    try {
+      ;(globalThis as any).window = globalThis
+      // Test 1: When WebM VP9/Opus is supported (Chromium & Firefox standard)
+      ;(globalThis as any).MediaRecorder = {
+        isTypeSupported: (mime: string) => mime.includes('opus') || mime === 'video/webm',
+      }
+      const chromeResult = getSupportedVideoMimeType()
+      assert.ok(
+        chromeResult.mimeType.includes('opus') || chromeResult.mimeType === 'video/webm',
+        'Should select WebM with Opus audio on Chromium/Firefox'
+      )
+      assert.strictEqual(chromeResult.extension, 'webm')
+
+      // Test 2: When only MP4 with AAC is supported (Safari standard)
+      ;(globalThis as any).MediaRecorder = {
+        isTypeSupported: (mime: string) => mime.includes('mp4a.40.2') || mime === 'video/mp4',
+      }
+      const safariResult = getSupportedVideoMimeType()
+      assert.ok(
+        safariResult.mimeType.includes('mp4a.40.2') || safariResult.mimeType === 'video/mp4',
+        'Should select MP4 with AAC audio on Safari'
+      )
+      assert.strictEqual(safariResult.extension, 'mp4')
+    } finally {
+      ;(globalThis as any).window = origWindow
+      ;(globalThis as any).MediaRecorder = origMediaRecorder
+    }
+  })
 })
