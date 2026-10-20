@@ -111,6 +111,8 @@ import {
   formatTimeDisplay,
   formatTimecode,
   getSupportedVideoMimeType,
+  getExtensionFromMimeType,
+  validateExportedVideo,
 } from '../lib/video/videoExportEngine'
 import {
   generateVisualizerDemoSpecimen,
@@ -461,6 +463,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const gainNodeRef = useRef<GainNode | null>(null)
+  const exportGainRef = useRef<GainNode | null>(null)
   const destinationNodeRef = useRef<MediaStreamAudioDestinationNode | null>(null)
   const activeSourceRef = useRef<AudioBufferSourceNode | null>(null)
   const playbackStartTimeRef = useRef<number>(0)
@@ -509,10 +512,29 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       audioContextRef.current = ctx
       analyserRef.current = analyser
       gainNodeRef.current = monitorGain
+      exportGainRef.current = exportGain
       destinationNodeRef.current = dest
     }
     return audioContextRef.current
   }, [state.fftSize, audioDspTuning.smoothing, isMuted, volume])
+
+  // Obtain a clean, live MediaStreamAudioDestinationNode for video recording
+  const getFreshExportDestination = useCallback((ctx: AudioContext): MediaStreamAudioDestinationNode => {
+    if (destinationNodeRef.current) {
+      const tracks = destinationNodeRef.current.stream.getAudioTracks()
+      if (tracks.length > 0 && tracks[0].readyState === 'live') {
+        return destinationNodeRef.current
+      }
+    }
+    const dest = ctx.createMediaStreamDestination()
+    if (exportGainRef.current) {
+      try {
+        exportGainRef.current.connect(dest)
+      } catch {}
+    }
+    destinationNodeRef.current = dest
+    return dest
+  }, [])
 
   // Volume & Mute listener (adjusts monitor gain for speaker preview only, never touches export audio)
   useEffect(() => {
@@ -1142,12 +1164,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       return
     }
 
-    const ctx = getAudioContext()
-    const dest = destinationNodeRef.current
-    if (!dest) {
-      showToast('Audio recording node not initialized.', 'error')
-      return
-    }
+    setExportErrorMessage(null)
+    setExportState('preparing')
 
     let targetSeconds = audioBuffer.duration
     if (targetExportLength === '15s') targetSeconds = Math.min(15, audioBuffer.duration)
@@ -1163,7 +1181,27 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       setExportResult(null)
     }
 
-    setExportErrorMessage(null)
+    // 1. Ensure AudioContext is active and running (resume immediately under user click)
+    const ctx = getAudioContext()
+    if (ctx.state === 'suspended') {
+      await ctx.resume()
+    }
+    if (ctx.state !== 'running') {
+      try {
+        await ctx.resume()
+      } catch {}
+    }
+
+    // 2. Obtain clean, live MediaStreamAudioDestinationNode
+    const dest = getFreshExportDestination(ctx)
+    const audioTracks = dest.stream.getAudioTracks()
+    if (!audioTracks || audioTracks.length === 0 || audioTracks[0].readyState === 'ended') {
+      setExportState('error')
+      setExportErrorMessage('Could not establish an active audio destination track. Please check browser permissions and retry.')
+      showToast('Audio track initialization error.', 'error')
+      return
+    }
+
     setExportState('recording')
     setIsRecording(true)
 
@@ -1198,11 +1236,29 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           setExportState('finalizing')
         }
       },
-      onComplete: (result) => {
+      onComplete: async (result) => {
         setIsRecording(false)
         stopAllAudio()
-        setExportState('completed')
 
+        // 3. Enter validating state & verify real video decode/playability
+        setExportState('validating')
+        setExportTelemetry((prev) => ({
+          ...prev,
+          state: 'validating',
+          percent: 99,
+          phaseText: 'Validating Video Integrity & Playback...',
+        }))
+
+        const validation = await validateExportedVideo(result.blob)
+        if (!validation.valid) {
+          setExportState('error')
+          const errDetail = validation.error || 'Video file failed container playability verification.'
+          setExportErrorMessage(errDetail)
+          showToast(`Export verification failed: ${errDetail}`, 'error')
+          return
+        }
+
+        // 4. File extension strictly matches container format
         const cleanTitle = (audioFileName || 'music_video').replace(/[^a-zA-Z0-9_-]/g, '_')
         const filename = `IndiaTools_${cleanTitle}_${state.activePreset}_${state.aspectRatio.replace(':', 'x')}.${result.fileExtension}`
 
@@ -1225,6 +1281,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           fps: result.fps,
         })
 
+        setExportState('completed')
         const downloadSuccess = downloadBlob(result.blob, filename)
         if (downloadSuccess) {
           showToast(`Video exported successfully! (${result.formattedSize})`, 'success')
@@ -1253,6 +1310,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     state.aspectRatio,
     exportResult,
     getAudioContext,
+    getFreshExportDestination,
     playFromOffset,
     stopAllAudio,
     showToast,
@@ -3531,7 +3589,13 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     <h3 className="text-base font-bold text-white">
                       {exportState === 'completed'
                         ? 'Export Complete!'
-                        : exportState === 'recording' || exportState === 'finalizing'
+                        : exportState === 'validating'
+                        ? 'Verifying Video Playback...'
+                        : exportState === 'finalizing'
+                        ? 'Finalizing Video Container...'
+                        : exportState === 'preparing'
+                        ? 'Preparing Audio & Canvas...'
+                        : exportState === 'recording'
                         ? 'Rendering Video...'
                         : exportState === 'error'
                         ? 'Export Failed'
@@ -3539,12 +3603,16 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     </h3>
                     <p className="text-xs text-slate-400">
                       {exportState === 'completed'
-                        ? 'Your video is ready for download'
+                        ? 'Your video has been verified and is ready for download'
+                        : exportState === 'validating'
+                        ? 'Testing decoded duration, video/audio tracks & container sanity'
+                        : exportState === 'finalizing' || exportState === 'recording' || exportState === 'preparing'
+                        ? 'Browser-native MediaRecorder rendering at Full HD'
                         : 'Browser-native MediaRecorder rendering at Full HD'}
                     </p>
                   </div>
                 </div>
-                {exportState !== 'recording' && exportState !== 'finalizing' && (
+                {exportState !== 'recording' && exportState !== 'finalizing' && exportState !== 'preparing' && exportState !== 'validating' && (
                   <button
                     onClick={handleCloseExportModal}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -3654,12 +3722,23 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </div>
               )}
 
-              {/* STATE 2: RECORDING & FINALIZING */}
-              {(exportState === 'recording' || exportState === 'finalizing') && (
+              {/* STATE 2: PREPARING, RECORDING, FINALIZING, VALIDATING */}
+              {(exportState === 'recording' ||
+                exportState === 'finalizing' ||
+                exportState === 'preparing' ||
+                exportState === 'validating') && (
                 <div className="space-y-4 py-1">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                      <span
+                        className={`w-2.5 h-2.5 rounded-full ${
+                          exportState === 'validating'
+                            ? 'bg-cyan-400 animate-pulse'
+                            : exportState === 'finalizing'
+                            ? 'bg-amber-400 animate-pulse'
+                            : 'bg-rose-500 animate-ping'
+                        }`}
+                      />
                       <span className="font-semibold text-white">
                         {exportTelemetry.phaseText}
                       </span>
@@ -3672,8 +3751,12 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${
-                        exportState === 'finalizing'
+                        exportState === 'validating'
+                          ? 'bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 animate-pulse'
+                          : exportState === 'finalizing'
                           ? 'bg-gradient-to-r from-amber-500 to-yellow-400 animate-pulse'
+                          : exportState === 'preparing'
+                          ? 'bg-gradient-to-r from-blue-500 to-cyan-500 animate-pulse'
                           : 'bg-gradient-to-r from-emerald-500 to-cyan-500'
                       }`}
                       style={{ width: `${exportTelemetry.percent}%` }}

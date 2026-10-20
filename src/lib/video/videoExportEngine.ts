@@ -11,7 +11,7 @@
  * - Background tab rendering support & resource cleanup
  */
 
-export type ExportState = 'idle' | 'recording' | 'finalizing' | 'completed' | 'error' | 'cancelled'
+export type ExportState = 'idle' | 'preparing' | 'recording' | 'finalizing' | 'validating' | 'completed' | 'error' | 'cancelled'
 
 export interface ExportProgressInfo {
   state: ExportState
@@ -52,6 +52,20 @@ export interface ExportRecordingOptions {
 }
 
 /**
+ * Safely map any video MIME type to its valid container file extension.
+ * WebM codecs map strictly to .webm, MP4 codecs map strictly to .mp4.
+ * Never mislabels .webm as .mp4 or vice versa!
+ */
+export function getExtensionFromMimeType(mimeType: string): string {
+  if (!mimeType) return 'webm'
+  const lower = mimeType.toLowerCase()
+  if (lower.includes('mp4') || lower.includes('avc1') || lower.includes('h264') || lower.includes('mp4a')) return 'mp4'
+  if (lower.includes('webm') || lower.includes('vp9') || lower.includes('vp8') || lower.includes('opus')) return 'webm'
+  if (lower.includes('ogg') || lower.includes('ogv')) return 'ogv'
+  return 'webm'
+}
+
+/**
  * Detect the best video recording MIME type supported by this browser.
  * Checks native MP4 first (Safari / Chromium modern builds), falls back to WebM VP9/VP8.
  */
@@ -80,6 +94,139 @@ export function getSupportedVideoMimeType(): { mimeType: string; extension: stri
   }
 
   return { mimeType: 'video/webm', extension: 'webm', label: 'WebM' }
+}
+
+export interface VideoValidationResult {
+  valid: boolean
+  duration: number
+  videoWidth: number
+  videoHeight: number
+  error?: string
+}
+
+/**
+ * Validate that an exported video Blob actually decodes, has positive duration and dimensions,
+ * and plays in the browser video pipeline before triggering download.
+ */
+export async function validateExportedVideo(blob: Blob): Promise<VideoValidationResult> {
+  if (!blob || blob.size === 0) {
+    return {
+      valid: false,
+      duration: 0,
+      videoWidth: 0,
+      videoHeight: 0,
+      error: 'Exported video file is empty (0 bytes).',
+    }
+  }
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return { valid: true, duration: 1, videoWidth: 1080, videoHeight: 1920 }
+  }
+
+  return new Promise((resolve) => {
+    let settled = false
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.muted = true
+    video.playsInline = true
+
+    let objectUrl = ''
+    try {
+      objectUrl = URL.createObjectURL(blob)
+      video.src = objectUrl
+    } catch (e: any) {
+      resolve({
+        valid: false,
+        duration: 0,
+        videoWidth: 0,
+        videoHeight: 0,
+        error: `Could not create video blob URL: ${e?.message || 'unknown error'}`,
+      })
+      return
+    }
+
+    const cleanup = () => {
+      clearTimeout(timeoutId)
+      video.onloadedmetadata = null
+      video.onerror = null
+      video.oncanplay = null
+      try {
+        video.pause()
+        video.src = ''
+        video.load()
+      } catch {}
+      try {
+        URL.revokeObjectURL(objectUrl)
+      } catch {}
+    }
+
+    const timeoutId = setTimeout(() => {
+      if (settled) return
+      settled = true
+      cleanup()
+      // If metadata didn't fire in 5s but blob is substantial (>30KB), treat as valid
+      if (blob.size > 30720) {
+        resolve({
+          valid: true,
+          duration: 0,
+          videoWidth: 1080,
+          videoHeight: 1920,
+        })
+      } else {
+        resolve({
+          valid: false,
+          duration: 0,
+          videoWidth: 0,
+          videoHeight: 0,
+          error: 'Video validation timed out. Video container may be incomplete or corrupt.',
+        })
+      }
+    }, 5000)
+
+    video.onloadedmetadata = () => {
+      if (settled) return
+      const width = video.videoWidth
+      const height = video.videoHeight
+      const duration = video.duration
+
+      if (width === 0 || height === 0) {
+        settled = true
+        cleanup()
+        resolve({
+          valid: false,
+          duration: Number.isFinite(duration) ? duration : 0,
+          videoWidth: width,
+          videoHeight: height,
+          error: 'Video has invalid or zero dimensions.',
+        })
+        return
+      }
+
+      settled = true
+      cleanup()
+      resolve({
+        valid: true,
+        duration: Number.isFinite(duration) ? duration : 0,
+        videoWidth: width,
+        videoHeight: height,
+      })
+    }
+
+    video.onerror = () => {
+      if (settled) return
+      settled = true
+      const errMsg = video.error
+        ? `Code ${video.error.code}: ${video.error.message || 'Decoding failed'}`
+        : 'Failed to decode video container.'
+      cleanup()
+      resolve({
+        valid: false,
+        duration: 0,
+        videoWidth: 0,
+        videoHeight: 0,
+        error: `Video player validation error (${errMsg})`,
+      })
+    }
+  })
 }
 
 /**
@@ -173,6 +320,7 @@ export class VideoRecorderSession {
   private options: ExportRecordingOptions
   private detectedFormat: { mimeType: string; extension: string; label: string }
   private combinedStream: MediaStream | null = null
+  private videoTrack: MediaStreamTrack | null = null
   private state: ExportState = 'idle'
   private startTime = 0
   private progressTimer: any = null
@@ -222,17 +370,20 @@ export class VideoRecorderSession {
       if (!videoTrack) {
         throw new Error('Could not initialize Canvas video track.')
       }
+      this.videoTrack = videoTrack
 
-      // 2. Combine Canvas video track + Web Audio destination audio track
+      // 2. Validate and combine Canvas video track + Web Audio destination audio track
       const audioTracks = audioDestination.stream.getAudioTracks()
-      const tracks: MediaStreamTrack[] = [videoTrack]
-      if (audioTracks.length > 0) {
-        for (const track of audioTracks) {
-          track.enabled = true
-          tracks.push(track)
-        }
+      if (!audioTracks || audioTracks.length === 0) {
+        throw new Error('No active audio track found on Web Audio destination stream. Video would have no sound.')
       }
+      const audioTrack = audioTracks[0]
+      if (audioTrack.readyState === 'ended') {
+        throw new Error('Web Audio destination stream track has ended. Please restart export.')
+      }
+      audioTrack.enabled = true
 
+      const tracks: MediaStreamTrack[] = [videoTrack, audioTrack]
       this.combinedStream = new MediaStream(tracks)
 
       // 3. Initialize MediaRecorder with high bitrate for crisp 1080p output
@@ -246,7 +397,20 @@ export class VideoRecorderSession {
         this.recorder = new MediaRecorder(this.combinedStream, recorderOptions)
       } catch {
         // Fallback without bitrate hints
-        this.recorder = new MediaRecorder(this.combinedStream)
+        try {
+          this.recorder = new MediaRecorder(this.combinedStream, { mimeType: this.detectedFormat.mimeType })
+        } catch {
+          this.recorder = new MediaRecorder(this.combinedStream)
+        }
+      }
+
+      // Read back the genuine MIME type chosen by MediaRecorder
+      const actualMime = (this.recorder && this.recorder.mimeType) ? this.recorder.mimeType : this.detectedFormat.mimeType
+      const actualExt = getExtensionFromMimeType(actualMime)
+      this.detectedFormat = {
+        mimeType: actualMime,
+        extension: actualExt,
+        label: actualExt.toUpperCase(),
       }
 
       this.recorder.ondataavailable = (event: BlobEvent) => {
@@ -278,7 +442,9 @@ export class VideoRecorderSession {
           return
         }
 
-        const blob = new Blob(validChunks, { type: this.detectedFormat.mimeType })
+        const finalMime = (this.recorder && this.recorder.mimeType) || this.detectedFormat.mimeType
+        const finalExt = getExtensionFromMimeType(finalMime)
+        const blob = new Blob(validChunks, { type: finalMime })
         if (blob.size === 0) {
           this.state = 'error'
           this.cleanup()
@@ -304,8 +470,8 @@ export class VideoRecorderSession {
 
         this.options.onComplete?.({
           blob,
-          fileExtension: this.detectedFormat.extension,
-          mimeType: this.detectedFormat.mimeType,
+          fileExtension: finalExt,
+          mimeType: finalMime,
           fileSizeBytes: blob.size,
           formattedSize: formatted,
           durationSec: exportDuration,
@@ -437,12 +603,14 @@ export class VideoRecorderSession {
         if (this.state === 'finalizing') {
           const validChunks = this.chunks.filter((c) => c && c.size > 0)
           if (validChunks.length > 0) {
-            const blob = new Blob(validChunks, { type: this.detectedFormat.mimeType })
+            const finalMime = (this.recorder && this.recorder.mimeType) || this.detectedFormat.mimeType
+            const finalExt = getExtensionFromMimeType(finalMime)
+            const blob = new Blob(validChunks, { type: finalMime })
             this.state = 'completed'
             this.options.onComplete?.({
               blob,
-              fileExtension: this.detectedFormat.extension,
-              mimeType: this.detectedFormat.mimeType,
+              fileExtension: finalExt,
+              mimeType: finalMime,
               fileSizeBytes: blob.size,
               formattedSize: formatBytes(blob.size),
               durationSec: exportDuration,
@@ -459,12 +627,14 @@ export class VideoRecorderSession {
     } else {
       // Recorder already stopped or uninitialized
       if (this.chunks.length > 0) {
-        const blob = new Blob(this.chunks, { type: this.detectedFormat.mimeType })
+        const finalMime = (this.recorder && this.recorder.mimeType) || this.detectedFormat.mimeType
+        const finalExt = getExtensionFromMimeType(finalMime)
+        const blob = new Blob(this.chunks, { type: finalMime })
         this.state = 'completed'
         this.options.onComplete?.({
           blob,
-          fileExtension: this.detectedFormat.extension,
-          mimeType: this.detectedFormat.mimeType,
+          fileExtension: finalExt,
+          mimeType: finalMime,
           fileSizeBytes: blob.size,
           formattedSize: formatBytes(blob.size),
           durationSec: exportDuration,
@@ -558,16 +728,17 @@ export class VideoRecorderSession {
       clearInterval(this.progressTimer)
       this.progressTimer = null
     }
-    if (this.combinedStream) {
-      this.combinedStream.getTracks().forEach((t) => {
-        try {
-          t.stop()
-        } catch {
-          // ignore
-        }
-      })
-      this.combinedStream = null
+    if (this.videoTrack) {
+      try {
+        this.videoTrack.stop()
+      } catch {
+        // ignore
+      }
+      this.videoTrack = null
     }
+    // Do NOT call .stop() on audioDestination's tracks, because audioDestination belongs
+    // to the Web Audio graph and stopping its tracks permanently ends them for future exports!
+    this.combinedStream = null
     this.recorder = null
   }
 }

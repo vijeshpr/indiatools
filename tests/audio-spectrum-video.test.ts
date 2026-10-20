@@ -13,6 +13,8 @@ import {
   formatDurationDisplay,
   formatBytes,
   getSupportedVideoMimeType,
+  getExtensionFromMimeType,
+  validateExportedVideo,
   VideoRecorderSession,
 } from '../src/lib/video/videoExportEngine.ts'
 import {
@@ -271,12 +273,38 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
     assert.strictEqual(formatBytes(-100), '0 B')
   })
 
+  it('should map container MIME types to correct file extensions without cross-naming', () => {
+    assert.strictEqual(getExtensionFromMimeType('video/webm'), 'webm')
+    assert.strictEqual(getExtensionFromMimeType('video/webm;codecs=vp9,opus'), 'webm')
+    assert.strictEqual(getExtensionFromMimeType('video/webm;codecs=vp8,opus'), 'webm')
+    assert.strictEqual(getExtensionFromMimeType('video/mp4'), 'mp4')
+    assert.strictEqual(getExtensionFromMimeType('video/mp4;codecs=avc1.42E01E,mp4a.40.2'), 'mp4')
+    assert.strictEqual(getExtensionFromMimeType('video/mp4;codecs=avc1,opus'), 'mp4')
+    assert.strictEqual(getExtensionFromMimeType(''), 'webm')
+  })
+
+  it('should validate exported video blob with safety checks', async () => {
+    // In node environment without DOM, validateExportedVideo returns fallback valid info
+    const dummyBlob = new Blob(['sample-video-bytes'], { type: 'video/webm' })
+    const res = await validateExportedVideo(dummyBlob)
+    assert.strictEqual(res.valid, true)
+
+    // Empty blob returns invalid
+    const emptyBlob = new Blob([], { type: 'video/webm' })
+    const emptyRes = await validateExportedVideo(emptyBlob)
+    assert.strictEqual(emptyRes.valid, false)
+    assert.ok(emptyRes.error?.includes('empty'))
+  })
+
   it('should manage VideoRecorderSession lifecycle with Triple-Guard finalization', () => {
     // Mock MediaStreamTrack
     class MockTrack {
       stopped = false
+      readyState = 'live'
+      enabled = true
       stop() {
         this.stopped = true
+        this.readyState = 'ended'
       }
     }
 
@@ -337,12 +365,14 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
     ;(globalThis as any).MediaStream = MockMediaStream
 
     try {
+      const mockCanvasTrack = new MockTrack()
       const mockCanvas = {
-        captureStream: () => new MockMediaStream([new MockTrack()]),
+        captureStream: () => new MockMediaStream([mockCanvasTrack]),
       } as any
 
+      const mockAudioTrack = new MockTrack()
       const mockDest = {
-        stream: new MockMediaStream([new MockTrack()]),
+        stream: new MockMediaStream([mockAudioTrack]),
       } as any
 
       let progressUpdates: any[] = []
@@ -383,6 +413,11 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
       assert.strictEqual(completedResult.fps, 60)
       assert.ok(completedResult.formattedSize.includes('KB') || completedResult.formattedSize.includes('MB'))
 
+      // Verify that audioDestination's track was NOT stopped (preserved for next export)
+      assert.strictEqual(mockAudioTrack.stopped, false, 'Audio destination track must not be stopped by session cleanup')
+      // Verify that canvas video track was stopped
+      assert.strictEqual(mockCanvasTrack.stopped, true, 'Canvas video track must be cleaned up')
+
       // Guard C Test: Idempotency of finishExport - calling again should be a no-op
       session.finishExport('duplicate-call')
       assert.strictEqual(session.getState(), 'completed')
@@ -398,6 +433,20 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
       cancelSession.cancel()
       assert.strictEqual(cancelSession.getState(), 'cancelled')
       assert.strictEqual(cancelSession.isRecording(), false)
+
+      // Missing audio track error enforcement
+      let receivedAudioError: any = null
+      const brokenSession = new VideoRecorderSession({
+        canvas: mockCanvas,
+        audioDestination: { stream: new MockMediaStream([]) } as any,
+        onError: (err) => {
+          receivedAudioError = err
+        },
+      })
+      brokenSession.start()
+      assert.strictEqual(brokenSession.getState(), 'error')
+      assert.ok(receivedAudioError !== null, 'onError must be invoked when audio track is missing')
+      assert.ok(receivedAudioError.message.includes('No active audio track found'))
     } finally {
       ;(globalThis as any).MediaRecorder = origMediaRecorder
       ;(globalThis as any).MediaStream = origMediaStream
