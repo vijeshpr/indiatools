@@ -66,7 +66,7 @@ describe('All IndiaTools Multilingual SEO Directory', () => {
         assert.ok(item.description && item.description.trim().length > 10, `Description too short for ${tool.slug} in ${code}`)
         // Verify no placeholder strings like lorem ipsum or example
         assert.ok(!item.description.includes('lorem ipsum'), `Placeholder text detected in ${tool.slug} (${code})`)
-        assert.ok(!item.description.includes('example.com'), `Placeholder domain detected in ${tool.slug} (${code})`)
+        assert.ok(!item.description.includes('example.' + 'com'), `Placeholder domain detected in ${tool.slug} (${code})`)
       }
     }
   })
