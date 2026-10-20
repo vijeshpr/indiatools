@@ -81,6 +81,11 @@ import {
   DottedMatrixDensity,
   DottedMatrixHalftoneMode,
   DottedMatrixRecoverySpeed,
+  PixelDispersionConfig,
+  DEFAULT_PIXEL_DISPERSION_CONFIG,
+  PixelDispersionMode,
+  PixelDispersionDirection,
+  PixelDispersionColorMode,
   ASPECT_RATIOS,
   THEME_PALETTES,
   SUPPORTED_LANGUAGES,
@@ -324,6 +329,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   })
 
   const [dottedMatrixConfig, setDottedMatrixConfig] = useState<DottedMatrixConfig>(DEFAULT_DOTTED_MATRIX_CONFIG)
+  const [pixelDispersionConfig, setPixelDispersionConfig] = useState<PixelDispersionConfig>(DEFAULT_PIXEL_DISPERSION_CONFIG)
 
   // -------------------------------------------------------------
   // MASTER COMPOSITION STATE
@@ -378,6 +384,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     particleUniverse: universeConfig,
     shockwaves: shockwaveConfig,
     dottedMatrix: dottedMatrixConfig,
+    pixelDispersion: pixelDispersionConfig,
 
     textLayers: INITIAL_TEXT_LAYERS,
     selectedLayerId: 'layer-title',
@@ -400,14 +407,15 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       particleUniverse: universeConfig,
       shockwaves: shockwaveConfig,
       dottedMatrix: dottedMatrixConfig,
+      pixelDispersion: pixelDispersionConfig,
     }))
-  }, [lightingConfig, smokeConfig, universeConfig, shockwaveConfig, dottedMatrixConfig])
+  }, [lightingConfig, smokeConfig, universeConfig, shockwaveConfig, dottedMatrixConfig, pixelDispersionConfig])
 
   // -------------------------------------------------------------
   // STUDIO WORKSPACE NAVIGATION & UI TOGGLES
   // -------------------------------------------------------------
   const [activeTab, setActiveTab] = useState<
-    'visualizers' | 'combos' | 'dotted-matrix' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity'
+    'visualizers' | 'combos' | 'dotted-matrix' | 'dispersion' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity'
   >('visualizers')
   const [visualizerCategory, setVisualizerCategory] = useState<string>('all')
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ml')
@@ -2115,6 +2123,32 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </span>
               </button>
               <button
+                onClick={() => {
+                  setActiveTab('dispersion')
+                  if (!pixelDispersionConfig.enabled) {
+                    setPixelDispersionConfig((p) => ({ ...p, enabled: true }))
+                    showToast('Enabled Particle Pixel Dispersion FX!', 'success')
+                  }
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeTab === 'dispersion'
+                    ? 'bg-gradient-to-r from-amber-500/25 via-orange-500/25 to-rose-500/25 text-amber-300 border border-amber-400/50 shadow-lg shadow-orange-500/20 ring-1 ring-amber-400/40'
+                    : pixelDispersionConfig.enabled
+                    ? 'text-amber-400 hover:text-amber-200 hover:bg-amber-950/40 border border-amber-500/40'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Flame className="w-4 h-4 text-orange-400 animate-pulse" />
+                <span className="font-bold">✨ Sand / Ember Dissolve</span>
+                <span
+                  className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded tracking-wider ${
+                    pixelDispersionConfig.enabled ? 'bg-orange-500 text-black' : 'bg-slate-800 text-slate-300'
+                  }`}
+                >
+                  {pixelDispersionConfig.enabled ? 'ON' : 'FX'}
+                </span>
+              </button>
+              <button
                 onClick={() => setActiveTab('combos')}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   activeTab === 'combos'
@@ -2271,6 +2305,405 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             {activeTab === 'dotted-matrix' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
                 {renderDottedMatrixControls(true)}
+              </div>
+            )}
+
+            {/* TAB: SPECIAL FX #1: PARTICLE PIXEL DISPERSION ("Sand / Ember Dissolve") */}
+            {activeTab === 'dispersion' && (
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1 animate-in fade-in duration-200">
+                {/* Header Card with Enable Toggle */}
+                <div className="flex items-center justify-between bg-gradient-to-r from-amber-950/60 via-slate-900/90 to-orange-950/60 p-4 rounded-2xl border border-amber-500/40 shadow-xl shadow-amber-950/30">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-400">
+                      <Flame className="w-5 h-5 animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-white block">
+                          Particle Pixel Dispersion ("Sand / Ember Dissolve")
+                        </span>
+                        <span className="text-[10px] font-mono uppercase bg-orange-950/80 text-orange-300 border border-orange-500/40 px-2 py-0.5 rounded-full font-bold">
+                          SPECIAL FX #1
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-300">
+                        Pixels from edges and bright areas detach and float away like glowing embers or sand grains in sync with music
+                      </span>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={pixelDispersionConfig.enabled}
+                      onChange={(e) => {
+                        setPixelDispersionConfig((p) => ({ ...p, enabled: e.target.checked }))
+                        showToast(
+                          e.target.checked ? 'Particle Pixel Dispersion enabled!' : 'Pixel Dispersion disabled.',
+                          'info'
+                        )
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-12 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-orange-500 shadow-md"></div>
+                  </label>
+                </div>
+
+                {/* 1-Click Curated FX Presets */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    {
+                      id: 'campfire-embers',
+                      label: '🔥 Campfire Embers',
+                      desc: 'Rising fiery sparks',
+                      config: {
+                        mode: 'ember-glow' as PixelDispersionMode,
+                        colorMode: 'ember-fire' as PixelDispersionColorMode,
+                        direction: 'up' as PixelDispersionDirection,
+                        blendMode: 'lighter' as const,
+                        particleSize: 3.2,
+                        speed: 1.3,
+                        bassBurstReactivity: 85,
+                        trebleShimmer: 75,
+                      },
+                    },
+                    {
+                      id: 'desert-sand',
+                      label: '🏜️ Desert Sand Drift',
+                      desc: 'Golden wind dunes',
+                      config: {
+                        mode: 'sand-drift' as PixelDispersionMode,
+                        colorMode: 'golden-sand' as PixelDispersionColorMode,
+                        direction: 'up-right' as PixelDispersionDirection,
+                        blendMode: 'screen' as const,
+                        particleSize: 2.2,
+                        speed: 1.4,
+                        bassBurstReactivity: 70,
+                        trebleShimmer: 40,
+                      },
+                    },
+                    {
+                      id: 'photo-dust',
+                      label: '✨ Photo True Pixels',
+                      desc: 'Subject dissolves into self',
+                      config: {
+                        mode: 'sand-drift' as PixelDispersionMode,
+                        colorMode: 'photo-rgb' as PixelDispersionColorMode,
+                        direction: 'up' as PixelDispersionDirection,
+                        blendMode: 'source-over' as const,
+                        particleSize: 2.5,
+                        speed: 1.1,
+                        bassBurstReactivity: 80,
+                        trebleShimmer: 60,
+                      },
+                    },
+                    {
+                      id: 'cosmic-stardust',
+                      label: '🌌 Cosmic Stardust',
+                      desc: 'Radial galactic shimmer',
+                      config: {
+                        mode: 'cosmic-stardust' as PixelDispersionMode,
+                        colorMode: 'palette-tint' as PixelDispersionColorMode,
+                        direction: 'outward' as PixelDispersionDirection,
+                        blendMode: 'lighter' as const,
+                        particleSize: 2.8,
+                        speed: 1.2,
+                        bassBurstReactivity: 90,
+                        trebleShimmer: 95,
+                      },
+                    },
+                  ].map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => {
+                        setPixelDispersionConfig((prev) => ({
+                          ...prev,
+                          enabled: true,
+                          ...preset.config,
+                        }))
+                        showToast(`Applied Dispersion Preset: ${preset.label}`, 'success')
+                      }}
+                      className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-amber-500/50 hover:bg-amber-950/20 text-left transition-all"
+                    >
+                      <span className="text-xs font-bold text-white block">{preset.label}</span>
+                      <span className="text-[10px] text-slate-400 block">{preset.desc}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Photo Source Quick Action Banner */}
+                <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <ImageIcon className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span className="text-slate-300 shrink-0">Photo Source:</span>
+                    {photoName ? (
+                      <span className="font-semibold text-amber-300 truncate max-w-[160px] sm:max-w-[240px]">
+                        {photoName}
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 italic truncate">No custom photo (Using Procedural Stardust)</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => photoFileInputRef.current?.click()}
+                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700"
+                    >
+                      Upload Photo
+                    </button>
+                    <button
+                      onClick={handleLoadSampleArtwork}
+                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-950/80 hover:bg-amber-900 text-amber-300 transition-all border border-amber-800/60"
+                    >
+                      Load Sample Art
+                    </button>
+                  </div>
+                </div>
+
+                {/* SECTION 1: Dispersion Visual Mode */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                    Dispersion Visual Style:
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { id: 'ember-glow', label: 'Ember Glow', desc: 'Fiery incandescent sparks' },
+                      { id: 'sand-drift', label: 'Sand Drift', desc: 'Atmospheric wind-blown dust' },
+                      { id: 'cosmic-stardust', label: 'Cosmic Stardust', desc: 'Galactic sparkling dust' },
+                      { id: 'neon-shards', label: 'Neon Shards', desc: 'Angular prismatic fragments' },
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() =>
+                          setPixelDispersionConfig((p) => ({
+                            ...p,
+                            mode: m.id as PixelDispersionMode,
+                          }))
+                        }
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          pixelDispersionConfig.mode === m.id
+                            ? 'bg-amber-950/60 border-amber-500/70 text-white shadow-md shadow-amber-950/40 ring-1 ring-amber-500/40'
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="text-xs font-bold block">{m.label}</span>
+                        <span className="text-[10px] text-slate-400 line-clamp-1">{m.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION 2: Particle Color Source */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                    Particle Color Origin:
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { id: 'photo-rgb', label: 'Photo True RGB', desc: 'Sampled pixel colors' },
+                      { id: 'ember-fire', label: 'Ember Fire', desc: 'Molten gold / fiery flame' },
+                      { id: 'golden-sand', label: 'Golden Sand', desc: 'Warm desert amber' },
+                      { id: 'palette-tint', label: 'Theme Palette', desc: 'Harmonized visualizer glow' },
+                    ].map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() =>
+                          setPixelDispersionConfig((p) => ({
+                            ...p,
+                            colorMode: c.id as PixelDispersionColorMode,
+                          }))
+                        }
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          pixelDispersionConfig.colorMode === c.id
+                            ? 'bg-amber-950/60 border-amber-500/70 text-white shadow-md shadow-amber-950/40 ring-1 ring-amber-500/40'
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="text-xs font-bold block">{c.label}</span>
+                        <span className="text-[10px] text-slate-400 line-clamp-1">{c.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION 3: Drift Direction */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                    Dissolve & Drift Direction:
+                  </label>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    {[
+                      { id: 'up', label: 'Upward Drift' },
+                      { id: 'up-right', label: 'Wind Drift' },
+                      { id: 'outward', label: 'Radial Out' },
+                      { id: 'vortex', label: 'Vortex Swirl' },
+                      { id: 'down', label: 'Cascade Fall' },
+                    ].map((d) => (
+                      <button
+                        key={d.id}
+                        onClick={() =>
+                          setPixelDispersionConfig((p) => ({
+                            ...p,
+                            direction: d.id as PixelDispersionDirection,
+                          }))
+                        }
+                        className={`p-2 rounded-xl border text-center transition-all ${
+                          pixelDispersionConfig.direction === d.id
+                            ? 'bg-amber-950/60 border-amber-500/70 text-white shadow-md shadow-amber-950/40 ring-1 ring-amber-500/40'
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="text-xs font-bold block">{d.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION 4: Audio Reactivity Sliders (Bass Burst + Treble Shimmer) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+                        <Activity className="w-3.5 h-3.5 text-amber-400" />
+                        Bass Burst Reactivity:
+                      </span>
+                      <span className="font-mono text-amber-400 font-bold">
+                        {pixelDispersionConfig.bassBurstReactivity}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={pixelDispersionConfig.bassBurstReactivity}
+                      onChange={(e) =>
+                        setPixelDispersionConfig((p) => ({
+                          ...p,
+                          bassBurstReactivity: parseInt(e.target.value, 10),
+                        }))
+                      }
+                      className="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400">
+                      <span>0% (Steady flow)</span>
+                      <span className="text-amber-400">80% (Explosive bass kicks)</span>
+                      <span>100% (High blast)</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-semibold text-cyan-300 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                        Treble Shimmer & Sparkle:
+                      </span>
+                      <span className="font-mono text-cyan-400 font-bold">
+                        {pixelDispersionConfig.trebleShimmer}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={pixelDispersionConfig.trebleShimmer}
+                      onChange={(e) =>
+                        setPixelDispersionConfig((p) => ({
+                          ...p,
+                          trebleShimmer: parseInt(e.target.value, 10),
+                        }))
+                      }
+                      className="w-full accent-cyan-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400">
+                      <span>0% (Constant glow)</span>
+                      <span className="text-cyan-400">70% (Hi-hat sparkle)</span>
+                      <span>100% (High flicker)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION 5: Physics Fine Tuning Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 border-t border-slate-800 text-xs">
+                  <div>
+                    <div className="flex justify-between text-slate-300 mb-1">
+                      <span>Particle Size:</span>
+                      <span className="font-mono text-amber-400">{pixelDispersionConfig.particleSize}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="10"
+                      max="80"
+                      value={Math.round(pixelDispersionConfig.particleSize * 10)}
+                      onChange={(e) =>
+                        setPixelDispersionConfig((p) => ({
+                          ...p,
+                          particleSize: parseFloat((parseInt(e.target.value, 10) / 10).toFixed(1)),
+                        }))
+                      }
+                      className="w-full accent-amber-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-slate-300 mb-1">
+                      <span>Spawn Density:</span>
+                      <span className="font-mono text-amber-400">{pixelDispersionConfig.density}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="10"
+                      max="100"
+                      value={pixelDispersionConfig.density}
+                      onChange={(e) =>
+                        setPixelDispersionConfig((p) => ({
+                          ...p,
+                          density: parseInt(e.target.value, 10),
+                        }))
+                      }
+                      className="w-full accent-amber-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-slate-300 mb-1">
+                      <span>Drift Speed:</span>
+                      <span className="font-mono text-amber-400">{pixelDispersionConfig.speed}x</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="30"
+                      value={Math.round(pixelDispersionConfig.speed * 10)}
+                      onChange={(e) =>
+                        setPixelDispersionConfig((p) => ({
+                          ...p,
+                          speed: parseFloat((parseInt(e.target.value, 10) / 10).toFixed(1)),
+                        }))
+                      }
+                      className="w-full accent-amber-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-slate-300 mb-1">
+                      <span>Blend Mode:</span>
+                      <span className="font-mono text-amber-400">{pixelDispersionConfig.blendMode}</span>
+                    </div>
+                    <select
+                      value={pixelDispersionConfig.blendMode}
+                      onChange={(e) =>
+                        setPixelDispersionConfig((p) => ({
+                          ...p,
+                          blendMode: e.target.value as any,
+                        }))
+                      }
+                      className="w-full bg-slate-900 border border-slate-800 rounded p-1 text-slate-200 text-xs"
+                    >
+                      <option value="lighter">Additive (Lighter Glow)</option>
+                      <option value="screen">Screen (Soft Ambient)</option>
+                      <option value="source-over">Matte (Source-Over)</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             )}
 

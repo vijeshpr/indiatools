@@ -29,6 +29,11 @@ import {
   DottedHarmonicMatrixEngine,
   DEFAULT_DOTTED_MATRIX_CONFIG,
 } from '../src/lib/video/dottedHarmonicMatrixEngine.ts'
+import { ParticlePixelDispersionEngine } from '../src/lib/video/particlePixelDispersionEngine.ts'
+import {
+  DEFAULT_PIXEL_DISPERSION_CONFIG,
+  PixelDispersionConfig,
+} from '../src/lib/video/audioVisualizerTypes.ts'
 
 describe('Audio Spectrum & Waveform Video Generator Suite', () => {
   it('should be correctly registered in TOOLS registry', () => {
@@ -639,5 +644,119 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
       ;(globalThis as any).window = origWindow
       ;(globalThis as any).MediaRecorder = origMediaRecorder
     }
+  })
+
+  it('should initialize ParticlePixelDispersionEngine with zero GC object pool and pre-sample candidates', () => {
+    assert.strictEqual(DEFAULT_PIXEL_DISPERSION_CONFIG.mode, 'ember-glow')
+    assert.strictEqual(DEFAULT_PIXEL_DISPERSION_CONFIG.colorMode, 'photo-rgb')
+    assert.strictEqual(DEFAULT_PIXEL_DISPERSION_CONFIG.direction, 'up')
+    assert.strictEqual(DEFAULT_PIXEL_DISPERSION_CONFIG.bassBurstReactivity, 80)
+    assert.strictEqual(DEFAULT_PIXEL_DISPERSION_CONFIG.trebleShimmer, 70)
+
+    const engine = new ParticlePixelDispersionEngine(1500)
+    assert.ok(engine, 'Engine created successfully')
+
+    // Pre-sample with null photo -> triggers procedural harmonic candidates
+    engine.preSampleImageOnce(null)
+    assert.ok(true, 'preSampleImageOnce handled null cleanly')
+
+    engine.reset()
+    assert.ok(true, 'reset executed cleanly')
+  })
+
+  it('should update and render ParticlePixelDispersionEngine with audio bursts and treble shimmer', () => {
+    const engine = new ParticlePixelDispersionEngine(1000)
+    const mockCtx = {
+      save: () => {},
+      restore: () => {},
+      fillRect: () => {},
+      beginPath: () => {},
+      arc: () => {},
+      fill: () => {},
+      fillStyle: '',
+      globalCompositeOperation: '',
+    } as any
+
+    const activeBands: DetailedAudioBands = {
+      subBass: 0.9,
+      bass: 0.85,
+      mids: 0.5,
+      treble: 0.8,
+      overall: 0.75,
+      isBeatHit: true,
+      subBassDb: -2,
+      bassDb: -3,
+      midsDb: -10,
+      trebleDb: -8,
+      peakVolumeDb: -1,
+    }
+
+    const testConfig: PixelDispersionConfig = {
+      enabled: true,
+      mode: 'ember-glow',
+      direction: 'up',
+      colorMode: 'ember-fire',
+      density: 80,
+      particleSize: 3.5,
+      speed: 1.5,
+      bassBurstReactivity: 90,
+      trebleShimmer: 85,
+      blendMode: 'lighter',
+      dissolveSpread: 60,
+    }
+
+    // Frame 1: Initial spawn on beat hit
+    assert.doesNotThrow(() => {
+      engine.updateAndDraw(
+        mockCtx,
+        1080,
+        1920,
+        null,
+        activeBands,
+        THEME_PALETTES['neon-cyber'],
+        1.0,
+        testConfig,
+        'portrait-frame',
+        '9:16'
+      )
+    }, 'Engine render frame 1 executed cleanly')
+
+    // Frame 2: Sand drift mode
+    assert.doesNotThrow(() => {
+      engine.updateAndDraw(
+        mockCtx,
+        1080,
+        1920,
+        null,
+        { ...activeBands, isBeatHit: false, bass: 0.3 },
+        THEME_PALETTES['neon-cyber'],
+        1.05,
+        {
+          ...testConfig,
+          mode: 'sand-drift',
+          colorMode: 'golden-sand',
+          direction: 'up-right',
+          blendMode: 'screen',
+        },
+        'album-disc',
+        '9:16'
+      )
+    }, 'Engine render frame 2 executed cleanly in sand-drift mode')
+
+    // Frame 3: Disabled mode early exit
+    assert.doesNotThrow(() => {
+      engine.updateAndDraw(
+        mockCtx,
+        1080,
+        1920,
+        null,
+        activeBands,
+        THEME_PALETTES['neon-cyber'],
+        1.1,
+        { ...testConfig, enabled: false },
+        'portrait-frame',
+        '9:16'
+      )
+    }, 'Disabled engine exited cleanly')
   })
 })

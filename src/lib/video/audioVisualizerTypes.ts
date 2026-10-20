@@ -497,6 +497,41 @@ export interface DottedMatrixConfig {
   backgroundDarkness: number // 0 - 100 (%)
 }
 
+// -------------------------------------------------------------
+// SPECIAL FX #1: PARTICLE PIXEL DISPERSION ("Sand / Ember Dissolve")
+// -------------------------------------------------------------
+export type PixelDispersionMode = 'ember-glow' | 'sand-drift' | 'cosmic-stardust' | 'neon-shards'
+export type PixelDispersionDirection = 'up' | 'up-right' | 'outward' | 'vortex' | 'down'
+export type PixelDispersionColorMode = 'photo-rgb' | 'ember-fire' | 'golden-sand' | 'palette-tint'
+
+export interface PixelDispersionConfig {
+  enabled: boolean
+  mode: PixelDispersionMode
+  direction: PixelDispersionDirection
+  colorMode: PixelDispersionColorMode
+  density: number // 10 - 100 (%) spawn rate
+  particleSize: number // 1 - 8 (px)
+  speed: number // 0.5 - 3.0
+  bassBurstReactivity: number // 0 - 100 (%)
+  trebleShimmer: number // 0 - 100 (%)
+  blendMode: 'lighter' | 'screen' | 'source-over'
+  dissolveSpread: number // 10 - 100 (%)
+}
+
+export const DEFAULT_PIXEL_DISPERSION_CONFIG: PixelDispersionConfig = {
+  enabled: false,
+  mode: 'ember-glow',
+  direction: 'up',
+  colorMode: 'photo-rgb',
+  density: 65,
+  particleSize: 2.8,
+  speed: 1.2,
+  bassBurstReactivity: 80,
+  trebleShimmer: 70,
+  blendMode: 'lighter',
+  dissolveSpread: 50,
+}
+
 export interface CompositionState {
   version: 2
   aspectRatio: AspectRatio
@@ -536,12 +571,13 @@ export interface CompositionState {
   particlePreset: ParticlePresetType
   fx: CinematicFxConfig
 
-  // Advanced Visual FX (Lights, Smoke, Particle Universe, Shockwaves, Dotted Matrix)
+  // Advanced Visual FX (Lights, Smoke, Particle Universe, Shockwaves, Dotted Matrix, Pixel Dispersion)
   lighting?: LightShowConfig
   smoke?: SmokeConfig
   particleUniverse?: ParticleUniverseConfig
   shockwaves?: ShockwaveConfig
   dottedMatrix?: DottedMatrixConfig
+  pixelDispersion?: PixelDispersionConfig
 
   // Typography Layers
   textLayers: TypographyLayer[]

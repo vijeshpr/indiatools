@@ -38,6 +38,7 @@ import { CinematicLightingEngine } from './cinematicLightingEngine.ts'
 import { AudioReactiveSmokeEngine } from './audioReactiveSmokeEngine.ts'
 import { ParticleUniverseEngine } from './particleUniverseEngine.ts'
 import { ShockwaveEngine } from './shockwaveEngine.ts'
+import { ParticlePixelDispersionEngine } from './particlePixelDispersionEngine.ts'
 
 // Re-export core DSP & effects for backward compatibility and test suites
 export {
@@ -50,6 +51,7 @@ export {
   AudioReactiveSmokeEngine,
   ParticleUniverseEngine,
   ShockwaveEngine,
+  ParticlePixelDispersionEngine,
 }
 export type { VisualizerParticle }
 
@@ -58,6 +60,7 @@ export const studioLightingEngine = new CinematicLightingEngine()
 export const studioSmokeEngine = new AudioReactiveSmokeEngine()
 export const studioUniverseEngine = new ParticleUniverseEngine()
 export const studioShockwaveEngine = new ShockwaveEngine()
+export const studioPixelDispersionEngine = new ParticlePixelDispersionEngine()
 
 // Backward-compatible individual preset drawer aliases
 export const drawCircularPulse = (ctx: CanvasRenderingContext2D, width: number, height: number, freqData: Uint8Array, config: VisualizerConfig, palette: ThemeColors, bands: any, time: number, albumImage: HTMLImageElement | null) => {
@@ -152,6 +155,23 @@ export function renderStudioComposition(
 
   // 5. Layer 3: Render Photo / Album Artwork Composition Layer
   drawPhotoCompositionLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+
+  // 5.5 SPECIAL FX #1: Audio-Reactive Particle Pixel Dispersion ("Sand / Ember Dissolve")
+  if (state.pixelDispersion && state.pixelDispersion.enabled) {
+    const currentPhotoForDispersion = photoImages[state.activePhotoIndex] || photoImages[0] || null
+    studioPixelDispersionEngine.updateAndDraw(
+      ctx,
+      width,
+      height,
+      currentPhotoForDispersion,
+      bands,
+      palette,
+      currentTime,
+      state.pixelDispersion,
+      state.imageLayoutMode,
+      state.aspectRatio
+    )
+  }
 
   // 6. Layer 4: Concert Stage Lights & Beat Light Show
   if (state.lighting && state.lighting.enabled) {
