@@ -3738,4 +3738,694 @@
     <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/name-slip-maker" />
     <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/name-slip-maker" />
   </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/hi</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/ml</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/ta</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/te</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/kn</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/bn</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/mr</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/gu</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/pa</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/or</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/as</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/ur</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/sa</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/kok</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/mai</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/ne</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/ks</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/sd</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/doi</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/mni</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/brx</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/all-tools/sat</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/all-tools" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/all-tools/hi" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/all-tools/ml" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/all-tools/ta" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/all-tools/te" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/all-tools/kn" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/all-tools/bn" />
+    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/all-tools/mr" />
+    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/all-tools/gu" />
+    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/all-tools/pa" />
+    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/all-tools/or" />
+    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/all-tools/as" />
+    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/all-tools/ur" />
+    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/all-tools/sa" />
+    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/all-tools/kok" />
+    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/all-tools/mai" />
+    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/all-tools/ne" />
+    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/all-tools/ks" />
+    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/all-tools/sd" />
+    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/all-tools/doi" />
+    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/all-tools/mni" />
+    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/all-tools/brx" />
+    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/all-tools/sat" />
+  </url>
 </urlset>

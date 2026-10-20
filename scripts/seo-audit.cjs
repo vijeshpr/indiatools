@@ -229,6 +229,31 @@ async function runAudit() {
   }
   check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English (Name Slip Maker)', allNameSlipHreflangsInSitemap);
 
+  // 3i. All IndiaTools Multilingual Directory Sitemaps & Hreflang Audit (23 languages)
+  const directoryLocalesModule = await import('../src/data/directory/locales.ts');
+  const directoryLocales = directoryLocalesModule.DIRECTORY_LOCALES;
+  const directoryLangCodes = directoryLocalesModule.DIRECTORY_LANG_CODES;
+
+  let allDirectoryInSitemap = true;
+  for (const c of directoryLangCodes) {
+    const urlPath = c === 'en' ? '/all-tools' : '/all-tools/' + c;
+    if (!sitemapXml.includes('https://indiatools-rho.vercel.app' + urlPath)) {
+      allDirectoryInSitemap = false;
+      console.error('Missing Directory localized URL in sitemap: ' + urlPath);
+    }
+  }
+  check('sitemap.xml: Contains all 23 All IndiaTools Directory language URLs', allDirectoryInSitemap);
+
+  let allDirectoryHreflangsInSitemap = true;
+  for (const c of directoryLangCodes) {
+    const bcp47 = directoryLocales[c].bcp47;
+    if (!sitemapXml.includes('hreflang="' + bcp47 + '"')) {
+      allDirectoryHreflangsInSitemap = false;
+      console.error('Missing hreflang="' + bcp47 + '" in sitemap.xml for Directory');
+    }
+  }
+  check('sitemap.xml: Contains reciprocal hreflang tags for all 22 Indian languages + English (All Tools Directory)', allDirectoryHreflangsInSitemap);
+
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
@@ -299,7 +324,7 @@ async function runAudit() {
   // 6b. Sitemap Quality & Production Host Integrity
   const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   const dupes = locs.filter((item, index) => locs.indexOf(item) !== index);
-  check('sitemap.xml: Exactly 193 production URLs with zero duplicates', locs.length === 193 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
+  check('sitemap.xml: Exactly 216 production URLs with zero duplicates', locs.length === 216 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
   const nonProd = locs.filter(u => !u.startsWith('https://indiatools-rho.vercel.app/'));
   check('sitemap.xml: 100% of URLs use canonical production domain https://indiatools-rho.vercel.app', nonProd.length === 0, `${nonProd.length} non-production URLs`);
   const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);

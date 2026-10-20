@@ -17,6 +17,7 @@ import { ContactPage } from './pages/ContactPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { TermsPage } from './pages/TermsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { AllToolsDirectoryPage } from './pages/AllToolsDirectoryPage'
 import { IndianChequeStudioTool } from './calculators/IndianChequeStudioTool'
 import { GoldExchangeCalculatorTool } from './calculators/GoldExchangeCalculatorTool'
 
@@ -97,6 +98,8 @@ export function App() {
                 <Route path="/calculators/name-slip-maker" element={<Navigate to="/tools/name-slip-maker" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
+                <Route path="/all-tools" element={<AllToolsDirectoryPage />} />
+                <Route path="/all-tools/:langCode" element={<AllToolsDirectoryPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />

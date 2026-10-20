@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { ShieldCheck, ArrowUp, Cpu, Heart, CheckCircle2 } from 'lucide-react'
+import { ShieldCheck, ArrowUp, Cpu, Heart, CheckCircle2, Languages } from 'lucide-react'
 import { CATEGORIES, TOOLS } from '../../data/tools'
 import { useI18n } from '../../i18n/I18nContext'
 
@@ -162,6 +162,15 @@ export const Footer: React.FC = () => {
               <span>Language & Platform</span>
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm font-sans">
+              <li className="pb-2 border-b border-white/[0.08]">
+                <Link
+                  to="/all-tools"
+                  className="flex items-center gap-2 font-semibold text-[#D8B879] hover:text-white transition-colors group"
+                >
+                  <Languages className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <span>All Tools in 22 Languages</span>
+                </Link>
+              </li>
               <li>
                 <Link to="/calculators/indian-cheque-studio/ml" className="hover:text-cyan-300 transition-colors">
                   മലയാളം (Malayalam)

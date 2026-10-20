@@ -10,6 +10,7 @@ import {
   Sparkles,
   Info,
   ShieldCheck,
+  Languages,
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { CommandPalette } from './CommandPalette'
@@ -223,6 +224,19 @@ export const Header: React.FC = () => {
                     </span>
                     <span className="text-xs font-mono font-bold text-[#D8B879] bg-[#10271C] px-2 py-0.5 rounded border border-emerald-500/30">
                       {TOOLS.length}
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/all-tools"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-[#A8C5AC] hover:bg-white/[0.05] flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Languages className="w-4 h-4 text-[#10B981]" />
+                      <span>22 Languages Directory</span>
+                    </span>
+                    <span className="text-xs font-mono font-bold text-[#D8B879] bg-[#10271C] px-2 py-0.5 rounded border border-emerald-500/30">
+                      22
                     </span>
                   </Link>
 

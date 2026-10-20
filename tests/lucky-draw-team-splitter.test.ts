@@ -261,10 +261,10 @@ describe('Lucky Draw Wheel & Random Team Splitter Test Suite', () => {
       assert.ok(appCode.includes('/calculators/lucky-draw-team-splitter'))
     })
 
-    it('sitemap.xml contains 193 URLs including all 23 Lucky Draw URLs', () => {
+    it('sitemap.xml contains 216 URLs including all 23 Lucky Draw URLs', () => {
       const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
       const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-      assert.strictEqual(locs.length, 193)
+      assert.strictEqual(locs.length, 216)
 
       // Canonical URL
       assert.ok(locs.includes('https://indiatools-rho.vercel.app/tools/lucky-draw-team-splitter'))

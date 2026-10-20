@@ -46,6 +46,53 @@ const LUCKY_LOCALES = luckyMod.LUCKY_LOCALES;
 const NAME_SLIP_TOOL_I18N = nameSlipMod.NAME_SLIP_TOOL_I18N;
 const NAME_SLIP_LOCALES = nameSlipMod.NAME_SLIP_LOCALES;
 
+const directoryLocalesMod = loadTs('src/data/directory/locales.ts');
+const DIRECTORY_LOCALES = directoryLocalesMod.DIRECTORY_LOCALES;
+const DIRECTORY_LANG_CODES = directoryLocalesMod.DIRECTORY_LANG_CODES;
+const DIRECTORY_UI = directoryLocalesMod.DIRECTORY_UI;
+
+const directoryTranslationsCache = {};
+function getDirectoryTranslations(code) {
+  if (!directoryTranslationsCache[code]) {
+    try {
+      const mod = loadTs(`src/data/directory/translations/${code}.ts`);
+      directoryTranslationsCache[code] = mod.translations || mod.default || {};
+    } catch (e) {
+      console.warn(`Could not load translations for directory lang ${code}:`, e.message);
+      directoryTranslationsCache[code] = {};
+    }
+  }
+  return directoryTranslationsCache[code];
+}
+
+const CHEQUE_SEO_LANG_CODES = ['hi', 'ml', 'ta', 'te', 'kn', 'bn', 'mr', 'gu', 'pa', 'or', 'as', 'ur'];
+const GOLD_EXCHANGE_LANG_CODES = ['ml', 'hi', 'ta', 'te', 'kn', 'bn', 'mr', 'gu', 'pa', 'or'];
+
+function getDirectoryToolDestinationUrl(tool, langCode) {
+  if (langCode === 'en') {
+    return tool.seo.canonicalPath;
+  }
+  if (tool.slug === 'name-slip-maker') {
+    return `/${langCode}/tools/name-slip-maker`;
+  }
+  if (tool.slug === 'lucky-draw-team-splitter') {
+    return `/${langCode}/tools/lucky-draw-team-splitter`;
+  }
+  if (tool.slug === 'repair-vs-replace') {
+    return `/${langCode}/calculators/repair-vs-replace`;
+  }
+  if (tool.slug === 'friendship-relationship-cost') {
+    return `/${langCode}/calculators/friendship-relationship-cost`;
+  }
+  if (tool.slug === 'indian-cheque-studio' && CHEQUE_SEO_LANG_CODES.includes(langCode)) {
+    return `/calculators/indian-cheque-studio/${langCode}`;
+  }
+  if (tool.slug === 'gold-exchange-calculator' && GOLD_EXCHANGE_LANG_CODES.includes(langCode)) {
+    return `/${langCode}/tools/gold-exchange-calculator`;
+  }
+  return tool.seo.canonicalPath;
+}
+
 const templatePath = path.join('dist', 'index.html');
 if (!fs.existsSync(templatePath)) {
   console.error('Error: dist/index.html not found. Run "vite build" first.');
@@ -984,7 +1031,133 @@ for (const fullUrl of sitemapUrls) {
     };
   }
 
-  // 11. Individual Calculator & Image Tools (all 68 tools)
+  // 11. Multilingual SEO Directory (/all-tools and /all-tools/:langCode)
+  else if (urlPath.startsWith('/all-tools')) {
+    const parts = urlPath.split('/').filter(Boolean);
+    const langCode = parts[1] || 'en';
+    const currentLocale = DIRECTORY_LOCALES[langCode] || DIRECTORY_LOCALES.en;
+    const ui = DIRECTORY_UI[langCode] || DIRECTORY_UI.en;
+    const isRtl = currentLocale.dir === 'rtl';
+
+    meta = {
+      title: ui.title,
+      description: ui.metaDescription,
+      canonicalUrl: langCode === 'en' ? `${BASE_URL}/all-tools` : `${BASE_URL}/all-tools/${langCode}`
+    };
+
+    hreflangs = [
+      { lang: 'x-default', href: `${BASE_URL}/all-tools` },
+      { lang: 'en-IN', href: `${BASE_URL}/all-tools` },
+      ...DIRECTORY_LANG_CODES.filter(c => c !== 'en').map(c => ({
+        lang: DIRECTORY_LOCALES[c].bcp47,
+        href: `${BASE_URL}/all-tools/${c}`
+      }))
+    ];
+
+    const langDict = getDirectoryTranslations(langCode);
+    const enDict = getDirectoryTranslations('en');
+
+    const toolsWithMeta = TOOLS.map(t => {
+      const item = langDict[t.slug] || enDict[t.slug] || { name: t.title, description: t.description };
+      return {
+        tool: t,
+        localizedName: item.name,
+        localizedDescription: item.description,
+        destinationUrl: getDirectoryToolDestinationUrl(t, langCode)
+      };
+    });
+
+    bodyContent = `
+      <div style="direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${isRtl ? 'right' : 'left'};">
+        <nav aria-label="Breadcrumb" style="font-size: 0.8rem; color: #94A3B8; margin-bottom: 16px;">
+          <a href="/" style="color: #94A3B8; text-decoration: none;">${escapeHtml(ui.breadcrumbs.home)}</a> &gt; 
+          <span style="color: #FFFFFF;">${escapeHtml(ui.breadcrumbs.directory)}</span>
+          ${langCode !== 'en' ? ` &gt; <span style="color: #10B981;">${escapeHtml(currentLocale.nativeName)}</span>` : ''}
+        </nav>
+
+        <header style="margin-bottom: 30px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+            <span style="background: rgba(16,185,129,0.15); color: #10B981; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px;">${escapeHtml(ui.totalToolsLabel)}</span>
+            <span style="background: rgba(216,184,121,0.15); color: #D8B879; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px;">${escapeHtml(ui.availableLanguagesBadge)}</span>
+            <span style="background: rgba(255,255,255,0.06); color: #A8C5AC; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px;">${escapeHtml(currentLocale.nativeName)} (${escapeHtml(currentLocale.name)})</span>
+          </div>
+          <h1 style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF; margin: 0 0 12px 0; line-height: 1.25;">${escapeHtml(ui.h1)}</h1>
+          <p style="font-size: 1.05rem; color: #CBD5E1; line-height: 1.6; max-width: 840px;">${escapeHtml(ui.subtitle)}</p>
+        </header>
+
+        <!-- 23-Language Quick Switcher -->
+        <section style="background: #0E261B; border: 1px solid rgba(16,185,129,0.25); border-radius: 14px; padding: 18px; margin-bottom: 30px;">
+          <h3 style="font-size: 0.85rem; color: #D8B879; text-transform: uppercase; margin: 0 0 12px 0; font-weight: 700;">${escapeHtml(ui.multilingualBadge)}</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            ${DIRECTORY_LANG_CODES.map(c => {
+              const meta = DIRECTORY_LOCALES[c];
+              const target = c === 'en' ? '/all-tools' : `/all-tools/${c}`;
+              const active = c === langCode;
+              return `<a href="${target}" style="padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; text-decoration: none; ${active ? 'background: #10B981; color: #07130E; font-weight: 700;' : 'background: rgba(255,255,255,0.05); color: #A8C5AC; border: 1px solid rgba(255,255,255,0.08);'}">${escapeHtml(meta.nativeName)} (${escapeHtml(meta.name)})</a>`;
+            }).join('')}
+          </div>
+        </section>
+
+        <!-- All 68 Tools Grid -->
+        <section>
+          <h2 style="font-size: 1.35rem; color: #FFFFFF; margin-bottom: 18px;">${escapeHtml(ui.featuredSectionTitle)} (${toolsWithMeta.length} Tools)</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+            ${toolsWithMeta.map(t => `
+              <div style="background: #0A1E15; border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #10B981; background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 4px;">${escapeHtml(ui.categoryLabels[t.tool.category] || t.tool.categoryLabel)}</span>
+                    <span style="font-size: 0.7rem; color: #64748B; font-family: monospace;">${escapeHtml(t.tool.slug)}</span>
+                  </div>
+                  <h3 style="font-size: 1.05rem; margin: 0 0 6px 0;">
+                    <a href="${t.destinationUrl}" style="color: #FFFFFF; text-decoration: none; font-weight: 700;">${escapeHtml(t.localizedName)}</a>
+                  </h3>
+                  <p style="font-size: 0.8rem; color: #94A3B8; margin: 0 0 14px 0; line-height: 1.5;">${escapeHtml(t.localizedDescription)}</p>
+                </div>
+                <div style="padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                  <a href="${t.destinationUrl}" style="color: #D8B879; font-size: 0.8rem; font-weight: 700; text-decoration: none;">${escapeHtml(ui.openToolLabel)} →</a>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      </div>
+    `;
+
+    jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: ui.breadcrumbs.home, item: `${BASE_URL}/` },
+            { "@type": "ListItem", position: 2, name: ui.breadcrumbs.directory, item: meta.canonicalUrl }
+          ]
+        },
+        {
+          "@type": "CollectionPage",
+          "@id": meta.canonicalUrl,
+          url: meta.canonicalUrl,
+          name: ui.h1,
+          description: ui.metaDescription,
+          inLanguage: currentLocale.bcp47,
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: toolsWithMeta.length,
+            itemListElement: toolsWithMeta.map((t, idx) => ({
+              "@type": "ListItem",
+              position: idx + 1,
+              name: t.localizedName,
+              description: t.localizedDescription,
+              url: `${BASE_URL}${t.destinationUrl}`
+            }))
+          }
+        }
+      ]
+    };
+  }
+
+  // 12. Individual Calculator & Image Tools (all 68 tools)
   else {
     const tool = TOOLS.find(t => t.seo.canonicalPath === urlPath);
     if (!tool) {
