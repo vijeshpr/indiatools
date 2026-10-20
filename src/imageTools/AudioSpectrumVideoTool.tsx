@@ -47,6 +47,11 @@ import {
   SlidersHorizontal,
   RefreshCw,
   FolderOpen,
+  Radio,
+  Gauge,
+  CloudRain,
+  Feather,
+  Wind,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -64,6 +69,14 @@ import {
   ParticlePresetType,
   TextAnimationStyle,
   ImageLayoutMode,
+  LightShowMode,
+  LightShowConfig,
+  SmokePalette,
+  SmokePosition,
+  SmokeConfig,
+  ParticleUniverseMode,
+  ParticleUniverseConfig,
+  ShockwaveConfig,
   ASPECT_RATIOS,
   THEME_PALETTES,
   SUPPORTED_LANGUAGES,
@@ -88,6 +101,7 @@ import {
   DemoAudioGenre,
 } from '../lib/video/demoAudioGenerator'
 import { STUDIO_TEMPLATES } from '../lib/video/studioTemplates'
+import { EFFECT_COMBOS, EffectCombo } from '../lib/video/effectCombos'
 import { ensureFontsLoaded } from '../lib/video/typographyEngine'
 
 const INITIAL_TEXT_LAYERS: TypographyLayer[] = [
@@ -200,7 +214,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const { showToast } = useToast()
 
   // -------------------------------------------------------------
-  // AUDIO STATE (File, Buffer, Playback, Time, Drag & Drop)
+  // AUDIO FILE, BUFFER & PLAYBACK STATE
   // -------------------------------------------------------------
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null)
@@ -217,7 +231,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const [isAudioDragOver, setIsAudioDragOver] = useState<boolean>(false)
 
   // -------------------------------------------------------------
-  // PHOTO STATE (File, Image Element, Thumbnail, Layout, Drag & Drop)
+  // PHOTO & ARTWORK STATE
   // -------------------------------------------------------------
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
@@ -231,7 +245,74 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const [showPhotoFineTune, setShowPhotoFineTune] = useState<boolean>(false)
 
   // -------------------------------------------------------------
-  // COMPOSITION ENGINE STATE
+  // AUDIO DSP TUNING & LIVE DIAGNOSTIC STATE
+  // -------------------------------------------------------------
+  const [audioDspTuning, setAudioDspTuning] = useState({
+    sensitivity: 1.25,
+    bassSensitivity: 1.35,
+    midsSensitivity: 1.0,
+    trebleSensitivity: 1.0,
+    smoothing: 0.82,
+    attack: 0.75,
+    release: 0.18,
+    beatThreshold: 1.45,
+    minTriggerInterval: 0.22,
+    reduceFlashing: false,
+  })
+
+  const [liveMeters, setLiveMeters] = useState({
+    subBass: 0,
+    bass: 0,
+    mids: 0,
+    treble: 0,
+    overall: 0,
+    isBeatHit: false,
+  })
+
+  // -------------------------------------------------------------
+  // EFFECTS CONFIG: LIGHT SHOW, SMOKE, PARTICLES, SHOCKWAVES
+  // -------------------------------------------------------------
+  const [lightingConfig, setLightingConfig] = useState<LightShowConfig>({
+    enabled: true,
+    mode: 'concert-stage',
+    intensity: 75,
+    beamCount: 8,
+    reduceFlashing: false,
+    blackoutOnDrop: false,
+    ambientGlow: 50,
+  })
+
+  const [smokeConfig, setSmokeConfig] = useState<SmokeConfig>({
+    enabled: true,
+    palette: 'cyan',
+    position: 'bottom-rise',
+    density: 26,
+    speed: 1.2,
+    opacity: 65,
+    turbulence: 50,
+  })
+
+  const [universeConfig, setUniverseConfig] = useState<ParticleUniverseConfig>({
+    enabled: true,
+    mode: 'starfield',
+    count: 85,
+    size: 3,
+    speed: 1.2,
+    glow: 14,
+    burstIntensity: 70,
+  })
+
+  const [shockwaveConfig, setShockwaveConfig] = useState<ShockwaveConfig>({
+    enabled: true,
+    ringCount: 2,
+    thickness: 4,
+    glow: 18,
+    expansionSpeed: 2.4,
+    color: '#06b6d4',
+  })
+
+  // -------------------------------------------------------------
+  // MASTER COMPOSITION STATE
   // -------------------------------------------------------------
   const [state, setState] = useState<CompositionState>({
     version: 2,
@@ -278,6 +359,11 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       colorGrading: 'vintage-warm',
     },
 
+    lighting: lightingConfig,
+    smoke: smokeConfig,
+    particleUniverse: universeConfig,
+    shockwaves: shockwaveConfig,
+
     textLayers: INITIAL_TEXT_LAYERS,
     selectedLayerId: 'layer-title',
 
@@ -290,12 +376,24 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     },
   })
 
+  // Keep state.effects in sync with effect config states
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      lighting: lightingConfig,
+      smoke: smokeConfig,
+      particleUniverse: universeConfig,
+      shockwaves: shockwaveConfig,
+    }))
+  }, [lightingConfig, smokeConfig, universeConfig, shockwaveConfig])
+
   // -------------------------------------------------------------
   // STUDIO WORKSPACE NAVIGATION & UI TOGGLES
   // -------------------------------------------------------------
-  const [activeTab, setActiveTab] = useState<'visualizers' | 'templates' | 'typography' | 'fx'>('visualizers')
+  const [activeTab, setActiveTab] = useState<
+    'visualizers' | 'combos' | 'lighting' | 'smoke' | 'particles' | 'typography' | 'reactivity'
+  >('visualizers')
   const [visualizerCategory, setVisualizerCategory] = useState<string>('all')
-  const [templateCategory, setTemplateCategory] = useState<string>('all')
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ml')
   const [showSafeZones, setShowSafeZones] = useState<boolean>(false)
 
@@ -313,7 +411,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   }>({ percent: 0, elapsedSec: 0, remainingSec: 0 })
 
   // -------------------------------------------------------------
-  // AUDIO & CANVAS REFS
+  // AUDIO & CANVAS ENGINE REFS
   // -------------------------------------------------------------
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
@@ -333,24 +431,19 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const audioFileInputRef = useRef<HTMLInputElement | null>(null)
   const photoFileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Load Google Fonts on component mount
+  // Load Google Fonts on mount
   useEffect(() => {
     ensureFontsLoaded()
   }, [])
 
-  // Sync particle preset with manager
-  useEffect(() => {
-    particleManagerRef.current.setPreset(state.particlePreset)
-  }, [state.particlePreset])
-
-  // Master AudioContext initializer
+  // Master AudioContext initializer (singleton pattern with user gesture recovery)
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
       const ctx = new AudioCtx()
       const analyser = ctx.createAnalyser()
       analyser.fftSize = state.fftSize
-      analyser.smoothingTimeConstant = state.smoothing
+      analyser.smoothingTimeConstant = audioDspTuning.smoothing
 
       const gain = ctx.createGain()
       gain.gain.value = isMuted ? 0 : volume
@@ -367,7 +460,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       destinationNodeRef.current = dest
     }
     return audioContextRef.current
-  }, [state.fftSize, state.smoothing, isMuted, volume])
+  }, [state.fftSize, audioDspTuning.smoothing, isMuted, volume])
 
   // Volume & Mute listener
   useEffect(() => {
@@ -377,7 +470,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }
   }, [volume, isMuted])
 
-  // Stop audio playback safely
+  // Stop audio playback cleanly
   const stopAllAudio = useCallback(() => {
     if (activeSourceRef.current) {
       try {
@@ -389,9 +482,10 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       activeSourceRef.current = null
     }
     setIsPlaying(false)
+    dspAnalyzerRef.current.reset()
   }, [])
 
-  // Play audio from specific second offset
+  // Play audio from specific second offset with resume on gesture
   const playFromOffset = useCallback(
     async (offsetSec: number) => {
       if (!audioBuffer) return
@@ -420,6 +514,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           setIsPlaying(false)
           setCurrentTime(0)
           playbackStartOffsetRef.current = 0
+          dspAnalyzerRef.current.reset()
         }
       }
 
@@ -451,7 +546,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }
   }, [isPlaying, pauseAudio, playFromOffset])
 
-  // Hotkey Spacebar for Play/Pause
+  // Spacebar hotkey for Play/Pause
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -489,7 +584,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
         let decodedBuffer: AudioBuffer
         try {
-          // slice(0) avoids detached arrayBuffer memory errors across browsers
           const bufferCopy = arrayBuffer.slice(0)
           decodedBuffer = await new Promise<AudioBuffer>((resolve, reject) => {
             ctx.decodeAudioData(bufferCopy, resolve, reject).catch?.(reject)
@@ -511,7 +605,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
         const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
 
-        // Update title layer
         setState((prev) => ({
           ...prev,
           duration: decodedBuffer.duration,
@@ -553,7 +646,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     showToast('Audio track removed.', 'info')
   }, [stopAllAudio, showToast])
 
-  // Demo audio track generator
   const handleLoadDemoTrack = useCallback(
     async (genre: DemoAudioGenre = 'synthwave') => {
       stopAllAudio()
@@ -564,9 +656,9 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         const file = await generateVisualizerDemoSpecimen(genre)
         await handleProcessAudioFile(file)
 
-        if (genre === 'synthwave') applyStudioTemplate('neon-night')
-        else if (genre === 'lofi') applyStudioTemplate('lofi-night')
-        else applyStudioTemplate('cinematic-portrait')
+        if (genre === 'synthwave') applyEffectCombo('neon-smoke-storm')
+        else if (genre === 'lofi') applyEffectCombo('purple-smoke-galaxy')
+        else applyEffectCombo('cinematic-light-beams')
 
         showToast('Demo specimen ready! Click Play or Spacebar.', 'success')
       } catch (err: any) {
@@ -579,7 +671,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   )
 
   // -------------------------------------------------------------
-  // PHOTO UPLOAD HANDLERS (JPG, PNG, WebP with local preview)
+  // PHOTO UPLOAD HANDLERS
   // -------------------------------------------------------------
   const handleProcessPhotoFile = useCallback(
     (file: File) => {
@@ -655,7 +747,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     showToast('Photo removed.', 'info')
   }, [photoUrl, showToast])
 
-  // Generate Sample Artwork Canvas in 1 click
   const handleLoadSampleArtwork = useCallback(() => {
     const tempCanvas = document.createElement('canvas')
     tempCanvas.width = 1080
@@ -663,7 +754,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     const ctx = tempCanvas.getContext('2d')
     if (!ctx) return
 
-    // Draw radiant aesthetic artwork
     const grad = ctx.createRadialGradient(540, 540, 50, 540, 540, 600)
     grad.addColorStop(0, '#f97316')
     grad.addColorStop(0.4, '#8b5cf6')
@@ -672,7 +762,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, 1080, 1080)
 
-    // Cosmic stardust specks
     ctx.fillStyle = '#ffffff'
     for (let i = 0; i < 200; i++) {
       const rx = Math.random() * 1080
@@ -708,7 +797,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }))
   }, [photoZoom, photoOffsetY, photoDarkness])
 
-  // Change image presentation layout mode
   const handleSetImageLayoutMode = (mode: ImageLayoutMode) => {
     setState((prev) => ({
       ...prev,
@@ -718,38 +806,31 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   }
 
   // -------------------------------------------------------------
-  // STUDIO TEMPLATES & INDIC LANGUAGE
+  // APPLY ONE-CLICK EFFECT COMBINATIONS (Section 8)
   // -------------------------------------------------------------
-  const applyStudioTemplate = useCallback(
-    (templateId: StudioTemplateId) => {
-      const t = STUDIO_TEMPLATES[templateId]
-      if (!t) return
-
-      const sampleTitle = t.sampleTitle[currentLanguage] || t.sampleTitle.en
-      const sampleArtist = t.sampleArtist[currentLanguage] || t.sampleArtist.en
+  const applyEffectCombo = useCallback(
+    (comboId: string) => {
+      const combo = EFFECT_COMBOS.find((c) => c.id === comboId)
+      if (!combo) return
 
       setState((prev) => ({
         ...prev,
-        activeTemplateId: templateId,
-        activePreset: t.preset,
-        theme: t.theme,
-        backgroundMode: t.backgroundMode,
-        particlePreset: t.particlePreset,
-        fx: { ...t.fx },
-        textLayers: prev.textLayers.map((layer) => {
-          if (layer.id === 'layer-title') {
-            return { ...layer, text: sampleTitle, language: currentLanguage }
-          }
-          if (layer.id === 'layer-artist') {
-            return { ...layer, text: sampleArtist, language: currentLanguage }
-          }
-          return layer
-        }),
+        activePreset: combo.preset,
+        theme: combo.theme,
+        lighting: { ...combo.lighting },
+        smoke: { ...combo.smoke },
+        particleUniverse: { ...combo.particleUniverse },
+        shockwaves: { ...combo.shockwaves },
       }))
 
-      showToast(`Applied preset: ${t.name}`, 'info')
+      setLightingConfig(combo.lighting)
+      setSmokeConfig(combo.smoke)
+      setUniverseConfig(combo.particleUniverse)
+      setShockwaveConfig(combo.shockwaves)
+
+      showToast(`Applied Combo: ${combo.name}`, 'info')
     },
-    [currentLanguage, showToast]
+    [showToast]
   )
 
   const handleSwitchLanguage = useCallback(
@@ -791,7 +872,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   )
 
   // -------------------------------------------------------------
-  // CANVAS RENDER LOOP (60 FPS with A/V sync)
+  // MASTER CANVAS RENDER LOOP (Deterministic, strictly audio-reactive)
   // -------------------------------------------------------------
   useEffect(() => {
     const canvas = canvasRef.current
@@ -808,13 +889,14 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     let isRunning = true
     const freqData = new Uint8Array(state.fftSize / 2)
     const timeData = new Uint8Array(state.fftSize / 2)
+    let frameCount = 0
 
     const render = () => {
       if (!isRunning) return
+      frameCount++
 
       const width = canvas.width
       const height = canvas.height
-      const nowSec = performance.now() / 1000
 
       let renderTime = currentTime
       if (isPlaying && audioContextRef.current) {
@@ -823,20 +905,44 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         setCurrentTime(renderTime)
       }
 
+      // STRICT AUDIO REACTIVITY: If audio is paused, do NOT generate synthetic sinusoidal values
+      // Real silence guarantees zero beat hits and zero false spectrum animation when paused!
       if (analyserRef.current && isPlaying) {
         analyserRef.current.getByteFrequencyData(freqData)
         analyserRef.current.getByteTimeDomainData(timeData)
       } else {
-        // Idle gentle breathing animation when audio is paused
-        for (let i = 0; i < freqData.length; i++) {
-          freqData[i] = Math.max(0, Math.sin(nowSec * 2.2 + i * 0.12) * 32 + 18)
-        }
-        for (let i = 0; i < timeData.length; i++) {
-          timeData[i] = 128 + Math.sin(nowSec * 3 + i * 0.06) * 8
-        }
+        freqData.fill(0)
+        timeData.fill(128)
       }
 
-      const bands = dspAnalyzerRef.current.analyze(freqData, renderTime)
+      const bands = dspAnalyzerRef.current.analyze(
+        freqData,
+        renderTime,
+        {
+          sensitivity: audioDspTuning.sensitivity,
+          bassSensitivity: audioDspTuning.bassSensitivity,
+          midsSensitivity: audioDspTuning.midsSensitivity,
+          trebleSensitivity: audioDspTuning.trebleSensitivity,
+          smoothing: audioDspTuning.smoothing,
+          attack: audioDspTuning.attack,
+          release: audioDspTuning.release,
+          beatThreshold: audioDspTuning.beatThreshold,
+          minTriggerInterval: audioDspTuning.minTriggerInterval,
+        },
+        timeData
+      )
+
+      // Throttle live VU meter state updates to ~15 FPS to keep React render lightweight
+      if (frameCount % 4 === 0) {
+        setLiveMeters({
+          subBass: bands.subBass,
+          bass: bands.bass,
+          mids: bands.mids,
+          treble: bands.treble,
+          overall: bands.overall,
+          isBeatHit: isPlaying && bands.isBeatHit,
+        })
+      }
 
       const compositionStateSnapshot: CompositionState = {
         ...state,
@@ -872,7 +978,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [state, isPlaying, duration, photoImages, showSafeZones])
+  }, [state, isPlaying, duration, photoImages, showSafeZones, audioDspTuning])
 
   const drawReelsSafeZoneOverlay = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.save()
@@ -901,7 +1007,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   }
 
   // -------------------------------------------------------------
-  // VIDEO RECORDING & EXPORT EXECUTION
+  // VIDEO EXPORT EXECUTION
   // -------------------------------------------------------------
   const handleStartExport = useCallback(async () => {
     const canvas = canvasRef.current
@@ -979,7 +1085,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     showToast('Export cancelled.', 'info')
   }, [stopAllAudio, showToast])
 
-  // Selected typography layer accessor
   const selectedLayer = useMemo(() => {
     return state.textLayers.find((l) => l.id === state.selectedLayerId) || state.textLayers[0]
   }, [state.textLayers, state.selectedLayerId])
@@ -998,12 +1103,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     if (visualizerCategory === 'all') return VISUALIZER_ENGINES
     return VISUALIZER_ENGINES.filter((e) => e.category === visualizerCategory)
   }, [visualizerCategory])
-
-  const templateList = useMemo(() => {
-    const all = Object.values(STUDIO_TEMPLATES)
-    if (templateCategory === 'all') return all
-    return all.filter((t) => t.category === templateCategory)
-  }, [templateCategory])
 
   return (
     <ToolPageLayout tool={tool}>
@@ -1049,8 +1148,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 4
               </span>
               <div>
-                <span className="font-semibold text-white block">Lyrics & Style</span>
-                <span className="text-[11px] text-slate-400">5 Indic Languages</span>
+                <span className="font-semibold text-white block">Lights & Smoke</span>
+                <span className="text-[11px] text-slate-400">Audio-Reactive FX</span>
               </div>
             </div>
             <div className="bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-xl flex items-center gap-2.5">
@@ -1129,7 +1228,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </div>
               </div>
             ) : (
-              /* Audio Loaded State */
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                   <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
@@ -1237,7 +1335,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 </div>
               </div>
             ) : (
-              /* Photo Loaded State */
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                   <span className="flex items-center gap-1.5 text-xs font-bold text-cyan-400">
@@ -1294,7 +1391,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Photo Zoom & Darkness Sliders Toggle */}
                 {showPhotoFineTune && (
                   <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 space-y-2 text-xs">
                     <div className="flex justify-between text-slate-300">
@@ -1361,7 +1457,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         {/* 3. TOOLBAR: ASPECT RATIO, SAFE-ZONES, FPS, EXPORT TRIGGER */}
         {/* ========================================================= */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 backdrop-blur-xl shadow-2xl flex flex-wrap items-center justify-between gap-4">
-          {/* Aspect Ratio selector */}
           <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
             <button
               onClick={() => setState((p) => ({ ...p, aspectRatio: '9:16' }))}
@@ -1398,7 +1493,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick controls */}
           <div className="flex items-center gap-3">
             {state.aspectRatio === '9:16' && (
               <button
@@ -1447,7 +1541,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             </div>
           </div>
 
-          {/* Export Video Button */}
           <button
             onClick={() => setIsExportModalOpen(true)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/35 transition-all transform hover:-translate-y-0.5"
@@ -1462,7 +1555,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         {/* ========================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* LEFT COLUMN: Tabbed Dock (7 cols) */}
-          <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-5 backdrop-blur-xl shadow-xl flex flex-col min-h-[640px]">
+          <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-2xl p-5 backdrop-blur-xl shadow-xl flex flex-col min-h-[660px]">
             {/* Dock Tabs Header */}
             <div className="flex items-center gap-2 border-b border-slate-800 pb-3 mb-5 overflow-x-auto scrollbar-none">
               <button
@@ -1474,40 +1567,73 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 }`}
               >
                 <Activity className="w-4 h-4" />
-                20 Visualizer Styles
+                20 Visualizers
               </button>
               <button
-                onClick={() => setActiveTab('templates')}
+                onClick={() => setActiveTab('combos')}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'templates'
+                  activeTab === 'combos'
                     ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <Sparkles className="w-4 h-4" />
-                20 Studio Presets
+                12 Effect Combos
+              </button>
+              <button
+                onClick={() => setActiveTab('lighting')}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeTab === 'lighting'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                Beat Light Show
+              </button>
+              <button
+                onClick={() => setActiveTab('smoke')}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeTab === 'smoke'
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Wind className="w-4 h-4" />
+                Audio Smoke
+              </button>
+              <button
+                onClick={() => setActiveTab('particles')}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeTab === 'particles'
+                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Radio className="w-4 h-4" />
+                Particles & Waves
               </button>
               <button
                 onClick={() => setActiveTab('typography')}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   activeTab === 'typography'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-md'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <Type className="w-4 h-4" />
-                Indic Typography
+                Typography
               </button>
               <button
-                onClick={() => setActiveTab('fx')}
+                onClick={() => setActiveTab('reactivity')}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeTab === 'fx'
-                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-md'
+                  activeTab === 'reactivity'
+                    ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
-                <SlidersHorizontal className="w-4 h-4" />
-                Cinematic FX
+                <Gauge className="w-4 h-4" />
+                DSP Reactivity
               </button>
             </div>
 
@@ -1530,7 +1656,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
                   {filteredVisualizers.map((engine) => {
                     const isSelected = state.activePreset === engine.id
                     return (
@@ -1559,100 +1685,398 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     )
                   })}
                 </div>
-
-                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <Sliders className="w-3.5 h-3.5 text-cyan-400" />
-                    Spectrum Dynamics
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Audio Sensitivity</span>
-                        <span className="font-mono text-cyan-400">{state.sensitivity.toFixed(2)}x</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.5"
-                        max="2.5"
-                        step="0.05"
-                        value={state.sensitivity}
-                        onChange={(e) => setState((p) => ({ ...p, sensitivity: parseFloat(e.target.value) }))}
-                        className="w-full accent-cyan-500"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Bass Reactivity</span>
-                        <span className="font-mono text-cyan-400">{state.bassSensitivity.toFixed(2)}x</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.5"
-                        max="2.5"
-                        step="0.05"
-                        value={state.bassSensitivity}
-                        onChange={(e) => setState((p) => ({ ...p, bassSensitivity: parseFloat(e.target.value) }))}
-                        className="w-full accent-cyan-500"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
-            {/* TAB 2: 20 STUDIO TEMPLATES */}
-            {activeTab === 'templates' && (
+            {/* TAB 2: 12 ONE-CLICK EFFECT COMBINATIONS (Section 8) */}
+            {activeTab === 'combos' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {['all', 'Cinematic', 'Electronic', 'Mood', 'Indian Traditional', 'Minimal'].map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setTemplateCategory(cat)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all ${
-                        templateCategory === cat
-                          ? 'bg-violet-900/60 text-violet-200 border border-violet-500/40'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                      }`}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {EFFECT_COMBOS.map((combo) => (
+                    <div
+                      key={combo.id}
+                      onClick={() => applyEffectCombo(combo.id)}
+                      className="p-4 rounded-xl border bg-slate-950/50 border-slate-800/80 hover:border-violet-500/50 hover:bg-violet-950/20 text-left cursor-pointer transition-all shadow-md group"
                     >
-                      {cat}
-                    </button>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-bold text-white flex items-center gap-1.5 group-hover:text-violet-300">
+                          <Sparkles className="w-4 h-4 text-violet-400" />
+                          {combo.name}
+                        </span>
+                        <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-violet-900/40 text-violet-300 border border-violet-700/40">
+                          {combo.theme}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                        {combo.subtitle}
+                      </p>
+                    </div>
                   ))}
                 </div>
+              </div>
+            )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {templateList.map((tpl) => {
-                    const isSelected = state.activeTemplateId === tpl.id
-                    return (
-                      <div
-                        key={tpl.id}
-                        onClick={() => applyStudioTemplate(tpl.id)}
-                        className={`p-4 rounded-xl border text-left cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-violet-950/40 border-violet-500/60 shadow-lg shadow-violet-950/50 ring-1 ring-violet-500/40'
-                            : 'bg-slate-950/50 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/30'
-                        }`}
+            {/* TAB 3: BEAT LIGHT SHOW (Section 3) */}
+            {activeTab === 'lighting' && (
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                <div className="flex items-center justify-between bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+                  <div>
+                    <span className="text-xs font-bold text-white block">Enable Beat Light Show</span>
+                    <span className="text-[11px] text-slate-400">
+                      Concert beams, spotlights and sweeps pulsing to beats
+                    </span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={lightingConfig.enabled}
+                      onChange={(e) => setLightingConfig((p) => ({ ...p, enabled: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {lightingConfig.enabled && (
+                  <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-4 text-xs">
+                    <div>
+                      <label className="text-slate-300 block mb-1 font-semibold">Light Show Mode:</label>
+                      <select
+                        value={lightingConfig.mode}
+                        onChange={(e) =>
+                          setLightingConfig((p) => ({ ...p, mode: e.target.value as LightShowMode }))
+                        }
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white"
                       >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-sm font-bold text-white flex items-center gap-1.5">
-                            <Sparkles className={`w-4 h-4 ${isSelected ? 'text-violet-400' : 'text-slate-400'}`} />
-                            {tpl.name}
-                          </span>
-                          <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-violet-900/40 text-violet-300 border border-violet-700/40">
-                            {tpl.category}
+                        <option value="concert-stage">Concert Stage Beams (Arena Sweepers)</option>
+                        <option value="neon-club">Neon Club Rotating Sweepers</option>
+                        <option value="cinematic-spotlight">Cinematic Center Spotlight</option>
+                        <option value="dark-bass-drop">Dark Bass Drop Pulse</option>
+                        <option value="rainbow-pulse">Rainbow Pulse Strobe</option>
+                        <option value="minimal-light-bars">Minimal Concert Stage Bars</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Beam Intensity:</span>
+                          <span className="font-mono text-amber-400">{lightingConfig.intensity}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="10"
+                          max="100"
+                          value={lightingConfig.intensity}
+                          onChange={(e) =>
+                            setLightingConfig((p) => ({ ...p, intensity: parseInt(e.target.value) }))
+                          }
+                          className="w-full accent-amber-500"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Beam Count:</span>
+                          <span className="font-mono text-amber-400">{lightingConfig.beamCount}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="4"
+                          max="16"
+                          value={lightingConfig.beamCount}
+                          onChange={(e) =>
+                            setLightingConfig((p) => ({ ...p, beamCount: parseInt(e.target.value) }))
+                          }
+                          className="w-full accent-amber-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 pt-2 border-t border-slate-800 text-xs">
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={lightingConfig.reduceFlashing}
+                          onChange={(e) =>
+                            setLightingConfig((p) => ({ ...p, reduceFlashing: e.target.checked }))
+                          }
+                          className="accent-amber-500 rounded"
+                        />
+                        Reduce Flashing (Accessibility Safe)
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={lightingConfig.blackoutOnDrop}
+                          onChange={(e) =>
+                            setLightingConfig((p) => ({ ...p, blackoutOnDrop: e.target.checked }))
+                          }
+                          className="accent-amber-500 rounded"
+                        />
+                        Blackout Flash on Bass Drop
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 4: AUDIO-REACTIVE SMOKE & MIST (Section 4) */}
+            {activeTab === 'smoke' && (
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                <div className="flex items-center justify-between bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+                  <div>
+                    <span className="text-xs font-bold text-white block">
+                      Enable Coloured Smoke & Mist
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      Volumetric atmospheric fog swirling to bass & beat hits
+                    </span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={smokeConfig.enabled}
+                      onChange={(e) => setSmokeConfig((p) => ({ ...p, enabled: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                  </label>
+                </div>
+
+                {smokeConfig.enabled && (
+                  <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-4 text-xs">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-slate-300 block mb-1 font-semibold">Smoke Palette:</label>
+                        <select
+                          value={smokeConfig.palette}
+                          onChange={(e) =>
+                            setSmokeConfig((p) => ({ ...p, palette: e.target.value as SmokePalette }))
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white capitalize"
+                        >
+                          <option value="cyan">Cyan Electric</option>
+                          <option value="purple">Royal Purple</option>
+                          <option value="magenta">Neon Magenta</option>
+                          <option value="electric-blue">Electric Blue</option>
+                          <option value="orange">Sunset Orange</option>
+                          <option value="red">Crimson Red</option>
+                          <option value="rainbow">Chroma Rainbow</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-slate-300 block mb-1 font-semibold">Flow Position:</label>
+                        <select
+                          value={smokeConfig.position}
+                          onChange={(e) =>
+                            setSmokeConfig((p) => ({ ...p, position: e.target.value as SmokePosition }))
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                        >
+                          <option value="bottom-rise">Rising From Bottom (Stage Fog)</option>
+                          <option value="side-flow">Side Flowing Plumes</option>
+                          <option value="center-burst">Center Bass Bursts</option>
+                          <option value="background-ambient">Ambient Background Mist</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Smoke Opacity:</span>
+                          <span className="font-mono text-rose-400">{smokeConfig.opacity}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="15"
+                          max="95"
+                          value={smokeConfig.opacity}
+                          onChange={(e) =>
+                            setSmokeConfig((p) => ({ ...p, opacity: parseInt(e.target.value) }))
+                          }
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Flow Speed:</span>
+                          <span className="font-mono text-rose-400">{smokeConfig.speed.toFixed(1)}x</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.5"
+                          step="0.1"
+                          value={smokeConfig.speed}
+                          onChange={(e) =>
+                            setSmokeConfig((p) => ({ ...p, speed: parseFloat(e.target.value) }))
+                          }
+                          className="w-full accent-rose-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 5: PARTICLE UNIVERSE & SHOCKWAVES (Sections 5 & 6) */}
+            {activeTab === 'particles' && (
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                {/* 12 Particle Universe Modes */}
+                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-4 text-xs">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span className="font-bold text-white">Particle Universe (12 Modes)</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={universeConfig.enabled}
+                        onChange={(e) =>
+                          setUniverseConfig((p) => ({ ...p, enabled: e.target.checked }))
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                    </label>
+                  </div>
+
+                  {universeConfig.enabled && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-slate-300 block mb-1">Particle Mode:</label>
+                        <select
+                          value={universeConfig.mode}
+                          onChange={(e) =>
+                            setUniverseConfig((p) => ({
+                              ...p,
+                              mode: e.target.value as ParticleUniverseMode,
+                            }))
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white capitalize"
+                        >
+                          <option value="galaxy">Galaxy Vortex (Orbiting Spiral)</option>
+                          <option value="starfield">Starfield Warp Speed</option>
+                          <option value="neon-dust">Neon Ambient Dust</option>
+                          <option value="fireflies">Floating Fireflies</option>
+                          <option value="energy-sparks">Energy Sparks (Electric Hits)</option>
+                          <option value="particle-explosion">Particle Explosion on Beat</option>
+                          <option value="orbiting-particles">Orbiting Vinyl Satellites</option>
+                          <option value="rainbow-confetti">Rainbow Festival Confetti</option>
+                          <option value="cosmic-nebula">Cosmic Nebula Gas</option>
+                          <option value="light-trails">Light Trails (Long Exposure)</option>
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex justify-between text-slate-300 mb-1">
+                            <span>Count:</span>
+                            <span className="font-mono text-blue-400">{universeConfig.count}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="30"
+                            max="180"
+                            value={universeConfig.count}
+                            onChange={(e) =>
+                              setUniverseConfig((p) => ({ ...p, count: parseInt(e.target.value) }))
+                            }
+                            className="w-full accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-slate-300 mb-1">
+                            <span>Beat Burst:</span>
+                            <span className="font-mono text-blue-400">{universeConfig.burstIntensity}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={universeConfig.burstIntensity}
+                            onChange={(e) =>
+                              setUniverseConfig((p) => ({
+                                ...p,
+                                burstIntensity: parseInt(e.target.value),
+                              }))
+                            }
+                            className="w-full accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bass Shockwaves & Concentric Energy Rings (Section 6) */}
+                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-4 text-xs">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span className="font-bold text-white">Bass Shockwaves & Energy Rings</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={shockwaveConfig.enabled}
+                        onChange={(e) =>
+                          setShockwaveConfig((p) => ({ ...p, enabled: e.target.checked }))
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                    </label>
+                  </div>
+
+                  {shockwaveConfig.enabled && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Rings Count:</span>
+                          <span className="font-mono text-cyan-400">{shockwaveConfig.ringCount}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="4"
+                          value={shockwaveConfig.ringCount}
+                          onChange={(e) =>
+                            setShockwaveConfig((p) => ({ ...p, ringCount: parseInt(e.target.value) }))
+                          }
+                          className="w-full accent-cyan-500"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Expansion Speed:</span>
+                          <span className="font-mono text-cyan-400">
+                            {shockwaveConfig.expansionSpeed.toFixed(1)}x
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400 line-clamp-2 mb-2 leading-relaxed">
-                          {tpl.subtitle}
-                        </p>
+                        <input
+                          type="range"
+                          min="1.0"
+                          max="4.0"
+                          step="0.2"
+                          value={shockwaveConfig.expansionSpeed}
+                          onChange={(e) =>
+                            setShockwaveConfig((p) => ({
+                              ...p,
+                              expansionSpeed: parseFloat(e.target.value),
+                            }))
+                          }
+                          className="w-full accent-cyan-500"
+                        />
                       </div>
-                    )
-                  })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* TAB 3: INDIC TYPOGRAPHY */}
+            {/* TAB 6: INDIC TYPOGRAPHY */}
             {activeTab === 'typography' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
                 <div>
@@ -1759,84 +2183,184 @@ export const AudioSpectrumVideoTool: React.FC = () => {
               </div>
             )}
 
-            {/* TAB 4: CINEMATIC FX */}
-            {activeTab === 'fx' && (
+            {/* TAB 7: AUDIO REACTIVITY TUNING & LIVE DIAGNOSTICS (Section 9) */}
+            {activeTab === 'reactivity' && (
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Color Palette Theme:</label>
-                    <select
-                      value={state.theme}
-                      onChange={(e) => setState((p) => ({ ...p, theme: e.target.value as ColorTheme }))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                {/* Live Measured Audio Diagnostics Panel */}
+                <div className="bg-slate-950/80 rounded-xl p-4 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Gauge className="w-4 h-4 text-fuchsia-400" />
+                      Live Analyser Energy Activity
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono transition-all ${
+                        liveMeters.isBeatHit
+                          ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/50 animate-pulse'
+                          : 'bg-slate-800 text-slate-500'
+                      }`}
                     >
-                      <option value="neon-cyber">Neon Cyber (Cyan & Magenta)</option>
-                      <option value="electric-violet">Electric Violet</option>
-                      <option value="sunset-ember">Sunset Ember (Orange & Amber)</option>
-                      <option value="aurora-emerald">Aurora Emerald</option>
-                      <option value="matrix-glow">Matrix Hacker Green</option>
-                      <option value="gold-luxury">Gold Luxury</option>
-                      <option value="monochrome-silver">Monochrome Silver</option>
-                      <option value="crimson-cinema">Crimson Cinema</option>
-                      <option value="ocean-sapphire">Ocean Sapphire</option>
-                      <option value="cherry-blossom">Cherry Blossom Pastel</option>
-                    </select>
+                      {liveMeters.isBeatHit ? '⚡ BEAT DETECTED' : 'IDLE WAIT'}
+                    </span>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-slate-300 block mb-1">Atmospheric Particles:</label>
-                    <select
-                      value={state.particlePreset}
-                      onChange={(e) => setState((p) => ({ ...p, particlePreset: e.target.value as ParticlePresetType }))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                    >
-                      <option value="floating-dust">Floating Dust Motes (Lo-Fi Acoustic)</option>
-                      <option value="rising-embers">Rising Flame Embers (Phonk / Trap)</option>
-                      <option value="monsoon-rain">Monsoon Rain Streaks (Kerala / Romantic)</option>
-                      <option value="cosmic-stardust">Cosmic Stardust (Ambient / Sci-Fi)</option>
-                      <option value="sakura-petals">Falling Sakura Petals</option>
-                      <option value="none">Disabled</option>
-                    </select>
+                  {/* 6-Band Live VU Meters */}
+                  <div className="space-y-2 text-[11px] font-mono">
+                    <div>
+                      <div className="flex justify-between text-slate-400 mb-0.5">
+                        <span>Sub-Bass (20-60 Hz)</span>
+                        <span className="text-cyan-400">{(liveMeters.subBass * 100).toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-cyan-500 h-full transition-all duration-75"
+                          style={{ width: `${liveMeters.subBass * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-slate-400 mb-0.5">
+                        <span>Bass (60-250 Hz)</span>
+                        <span className="text-emerald-400">{(liveMeters.bass * 100).toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-emerald-500 h-full transition-all duration-75"
+                          style={{ width: `${liveMeters.bass * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-slate-400 mb-0.5">
+                        <span>Midrange (500-2000 Hz)</span>
+                        <span className="text-amber-400">{(liveMeters.mids * 100).toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-amber-500 h-full transition-all duration-75"
+                          style={{ width: `${liveMeters.mids * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-slate-400 mb-0.5">
+                        <span>Treble (6000-20000 Hz)</span>
+                        <span className="text-rose-400">{(liveMeters.treble * 100).toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-rose-500 h-full transition-all duration-75"
+                          style={{ width: `${liveMeters.treble * 100}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
+
+                  {isPlaying && liveMeters.overall === 0 && (
+                    <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-500/40 text-[11px] text-amber-300">
+                      💡 Tip: Click anywhere in the editor window to resume the Web Audio context if meters remain at zero.
+                    </div>
+                  )}
                 </div>
 
-                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-3.5">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <Film className="w-3.5 h-3.5 text-rose-400" />
-                    Camera & Optical Post-Processing
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                {/* DSP Tuning Sliders */}
+                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-3.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white">Reactivity Parameters</span>
+                    <button
+                      onClick={() =>
+                        setAudioDspTuning({
+                          sensitivity: 1.25,
+                          bassSensitivity: 1.35,
+                          midsSensitivity: 1.0,
+                          trebleSensitivity: 1.0,
+                          smoothing: 0.82,
+                          attack: 0.75,
+                          release: 0.18,
+                          beatThreshold: 1.45,
+                          minTriggerInterval: 0.22,
+                          reduceFlashing: false,
+                        })
+                      }
+                      className="text-[11px] text-cyan-400 hover:underline"
+                    >
+                      Reset Defaults
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="flex justify-between text-slate-300 mb-1">
-                        <span>2.5D Camera Drift (Ken Burns)</span>
-                        <span className="font-mono text-rose-400">{state.fx.cameraDrift}%</span>
+                        <span>Global Sensitivity:</span>
+                        <span className="font-mono text-fuchsia-400">{audioDspTuning.sensitivity.toFixed(2)}x</span>
                       </div>
                       <input
                         type="range"
-                        min="0"
-                        max="100"
-                        value={state.fx.cameraDrift}
+                        min="0.5"
+                        max="2.5"
+                        step="0.05"
+                        value={audioDspTuning.sensitivity}
                         onChange={(e) =>
-                          setState((p) => ({ ...p, fx: { ...p.fx, cameraDrift: parseInt(e.target.value) } }))
+                          setAudioDspTuning((p) => ({ ...p, sensitivity: parseFloat(e.target.value) }))
                         }
-                        className="w-full accent-rose-500"
+                        className="w-full accent-fuchsia-500"
                       />
                     </div>
 
                     <div>
                       <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Bass Camera Shake</span>
-                        <span className="font-mono text-rose-400">{state.fx.cameraBassShake}%</span>
+                        <span>Bass Sensitivity:</span>
+                        <span className="font-mono text-fuchsia-400">{audioDspTuning.bassSensitivity.toFixed(2)}x</span>
                       </div>
                       <input
                         type="range"
-                        min="0"
-                        max="100"
-                        value={state.fx.cameraBassShake}
+                        min="0.5"
+                        max="2.5"
+                        step="0.05"
+                        value={audioDspTuning.bassSensitivity}
                         onChange={(e) =>
-                          setState((p) => ({ ...p, fx: { ...p.fx, cameraBassShake: parseInt(e.target.value) } }))
+                          setAudioDspTuning((p) => ({ ...p, bassSensitivity: parseFloat(e.target.value) }))
                         }
-                        className="w-full accent-rose-500"
+                        className="w-full accent-fuchsia-500"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-slate-300 mb-1">
+                        <span>Beat Threshold:</span>
+                        <span className="font-mono text-fuchsia-400">{audioDspTuning.beatThreshold.toFixed(2)}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1.1"
+                        max="2.0"
+                        step="0.05"
+                        value={audioDspTuning.beatThreshold}
+                        onChange={(e) =>
+                          setAudioDspTuning((p) => ({ ...p, beatThreshold: parseFloat(e.target.value) }))
+                        }
+                        className="w-full accent-fuchsia-500"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-slate-300 mb-1">
+                        <span>DSP Smoothing:</span>
+                        <span className="font-mono text-fuchsia-400">{audioDspTuning.smoothing.toFixed(2)}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.3"
+                        max="0.95"
+                        step="0.02"
+                        value={audioDspTuning.smoothing}
+                        onChange={(e) =>
+                          setAudioDspTuning((p) => ({ ...p, smoothing: parseFloat(e.target.value) }))
+                        }
+                        className="w-full accent-fuchsia-500"
                       />
                     </div>
                   </div>
@@ -2103,7 +2627,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         {/* 6. BELOW-THE-FOLD COMPREHENSIVE SEO & KNOWLEDGE HUB       */}
         {/* ========================================================= */}
         <div className="border-t border-slate-800 pt-10 space-y-12">
-          {/* Privacy & Zero-Watermark Guarantee */}
           <div className="bg-gradient-to-r from-emerald-950/30 via-slate-900 to-cyan-950/30 border border-emerald-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="p-3.5 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -2123,14 +2646,25 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             </div>
           </div>
 
-          {/* Detailed FAQ Accordion */}
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-white text-center mb-6">Frequently Asked Questions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 {
-                  q: 'How do I create a music visualizer video for Instagram Reels and YouTube Shorts?',
-                  a: 'Choose the 9:16 aspect ratio in the toolbar, click Upload Audio to select your MP3 or WAV, click Upload Photo for your cover artwork, pick a visualizer preset like Circular Harmonic Spectrum, and click Export Video. Your vertical Full HD video will be ready in seconds.',
+                  q: 'How does real audio reactivity work in this tool?',
+                  a: 'The engine uses the Web Audio API with a 2048-point Fast Fourier Transform (FFT) and an asymmetric envelope follower. It calculates real energy across sub-bass (20-60 Hz), bass (60-250 Hz), midrange, and treble, driving concert stage lights, volumetric smoke, shockwave rings, and spectrum bars directly from your music.',
+                },
+                {
+                  q: 'Why does animation stop triggering when audio is paused?',
+                  a: 'Unlike decorative simulators that run constant timers or random number generators, our engine only generates visual reactions when audio data is flowing through the AnalyserNode. When paused, beat triggers and transient shockwaves halt immediately.',
+                },
+                {
+                  q: 'What are the 12 One-Click Effect Combinations?',
+                  a: 'Combinations like Neon Smoke Storm, Cosmic Bass Drop, Purple Smoke Galaxy, and Dark Club Blackout orchestrate visualizers, coloured smoke plumes, concert light sweepers, and particle shockwaves into a single cohesive concert aesthetic in one click.',
+                },
+                {
+                  q: 'Can I reduce flashing lights for accessibility?',
+                  a: 'Yes! The Beat Light Show tab and DSP Reactivity panel feature a "Reduce Flashing" toggle that automatically smooths out harsh transient strobes while maintaining fluid music synchronization.',
                 },
                 {
                   q: 'Why does IndiaTools support Indic fonts without broken letters?',
@@ -2145,20 +2679,8 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                   a: 'You can upload MP3, WAV, AAC, M4A, OGG, and FLAC files. In addition, you can synthesize instant sample demo tracks directly in your browser with zero file uploads using our built-in Web Audio synthesizers.',
                 },
                 {
-                  q: 'Can I export in 1080p Full HD at 60 FPS?',
-                  a: 'Yes. The canvas locks to exact high-definition dimensions (1080×1920 for 9:16, 1080×1080 for 1:1, and 1920×1080 for 16:9). When you select 60 FPS in the toolbar, the video recording stream operates at a fluid 60 frames per second.',
-                },
-                {
-                  q: 'How do the 20 visualizer engines differ from each other?',
-                  a: 'Each visualizer runs an independent mathematical algorithm: from radial Bezier harmonic arcs and counter-rotating rings to 3D perspective topographic terrain, matrix dot arrays, and telemetry HUD reticles. They respond dynamically to sub-bass, mid, and treble frequencies.',
-                },
-                {
                   q: 'Does IndiaTools upload my audio or photos to any cloud server?',
                   a: 'Never. Everything runs 100% locally on your machine via Web Audio API, HTML5 Canvas, and MediaRecorder. Your intellectual property and private audio tracks stay completely private on your device.',
-                },
-                {
-                  q: 'What should I do if my browser cannot play or export MP4 videos?',
-                  a: 'IndiaTools automatically detects your browser’s supported codecs. Modern Chromium and Safari browsers export native MP4 (H.264/AAC), while Firefox defaults to high-quality WebM (VP9/VP8/Opus), which is fully supported across all major social networks.',
                 },
               ].map((faq, idx) => (
                 <div key={idx} className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
@@ -2172,7 +2694,6 @@ export const AudioSpectrumVideoTool: React.FC = () => {
             </div>
           </div>
 
-          {/* JSON-LD Structured Data Schema for SEO */}
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
@@ -2192,8 +2713,11 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                 },
                 featureList: [
                   '20 Distinct Visualizer Engines',
-                  '20 One-Click Studio Presets',
-                  'Indic Typography for Malayalam, Telugu, Kannada, Tamil, and English',
+                  '12 Curated Audio-Reactive Effect Combos',
+                  'Beat-Reactive Concert Light Show',
+                  'Volumetric Audio Smoke & Mist',
+                  '12 Particle Universe Systems & Bass Shockwaves',
+                  'Live DSP Frequency Diagnostic VU Meters',
                   'Full HD 1080p 60FPS Video Export',
                   '100% Client-Side Private Processing',
                   'Zero Forced Watermark',

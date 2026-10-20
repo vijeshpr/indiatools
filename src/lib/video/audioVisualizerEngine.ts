@@ -34,6 +34,10 @@ import {
   drawFuturisticHudTelemetry,
 } from './visualizerEngines.ts'
 import { drawTypographyLayer } from './typographyEngine.ts'
+import { CinematicLightingEngine } from './cinematicLightingEngine.ts'
+import { AudioReactiveSmokeEngine } from './audioReactiveSmokeEngine.ts'
+import { ParticleUniverseEngine } from './particleUniverseEngine.ts'
+import { ShockwaveEngine } from './shockwaveEngine.ts'
 
 // Re-export core DSP & effects for backward compatibility and test suites
 export {
@@ -42,8 +46,18 @@ export {
   VisualizerParticleSystem,
   AtmosphericParticleManager,
   AudioDspAnalyzer,
+  CinematicLightingEngine,
+  AudioReactiveSmokeEngine,
+  ParticleUniverseEngine,
+  ShockwaveEngine,
 }
 export type { VisualizerParticle }
+
+// Shared singletons for audio-reactive cinematic effects
+export const studioLightingEngine = new CinematicLightingEngine()
+export const studioSmokeEngine = new AudioReactiveSmokeEngine()
+export const studioUniverseEngine = new ParticleUniverseEngine()
+export const studioShockwaveEngine = new ShockwaveEngine()
 
 // Backward-compatible individual preset drawer aliases
 export const drawCircularPulse = (ctx: CanvasRenderingContext2D, width: number, height: number, freqData: Uint8Array, config: VisualizerConfig, palette: ThemeColors, bands: any, time: number, albumImage: HTMLImageElement | null) => {
@@ -124,20 +138,27 @@ export function renderStudioComposition(
   ctx.save()
   applyCameraMotion(ctx, width, height, currentTime, bands, state.fx)
 
-  // 3. Render Background Layer
-  drawBackgroundLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
-
-  // 4. Render Photo Composition Layer
-  drawPhotoCompositionLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
-
-  // 5. Render Atmospheric Particle Layer
-  particleManager.updateAndDraw(ctx, width, height, bands, palette)
-
-  // 6. Render One of the 20 Visualizer Engines
   const centerX = width / 2
   const centerY = state.aspectRatio === '9:16' ? height * 0.45 : height / 2
   const primaryRadius = Math.min(width, height) * (state.aspectRatio === '9:16' ? 0.22 : 0.26)
 
+  // 3. Layer 1: Render Background Layer
+  drawBackgroundLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+
+  // 4. Layer 2: Audio-Reactive Volumetric Smoke & Mist (Behind photo)
+  if (state.smoke && state.smoke.enabled) {
+    studioSmokeEngine.updateAndDraw(ctx, width, height, bands, currentTime, state.smoke)
+  }
+
+  // 5. Layer 3: Render Photo / Album Artwork Composition Layer
+  drawPhotoCompositionLayer(ctx, state, photoImages, width, height, palette, bands, currentTime)
+
+  // 6. Layer 4: Concert Stage Lights & Beat Light Show
+  if (state.lighting && state.lighting.enabled) {
+    studioLightingEngine.updateAndDraw(ctx, width, height, bands, palette, currentTime, state.lighting, centerX, centerY)
+  }
+
+  // 7. Layer 5: Render One of the 20 Visualizer Engines
   renderVisualizerEngine(state.activePreset, {
     ctx,
     width,
@@ -158,6 +179,39 @@ export function renderStudioComposition(
     primaryRadius,
     enableVinylRotation: state.enableVinylRotation,
   })
+
+  // 8. Layer 6: Bass Shockwaves & Concentric Energy Rings
+  if (state.shockwaves && state.shockwaves.enabled) {
+    studioShockwaveEngine.updateAndDraw(
+      ctx,
+      width,
+      height,
+      bands,
+      palette,
+      currentTime,
+      state.shockwaves,
+      centerX,
+      centerY,
+      primaryRadius
+    )
+  }
+
+  // 9. Layer 7: Particle Universe / Atmospheric Foreground Particles
+  if (state.particleUniverse && state.particleUniverse.enabled) {
+    studioUniverseEngine.updateAndDraw(
+      ctx,
+      width,
+      height,
+      bands,
+      palette,
+      currentTime,
+      state.particleUniverse,
+      centerX,
+      centerY
+    )
+  } else {
+    particleManager.updateAndDraw(ctx, width, height, bands, palette)
+  }
 
   // Restore Camera Motion transform before rendering static UI overlays
   ctx.restore()

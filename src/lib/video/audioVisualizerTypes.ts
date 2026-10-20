@@ -403,6 +403,84 @@ export interface PhotoAsset {
   }
 }
 
+export type LightShowMode =
+  | 'concert-stage'
+  | 'neon-club'
+  | 'cinematic-spotlight'
+  | 'dark-bass-drop'
+  | 'rainbow-pulse'
+  | 'minimal-light-bars'
+  | 'none'
+
+export interface LightShowConfig {
+  enabled: boolean
+  mode: LightShowMode
+  intensity: number
+  beamCount: number
+  reduceFlashing: boolean
+  blackoutOnDrop: boolean
+  ambientGlow: number
+}
+
+export type SmokePalette =
+  | 'purple'
+  | 'cyan'
+  | 'magenta'
+  | 'electric-blue'
+  | 'orange'
+  | 'red'
+  | 'rainbow'
+
+export type SmokePosition =
+  | 'bottom-rise'
+  | 'side-flow'
+  | 'center-burst'
+  | 'background-ambient'
+
+export interface SmokeConfig {
+  enabled: boolean
+  palette: SmokePalette
+  position: SmokePosition
+  density: number
+  speed: number
+  opacity: number
+  turbulence: number
+}
+
+export type ParticleUniverseMode =
+  | 'galaxy'
+  | 'starfield'
+  | 'neon-dust'
+  | 'fireflies'
+  | 'energy-sparks'
+  | 'particle-explosion'
+  | 'orbiting-particles'
+  | 'rainbow-confetti'
+  | 'cosmic-nebula'
+  | 'bass-shockwave'
+  | 'light-trails'
+  | 'flow-field'
+  | 'none'
+
+export interface ParticleUniverseConfig {
+  enabled: boolean
+  mode: ParticleUniverseMode
+  count: number
+  size: number
+  speed: number
+  glow: number
+  burstIntensity: number
+}
+
+export interface ShockwaveConfig {
+  enabled: boolean
+  ringCount: number
+  thickness: number
+  glow: number
+  expansionSpeed: number
+  color: string
+}
+
 export interface CompositionState {
   version: 2
   aspectRatio: AspectRatio
@@ -441,6 +519,12 @@ export interface CompositionState {
   // Particles & Effects
   particlePreset: ParticlePresetType
   fx: CinematicFxConfig
+
+  // Advanced Visual FX (Lights, Smoke, Particle Universe, Shockwaves)
+  lighting?: LightShowConfig
+  smoke?: SmokeConfig
+  particleUniverse?: ParticleUniverseConfig
+  shockwaves?: ShockwaveConfig
 
   // Typography Layers
   textLayers: TypographyLayer[]

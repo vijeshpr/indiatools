@@ -198,4 +198,39 @@ describe('Audio Spectrum & Waveform Video Generator Suite', () => {
     assert.strictEqual(words[1], 'സംഗീത')
     assert.strictEqual(words[2], 'സാഗരം')
   })
+
+  it('should register exactly 12 curated audio-reactive effect combinations', async () => {
+    const { EFFECT_COMBOS } = await import('../src/lib/video/effectCombos.ts')
+    assert.strictEqual(EFFECT_COMBOS.length, 12)
+    const expectedIds = [
+      'neon-smoke-storm',
+      'cosmic-bass-drop',
+      'purple-smoke-galaxy',
+      'rainbow-particle-pulse',
+      'dark-club-blackout',
+      'cinematic-light-beams',
+      'electric-blue-energy',
+      'magenta-nebula',
+      'gold-luxury-pulse',
+      'fire-and-sparks',
+      'monsoon-dream',
+      'spectrum-explosion',
+    ]
+    for (const id of expectedIds) {
+      assert.ok(EFFECT_COMBOS.some((c) => c.id === id), `Missing combo: ${id}`)
+    }
+  })
+
+  it('should support audio analysis reset and idle silence handling', () => {
+    const analyzer = new AudioDspAnalyzer()
+    const silence = new Uint8Array(1024)
+    const silentBands = analyzer.analyze(silence, 0)
+    assert.strictEqual(silentBands.subBass, 0)
+    assert.strictEqual(silentBands.isBeatHit, false)
+
+    analyzer.reset()
+    const postReset = analyzer.analyze(silence, 0)
+    assert.strictEqual(postReset.bass, 0)
+    assert.strictEqual(postReset.isBeatHit, false)
+  })
 })
