@@ -90,7 +90,12 @@ import {
 } from '../lib/video/audioVisualizerEngine'
 import {
   VideoRecorderSession,
+  ExportState,
+  ExportProgressInfo,
+  ExportResultInfo,
   downloadBlob,
+  formatBytes,
+  formatDurationDisplay,
   formatTimeDisplay,
   formatTimecode,
   getSupportedVideoMimeType,
@@ -398,17 +403,37 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   const [showSafeZones, setShowSafeZones] = useState<boolean>(false)
 
   // -------------------------------------------------------------
-  // VIDEO EXPORT MODAL STATE
+  // VIDEO EXPORT MODAL STATE (Triple-Guard Telemetry & Result Store)
   // -------------------------------------------------------------
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false)
   const [isRecording, setIsRecording] = useState<boolean>(false)
+  const [exportState, setExportState] = useState<ExportState>('idle')
   const [targetExportLength, setTargetExportLength] = useState<'15s' | '30s' | '60s' | 'full'>('15s')
   const [exportFps, setExportFps] = useState<30 | 60>(60)
-  const [exportProgress, setExportProgress] = useState<{
-    percent: number
-    elapsedSec: number
-    remainingSec: number
-  }>({ percent: 0, elapsedSec: 0, remainingSec: 0 })
+  const [exportTelemetry, setExportTelemetry] = useState<ExportProgressInfo>({
+    state: 'idle',
+    percent: 0,
+    elapsedSec: 0,
+    remainingSec: 15,
+    currentFrame: 0,
+    totalFrames: 900,
+    fps: 60,
+    phaseText: 'Ready',
+    audioCurrentTime: 0,
+    duration: 15,
+  })
+  const [exportResult, setExportResult] = useState<{
+    blob: Blob
+    blobUrl: string
+    fileName: string
+    fileExtension: string
+    mimeType: string
+    fileSizeBytes: number
+    formattedSize: string
+    durationSec: number
+    fps: number
+  } | null>(null)
+  const [exportErrorMessage, setExportErrorMessage] = useState<string | null>(null)
 
   // -------------------------------------------------------------
   // AUDIO & CANVAS ENGINE REFS
@@ -515,6 +540,10 @@ export const AudioSpectrumVideoTool: React.FC = () => {
           setCurrentTime(0)
           playbackStartOffsetRef.current = 0
           dspAnalyzerRef.current.reset()
+        }
+        // GUARD A: Complete export if video recording session is active
+        if (recorderSessionRef.current && recorderSessionRef.current.isRecording()) {
+          recorderSessionRef.current.finishExport('audio-source-ended')
         }
       }
 
@@ -873,6 +902,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
   // -------------------------------------------------------------
   // MASTER CANVAS RENDER LOOP (Deterministic, strictly audio-reactive)
+  // Background tab resilient with timer-driven rendering fallback
   // -------------------------------------------------------------
   useEffect(() => {
     const canvas = canvasRef.current
@@ -887,9 +917,35 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     }
 
     let isRunning = true
+    let fallbackInterval: any = null
+    let isRenderingFrame = false
     const freqData = new Uint8Array(state.fftSize / 2)
     const timeData = new Uint8Array(state.fftSize / 2)
     let frameCount = 0
+
+    const scheduleNextTick = () => {
+      if (!isRunning) return
+      if (typeof document !== 'undefined' && document.hidden) {
+        // Tab is hidden in background: RAF is paused or throttled to 1 FPS by browser
+        if (!fallbackInterval) {
+          const fpsInterval = Math.max(16, Math.floor(1000 / (exportFps || 60)))
+          fallbackInterval = setInterval(() => {
+            if (!isRenderingFrame) {
+              isRenderingFrame = true
+              render()
+              isRenderingFrame = false
+            }
+          }, fpsInterval)
+        }
+      } else {
+        // Tab is visible: use hardware-accelerated RAF
+        if (fallbackInterval) {
+          clearInterval(fallbackInterval)
+          fallbackInterval = null
+        }
+        animationFrameRef.current = requestAnimationFrame(render)
+      }
+    }
 
     const render = () => {
       if (!isRunning) return
@@ -963,22 +1019,60 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         height
       )
 
-      if (showSafeZones && state.aspectRatio === '9:16') {
+      // Only show editor safe zone overlay during live preview, never in exported video
+      if (showSafeZones && state.aspectRatio === '9:16' && !isRecording) {
         drawReelsSafeZoneOverlay(ctx, width, height)
       }
 
-      animationFrameRef.current = requestAnimationFrame(render)
+      // Notify recorder session of actual render tick and audio timestamp
+      if (recorderSessionRef.current && recorderSessionRef.current.isRecording()) {
+        recorderSessionRef.current.notifyFrameRendered()
+        recorderSessionRef.current.updateAudioPosition(renderTime)
+      }
+
+      scheduleNextTick()
+    }
+
+    const handleVisibilityChange = () => {
+      if (!isRunning) return
+      if (!document.hidden) {
+        if (fallbackInterval) {
+          clearInterval(fallbackInterval)
+          fallbackInterval = null
+        }
+        if (!animationFrameRef.current) {
+          animationFrameRef.current = requestAnimationFrame(render)
+        }
+      } else {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current)
+          animationFrameRef.current = null
+        }
+        scheduleNextTick()
+      }
+    }
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange)
     }
 
     render()
 
     return () => {
       isRunning = false
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+      }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
+      }
+      if (fallbackInterval) {
+        clearInterval(fallbackInterval)
+        fallbackInterval = null
       }
     }
-  }, [state, isPlaying, duration, photoImages, showSafeZones, audioDspTuning])
+  }, [state, isPlaying, duration, photoImages, showSafeZones, audioDspTuning, isRecording, exportFps])
 
   const drawReelsSafeZoneOverlay = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.save()
@@ -1007,7 +1101,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
   }
 
   // -------------------------------------------------------------
-  // VIDEO EXPORT EXECUTION
+  // VIDEO EXPORT EXECUTION (Triple-Guard Finalization & Telemetry)
   // -------------------------------------------------------------
   const handleStartExport = useCallback(async () => {
     const canvas = canvasRef.current
@@ -1033,8 +1127,32 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     else if (targetExportLength === '30s') targetSeconds = Math.min(30, audioBuffer.duration)
     else if (targetExportLength === '60s') targetSeconds = Math.min(60, audioBuffer.duration)
 
+    if (exportResult?.blobUrl) {
+      try {
+        URL.revokeObjectURL(exportResult.blobUrl)
+      } catch {
+        // ignore
+      }
+      setExportResult(null)
+    }
+
+    setExportErrorMessage(null)
+    setExportState('recording')
     setIsRecording(true)
-    setExportProgress({ percent: 0, elapsedSec: 0, remainingSec: targetSeconds })
+
+    const initialTelemetry: ExportProgressInfo = {
+      state: 'recording',
+      percent: 0,
+      elapsedSec: 0,
+      remainingSec: targetSeconds,
+      currentFrame: 0,
+      totalFrames: Math.max(1, Math.round(targetSeconds * exportFps)),
+      fps: exportFps,
+      phaseText: `Recording Audio & Video (00:00 / ${formatDurationDisplay(targetSeconds)})`,
+      audioCurrentTime: 0,
+      duration: targetSeconds,
+    }
+    setExportTelemetry(initialTelemetry)
 
     const session = new VideoRecorderSession({
       canvas,
@@ -1042,31 +1160,56 @@ export const AudioSpectrumVideoTool: React.FC = () => {
       fps: exportFps,
       bitrate: 7_000_000,
       duration: targetSeconds,
+      trimStart: 0,
+      trimEnd: targetSeconds,
       onStart: () => {
         showToast('Exporting high-definition video with A/V sync...', 'info')
       },
       onProgress: (info) => {
-        setExportProgress({
-          percent: info.percent,
-          elapsedSec: info.elapsedSec,
-          remainingSec: info.remainingSec,
-        })
+        setExportTelemetry(info)
+        if (info.state === 'finalizing') {
+          setExportState('finalizing')
+        }
       },
-      onComplete: (blob, ext) => {
+      onComplete: (result) => {
         setIsRecording(false)
         stopAllAudio()
+        setExportState('completed')
 
         const cleanTitle = (audioFileName || 'music_video').replace(/[^a-zA-Z0-9_-]/g, '_')
-        const filename = `IndiaTools_${cleanTitle}_${state.activePreset}_${state.aspectRatio.replace(':', 'x')}.${ext}`
-        downloadBlob(blob, filename)
+        const filename = `IndiaTools_${cleanTitle}_${state.activePreset}_${state.aspectRatio.replace(':', 'x')}.${result.fileExtension}`
 
-        const mb = (blob.size / (1024 * 1024)).toFixed(2)
-        showToast(`Video exported successfully! (${mb} MB .${ext})`, 'success')
-        setIsExportModalOpen(false)
+        let blobUrl = ''
+        try {
+          blobUrl = URL.createObjectURL(result.blob)
+        } catch {
+          // ignore
+        }
+
+        setExportResult({
+          blob: result.blob,
+          blobUrl,
+          fileName: filename,
+          fileExtension: result.fileExtension,
+          mimeType: result.mimeType,
+          fileSizeBytes: result.fileSizeBytes,
+          formattedSize: result.formattedSize,
+          durationSec: result.durationSec,
+          fps: result.fps,
+        })
+
+        const downloadSuccess = downloadBlob(result.blob, filename)
+        if (downloadSuccess) {
+          showToast(`Video exported successfully! (${result.formattedSize})`, 'success')
+        } else {
+          showToast(`Video ready! (${result.formattedSize}) Click download button to save.`, 'info')
+        }
       },
       onError: (err) => {
         setIsRecording(false)
         stopAllAudio()
+        setExportState('error')
+        setExportErrorMessage(err.message || 'Export failed.')
         showToast(`Export failed: ${err.message}`, 'error')
       },
     })
@@ -1074,16 +1217,59 @@ export const AudioSpectrumVideoTool: React.FC = () => {
     recorderSessionRef.current = session
     await playFromOffset(0)
     session.start()
-  }, [audioBuffer, targetExportLength, exportFps, audioFileName, state.activePreset, state.aspectRatio, getAudioContext, playFromOffset, stopAllAudio, showToast])
+  }, [
+    audioBuffer,
+    targetExportLength,
+    exportFps,
+    audioFileName,
+    state.activePreset,
+    state.aspectRatio,
+    exportResult,
+    getAudioContext,
+    playFromOffset,
+    stopAllAudio,
+    showToast,
+  ])
 
   const handleCancelExport = useCallback(() => {
     if (recorderSessionRef.current) {
       recorderSessionRef.current.cancel()
+      recorderSessionRef.current = null
     }
     stopAllAudio()
     setIsRecording(false)
+    setExportState('idle')
+    setExportErrorMessage(null)
     showToast('Export cancelled.', 'info')
   }, [stopAllAudio, showToast])
+
+  const handleCloseExportModal = useCallback(() => {
+    if (isRecording || exportState === 'recording' || exportState === 'finalizing') {
+      handleCancelExport()
+    }
+    if (exportResult?.blobUrl) {
+      try {
+        URL.revokeObjectURL(exportResult.blobUrl)
+      } catch {
+        // ignore
+      }
+      setExportResult(null)
+    }
+    setExportState('idle')
+    setExportErrorMessage(null)
+    setIsExportModalOpen(false)
+  }, [isRecording, exportState, handleCancelExport, exportResult])
+
+  const handleDownloadAgain = useCallback(() => {
+    if (!exportResult) return
+    const a = document.createElement('a')
+    a.href = exportResult.blobUrl
+    a.download = exportResult.fileName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    showToast('Download started!', 'success')
+  }, [exportResult, showToast])
 
   const selectedLayer = useMemo(() => {
     return state.textLayers.find((l) => l.id === state.selectedLayerId) || state.textLayers[0]
@@ -2498,7 +2684,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
         </div>
 
         {/* ========================================================= */}
-        {/* 5. VIDEO EXPORT MODAL                                     */}
+        {/* 5. VIDEO EXPORT MODAL (Triple-Guard Telemetry & Guaranteed Download) */}
         {/* ========================================================= */}
         {isExportModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -2509,23 +2695,34 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     <Film className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">Export Video</h3>
+                    <h3 className="text-base font-bold text-white">
+                      {exportState === 'completed'
+                        ? 'Export Complete!'
+                        : exportState === 'recording' || exportState === 'finalizing'
+                        ? 'Rendering Video...'
+                        : exportState === 'error'
+                        ? 'Export Failed'
+                        : 'Export Video Studio'}
+                    </h3>
                     <p className="text-xs text-slate-400">
-                      Browser-native MediaRecorder rendering at Full HD
+                      {exportState === 'completed'
+                        ? 'Your video is ready for download'
+                        : 'Browser-native MediaRecorder rendering at Full HD'}
                     </p>
                   </div>
                 </div>
-                {!isRecording && (
+                {exportState !== 'recording' && exportState !== 'finalizing' && (
                   <button
-                    onClick={() => setIsExportModalOpen(false)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                    onClick={handleCloseExportModal}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 )}
               </div>
 
-              {!isRecording ? (
+              {/* STATE 1: IDLE CONFIGURATION */}
+              {exportState === 'idle' && (
                 <div className="space-y-4">
                   <div>
                     <label className="text-xs font-semibold text-slate-300 block mb-1.5">
@@ -2553,6 +2750,36 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                      Frame Rate:
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setExportFps(60)}
+                        className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all text-left flex items-center justify-between ${
+                          exportFps === 60
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <span>60 FPS (Ultra Smooth)</span>
+                        {exportFps === 60 && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </button>
+                      <button
+                        onClick={() => setExportFps(30)}
+                        className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all text-left flex items-center justify-between ${
+                          exportFps === 30
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <span>30 FPS (Standard)</span>
+                        {exportFps === 30 && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-3 text-xs bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
                     <div>
                       <span className="text-slate-400 block mb-0.5">Resolution:</span>
@@ -2567,7 +2794,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     <div>
                       <span className="text-slate-400 block mb-0.5">Format:</span>
                       <span className="font-bold text-white uppercase">
-                        .{getSupportedVideoMimeType().extension}
+                        .{getSupportedVideoMimeType().extension} ({getSupportedVideoMimeType().label})
                       </span>
                     </div>
                     <div>
@@ -2578,7 +2805,7 @@ export const AudioSpectrumVideoTool: React.FC = () => {
 
                   <div className="flex items-center gap-3 pt-2">
                     <button
-                      onClick={() => setIsExportModalOpen(false)}
+                      onClick={handleCloseExportModal}
                       className="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
                     >
                       Back to Editor
@@ -2592,31 +2819,195 @@ export const AudioSpectrumVideoTool: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-4 py-2">
-                  <div className="flex items-center justify-between text-xs text-slate-300">
-                    <span>Rendering Frame by Frame in Real-Time...</span>
-                    <span className="font-mono text-emerald-400 font-bold">{exportProgress.percent}%</span>
+              )}
+
+              {/* STATE 2: RECORDING & FINALIZING */}
+              {(exportState === 'recording' || exportState === 'finalizing') && (
+                <div className="space-y-4 py-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                      <span className="font-semibold text-white">
+                        {exportTelemetry.phaseText}
+                      </span>
+                    </div>
+                    <span className="font-mono text-emerald-400 font-bold text-sm">
+                      {exportTelemetry.percent}%
+                    </span>
                   </div>
 
                   <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
                     <div
-                      className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full rounded-full transition-all duration-300"
-                      style={{ width: `${exportProgress.percent}%` }}
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        exportState === 'finalizing'
+                          ? 'bg-gradient-to-r from-amber-500 to-yellow-400 animate-pulse'
+                          : 'bg-gradient-to-r from-emerald-500 to-cyan-500'
+                      }`}
+                      style={{ width: `${exportTelemetry.percent}%` }}
                     />
                   </div>
 
-                  <div className="flex justify-between text-xs font-mono text-slate-400">
-                    <span>Elapsed: {exportProgress.elapsedSec}s</span>
-                    <span>Remaining: ~{exportProgress.remainingSec}s</span>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-2.5">
+                      <span className="text-[11px] text-slate-400 block mb-0.5">Frame Counter:</span>
+                      <span className="font-mono font-bold text-white">
+                        Frame {exportTelemetry.currentFrame} / {exportTelemetry.totalFrames}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">
+                        ({exportTelemetry.fps} FPS · Render-tick estimate)
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-2.5">
+                      <span className="text-[11px] text-slate-400 block mb-0.5">Timeline Position:</span>
+                      <span className="font-mono font-bold text-white">
+                        {formatDurationDisplay(exportTelemetry.audioCurrentTime)} / {formatDurationDisplay(exportTelemetry.duration)}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">
+                        Audio track position
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-2.5">
+                      <span className="text-[11px] text-slate-400 block mb-0.5">Elapsed Time:</span>
+                      <span className="font-mono font-bold text-white">
+                        {formatDurationDisplay(exportTelemetry.elapsedSec)}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">
+                        Real-time recording
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-2.5">
+                      <span className="text-[11px] text-slate-400 block mb-0.5">Estimated Remaining:</span>
+                      <span className="font-mono font-bold text-emerald-400">
+                        ~{formatDurationDisplay(exportTelemetry.remainingSec)}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">
+                        To packaging finish
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-950/30 border border-amber-500/30 rounded-xl p-3 flex items-start gap-2.5 text-xs text-amber-200">
+                    <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-semibold block">Keep this tab active for smoothest 60 FPS hardware rendering.</span>
+                      <span className="text-[11px] text-amber-300/80 leading-relaxed block mt-0.5">
+                        Browsers throttle background tabs to save battery. Keeping this window in focus gives the best audio/video sync.
+                      </span>
+                    </div>
                   </div>
 
                   <button
                     onClick={handleCancelExport}
-                    className="w-full py-2.5 rounded-xl text-xs font-semibold bg-rose-950/40 text-rose-300 border border-rose-500/30 hover:bg-rose-900/40 transition-all"
+                    className="w-full py-2.5 rounded-xl text-xs font-semibold bg-rose-950/40 text-rose-300 border border-rose-500/30 hover:bg-rose-900/40 transition-all flex items-center justify-center gap-1.5"
                   >
+                    <X className="w-3.5 h-3.5" />
                     Cancel Export
                   </button>
+                </div>
+              )}
+
+              {/* STATE 3: COMPLETED */}
+              {exportState === 'completed' && exportResult && (
+                <div className="space-y-4 py-1">
+                  <div className="bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0">
+                      <CheckCircle2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Video Successfully Generated!</h4>
+                      <p className="text-xs text-emerald-300/80">
+                        1080p high-definition visualizer packaged with 100% A/V sync.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                    <div className="col-span-2">
+                      <span className="text-slate-400 block mb-0.5">File Name:</span>
+                      <span className="font-mono text-white font-semibold text-[11px] break-all">
+                        {exportResult.fileName}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5">File Format:</span>
+                      <span className="font-bold text-white uppercase">
+                        .{exportResult.fileExtension} ({exportResult.mimeType.split(';')[0]})
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5">File Size:</span>
+                      <span className="font-bold text-emerald-400 font-mono">
+                        {exportResult.formattedSize}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5">Duration:</span>
+                      <span className="font-bold text-white font-mono">
+                        {formatDurationDisplay(exportResult.durationSec)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block mb-0.5">Frame Rate:</span>
+                      <span className="font-bold text-white font-mono">
+                        {exportResult.fps} FPS
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-1">
+                    <button
+                      onClick={handleDownloadAgain}
+                      className="w-full py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 shadow-lg shadow-teal-500/25 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download Video Again (.{exportResult.fileExtension})
+                    </button>
+                    <p className="text-[11px] text-slate-400 text-center">
+                      Your download was triggered automatically. If your browser blocked pop-up downloads, click the button above.
+                    </p>
+                    <button
+                      onClick={handleCloseExportModal}
+                      className="w-full py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
+                    >
+                      Back to Editor
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STATE 4: ERROR & RECOVERY */}
+              {exportState === 'error' && (
+                <div className="space-y-4 py-1">
+                  <div className="bg-rose-950/40 border border-rose-500/40 rounded-xl p-4 flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 shrink-0">
+                      <AlertCircle className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Export Failed</h4>
+                      <p className="text-xs text-rose-300/80 leading-relaxed">
+                        {exportErrorMessage || 'Video encoding pipeline failed. Please retry.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      onClick={handleCloseExportModal}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={handleStartExport}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 shadow-lg shadow-teal-500/25 transition-all flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Retry Export
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
