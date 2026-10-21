@@ -90,6 +90,18 @@ import {
   GardenSceneId,
   MusicGrownGardenConfig,
 } from '../lib/garden/gardenTypes'
+import {
+  SonicCamStudioConfig,
+  DEFAULT_SONIC_CAM_CONFIG,
+  CameraKeyframe,
+  SonicCamPresetMetadata,
+} from '../lib/sonicCam/sonicCamTypes'
+import {
+  SONIC_CAM_PRESETS,
+  getSonicCamPreset,
+} from '../lib/sonicCam/sonicCamPresets'
+import { sonicCamEngine } from '../lib/sonicCam/sonicCamEngine'
+import { SonicCamStudioPanel } from './audioToVideo/SonicCamStudioPanel'
 import { BACKGROUND_PRESETS } from '../lib/audioToVideo/backgroundPresets'
 import { AudioToVideoAudioEngine } from '../lib/audioToVideo/audioToVideoAudioEngine'
 import { AudioToVideoRenderEngine } from '../lib/audioToVideo/audioToVideoRenderEngine'
@@ -99,6 +111,7 @@ import {
 } from '../lib/audioToVideo/audioToVideoExportEngine'
 
 type StudioTab =
+  | 'soniccam'
   | 'portal'
   | 'photomotion'
   | 'garden'
@@ -143,6 +156,15 @@ export const AudioToVideoStudioTool: React.FC = () => {
     overall: 0,
     isBeatHit: false,
   })
+
+  // SonicCam 3D Studio State & Refs
+  const sonicCamPhotoInputRef = useRef<HTMLInputElement | null>(null)
+  const sonicCamBgInputRef = useRef<HTMLInputElement | null>(null)
+  const sonicCamJsonInputRef = useRef<HTMLInputElement | null>(null)
+  const [selectedSonicPresetModal, setSelectedSonicPresetModal] = useState<SonicCamPresetMetadata | null>(null)
+  const [newKeyframeZoom, setNewKeyframeZoom] = useState<number>(1.2)
+  const [newKeyframeTilt, setNewKeyframeTilt] = useState<number>(0)
+  const [newKeyframeOrbit, setNewKeyframeOrbit] = useState<number>(0)
 
   // Audio Playback & Track State (Default: High-Energy Studio Anthem 02:51)
   const [audioTrack, setAudioTrack] = useState<AudioTrackMetadata>({
@@ -1050,6 +1072,196 @@ export const AudioToVideoStudioTool: React.FC = () => {
     showToast('Reset all garden effects to neutral', 'info')
   }
 
+  // =========================================================
+  // SONICCAM 3D — HANDLERS & STATE ACTIONS
+  // =========================================================
+  const handleSonicCamPhotoUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file (PNG, JPG, WebP)', 'error')
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setComposition((prev) => ({
+      ...prev,
+      sonicCam3d: {
+        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+        sourceImageUrl: url,
+      },
+      background: {
+        ...prev.background,
+        singleImageUrl: url,
+      },
+    }))
+    showToast('Loaded photograph into SonicCam 3D', 'success')
+  }
+
+  const handleSonicCamBgUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file', 'error')
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setComposition((prev) => ({
+      ...prev,
+      sonicCam3d: {
+        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+        depth: {
+          ...(prev.sonicCam3d?.depth || DEFAULT_SONIC_CAM_CONFIG.depth),
+          enabled: true,
+          customBackgroundUrl: url,
+        },
+      },
+    }))
+    showToast('Loaded custom background depth layer for 3D parallax', 'success')
+  }
+
+  const handleRemoveSonicCamPhoto = () => {
+    setComposition((prev) => ({
+      ...prev,
+      sonicCam3d: {
+        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+        sourceImageUrl: null,
+      },
+    }))
+    showToast('Removed photograph from SonicCam 3D', 'info')
+  }
+
+  const handleResetSonicCam = () => {
+    setComposition((prev) => ({
+      ...prev,
+      sonicCam3d: {
+        ...DEFAULT_SONIC_CAM_CONFIG,
+        sourceImageUrl: prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null,
+      },
+    }))
+    sonicCamEngine.resetSmoothing()
+    showToast('Reset all SonicCam 3D effects to clean neutral', 'info')
+  }
+
+  const handleApplySonicCamPreset = (preset: SonicCamPresetMetadata) => {
+    setComposition((prev) => {
+      const currentPhoto = prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null
+      return {
+        ...prev,
+        sonicCam3d: {
+          ...DEFAULT_SONIC_CAM_CONFIG,
+          ...preset.config,
+          enabled: true,
+          sourceImageUrl: currentPhoto,
+          isBeforeActive: false,
+        },
+        gardenStudio: {
+          ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+          enabled: false,
+        },
+      }
+    })
+    setSelectedSonicPresetModal(null)
+    showToast(`Activated ${preset.name} camera preset`, 'success')
+  }
+
+  const handleToggleSonicCamMaster = () => {
+    setComposition((prev) => ({
+      ...prev,
+      sonicCam3d: {
+        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+        enabled: !(prev.sonicCam3d?.enabled ?? false),
+      },
+    }))
+  }
+
+  const handleToggleSonicCamBeforeAfter = () => {
+    setComposition((prev) => ({
+      ...prev,
+      sonicCam3d: {
+        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+        isBeforeActive: !(prev.sonicCam3d?.isBeforeActive ?? false),
+      },
+    }))
+  }
+
+  const handleAddSonicCamKeyframe = () => {
+    const newKf: CameraKeyframe = {
+      id: `kf-${Date.now()}`,
+      timeSec: Math.round(currentTime * 10) / 10,
+      xOffset: 0,
+      yOffset: 0,
+      zoom: newKeyframeZoom,
+      tiltDeg: newKeyframeTilt,
+      orbitDeg: newKeyframeOrbit,
+      intensity: 60,
+      easing: 'ease-in-out',
+    }
+    setComposition((prev) => {
+      const existing = prev.sonicCam3d?.cameraPath?.keyframes || []
+      const updated = [...existing, newKf].sort((a, b) => a.timeSec - b.timeSec)
+      return {
+        ...prev,
+        sonicCam3d: {
+          ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+          cameraPath: {
+            ...(prev.sonicCam3d?.cameraPath || DEFAULT_SONIC_CAM_CONFIG.cameraPath),
+            enabled: true,
+            keyframes: updated,
+          },
+        },
+      }
+    })
+    showToast(`Added camera keyframe at ${formatSec(currentTime)}`, 'success')
+  }
+
+  const handleDeleteSonicCamKeyframe = (id: string) => {
+    setComposition((prev) => {
+      const existing = prev.sonicCam3d?.cameraPath?.keyframes || []
+      return {
+        ...prev,
+        sonicCam3d: {
+          ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+          cameraPath: {
+            ...(prev.sonicCam3d?.cameraPath || DEFAULT_SONIC_CAM_CONFIG.cameraPath),
+            keyframes: existing.filter((k) => k.id !== id),
+          },
+        },
+      }
+    })
+    showToast('Keyframe removed from timeline', 'info')
+  }
+
+  const handleExportSonicCamJson = () => {
+    const config = composition.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `soniccam-3d-settings-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    showToast('Downloaded SonicCam 3D settings JSON', 'success')
+  }
+
+  const handleImportSonicCamJson = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target?.result as string)
+        if (typeof parsed === 'object') {
+          setComposition((prev) => ({
+            ...prev,
+            sonicCam3d: {
+              ...DEFAULT_SONIC_CAM_CONFIG,
+              ...parsed,
+              sourceImageUrl: prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null,
+            },
+          }))
+          showToast('Imported SonicCam 3D settings JSON successfully', 'success')
+        }
+      } catch {
+        showToast('Invalid JSON file format', 'error')
+      }
+    }
+    reader.readAsText(file)
+  }
+
   // Handle Export Video
   const handleStartExport = async () => {
     const canvas = canvasRef.current
@@ -1235,6 +1447,29 @@ export const AudioToVideoStudioTool: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
+                {/* 1-Click SonicCam 3D Mode Switch */}
+                <button
+                  onClick={() => {
+                    setActiveTab('soniccam')
+                    setComposition((prev) => ({
+                      ...prev,
+                      sonicCam3d: {
+                        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+                        sourceImageUrl: prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null,
+                      },
+                    }))
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    activeTab === 'soniccam'
+                      ? 'bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-lg shadow-sky-500/30 border border-sky-400'
+                      : 'bg-sky-950/40 border border-sky-500/30 text-sky-300 hover:text-white hover:bg-sky-900/60'
+                  }`}
+                  title="Switch directly to SonicCam 3D Cinematic Camera Studio"
+                >
+                  <Camera className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
+                  <span>🎥 SonicCam 3D</span>
+                </button>
+
                 {/* 1-Click Garden Studio Mode Switch */}
                 <button
                   onClick={() => setActiveTab('garden')}
@@ -1436,8 +1671,9 @@ export const AudioToVideoStudioTool: React.FC = () => {
           {/* RIGHT 5/12: MODULAR EDITING SUITE & STUDIO DOCK */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Dock Navigation Tabs */}
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-3 sm:grid-cols-9 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
               {[
+                { id: 'soniccam', label: 'SonicCam', icon: Camera },
                 { id: 'portal', label: 'Portal VFX', icon: Orbit },
                 { id: 'photomotion', label: '2.5D Motion', icon: Film },
                 { id: 'garden', label: 'Garden', icon: Flower2 },
@@ -1453,17 +1689,26 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as StudioTab)}
-                    className={`flex flex-col items-center justify-center py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+                    className={`flex flex-col items-center justify-center py-2 rounded-xl text-[11px] font-bold transition-all relative ${
                       isActive
-                        ? 'bg-gradient-to-tr from-emerald-600/30 via-teal-600/30 to-cyan-500/20 text-emerald-300 border border-emerald-400 shadow-md'
+                        ? tab.id === 'soniccam'
+                          ? 'bg-gradient-to-tr from-sky-600/30 via-cyan-600/30 to-blue-500/20 text-sky-300 border border-sky-400 shadow-md'
+                          : tab.id === 'garden'
+                          ? 'bg-gradient-to-tr from-emerald-600/30 via-teal-600/30 to-cyan-500/20 text-emerald-300 border border-emerald-400 shadow-md'
+                          : 'bg-gradient-to-tr from-violet-600/30 via-purple-600/30 to-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-md'
+                        : tab.id === 'soniccam'
+                        ? 'text-sky-300 bg-sky-950/40 border border-sky-500/40 hover:bg-sky-900/50 hover:text-white'
                         : tab.id === 'garden'
                         ? 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/40 hover:bg-emerald-900/50 hover:text-white'
                         : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 mb-1 ${tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
+                    <Icon className={`w-3.5 h-3.5 mb-1 ${tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
                     <div className="flex items-center gap-1">
                       <span>{tab.label}</span>
+                      {tab.id === 'soniccam' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse shrink-0" />
+                      )}
                       {tab.id === 'garden' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                       )}
@@ -1475,6 +1720,19 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
             {/* TAB CONTENT PANELS */}
             <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-5 shadow-2xl max-h-[580px] overflow-y-auto space-y-5">
+              {/* TAB: SONICCAM 3D CINEMATIC CAMERA STUDIO */}
+              {activeTab === 'soniccam' && (
+                <SonicCamStudioPanel
+                  composition={composition}
+                  setComposition={setComposition}
+                  liveBands={liveBands}
+                  currentTime={currentTime}
+                  duration={audioTrack.duration || 30}
+                  showToast={showToast}
+                  onSelectPresetModal={(preset) => setSelectedSonicPresetModal(preset)}
+                />
+              )}
+
               {/* TAB 0: CINEMATIC PORTAL VFX STUDIO */}
               {activeTab === 'portal' && (
                 <div className="space-y-6">
@@ -5644,6 +5902,74 @@ export const AudioToVideoStudioTool: React.FC = () => {
         )}
 
         {/* ========================================================= */}
+        {/* SONICCAM 3D PRESET CONFIRMATION MODAL                     */}
+        {/* ========================================================= */}
+        {selectedSonicPresetModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+            <div className="bg-[#090A0F] border border-white/15 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full"
+                    style={{ backgroundColor: selectedSonicPresetModal.accentColor }}
+                  />
+                  <h3 className="text-sm font-bold text-white">{selectedSonicPresetModal.name}</h3>
+                </div>
+                <button
+                  onClick={() => setSelectedSonicPresetModal(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  {selectedSonicPresetModal.subtitle}
+                </p>
+
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  {selectedSonicPresetModal.description}
+                </p>
+
+                <div className="p-3 bg-slate-950/70 border border-white/10 rounded-xl space-y-2">
+                  <div className="text-[11px] font-bold text-slate-400">Camera modules to be activated:</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedSonicPresetModal.enabledModules.map((mod) => (
+                      <span
+                        key={mod}
+                        className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30"
+                      >
+                        ✓ {mod}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-slate-500">
+                  Other camera modules will remain OFF. Presets never activate hidden distortion or aggressive movements.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setSelectedSonicPresetModal(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleApplySonicCamPreset(selectedSonicPresetModal)}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 shadow-lg shadow-sky-500/20"
+                >
+                  Activate Camera Preset
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
         {/* EXPORT PROGRESS MODAL                                     */}
         {/* ========================================================= */}
         {isExportModalOpen && (
@@ -5940,6 +6266,20 @@ export const AudioToVideoStudioTool: React.FC = () => {
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Yes. Title overlays fully support Malayalam, Tamil, Telugu, Kannada, Hindi, and English scripts with clean
                   drop shadows and stroke outlines.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-900/40 border border-white/5 space-y-1.5">
+                <h4 className="text-xs font-bold text-white">How does SonicCam 3D work with a single photograph?</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  SonicCam 3D applies real 2D perspective affine transformations, viewport overscan scaling, and multi-plane depth parallax directly on the HTML5 Canvas. Virtual dolly push-pull, orbital arcs, and harmonic Lissajous drift create a convincing cinematic film camera experience without pretending a flat 2D photo contains hidden 3D geometry.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-900/40 border border-white/5 space-y-1.5">
+                <h4 className="text-xs font-bold text-white">Will the camera shake abruptly on loud bass drops?</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  No. SonicCam 3D features a built-in Exponential Moving Average (EMA) smoothness filter (adjustable from 50% to 98%). Rather than reacting to raw digital audio spikes with jarring camera shakes, it tracks low-frequency sound envelopes and smoothly interpolates virtual camera positions.
                 </p>
               </div>
             </div>

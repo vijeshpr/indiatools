@@ -16,6 +16,13 @@ import {
 } from '../garden/gardenTypes.ts'
 export * from '../garden/gardenTypes.ts'
 
+import {
+  SonicCamStudioConfig,
+  DEFAULT_SONIC_CAM_CONFIG,
+} from '../sonicCam/sonicCamTypes.ts'
+export * from '../sonicCam/sonicCamTypes.ts'
+export * from '../sonicCam/sonicCamPresets.ts'
+
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
 
@@ -181,6 +188,7 @@ export interface StudioCompositionConfig {
   photoMotion?: PhotoMotionStudioConfig
   portalVfx?: CinematicPortalStudioConfig
   gardenStudio?: MusicGrownGardenConfig
+  sonicCam3d?: SonicCamStudioConfig
   performanceMode: boolean
 }
 
@@ -257,5 +265,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
   photoMotion: DEFAULT_PHOTO_MOTION_CONFIG,
   portalVfx: DEFAULT_PORTAL_VFX_CONFIG,
   gardenStudio: DEFAULT_GARDEN_CONFIG,
+  sonicCam3d: DEFAULT_SONIC_CAM_CONFIG,
   performanceMode: false,
 }

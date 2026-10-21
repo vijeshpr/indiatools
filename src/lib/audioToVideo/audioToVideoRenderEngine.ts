@@ -12,6 +12,7 @@ import { drawProceduralBackground } from './backgroundPresets.ts'
 import { studioPhotoMotionEngine } from './photoMotionEngine.ts'
 import { portalVfxEngine } from '../portalVfx/portalVfxEngine.ts'
 import { musicGrownGardenEngine } from '../garden/gardenEngine.ts'
+import { sonicCamEngine } from '../sonicCam/sonicCamEngine.ts'
 
 interface Particle {
   x: number
@@ -131,7 +132,19 @@ export class AudioToVideoRenderEngine {
         config.portalVfx.exitTransition.enabled ||
         config.portalVfx.isBeforePreviewActive)
 
-    if (config.gardenStudio?.enabled) {
+    // 2. Scene Layer: SonicCam 3D OR Garden Studio OR Portal VFX OR 2.5D Photo Motion Studio OR Standard Background + Cinematic FX
+    const sonicCamPhotoUrl =
+      config.sonicCam3d?.sourceImageUrl ||
+      config.portalVfx?.sourceImageUrl ||
+      config.background.singleImageUrl
+
+    if (config.sonicCam3d?.enabled) {
+      const activeSonicCamConfig = {
+        ...config.sonicCam3d,
+        sourceImageUrl: config.sonicCam3d.sourceImageUrl || sonicCamPhotoUrl,
+      }
+      sonicCamEngine.render(ctx, width, height, activeSonicCamConfig, bands, currentTime, duration)
+    } else if (config.gardenStudio?.enabled) {
       musicGrownGardenEngine.render(ctx, width, height, config.gardenStudio, bands, currentTime, duration)
     } else if (config.portalVfx && (hasPortalActive || (portalPhotoUrl && !config.photoMotion?.enabled && config.background.mode === 'single-image'))) {
       const baseImg = portalPhotoUrl ? portalVfxEngine.getCachedImage(portalPhotoUrl) : null
