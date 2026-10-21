@@ -93,7 +93,6 @@ import {
 import {
   SonicCamStudioConfig,
   DEFAULT_SONIC_CAM_CONFIG,
-  CameraKeyframe,
   SonicCamPresetMetadata,
 } from '../lib/sonicCam/sonicCamTypes'
 import {
@@ -158,13 +157,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
   })
 
   // SonicCam 3D Studio State & Refs
-  const sonicCamPhotoInputRef = useRef<HTMLInputElement | null>(null)
-  const sonicCamBgInputRef = useRef<HTMLInputElement | null>(null)
-  const sonicCamJsonInputRef = useRef<HTMLInputElement | null>(null)
   const [selectedSonicPresetModal, setSelectedSonicPresetModal] = useState<SonicCamPresetMetadata | null>(null)
-  const [newKeyframeZoom, setNewKeyframeZoom] = useState<number>(1.2)
-  const [newKeyframeTilt, setNewKeyframeTilt] = useState<number>(0)
-  const [newKeyframeOrbit, setNewKeyframeOrbit] = useState<number>(0)
 
   // Audio Playback & Track State (Default: High-Energy Studio Anthem 02:51)
   const [audioTrack, setAudioTrack] = useState<AudioTrackMetadata>({
@@ -1075,69 +1068,6 @@ export const AudioToVideoStudioTool: React.FC = () => {
   // =========================================================
   // SONICCAM 3D — HANDLERS & STATE ACTIONS
   // =========================================================
-  const handleSonicCamPhotoUpload = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      showToast('Please select a valid image file (PNG, JPG, WebP)', 'error')
-      return
-    }
-    const url = URL.createObjectURL(file)
-    setComposition((prev) => ({
-      ...prev,
-      sonicCam3d: {
-        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-        sourceImageUrl: url,
-      },
-      background: {
-        ...prev.background,
-        singleImageUrl: url,
-      },
-    }))
-    showToast('Loaded photograph into SonicCam 3D', 'success')
-  }
-
-  const handleSonicCamBgUpload = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      showToast('Please select a valid image file', 'error')
-      return
-    }
-    const url = URL.createObjectURL(file)
-    setComposition((prev) => ({
-      ...prev,
-      sonicCam3d: {
-        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-        depth: {
-          ...(prev.sonicCam3d?.depth || DEFAULT_SONIC_CAM_CONFIG.depth),
-          enabled: true,
-          customBackgroundUrl: url,
-        },
-      },
-    }))
-    showToast('Loaded custom background depth layer for 3D parallax', 'success')
-  }
-
-  const handleRemoveSonicCamPhoto = () => {
-    setComposition((prev) => ({
-      ...prev,
-      sonicCam3d: {
-        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-        sourceImageUrl: null,
-      },
-    }))
-    showToast('Removed photograph from SonicCam 3D', 'info')
-  }
-
-  const handleResetSonicCam = () => {
-    setComposition((prev) => ({
-      ...prev,
-      sonicCam3d: {
-        ...DEFAULT_SONIC_CAM_CONFIG,
-        sourceImageUrl: prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null,
-      },
-    }))
-    sonicCamEngine.resetSmoothing()
-    showToast('Reset all SonicCam 3D effects to clean neutral', 'info')
-  }
-
   const handleApplySonicCamPreset = (preset: SonicCamPresetMetadata) => {
     setComposition((prev) => {
       const currentPhoto = prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null
@@ -1158,108 +1088,6 @@ export const AudioToVideoStudioTool: React.FC = () => {
     })
     setSelectedSonicPresetModal(null)
     showToast(`Activated ${preset.name} camera preset`, 'success')
-  }
-
-  const handleToggleSonicCamMaster = () => {
-    setComposition((prev) => ({
-      ...prev,
-      sonicCam3d: {
-        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-        enabled: !(prev.sonicCam3d?.enabled ?? false),
-      },
-    }))
-  }
-
-  const handleToggleSonicCamBeforeAfter = () => {
-    setComposition((prev) => ({
-      ...prev,
-      sonicCam3d: {
-        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-        isBeforeActive: !(prev.sonicCam3d?.isBeforeActive ?? false),
-      },
-    }))
-  }
-
-  const handleAddSonicCamKeyframe = () => {
-    const newKf: CameraKeyframe = {
-      id: `kf-${Date.now()}`,
-      timeSec: Math.round(currentTime * 10) / 10,
-      xOffset: 0,
-      yOffset: 0,
-      zoom: newKeyframeZoom,
-      tiltDeg: newKeyframeTilt,
-      orbitDeg: newKeyframeOrbit,
-      intensity: 60,
-      easing: 'ease-in-out',
-    }
-    setComposition((prev) => {
-      const existing = prev.sonicCam3d?.cameraPath?.keyframes || []
-      const updated = [...existing, newKf].sort((a, b) => a.timeSec - b.timeSec)
-      return {
-        ...prev,
-        sonicCam3d: {
-          ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-          cameraPath: {
-            ...(prev.sonicCam3d?.cameraPath || DEFAULT_SONIC_CAM_CONFIG.cameraPath),
-            enabled: true,
-            keyframes: updated,
-          },
-        },
-      }
-    })
-    showToast(`Added camera keyframe at ${formatSec(currentTime)}`, 'success')
-  }
-
-  const handleDeleteSonicCamKeyframe = (id: string) => {
-    setComposition((prev) => {
-      const existing = prev.sonicCam3d?.cameraPath?.keyframes || []
-      return {
-        ...prev,
-        sonicCam3d: {
-          ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-          cameraPath: {
-            ...(prev.sonicCam3d?.cameraPath || DEFAULT_SONIC_CAM_CONFIG.cameraPath),
-            keyframes: existing.filter((k) => k.id !== id),
-          },
-        },
-      }
-    })
-    showToast('Keyframe removed from timeline', 'info')
-  }
-
-  const handleExportSonicCamJson = () => {
-    const config = composition.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `soniccam-3d-settings-${Date.now()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    showToast('Downloaded SonicCam 3D settings JSON', 'success')
-  }
-
-  const handleImportSonicCamJson = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const parsed = JSON.parse(e.target?.result as string)
-        if (typeof parsed === 'object') {
-          setComposition((prev) => ({
-            ...prev,
-            sonicCam3d: {
-              ...DEFAULT_SONIC_CAM_CONFIG,
-              ...parsed,
-              sourceImageUrl: prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null,
-            },
-          }))
-          showToast('Imported SonicCam 3D settings JSON successfully', 'success')
-        }
-      } catch {
-        showToast('Invalid JSON file format', 'error')
-      }
-    }
-    reader.readAsText(file)
   }
 
   // Handle Export Video
@@ -1720,7 +1548,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
             {/* TAB CONTENT PANELS */}
             <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-5 shadow-2xl max-h-[580px] overflow-y-auto space-y-5">
-              {/* TAB: SONICCAM 3D CINEMATIC CAMERA STUDIO */}
+              {/* TAB: SONICCAM BEAT-SYNCED MULTI-REGION STUDIO */}
               {activeTab === 'soniccam' && (
                 <SonicCamStudioPanel
                   composition={composition}
@@ -1728,6 +1556,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   liveBands={liveBands}
                   currentTime={currentTime}
                   duration={audioTrack.duration || 30}
+                  audioUrl={audioTrack.url}
                   showToast={showToast}
                   onSelectPresetModal={(preset) => setSelectedSonicPresetModal(preset)}
                 />

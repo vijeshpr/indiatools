@@ -1,160 +1,104 @@
 /**
- * IndiaTools — SonicCam 3D
- * Music-Reactive Cinematic Camera Studio
+ * IndiaTools — SonicCam
+ * Beat-Synced Multi-Region Cinematic Photo Effect
  * Type Definitions & Configuration Interfaces
  */
 
-export type CameraFitMode = 'cover' | 'contain' | 'fill'
+export type { NormalizedAudioBands } from '../audioToVideo/types'
 
-export type OrbitDirection = 'left' | 'right' | 'oscillate'
-
-export interface SmoothOrbitConfig {
-  enabled: boolean
-  direction: OrbitDirection
-  intensity: number // 1 to 100
-  speed: number // 0.1 to 3.0
-  rangeDeg: number // 3 to 35 degrees
-  depthParallaxBoost: number // 0 to 100
+export interface ImageRegion {
+  id: string
+  label: string
+  // Normalized coordinates in [0, 1] relative to source image dimensions
+  x: number // 0.0 to 1.0 (left)
+  y: number // 0.0 to 1.0 (top)
+  width: number // 0.05 to 1.0
+  height: number // 0.05 to 1.0
+  color: string // Hex accent for editor outline
 }
 
-export type PushPullMode =
-  | 'push-in'
-  | 'pull-out'
-  | 'push-then-pull'
-  | 'slow-approach'
-  | 'wide-establishing'
+export type RegionLayoutMode =
+  | 'uniform-grid'
+  | 'cinematic-grid'
+  | 'random-rectangles'
+  | 'manual'
 
-export type SonicCamEasing = 'ease-in-out' | 'linear' | 'cubic' | 'dramatic'
+export type SequencerMode =
+  | 'beat-driven'
+  | 'every-n-beats'
+  | 'sequential'
+  | 'random'
+  | 'energy-driven'
+  | 'manual'
+  | 'full-image-interlude'
 
-export interface PushPullConfig {
-  enabled: boolean
-  mode: PushPullMode
-  startZoom: number // 1.0 to 2.2
-  endZoom: number // 1.0 to 2.2
-  speed: number // 0.1 to 3.0
-  easing: SonicCamEasing
-  overscan: number // 1.05 to 1.35 (guarantees zero empty canvas borders)
-}
+export type NoBeatBehavior =
+  | 'show-full-image'
+  | 'hold-current-region'
+  | 'return-full-smooth'
 
-export type DriftDirection =
-  | 'horizontal'
-  | 'vertical'
-  | 'diagonal-up'
-  | 'diagonal-down'
-  | 'lissajous'
+export type SonicTransitionType =
+  | 'instant-cut'
+  | 'snap-zoom'
+  | 'smooth-zoom-cut'
+  | 'whip-pan'
+  | 'directional-slide'
+  | 'flash-cut'
+  | 'crossfade'
+  | 'full-image-return'
 
-export interface CameraDriftConfig {
-  enabled: boolean
-  horizontalEnabled: boolean
-  verticalEnabled: boolean
-  tiltEnabled: boolean
-  amplitude: number // 5 to 100 px
-  speed: number // 0.1 to 2.5
-  direction: DriftDirection
-}
-
-export type ParallaxSeparationMode = 'perspective-warp' | 'layered-3d' | 'depth-gradient'
-
-export interface DepthParallaxConfig {
-  enabled: boolean
-  intensity: number // 1 to 100
-  foregroundSpeed: number // 0.5 to 2.5
-  midgroundSpeed: number // 0.5 to 2.0
-  backgroundSpeed: number // 0.2 to 1.5
-  edgeFeather: number // 0 to 40 px
-  separationMode: ParallaxSeparationMode
-  customForegroundUrl: string | null
-  customBackgroundUrl: string | null
-}
-
-export type TiltRiseMode =
-  | 'tilt-up'
-  | 'tilt-down'
-  | 'crane-rise-settle'
-  | 'diagonal-pan'
-
-export interface TiltRiseConfig {
-  enabled: boolean
-  mode: TiltRiseMode
-  angleDeg: number // -25 to 25 deg
-  craneHeight: number // 0 to 120 px
-  speed: number // 0.1 to 2.5
-}
-
-export interface ReactiveBandMapping {
-  enabled: boolean
-  target: string
-  sensitivity: number // 0 to 100
-  intensity: number // 0 to 100
-  minLimit: number
-  maxLimit: number
-}
-
-export interface MusicReactiveConfig {
-  enabled: boolean
-  masterReactivity: number // 0 to 200 (%)
-  smoothness: number // 0.5 to 0.98 (exponential smoothing factor)
-  bassMapping: ReactiveBandMapping & {
-    target: 'push-pull' | 'orbit' | 'zoom-pulse' | 'all'
-  }
-  midMapping: ReactiveBandMapping & {
-    target: 'horizontal-drift' | 'tilt' | 'orbit'
-  }
-  trebleMapping: ReactiveBandMapping & {
-    target: 'micro-tilt' | 'high-frequency-shimmer' | 'vertical-drift'
-  }
-  transientMapping: {
-    enabled: boolean
-    target: 'accent-kick' | 'none'
-    sensitivity: number // 0 to 100
-    intensity: number // 0 to 100
-  }
-  energyMapping: {
-    enabled: boolean
-    target: 'master-intensity' | 'speed'
-    sensitivity: number // 0 to 100
-    intensity: number // 0 to 100
-  }
-}
-
-export type KeyframeEasing = 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'cinematic-bezier'
-
-export interface CameraKeyframe {
+export interface BeatMarker {
   id: string
   timeSec: number
-  xOffset: number // -100 to 100 px
-  yOffset: number // -100 to 100 px
-  zoom: number // 1.0 to 2.2
-  tiltDeg: number // -20 to 20 deg
-  orbitDeg: number // -30 to 30 deg
-  intensity: number // 0 to 100
-  easing: KeyframeEasing
+  strength: number // 0.0 to 1.0
+  isManual?: boolean
 }
 
-export type CameraPathPresetId =
-  | 'custom'
-  | 'epic-journey'
-  | 'crescendo'
-  | 'ambient-float'
-  | 'cinematic-reveal'
+export interface BeatDetectionConfig {
+  sensitivity: number // 10 to 100 (threshold for transient peak)
+  minIntervalSec: number // 0.20 to 1.5s (minimum spacing between detected beats)
+  autoSnapToBeat: boolean
+  isAnalyzing?: boolean
+}
 
-export interface CameraPathConfig {
+export interface BassShakeConfig {
   enabled: boolean
-  pathPreset: CameraPathPresetId
-  keyframes: CameraKeyframe[]
-  autoInterpolate: boolean
+  intensity: number // 1 to 100
+  bassSensitivity: number // 10 to 100
+  maxDisplacementPx: number // 2 to 35 px
+  maxRotationDeg: number // 0.2 to 2.5 deg
+  recoverySpeed: number // 0.6 to 0.95 (decay back to zero)
+  zoomImpulseEnabled: boolean
+}
+
+export type InnerMotionMode = 'subtle-push' | 'subtle-drift' | 'handheld' | 'none'
+
+export interface InnerMotionConfig {
+  enabled: boolean
+  mode: InnerMotionMode
+  intensity: number // 1 to 100
+  speed: number // 0.1 to 2.0
+}
+
+export interface ShotSequenceEntry {
+  id: string
+  regionId: string // specific region id, or '__full_image__'
+  startTimeSec: number
+  durationSec: number
+  transition: SonicTransitionType
+  zoomBoost?: number
 }
 
 export type SonicCamPresetId =
-  | 'epic-cinematic'
-  | 'dreamy-floating'
-  | 'bass-motion'
-  | 'emotional-slow-motion'
-  | 'cinematic-reveal'
-  | 'orbit-experience'
-  | 'music-video-dynamic'
-  | 'minimal-natural'
-  | 'custom-camera-path'
+  | 'cinematic-discovery'
+  | 'beat-snap'
+  | 'bass-impact'
+  | 'rapid-cuts'
+  | 'slow-emotional'
+  | 'landscape-explorer'
+  | 'object-focus'
+  | 'minimal-clean'
+  | 'custom-sequence'
 
 export interface SonicCamPresetMetadata {
   id: SonicCamPresetId
@@ -170,15 +114,48 @@ export interface SonicCamStudioConfig {
   enabled: boolean // Master studio toggle (OFF by default)
   isBeforeActive: boolean // Before/After original comparison toggle
   sourceImageUrl: string | null
-  sourceImageFit: CameraFitMode
-  orbit: SmoothOrbitConfig
-  pushPull: PushPullConfig
-  drift: CameraDriftConfig
-  depth: DepthParallaxConfig
-  tiltRise: TiltRiseConfig
-  musicReactive: MusicReactiveConfig
-  cameraPath: CameraPathConfig
+  regions: ImageRegion[]
+  selectedRegionId: string | null
+  showRegionBoundsInPreview: boolean // Editor overlay (never exported)
+  regionCount: number // 4, 6, 9, 12, 16, 25
+  layoutMode: RegionLayoutMode
+  sequencerMode: SequencerMode
+  beatInterval: number // 1, 2, 4, 8 beats
+  noBeatBehavior: NoBeatBehavior
+  minShotDurationSec: number // minimum hold duration (e.g. 0.35s)
+  maxShotDurationSec: number // maximum hold duration (e.g. 3.0s)
+  fullImageEveryNShots: number // 0 = disabled, 1-8 = every N shots
+  fullImageIntroOutro: boolean
+  transition: SonicTransitionType
+  transitionDurationSec: number // 0.0 (instant) to 0.6s
+  bassShake: BassShakeConfig
+  innerMotion: InnerMotionConfig
+  beatDetection: BeatDetectionConfig
+  beatMarkers: BeatMarker[]
+  customSequence: ShotSequenceEntry[]
 }
+
+/**
+ * Default Palette for Visual Region Identification
+ */
+export const REGION_COLORS = [
+  '#00F0FF', // Cyan
+  '#A855F7', // Violet
+  '#EC4899', // Pink
+  '#10B981', // Emerald
+  '#F59E0B', // Amber
+  '#3B82F6', // Blue
+  '#F43F5E', // Rose
+  '#8B5CF6', // Purple
+  '#14B8A6', // Teal
+  '#EAB308', // Yellow
+  '#6366F1', // Indigo
+  '#D946EF', // Fuchsia
+  '#06B6D4', // Sky Cyan
+  '#84CC16', // Lime
+  '#FB923C', // Orange
+  '#4ADE80', // Mint
+]
 
 /**
  * STRICT REQUIREMENT: ALL EFFECTS OFF BY DEFAULT
@@ -187,130 +164,41 @@ export const DEFAULT_SONIC_CAM_CONFIG: SonicCamStudioConfig = {
   enabled: false,
   isBeforeActive: false,
   sourceImageUrl: null,
-  sourceImageFit: 'cover',
-  orbit: {
+  regions: [],
+  selectedRegionId: null,
+  showRegionBoundsInPreview: false,
+  regionCount: 6,
+  layoutMode: 'cinematic-grid',
+  sequencerMode: 'beat-driven',
+  beatInterval: 2,
+  noBeatBehavior: 'show-full-image',
+  minShotDurationSec: 0.4,
+  maxShotDurationSec: 3.5,
+  fullImageEveryNShots: 4,
+  fullImageIntroOutro: true,
+  transition: 'snap-zoom',
+  transitionDurationSec: 0.22,
+  bassShake: {
     enabled: false,
-    direction: 'left',
     intensity: 45,
-    speed: 1.0,
-    rangeDeg: 14,
-    depthParallaxBoost: 35,
+    bassSensitivity: 65,
+    maxDisplacementPx: 12,
+    maxRotationDeg: 0.8,
+    recoverySpeed: 0.85,
+    zoomImpulseEnabled: true,
   },
-  pushPull: {
+  innerMotion: {
     enabled: false,
-    mode: 'push-in',
-    startZoom: 1.05,
-    endZoom: 1.35,
-    speed: 1.0,
-    easing: 'ease-in-out',
-    overscan: 1.15,
+    mode: 'subtle-push',
+    intensity: 30,
+    speed: 0.6,
   },
-  drift: {
-    enabled: false,
-    horizontalEnabled: true,
-    verticalEnabled: true,
-    tiltEnabled: false,
-    amplitude: 28,
-    speed: 0.8,
-    direction: 'lissajous',
+  beatDetection: {
+    sensitivity: 65,
+    minIntervalSec: 0.35,
+    autoSnapToBeat: true,
+    isAnalyzing: false,
   },
-  depth: {
-    enabled: false,
-    intensity: 40,
-    foregroundSpeed: 1.4,
-    midgroundSpeed: 1.0,
-    backgroundSpeed: 0.6,
-    edgeFeather: 16,
-    separationMode: 'perspective-warp',
-    customForegroundUrl: null,
-    customBackgroundUrl: null,
-  },
-  tiltRise: {
-    enabled: false,
-    mode: 'crane-rise-settle',
-    angleDeg: 6,
-    craneHeight: 35,
-    speed: 0.8,
-  },
-  musicReactive: {
-    enabled: false,
-    masterReactivity: 100,
-    smoothness: 0.88,
-    bassMapping: {
-      enabled: true,
-      target: 'push-pull',
-      sensitivity: 65,
-      intensity: 50,
-      minLimit: 0,
-      maxLimit: 100,
-    },
-    midMapping: {
-      enabled: true,
-      target: 'horizontal-drift',
-      sensitivity: 55,
-      intensity: 45,
-      minLimit: 0,
-      maxLimit: 100,
-    },
-    trebleMapping: {
-      enabled: true,
-      target: 'micro-tilt',
-      sensitivity: 40,
-      intensity: 30,
-      minLimit: 0,
-      maxLimit: 100,
-    },
-    transientMapping: {
-      enabled: true,
-      target: 'accent-kick',
-      sensitivity: 60,
-      intensity: 35,
-    },
-    energyMapping: {
-      enabled: true,
-      target: 'master-intensity',
-      sensitivity: 50,
-      intensity: 40,
-    },
-  },
-  cameraPath: {
-    enabled: false,
-    pathPreset: 'ambient-float',
-    keyframes: [
-      {
-        id: 'kf-1',
-        timeSec: 0,
-        xOffset: 0,
-        yOffset: 0,
-        zoom: 1.05,
-        tiltDeg: 0,
-        orbitDeg: 0,
-        intensity: 50,
-        easing: 'ease-in-out',
-      },
-      {
-        id: 'kf-2',
-        timeSec: 15,
-        xOffset: 25,
-        yOffset: -15,
-        zoom: 1.25,
-        tiltDeg: 4,
-        orbitDeg: 8,
-        intensity: 75,
-        easing: 'ease-in-out',
-      },
-      {
-        id: 'kf-3',
-        timeSec: 30,
-        xOffset: -20,
-        yOffset: 10,
-        zoom: 1.15,
-        tiltDeg: -3,
-        orbitDeg: -6,
-        intensity: 60,
-        easing: 'ease-in-out',
-      },
-    ],
-    autoInterpolate: true,
-  },
+  beatMarkers: [],
+  customSequence: [],
 }

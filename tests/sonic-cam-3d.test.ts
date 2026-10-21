@@ -10,6 +10,20 @@ import {
   getSonicCamPreset,
 } from '../src/lib/sonicCam/sonicCamPresets.ts'
 import {
+  generateUniformGrid,
+  generateCinematicGrid,
+  generateRandomRectangles,
+  generateAutoRegions,
+} from '../src/lib/sonicCam/sonicCamRegionGenerator.ts'
+import {
+  sonicCamBeatDetector,
+  SonicCamBeatDetector,
+} from '../src/lib/sonicCam/sonicCamBeatDetector.ts'
+import {
+  sonicCamSequencer,
+  SonicCamSequencer,
+} from '../src/lib/sonicCam/sonicCamSequencer.ts'
+import {
   SonicCamEngine,
   sonicCamEngine,
 } from '../src/lib/sonicCam/sonicCamEngine.ts'
@@ -20,7 +34,7 @@ import {
   NormalizedAudioBands,
 } from '../src/lib/audioToVideo/types.ts'
 
-describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
+describe('SonicCam — Beat-Synced Multi-Region Cinematic Studio Suite', () => {
   it('should enforce STRICT requirement: ALL effects OFF by default on initial launch', () => {
     assert.strictEqual(
       DEFAULT_SONIC_CAM_CONFIG.enabled,
@@ -28,64 +42,44 @@ describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
       'Master studio toggle must be OFF by default'
     )
     assert.strictEqual(
-      DEFAULT_SONIC_CAM_CONFIG.orbit.enabled,
-      false,
-      'Orbit module must be OFF by default'
-    )
-    assert.strictEqual(
-      DEFAULT_SONIC_CAM_CONFIG.pushPull.enabled,
-      false,
-      'Push-Pull dolly module must be OFF by default'
-    )
-    assert.strictEqual(
-      DEFAULT_SONIC_CAM_CONFIG.drift.enabled,
-      false,
-      'Drift module must be OFF by default'
-    )
-    assert.strictEqual(
-      DEFAULT_SONIC_CAM_CONFIG.depth.enabled,
-      false,
-      'Depth parallax module must be OFF by default'
-    )
-    assert.strictEqual(
-      DEFAULT_SONIC_CAM_CONFIG.tiltRise.enabled,
-      false,
-      'Tilt and rise module must be OFF by default'
-    )
-    assert.strictEqual(
-      DEFAULT_SONIC_CAM_CONFIG.musicReactive.enabled,
-      false,
-      'Music reactivity must be OFF by default'
-    )
-    assert.strictEqual(
-      DEFAULT_SONIC_CAM_CONFIG.cameraPath.enabled,
-      false,
-      'Dynamic camera path must be OFF by default'
-    )
-    assert.strictEqual(
       DEFAULT_SONIC_CAM_CONFIG.isBeforeActive,
       false,
       'Before/After comparison must start inactive'
     )
+    assert.strictEqual(
+      DEFAULT_SONIC_CAM_CONFIG.bassShake.enabled,
+      false,
+      'Bass shake must be OFF by default'
+    )
+    assert.strictEqual(
+      DEFAULT_SONIC_CAM_CONFIG.innerMotion.enabled,
+      false,
+      'Inner camera motion must be OFF by default'
+    )
+    assert.strictEqual(
+      DEFAULT_SONIC_CAM_CONFIG.showRegionBoundsInPreview,
+      false,
+      'Region bounds overlay must be OFF by default'
+    )
   })
 
-  it('should register exactly 9 curated cinematic camera presets with valid configurations', () => {
+  it('should register exactly 9 curated beat-synced presets with valid configurations', () => {
     assert.strictEqual(
       SONIC_CAM_PRESETS.length,
       9,
-      'Must provide exactly 9 curated camera presets'
+      'Must provide exactly 9 curated presets'
     )
 
     const expectedPresetIds: SonicCamPresetId[] = [
-      'epic-cinematic',
-      'dreamy-floating',
-      'bass-motion',
-      'emotional-slow-motion',
-      'cinematic-reveal',
-      'orbit-experience',
-      'music-video-dynamic',
-      'minimal-natural',
-      'custom-camera-path',
+      'cinematic-discovery',
+      'beat-snap',
+      'bass-impact',
+      'rapid-cuts',
+      'slow-emotional',
+      'landscape-explorer',
+      'object-focus',
+      'minimal-clean',
+      'custom-sequence',
     ]
 
     const actualIds = SONIC_CAM_PRESETS.map((p) => p.id)
@@ -99,113 +93,117 @@ describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
       assert.ok(preset.enabledModules.length > 0, `Preset ${preset.id} must specify enabled modules`)
       assert.ok(preset.config, `Preset ${preset.id} must provide functioning config`)
 
-      // Verify getter function
       const fetched = getSonicCamPreset(preset.id)
       assert.strictEqual(fetched.id, preset.id)
     }
   })
 
-  it('should calculate camera transform matrices safely with overscan and boundary protection', () => {
-    const engine = new SonicCamEngine()
-
-    const mockConfig: SonicCamStudioConfig = {
-      ...DEFAULT_SONIC_CAM_CONFIG,
-      enabled: true,
-      orbit: {
-        ...DEFAULT_SONIC_CAM_CONFIG.orbit,
-        enabled: true,
-        rangeDeg: 15,
-        speed: 1.0,
-      },
-      pushPull: {
-        ...DEFAULT_SONIC_CAM_CONFIG.pushPull,
-        enabled: true,
-        mode: 'push-in',
-        startZoom: 1.05,
-        endZoom: 1.35,
-        overscan: 1.20,
-      },
-      drift: {
-        ...DEFAULT_SONIC_CAM_CONFIG.drift,
-        enabled: true,
-        amplitude: 30,
-      },
+  it('should generate valid normalized image regions across all layout modes', () => {
+    // 1. Uniform Grid
+    for (const count of [4, 6, 9, 12, 16, 25]) {
+      const uniform = generateUniformGrid(count)
+      assert.strictEqual(uniform.length, count, `Uniform grid must generate exactly ${count} regions`)
+      for (const r of uniform) {
+        assert.ok(r.x >= 0 && r.x <= 1, 'Region x must be in [0, 1]')
+        assert.ok(r.y >= 0 && r.y <= 1, 'Region y must be in [0, 1]')
+        assert.ok(r.width > 0 && r.x + r.width <= 1.001, 'Region width must fit inside [0, 1]')
+        assert.ok(r.height > 0 && r.y + r.height <= 1.001, 'Region height must fit inside [0, 1]')
+      }
     }
 
-    // Test at start, middle, and end of 30s track
-    for (const time of [0, 5, 15, 29.5]) {
-      const transform = engine.calculateCameraTransform(mockConfig, time, 30.0, 1920, 1080)
+    // 2. Cinematic Grid
+    const cinematic = generateCinematicGrid(8)
+    assert.strictEqual(cinematic.length, 8)
+    for (const r of cinematic) {
+      assert.ok(r.x >= 0 && r.x + r.width <= 1.001)
+      assert.ok(r.y >= 0 && r.y + r.height <= 1.001)
+    }
 
-      assert.ok(!isNaN(transform.x), `Transform x must not be NaN at t=${time}`)
-      assert.ok(!isNaN(transform.y), `Transform y must not be NaN at t=${time}`)
-      assert.ok(!isNaN(transform.zoom), `Transform zoom must not be NaN at t=${time}`)
-      assert.ok(!isNaN(transform.rotation), `Transform rotation must not be NaN at t=${time}`)
-      assert.ok(!isNaN(transform.tilt), `Transform tilt must not be NaN at t=${time}`)
-      assert.ok(transform.overscan >= 1.05, `Overscan must be >= 1.05 to guarantee zero black borders, got ${transform.overscan}`)
-      assert.ok(transform.zoom >= 1.0 && transform.zoom <= 2.5, `Zoom must be bounded in [1.0, 2.5], got ${transform.zoom}`)
+    // 3. Random Rectangles
+    const random = generateRandomRectangles(10)
+    assert.strictEqual(random.length, 10)
+    for (const r of random) {
+      assert.ok(r.x >= 0 && r.x + r.width <= 1.001)
+      assert.ok(r.y >= 0 && r.y + r.height <= 1.001)
     }
   })
 
-  it('should interpolate multi-keyframe camera paths smoothly without numerical instability', () => {
-    const engine = new SonicCamEngine()
+  it('should calculate full-screen crop rectangles without disproportionate stretching', () => {
+    const sequencer = new SonicCamSequencer()
 
-    const pathConfig: SonicCamStudioConfig = {
+    const imgW = 1920
+    const imgH = 1080
+    const canvasW = 1920
+    const canvasH = 1080
+    const targetAspect = canvasW / canvasH
+
+    // Test a wide region
+    const wideCrop = sequencer.calculateFitCrop(100, 100, 1200, 400, imgW, imgH, canvasW, canvasH)
+    const cropAspect = wideCrop.sw / wideCrop.sh
+    assert.ok(
+      Math.abs(cropAspect - targetAspect) < 0.001,
+      `Crop aspect ratio must match canvas aspect ratio, got ${cropAspect} vs ${targetAspect}`
+    )
+    assert.ok(wideCrop.sx >= 0 && wideCrop.sx + wideCrop.sw <= imgW, 'Crop sx must stay within source image')
+    assert.ok(wideCrop.sy >= 0 && wideCrop.sy + wideCrop.sh <= imgH, 'Crop sy must stay within source image')
+
+    // Test a tall vertical region (e.g. portrait detail on 16:9 canvas)
+    const tallCrop = sequencer.calculateFitCrop(200, 50, 400, 900, imgW, imgH, canvasW, canvasH)
+    const tallAspect = tallCrop.sw / tallCrop.sh
+    assert.ok(
+      Math.abs(tallAspect - targetAspect) < 0.001,
+      `Tall region crop must adapt to match canvas aspect ratio without distortion`
+    )
+    assert.ok(tallCrop.sx >= 0 && tallCrop.sx + tallCrop.sw <= imgW)
+    assert.ok(tallCrop.sy >= 0 && tallCrop.sy + tallCrop.sh <= imgH)
+  })
+
+  it('should evaluate beat-synced sequence and bass micro-shake safely across playback', () => {
+    const sequencer = new SonicCamSequencer()
+
+    const regions = generateCinematicGrid(6)
+    const beatMarkers = [
+      { id: 'b1', timeSec: 1.0, strength: 0.9 },
+      { id: 'b2', timeSec: 2.5, strength: 0.8 },
+      { id: 'b3', timeSec: 4.0, strength: 0.95 },
+      { id: 'b4', timeSec: 5.5, strength: 0.85 },
+    ]
+
+    const config: SonicCamStudioConfig = {
       ...DEFAULT_SONIC_CAM_CONFIG,
       enabled: true,
-      cameraPath: {
+      regions,
+      beatMarkers,
+      sequencerMode: 'beat-driven',
+      beatInterval: 1,
+      noBeatBehavior: 'show-full-image',
+      bassShake: {
+        ...DEFAULT_SONIC_CAM_CONFIG.bassShake,
         enabled: true,
-        pathPreset: 'custom',
-        autoInterpolate: true,
-        keyframes: [
-          {
-            id: 'kf-1',
-            timeSec: 0,
-            xOffset: 0,
-            yOffset: 0,
-            zoom: 1.05,
-            tiltDeg: 0,
-            orbitDeg: 0,
-            intensity: 50,
-            easing: 'ease-in-out',
-          },
-          {
-            id: 'kf-2',
-            timeSec: 10,
-            xOffset: 40,
-            yOffset: -20,
-            zoom: 1.40,
-            tiltDeg: 5,
-            orbitDeg: 12,
-            intensity: 80,
-            easing: 'cinematic-bezier',
-          },
-          {
-            id: 'kf-3',
-            timeSec: 20,
-            xOffset: -30,
-            yOffset: 15,
-            zoom: 1.15,
-            tiltDeg: -3,
-            orbitDeg: -8,
-            intensity: 60,
-            easing: 'ease-out',
-          },
-        ],
+        intensity: 50,
       },
     }
 
-    // Sample across timeline
-    for (let t = 0; t <= 20; t += 2) {
-      const transform = engine.calculateCameraTransform(pathConfig, t, 20, 1920, 1080)
-      assert.ok(Number.isFinite(transform.x), `Interpolated x at t=${t} must be finite`)
-      assert.ok(Number.isFinite(transform.y), `Interpolated y at t=${t} must be finite`)
-      assert.ok(Number.isFinite(transform.zoom), `Interpolated zoom at t=${t} must be finite`)
-      assert.ok(transform.zoom >= 1.0, `Zoom must stay >= 1.0, got ${transform.zoom}`)
+    const mockBands: NormalizedAudioBands = {
+      bass: 0.8,
+      mid: 0.4,
+      treble: 0.3,
+      subBass: 0.85,
+      overall: 0.6,
+      isBeatHit: true,
+    }
+
+    // Evaluate at multiple timestamps
+    for (const t of [0.5, 1.1, 2.6, 4.1, 5.6]) {
+      const state = sequencer.evaluateFrame(config, t, 30.0, 1920, 1080, 1920, 1080, mockBands)
+      assert.ok(Number.isFinite(state.shakeX), `Shake x must be finite at t=${t}`)
+      assert.ok(Number.isFinite(state.shakeY), `Shake y must be finite at t=${t}`)
+      assert.ok(Number.isFinite(state.shakeRotationRad), `Shake rotation must be finite at t=${t}`)
+      assert.ok(state.cropRect.sw > 0 && state.cropRect.sh > 0, `Crop sw and sh must be positive`)
     }
   })
 
   it('should execute SonicCamEngine rendering pipeline across all 9 presets without throwing', () => {
-    // Mock 2D Canvas context
     const mockCtx = {
       save: () => {},
       restore: () => {},
@@ -220,6 +218,9 @@ describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
       rotate: () => {},
       scale: () => {},
       transform: () => {},
+      strokeRect: () => {},
+      fillText: () => {},
+      setLineDash: () => {},
       createRadialGradient: () => ({
         addColorStop: () => {},
       }),
@@ -237,7 +238,6 @@ describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
       isBeatHit: true,
     }
 
-    // Mock Image in Node.js test environment
     const originalImage = (globalThis as any).Image
     try {
       class MockImage {
@@ -259,10 +259,11 @@ describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
           ...preset.config,
           sourceImageUrl: 'data:image/png;base64,mock',
           enabled: true,
+          regions: preset.config.regions || generateCinematicGrid(6),
         }
 
         assert.doesNotThrow(() => {
-          testEngine.render(mockCtx, 1920, 1080, fullConfig, mockBands, 6.5, 30.0)
+          testEngine.render(mockCtx, 1920, 1080, fullConfig, mockBands, 2.5, 30.0)
         }, `SonicCamEngine must render preset ${preset.id} without throwing`)
       }
 
@@ -285,7 +286,7 @@ describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
           ...DEFAULT_SONIC_CAM_CONFIG,
           sourceImageUrl: 'data:image/png;base64,mock',
           enabled: true,
-          orbit: { ...DEFAULT_SONIC_CAM_CONFIG.orbit, enabled: true },
+          regions: generateCinematicGrid(6),
         },
       }
 
@@ -294,7 +295,7 @@ describe('SonicCam 3D — Music-Reactive Cinematic Camera Studio Suite', () => {
 
       assert.doesNotThrow(() => {
         renderEngine.render(mockCtx, 1920, 1080, studioConfig, mockBands, mockFreq, mockTime, 5.0, 30.0)
-      }, 'Main AudioToVideoRenderEngine must execute SonicCam 3D composition branch without throwing')
+      }, 'Main AudioToVideoRenderEngine must execute SonicCam composition branch without throwing')
     } finally {
       ;(globalThis as any).Image = originalImage
     }
