@@ -45,6 +45,9 @@ import {
   Waves,
   Tv,
   SlidersHorizontal,
+  Flower2,
+  Sprout,
+  Leaf,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -59,6 +62,7 @@ import {
   MotionStyle,
   SlideshowImage,
   AudioTrackMetadata,
+  NormalizedAudioBands,
 } from '../lib/audioToVideo/types'
 import {
   CameraMotionPreset,
@@ -77,6 +81,15 @@ import {
   PortalPreset,
   PortalModuleId,
 } from '../lib/portalVfx/portalTypes'
+import {
+  GARDEN_SCENES,
+  getGardenScene,
+} from '../lib/garden/gardenPresets'
+import {
+  DEFAULT_GARDEN_CONFIG,
+  GardenSceneId,
+  MusicGrownGardenConfig,
+} from '../lib/garden/gardenTypes'
 import { BACKGROUND_PRESETS } from '../lib/audioToVideo/backgroundPresets'
 import { AudioToVideoAudioEngine } from '../lib/audioToVideo/audioToVideoAudioEngine'
 import { AudioToVideoRenderEngine } from '../lib/audioToVideo/audioToVideoRenderEngine'
@@ -85,7 +98,15 @@ import {
   ExportProgress,
 } from '../lib/audioToVideo/audioToVideoExportEngine'
 
-type StudioTab = 'portal' | 'photomotion' | 'background' | 'visualizer' | 'cinematic' | 'typography' | 'audio'
+type StudioTab =
+  | 'portal'
+  | 'photomotion'
+  | 'garden'
+  | 'background'
+  | 'visualizer'
+  | 'cinematic'
+  | 'typography'
+  | 'audio'
 
 export const AudioToVideoStudioTool: React.FC = () => {
   const tool = getToolBySlug('audio-to-video-studio')
@@ -110,6 +131,18 @@ export const AudioToVideoStudioTool: React.FC = () => {
   const maskCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const photoMotionInputRef = useRef<HTMLInputElement | null>(null)
   const foregroundInputRef = useRef<HTMLInputElement | null>(null)
+
+  // Garden Studio State & Refs
+  const gardenPhotoInputRef = useRef<HTMLInputElement | null>(null)
+  const frameCounterRef = useRef<number>(0)
+  const [liveBands, setLiveBands] = useState<NormalizedAudioBands>({
+    bass: 0,
+    mid: 0,
+    treble: 0,
+    subBass: 0,
+    overall: 0,
+    isBeatHit: false,
+  })
 
   // Audio Playback & Track State
   const [audioTrack, setAudioTrack] = useState<AudioTrackMetadata>({
@@ -207,6 +240,12 @@ export const AudioToVideoStudioTool: React.FC = () => {
             if (audio.isEnded() && isPlaying) {
               setIsPlaying(false)
             }
+          }
+
+          // Update live DSP meters throttled every ~4 frames
+          frameCounterRef.current++
+          if (frameCounterRef.current % 4 === 0) {
+            setLiveBands(bands)
           }
 
           renderer.render(
@@ -941,6 +980,35 @@ export const AudioToVideoStudioTool: React.FC = () => {
     showToast('Brush mask applied to 2.5D Parallax Compositor!', 'success')
   }
 
+  // Handle Custom Garden Photo Upload
+  const handleGardenPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const url = URL.createObjectURL(file)
+    setComposition((prev) => ({
+      ...prev,
+      gardenStudio: {
+        ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+        enabled: true,
+        sceneId: 'custom-photo',
+        customPhoto: {
+          ...(prev.gardenStudio?.customPhoto || DEFAULT_GARDEN_CONFIG.customPhoto),
+          customImageUrl: url,
+        },
+      },
+    }))
+    showToast('Loaded custom garden photograph', 'success')
+  }
+
+  // Handle Garden Reset
+  const handleResetGarden = () => {
+    setComposition((prev) => ({
+      ...prev,
+      gardenStudio: DEFAULT_GARDEN_CONFIG,
+    }))
+    showToast('Reset all garden effects to neutral', 'info')
+  }
+
   // Handle Export Video
   const handleStartExport = async () => {
     const canvas = canvasRef.current
@@ -1305,10 +1373,11 @@ export const AudioToVideoStudioTool: React.FC = () => {
           {/* RIGHT 5/12: MODULAR EDITING SUITE & STUDIO DOCK */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Dock Navigation Tabs */}
-            <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
               {[
                 { id: 'portal', label: 'Portal VFX', icon: Orbit },
                 { id: 'photomotion', label: '2.5D Motion', icon: Film },
+                { id: 'garden', label: 'Garden', icon: Flower2 },
                 { id: 'background', label: 'Scene', icon: ImageIcon },
                 { id: 'visualizer', label: 'Spectrum', icon: Activity },
                 { id: 'cinematic', label: 'Effects', icon: Sparkles },
@@ -3765,6 +3834,981 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2.5: MUSIC-GROWN GARDEN STUDIO */}
+              {activeTab === 'garden' && (
+                <div className="space-y-6">
+                  {/* Hidden Garden Photo Input */}
+                  <input
+                    type="file"
+                    ref={gardenPhotoInputRef}
+                    onChange={handleGardenPhotoUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+
+                  {/* Header & Master Toggle */}
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 p-0.5 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <Flower2 className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white flex items-center gap-2">
+                          <span>Music-Grown Garden Studio</span>
+                          <span
+                            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              composition.gardenStudio?.enabled
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : 'bg-slate-800 text-slate-400'
+                            }`}
+                          >
+                            {composition.gardenStudio?.enabled ? 'Active' : 'Disabled'}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          Atmospheric living botanical world reactive to music
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {composition.gardenStudio?.enabled && (
+                        <button
+                          onClick={() =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              gardenStudio: {
+                                ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                isBeforeActive: !prev.gardenStudio?.isBeforeActive,
+                              },
+                            }))
+                          }
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
+                            composition.gardenStudio?.isBeforeActive
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              : 'bg-slate-900 text-slate-400 border-white/10 hover:text-white'
+                          }`}
+                          title="Temporarily view original clean photo without garden effects"
+                        >
+                          {composition.gardenStudio?.isBeforeActive ? 'Showing Original' : 'Before / After'}
+                        </button>
+                      )}
+
+                      <button
+                        onClick={handleResetGarden}
+                        className="p-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-400 hover:text-red-300 hover:border-red-500/30 transition-all"
+                        title="Reset all garden effects to neutral default"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+
+                      <input
+                        type="checkbox"
+                        checked={composition.gardenStudio?.enabled ?? false}
+                        onChange={(e) => {
+                          const nextState = e.target.checked
+                          setComposition((prev) => ({
+                            ...prev,
+                            gardenStudio: {
+                              ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                              enabled: nextState,
+                            },
+                          }))
+                          showToast(
+                            nextState ? 'Music-Grown Garden Mode activated' : 'Garden Mode disabled',
+                            nextState ? 'success' : 'info'
+                          )
+                        }}
+                        className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* SECTION 1: GARDEN WORLD SCENE LIBRARY */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <Leaf className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Garden World Library</span>
+                      </label>
+                      <button
+                        onClick={() => gardenPhotoInputRef.current?.click()}
+                        className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        <Upload className="w-3 h-3" />
+                        <span>Upload Custom Photo</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {GARDEN_SCENES.map((scene) => {
+                        const isSelected =
+                          composition.gardenStudio?.enabled &&
+                          composition.gardenStudio?.sceneId === scene.id
+
+                        return (
+                          <div
+                            key={scene.id}
+                            onClick={() => {
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  enabled: true,
+                                  sceneId: scene.id,
+                                },
+                              }))
+                              showToast(`Loaded ${scene.name}`, 'success')
+                            }}
+                            className={`p-2 rounded-xl border text-left transition-all cursor-pointer relative group overflow-hidden ${
+                              isSelected
+                                ? 'bg-emerald-950/40 border-emerald-400 shadow-lg shadow-emerald-500/20'
+                                : 'bg-slate-900/80 border-white/10 hover:border-white/20 hover:bg-slate-800/60'
+                            }`}
+                          >
+                            <div className="relative aspect-video rounded-lg overflow-hidden mb-2 bg-slate-950">
+                              <img
+                                src={scene.thumbnailPath}
+                                alt={scene.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                onError={(e) => {
+                                  // Graceful fallback to jpg if webp fails
+                                  ;(e.target as HTMLImageElement).src = scene.imagePath
+                                }}
+                              />
+                              {isSelected && (
+                                <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-black shadow-md">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="font-bold text-xs text-white truncate">{scene.name}</div>
+                            <div className="text-[10px] text-slate-400 truncate mt-0.5">
+                              {scene.subtitle}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Custom Photograph Active Panel */}
+                    {composition.gardenStudio?.sceneId === 'custom-photo' &&
+                      composition.gardenStudio.customPhoto.customImageUrl && (
+                        <div className="p-3 rounded-xl bg-slate-900 border border-emerald-500/30 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                              <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>Custom Garden Photo Active</span>
+                            </span>
+                            <button
+                              onClick={() =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    sceneId: 'moonlit-rose',
+                                  },
+                                }))
+                              }
+                              className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                            >
+                              Remove Custom
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <div className="text-[11px] text-slate-400 mb-1">Image Fit</div>
+                              <select
+                                value={composition.gardenStudio.customPhoto.customImageFit}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    gardenStudio: {
+                                      ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                      customPhoto: {
+                                        ...(prev.gardenStudio?.customPhoto || DEFAULT_GARDEN_CONFIG.customPhoto),
+                                        customImageFit: e.target.value as any,
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full bg-slate-800 border border-white/10 rounded-lg p-1.5 text-xs text-white"
+                              >
+                                <option value="cover">Cover (Cinematic Fill)</option>
+                                <option value="contain">Contain (Full Image)</option>
+                                <option value="100%">Stretch 100%</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Brightness</span>
+                                <span>{composition.gardenStudio.customPhoto.brightness}%</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="30"
+                                max="150"
+                                value={composition.gardenStudio.customPhoto.brightness}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    gardenStudio: {
+                                      ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                      customPhoto: {
+                                        ...(prev.gardenStudio?.customPhoto || DEFAULT_GARDEN_CONFIG.customPhoto),
+                                        brightness: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-emerald-400"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                  </div>
+
+                  {/* SECTION 2: MUSICAL BLOOM ENGINE */}
+                  <div className="p-4 rounded-xl bg-slate-900 border border-white/10 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Sprout className="w-4 h-4 text-emerald-400" />
+                        <div>
+                          <div className="text-xs font-bold text-white">Musical Bloom Engine</div>
+                          <div className="text-[10px] text-slate-400">
+                            Layered geometric botanical petal uncurling & blooming
+                          </div>
+                        </div>
+                      </div>
+
+                      <input
+                        type="checkbox"
+                        checked={composition.gardenStudio?.bloom.enabled ?? false}
+                        onChange={(e) =>
+                          setComposition((prev) => ({
+                            ...prev,
+                            gardenStudio: {
+                              ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                              bloom: {
+                                ...(prev.gardenStudio?.bloom || DEFAULT_GARDEN_CONFIG.bloom),
+                                enabled: e.target.checked,
+                              },
+                            },
+                          }))
+                        }
+                        className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                      />
+                    </div>
+
+                    {composition.gardenStudio?.bloom.enabled && (
+                      <div className="space-y-3 pt-3 border-t border-white/5">
+                        <div>
+                          <div className="flex justify-between text-xs text-slate-300 mb-1">
+                            <span>Bloom Intensity</span>
+                            <span className="font-mono text-emerald-400 font-bold">
+                              {composition.gardenStudio.bloom.intensity}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="10"
+                            max="100"
+                            value={composition.gardenStudio.bloom.intensity}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  bloom: {
+                                    ...(prev.gardenStudio?.bloom || DEFAULT_GARDEN_CONFIG.bloom),
+                                    intensity: parseInt(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-emerald-400 cursor-pointer"
+                          />
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between text-xs text-slate-300 mb-1">
+                            <span>Bloom Response Speed</span>
+                            <span className="font-mono text-emerald-400 font-bold">
+                              {Math.round(composition.gardenStudio.bloom.responseSpeed * 100)}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.1"
+                            max="0.9"
+                            step="0.05"
+                            value={composition.gardenStudio.bloom.responseSpeed}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  bloom: {
+                                    ...(prev.gardenStudio?.bloom || DEFAULT_GARDEN_CONFIG.bloom),
+                                    responseSpeed: parseFloat(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-emerald-400 cursor-pointer"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-xs pt-1">
+                          <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input
+                              type="checkbox"
+                              checked={composition.gardenStudio.bloom.beatBloomPulse}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    bloom: {
+                                      ...(prev.gardenStudio?.bloom || DEFAULT_GARDEN_CONFIG.bloom),
+                                      beatBloomPulse: e.target.checked,
+                                    },
+                                  },
+                                }))
+                              }
+                              className="accent-emerald-400 w-3.5 h-3.5"
+                            />
+                            <span>Beat Opening Accents</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input
+                              type="checkbox"
+                              checked={composition.gardenStudio.bloom.gradualSongBloom}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    bloom: {
+                                      ...(prev.gardenStudio?.bloom || DEFAULT_GARDEN_CONFIG.bloom),
+                                      gradualSongBloom: e.target.checked,
+                                    },
+                                  },
+                                }))
+                              }
+                              className="accent-emerald-400 w-3.5 h-3.5"
+                            />
+                            <span>Song Progression Bloom</span>
+                          </label>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                          <div>
+                            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                              <span>Botanical Centers</span>
+                              <span>{composition.gardenStudio.bloom.flowerCount}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="4"
+                              max="8"
+                              value={composition.gardenStudio.bloom.flowerCount}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    bloom: {
+                                      ...(prev.gardenStudio?.bloom || DEFAULT_GARDEN_CONFIG.bloom),
+                                      flowerCount: parseInt(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-emerald-400"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                              <span>Petal Ring Layers</span>
+                              <span>{composition.gardenStudio.bloom.petalLayers}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="2"
+                              max="4"
+                              value={composition.gardenStudio.bloom.petalLayers}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    bloom: {
+                                      ...(prev.gardenStudio?.bloom || DEFAULT_GARDEN_CONFIG.bloom),
+                                      petalLayers: parseInt(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-emerald-400"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SECTION 3: AUDIO-REACTIVE ENGINE & LIVE METERS */}
+                  <div className="p-4 rounded-xl bg-slate-900 border border-white/10 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-cyan-400" />
+                        <div>
+                          <div className="text-xs font-bold text-white">Audio-Reactive Engine</div>
+                          <div className="text-[10px] text-slate-400">
+                            Custom DSP mappings to botanical motion & lighting
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono text-cyan-400 font-bold">
+                        Live DSP Analysis
+                      </span>
+                    </div>
+
+                    {/* Real-Time DSP Signal Meters */}
+                    <div className="grid grid-cols-4 gap-2 p-2.5 rounded-xl bg-slate-950/80 border border-white/5">
+                      {[
+                        { label: 'Bass', val: liveBands.bass, color: 'bg-rose-500' },
+                        { label: 'Mids', val: liveBands.mid, color: 'bg-emerald-400' },
+                        { label: 'Treble', val: liveBands.treble, color: 'bg-cyan-400' },
+                        { label: 'Energy', val: liveBands.overall, color: 'bg-amber-400' },
+                      ].map((meter) => (
+                        <div key={meter.label} className="space-y-1">
+                          <div className="flex justify-between text-[10px] text-slate-400">
+                            <span>{meter.label}</span>
+                            <span className="font-mono">{Math.round(meter.val * 100)}%</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${meter.color} transition-all duration-75`}
+                              style={{ width: `${Math.min(100, Math.round(meter.val * 100))}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Mappings */}
+                    <div className="space-y-3 pt-2">
+                      {[
+                        {
+                          key: 'bassToBloom',
+                          label: 'Bass → Bloom Amount & Garden Pulse',
+                          desc: 'Low frequencies expand petals & pulse scene breathing',
+                        },
+                        {
+                          key: 'midToLeafSway',
+                          label: 'Mid Frequencies → Leaf & Stem Sway',
+                          desc: 'Melodic mid-range instruments oscillate stems naturally',
+                        },
+                        {
+                          key: 'trebleToFireflies',
+                          label: 'Treble → Firefly Glow Flare',
+                          desc: 'High acoustic sparkle brightens firefly luminous cores',
+                        },
+                        {
+                          key: 'trebleToPollenSparkle',
+                          label: 'Treble → Pollen Spore Shimmer',
+                          desc: 'Percussive highs shimmer floating pollen particles',
+                        },
+                        {
+                          key: 'energyToAmbientLighting',
+                          label: 'Overall Energy → Atmospheric Lighting',
+                          desc: 'Master song intensity brightens ambient garden haze',
+                        },
+                      ].map((mapping) => (
+                        <div key={mapping.key} className="space-y-1">
+                          <div className="flex justify-between text-xs text-slate-300">
+                            <span>{mapping.label}</span>
+                            <span className="font-mono text-cyan-400 font-bold">
+                              {(composition.gardenStudio?.audioMapping as any)?.[mapping.key] ?? 50}%
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-500">{mapping.desc}</p>
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={(composition.gardenStudio?.audioMapping as any)?.[mapping.key] ?? 50}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  audioMapping: {
+                                    ...(prev.gardenStudio?.audioMapping || DEFAULT_GARDEN_CONFIG.audioMapping),
+                                    [mapping.key]: parseInt(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400 cursor-pointer"
+                          />
+                        </div>
+                      ))}
+
+                      {/* Smoothing Factor */}
+                      <div className="pt-2 border-t border-white/5 space-y-1">
+                        <div className="flex justify-between text-xs text-slate-300">
+                          <span>Audio Curve Smoothing (Zero Jitter)</span>
+                          <span className="font-mono text-cyan-400 font-bold">
+                            {Math.round(
+                              (composition.gardenStudio?.audioMapping.smoothingFactor ?? 0.8) * 100
+                            )}
+                            %
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.2"
+                          max="0.95"
+                          step="0.05"
+                          value={composition.gardenStudio?.audioMapping.smoothingFactor ?? 0.8}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              gardenStudio: {
+                                ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                audioMapping: {
+                                  ...(prev.gardenStudio?.audioMapping || DEFAULT_GARDEN_CONFIG.audioMapping),
+                                  smoothingFactor: parseFloat(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 4: NATURAL BOTANICAL ATMOSPHERE & MOTION */}
+                  <div className="p-4 rounded-xl bg-slate-900 border border-white/10 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Wind className="w-4 h-4 text-emerald-400" />
+                      <div>
+                        <div className="text-xs font-bold text-white">Atmosphere & Botanical Motion</div>
+                        <div className="text-[10px] text-slate-400">
+                          Organic fireflies, pollen, mist, light rays, and wind
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {/* 1. Fireflies */}
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-white">Fireflies Drift & Glow</div>
+                            <div className="text-[10px] text-slate-400">
+                              Luminous organic particles with treble reactivity
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={composition.gardenStudio?.atmosphere.firefliesEnabled ?? false}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                    firefliesEnabled: e.target.checked,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                          />
+                        </div>
+
+                        {composition.gardenStudio?.atmosphere.firefliesEnabled && (
+                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+                            <div>
+                              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Count</span>
+                                <span>{composition.gardenStudio.atmosphere.fireflyCount}</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="10"
+                                max="70"
+                                value={composition.gardenStudio.atmosphere.fireflyCount}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    gardenStudio: {
+                                      ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                      atmosphere: {
+                                        ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                        fireflyCount: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-emerald-400"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Glow Size</span>
+                                <span>{composition.gardenStudio.atmosphere.fireflySize.toFixed(1)}px</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="1.5"
+                                max="5.0"
+                                step="0.5"
+                                value={composition.gardenStudio.atmosphere.fireflySize}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    gardenStudio: {
+                                      ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                      atmosphere: {
+                                        ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                        fireflySize: parseFloat(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-emerald-400"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 2. Floating Pollen */}
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-white">Floating Pollen Spores</div>
+                            <div className="text-[10px] text-slate-400">
+                              Buoyant floral dust motes drifting in sunbeams
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={composition.gardenStudio?.atmosphere.pollenEnabled ?? false}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                    pollenEnabled: e.target.checked,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                          />
+                        </div>
+
+                        {composition.gardenStudio?.atmosphere.pollenEnabled && (
+                          <div className="pt-2 border-t border-white/5">
+                            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                              <span>Pollen Density</span>
+                              <span>{composition.gardenStudio.atmosphere.pollenDensity}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="15"
+                              max="90"
+                              value={composition.gardenStudio.atmosphere.pollenDensity}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    atmosphere: {
+                                      ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                      pollenDensity: parseInt(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-emerald-400"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 3. Atmospheric Mist */}
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-white">Atmospheric Drifting Mist</div>
+                            <div className="text-[10px] text-slate-400">
+                              Multi-layer soft fog drifting across the garden
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={composition.gardenStudio?.atmosphere.mistEnabled ?? false}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                    mistEnabled: e.target.checked,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                          />
+                        </div>
+
+                        {composition.gardenStudio?.atmosphere.mistEnabled && (
+                          <div className="pt-2 border-t border-white/5">
+                            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                              <span>Mist Density</span>
+                              <span>{composition.gardenStudio.atmosphere.mistDensity}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="10"
+                              max="80"
+                              value={composition.gardenStudio.atmosphere.mistDensity}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    atmosphere: {
+                                      ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                      mistDensity: parseInt(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-emerald-400"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 4. Volumetric Light Rays */}
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-white">
+                              Volumetric Sun / Moon Rays
+                            </div>
+                            <div className="text-[10px] text-slate-400">
+                              Diagonal celestial god-rays streaming through foliage
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={composition.gardenStudio?.atmosphere.lightRaysEnabled ?? false}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                    lightRaysEnabled: e.target.checked,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                          />
+                        </div>
+
+                        {composition.gardenStudio?.atmosphere.lightRaysEnabled && (
+                          <div className="pt-2 border-t border-white/5">
+                            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                              <span>Ray Intensity</span>
+                              <span>{composition.gardenStudio.atmosphere.lightRayIntensity}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="10"
+                              max="90"
+                              value={composition.gardenStudio.atmosphere.lightRayIntensity}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  gardenStudio: {
+                                    ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                    atmosphere: {
+                                      ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                      lightRayIntensity: parseInt(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-emerald-400"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 5. Natural Wind */}
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-white">Natural Garden Breeze</div>
+                            <div className="text-[10px] text-slate-400">
+                              Directs drifting pollen, foliage sway & light rays
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={composition.gardenStudio?.atmosphere.windEnabled ?? false}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                    windEnabled: e.target.checked,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                          />
+                        </div>
+
+                        {composition.gardenStudio?.atmosphere.windEnabled && (
+                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+                            <div>
+                              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Breeze Speed</span>
+                                <span>{composition.gardenStudio.atmosphere.windSpeed}</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                value={composition.gardenStudio.atmosphere.windSpeed}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    gardenStudio: {
+                                      ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                      atmosphere: {
+                                        ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                        windSpeed: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-emerald-400"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                                <span>Wind Direction</span>
+                                <span>{composition.gardenStudio.atmosphere.windDirectionDeg}°</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="-45"
+                                max="45"
+                                value={composition.gardenStudio.atmosphere.windDirectionDeg}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    gardenStudio: {
+                                      ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                      atmosphere: {
+                                        ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                        windDirectionDeg: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-emerald-400"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 6. Dew Highlights & 2.5D Parallax */}
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <label className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer text-xs text-white">
+                          <span className="flex items-center gap-1.5">
+                            <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>Dew Highlights</span>
+                          </span>
+                          <input
+                            type="checkbox"
+                            checked={composition.gardenStudio?.atmosphere.dewHighlightsEnabled ?? false}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                    dewHighlightsEnabled: e.target.checked,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                          />
+                        </label>
+
+                        <label className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer text-xs text-white">
+                          <span className="flex items-center gap-1.5">
+                            <Camera className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>2.5D Parallax</span>
+                          </span>
+                          <input
+                            type="checkbox"
+                            checked={composition.gardenStudio?.atmosphere.parallaxEnabled ?? false}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                gardenStudio: {
+                                  ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.gardenStudio?.atmosphere || DEFAULT_GARDEN_CONFIG.atmosphere),
+                                    parallaxEnabled: e.target.checked,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-emerald-400 rounded cursor-pointer"
+                          />
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

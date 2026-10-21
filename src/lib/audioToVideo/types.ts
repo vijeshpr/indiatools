@@ -10,6 +10,12 @@ import {
 } from '../portalVfx/portalTypes.ts'
 export * from '../portalVfx/portalTypes.ts'
 
+import {
+  MusicGrownGardenConfig,
+  DEFAULT_GARDEN_CONFIG,
+} from '../garden/gardenTypes.ts'
+export * from '../garden/gardenTypes.ts'
+
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
 
@@ -174,6 +180,7 @@ export interface StudioCompositionConfig {
   textOverlay: TextOverlayConfig
   photoMotion?: PhotoMotionStudioConfig
   portalVfx?: CinematicPortalStudioConfig
+  gardenStudio?: MusicGrownGardenConfig
   performanceMode: boolean
 }
 
@@ -249,5 +256,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
   },
   photoMotion: DEFAULT_PHOTO_MOTION_CONFIG,
   portalVfx: DEFAULT_PORTAL_VFX_CONFIG,
+  gardenStudio: DEFAULT_GARDEN_CONFIG,
   performanceMode: false,
 }

@@ -32,6 +32,16 @@ import {
   PortalVfxEngine,
   portalVfxEngine,
 } from '../src/lib/portalVfx/portalVfxEngine.ts'
+import {
+  GARDEN_SCENES,
+  getGardenScene,
+} from '../src/lib/garden/gardenPresets.ts'
+import {
+  musicGrownGardenEngine,
+} from '../src/lib/garden/gardenEngine.ts'
+import {
+  DEFAULT_GARDEN_CONFIG,
+} from '../src/lib/garden/gardenTypes.ts'
 
 describe('IndiaTools Audio to Video Studio Suite', () => {
   it('should be correctly registered as Tool #69 in TOOLS registry', () => {
@@ -478,6 +488,18 @@ describe('IndiaTools Audio to Video Studio Suite', () => {
     assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.dreamyBokehEnabled, false, 'Bokeh must start OFF')
     assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.textOverlay.title, '', 'Default title must be empty')
     assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.photoMotion?.enabled, false, 'Photo Motion must start OFF')
+
+    // 3. Music-Grown Garden Studio must start completely OFF
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.enabled, false, 'Garden master switch must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.bloom.enabled, false, 'Bloom must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.atmosphere.firefliesEnabled, false, 'Fireflies must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.atmosphere.pollenEnabled, false, 'Pollen must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.atmosphere.mistEnabled, false, 'Mist must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.atmosphere.lightRaysEnabled, false, 'Light rays must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.atmosphere.windEnabled, false, 'Wind must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.atmosphere.dewHighlightsEnabled, false, 'Dew highlights must start OFF')
+    assert.strictEqual(DEFAULT_GARDEN_CONFIG.atmosphere.parallaxEnabled, false, 'Parallax must start OFF')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.gardenStudio?.enabled, false, 'Garden mode in studio must start OFF')
   })
 
   it('should execute PortalVfxEngine render pipeline without errors across all modules', () => {
@@ -582,6 +604,147 @@ describe('IndiaTools Audio to Video Studio Suite', () => {
       // Apply preset and verify only expected modules are activated
       const applied = preset.apply(DEFAULT_PORTAL_VFX_CONFIG)
       assert.ok(applied.ring.enabled, `Preset ${preset.id} should enable portal ring`)
+    }
+  })
+
+  it('should verify Music-Grown Garden Studio World Library and all 6 scenes', () => {
+    assert.strictEqual(GARDEN_SCENES.length, 6, 'Must provide exactly 6 curated botanical garden scenes')
+
+    const expectedSceneIds = [
+      'moonlit-rose',
+      'golden-hour-meadow',
+      'white-jasmine-night',
+      'rain-kissed-botanical',
+      'dreamlike-glowing',
+      'calm-garden-dawn',
+    ]
+
+    const actualSceneIds = GARDEN_SCENES.map((s) => s.id)
+    assert.deepStrictEqual(actualSceneIds, expectedSceneIds)
+
+    for (const scene of GARDEN_SCENES) {
+      assert.ok(scene.name.length > 0, `Scene ${scene.id} must have a name`)
+      assert.ok(scene.subtitle.length > 0, `Scene ${scene.id} must have a subtitle`)
+      assert.ok(scene.description.length > 0, `Scene ${scene.id} must have a description`)
+      assert.ok(scene.imagePath.startsWith('/images/garden/'), `Scene ${scene.id} must have an image path`)
+      assert.ok(scene.thumbnailPath.startsWith('/images/garden/'), `Scene ${scene.id} must have a thumbnail path`)
+      assert.ok(scene.fallbackTheme.primaryFlowerColor.startsWith('#'), `Scene ${scene.id} must have hex flower color`)
+      assert.ok(scene.fallbackTheme.skyTop.startsWith('#'), `Scene ${scene.id} must have hex sky color`)
+    }
+
+    // Verify getGardenScene helper
+    const moonlit = getGardenScene('moonlit-rose')
+    assert.strictEqual(moonlit.name, 'Moonlit Rose Garden')
+    const fallback = getGardenScene('unknown' as any)
+    assert.strictEqual(fallback.id, 'moonlit-rose', 'Unknown scene should gracefully fallback to first scene')
+  })
+
+  it('should execute MusicGrownGardenEngine render pipeline across all scenes and modules', () => {
+    const originalImage = (globalThis as any).Image
+    ;(globalThis as any).Image = class MockImage {
+      complete = true
+      naturalWidth = 1920
+      naturalHeight = 1080
+      src = ''
+    }
+
+    try {
+      const gradMock = { addColorStop: () => {} }
+      const mockCtx = {
+        save: () => {},
+        restore: () => {},
+        clearRect: () => {},
+        beginPath: () => {},
+      closePath: () => {},
+      arc: () => {},
+      ellipse: () => {},
+      clip: () => {},
+      moveTo: () => {},
+      lineTo: () => {},
+      quadraticCurveTo: () => {},
+      bezierCurveTo: () => {},
+      stroke: () => {},
+      fill: () => {},
+      translate: () => {},
+      scale: () => {},
+      rotate: () => {},
+      drawImage: () => {},
+      fillRect: () => {},
+      createLinearGradient: () => gradMock,
+      createRadialGradient: () => gradMock,
+      fillStyle: '',
+      strokeStyle: '',
+      lineWidth: 1,
+      lineCap: 'round',
+      globalAlpha: 1,
+      globalCompositeOperation: 'source-over',
+      shadowBlur: 0,
+      shadowColor: '',
+      filter: '',
+    } as any
+
+    const mockBands = { bass: 0.85, mid: 0.6, treble: 0.75, subBass: 0.9, overall: 0.7, isBeatHit: true }
+
+    // Test each of the 6 scenes
+    for (const scene of GARDEN_SCENES) {
+      const config = {
+        ...DEFAULT_GARDEN_CONFIG,
+        enabled: true,
+        sceneId: scene.id,
+        bloom: {
+          ...DEFAULT_GARDEN_CONFIG.bloom,
+          enabled: true,
+          beatBloomPulse: true,
+          gradualSongBloom: true,
+        },
+        atmosphere: {
+          ...DEFAULT_GARDEN_CONFIG.atmosphere,
+          firefliesEnabled: true,
+          pollenEnabled: true,
+          mistEnabled: true,
+          lightRaysEnabled: true,
+          windEnabled: true,
+          dewHighlightsEnabled: true,
+          parallaxEnabled: true,
+        },
+      }
+
+      assert.doesNotThrow(() => {
+        musicGrownGardenEngine.render(mockCtx, 1920, 1080, config, mockBands, 5.0, 30.0)
+      }, `Garden engine must render scene ${scene.id} with all effects enabled without throwing`)
+    }
+
+    // Test Before/After comparison mode
+    const beforeConfig = {
+      ...DEFAULT_GARDEN_CONFIG,
+      enabled: true,
+      sceneId: 'moonlit-rose' as const,
+      isBeforeActive: true,
+    }
+    assert.doesNotThrow(() => {
+      musicGrownGardenEngine.render(mockCtx, 1920, 1080, beforeConfig, mockBands, 5.0, 30.0)
+    }, 'Garden engine must render in Before/After preview mode without throwing')
+
+    // Test integration with main AudioToVideoRenderEngine
+    const renderEngine = new AudioToVideoRenderEngine()
+    const studioConfig: StudioCompositionConfig = {
+      ...DEFAULT_STUDIO_COMPOSITION,
+      gardenStudio: {
+        ...DEFAULT_GARDEN_CONFIG,
+        enabled: true,
+        sceneId: 'moonlit-rose',
+        bloom: { ...DEFAULT_GARDEN_CONFIG.bloom, enabled: true },
+      },
+    }
+
+    const mockFreq = new Uint8Array(1024).fill(128)
+    const mockTime = new Uint8Array(1024).fill(128)
+
+    assert.doesNotThrow(() => {
+      renderEngine.render(mockCtx, 1920, 1080, studioConfig, mockBands, mockFreq, mockTime, 5.0, 30.0)
+    }, 'Main render engine must execute garden composition branch without throwing')
+    } finally {
+      ;(globalThis as any).Image = originalImage
     }
   })
 })
