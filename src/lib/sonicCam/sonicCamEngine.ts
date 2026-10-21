@@ -425,6 +425,283 @@ export class SonicCamEngine {
       return
     }
 
+    // Anamorphic Blue Streak / Lens Flare
+    if (state.transitionType === 'anamorphic-flare') {
+      const t = progress
+      ctx.save()
+      ctx.globalAlpha = 1 - t
+      ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, 0, canvasW, canvasH)
+      ctx.globalAlpha = t
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+      ctx.restore()
+
+      const peak = Math.sin(t * Math.PI)
+      if (peak > 0.02) {
+        ctx.save()
+        ctx.globalCompositeOperation = 'screen'
+        const streakY = canvasH * 0.5
+        const streakH = Math.max(6, peak * 36)
+
+        const grad = ctx.createLinearGradient(0, streakY, canvasW, streakY)
+        grad.addColorStop(0, 'rgba(0, 150, 255, 0)')
+        grad.addColorStop(0.3, `rgba(0, 210, 255, ${peak * 0.7})`)
+        grad.addColorStop(0.5, `rgba(255, 255, 255, ${peak * 0.95})`)
+        grad.addColorStop(0.7, `rgba(0, 210, 255, ${peak * 0.7})`)
+        grad.addColorStop(1, 'rgba(0, 150, 255, 0)')
+
+        ctx.fillStyle = grad
+        ctx.fillRect(0, streakY - streakH / 2, canvasW, streakH)
+
+        const rGrad = ctx.createRadialGradient(canvasW / 2, streakY, 0, canvasW / 2, streakY, canvasW * 0.3)
+        rGrad.addColorStop(0, `rgba(255, 255, 255, ${peak * 0.8})`)
+        rGrad.addColorStop(0.4, `rgba(0, 200, 255, ${peak * 0.4})`)
+        rGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = rGrad
+        ctx.fillRect(0, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // RGB Chromatic Seismic Shake
+    if (state.transitionType === 'rgb-shake') {
+      const t = progress
+      const decay = 1 - t
+      const shakeAmt = decay * 36
+
+      ctx.save()
+      if (t < 0.4) {
+        ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, 0, canvasW, canvasH)
+      } else {
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+      }
+
+      if (shakeAmt > 1) {
+        ctx.globalCompositeOperation = 'screen'
+        const ox = Math.sin(t * 70) * shakeAmt
+        const oy = Math.cos(t * 60) * (shakeAmt * 0.5)
+
+        ctx.globalAlpha = decay * 0.5
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, ox, oy, canvasW, canvasH)
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, -ox, -oy, canvasW, canvasH)
+      }
+      ctx.restore()
+      return
+    }
+
+    // Kaleidoscope Mirror Refraction
+    if (state.transitionType === 'kaleidoscope') {
+      const t = this.easeInOutQuad(progress)
+      if (t > 0.85) {
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+        return
+      }
+
+      const hw = canvasW / 2
+      const hh = canvasH / 2
+      const crop = t < 0.5 ? prev : cur
+
+      ctx.save()
+      ctx.translate(hw, hh)
+      const rot = t * Math.PI * 0.5
+      ctx.rotate(rot)
+
+      for (let sx = -1; sx <= 1; sx += 2) {
+        for (let sy = -1; sy <= 1; sy += 2) {
+          ctx.save()
+          ctx.scale(sx, sy)
+          ctx.drawImage(
+            img,
+            crop.sx,
+            crop.sy,
+            crop.sw * 0.5,
+            crop.sh * 0.5,
+            0,
+            0,
+            hw,
+            hh
+          )
+          ctx.restore()
+        }
+      }
+      ctx.restore()
+
+      if (t > 0.4) {
+        ctx.save()
+        ctx.globalAlpha = (t - 0.4) / 0.6
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // Digital Matrix / Pixel Grid Dissolve
+    if (state.transitionType === 'pixelate-dissolve') {
+      const t = progress
+      if (t < 0.5) {
+        const p = t * 2
+        const blockSize = Math.max(2, Math.floor(p * 32))
+        const cols = Math.ceil(canvasW / blockSize)
+        const rows = Math.ceil(canvasH / blockSize)
+
+        for (let c = 0; c < cols; c++) {
+          for (let r = 0; r < rows; r++) {
+            const bx = c * blockSize
+            const by = r * blockSize
+            const imgX = prev.sx + (bx / canvasW) * prev.sw
+            const imgY = prev.sy + (by / canvasH) * prev.sh
+            ctx.drawImage(img, imgX, imgY, 1, 1, bx, by, blockSize, blockSize)
+          }
+        }
+      } else {
+        const p = (t - 0.5) * 2
+        const blockSize = Math.max(1, Math.floor((1 - p) * 32))
+        const cols = Math.ceil(canvasW / blockSize)
+        const rows = Math.ceil(canvasH / blockSize)
+
+        for (let c = 0; c < cols; c++) {
+          for (let r = 0; r < rows; r++) {
+            const bx = c * blockSize
+            const by = r * blockSize
+            const imgX = cur.sx + (bx / canvasW) * cur.sw
+            const imgY = cur.sy + (by / canvasH) * cur.sh
+            ctx.drawImage(img, imgX, imgY, 1, 1, bx, by, blockSize, blockSize)
+          }
+        }
+      }
+      return
+    }
+
+    // Inverted Negative Film Flash
+    if (state.transitionType === 'invert-negative') {
+      const t = progress
+      if (t < 0.4) {
+        ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, 0, canvasW, canvasH)
+      } else {
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+      }
+
+      const peak = Math.sin(t * Math.PI)
+      if (peak > 0.1) {
+        ctx.save()
+        ctx.globalCompositeOperation = 'difference'
+        ctx.fillStyle = `rgba(255, 255, 255, ${peak * 0.95})`
+        ctx.fillRect(0, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // Infinite Radial Tunnel Warp
+    if (state.transitionType === 'tunnel-warp') {
+      const t = this.easeInOutQuad(progress)
+      const rings = 6
+      const hw = canvasW / 2
+      const hh = canvasH / 2
+
+      ctx.save()
+      ctx.translate(hw, hh)
+
+      for (let i = rings; i >= 1; i--) {
+        const p = (i / rings) * (1 - t * 0.6)
+        const s = 1.0 + (1 - p) * 1.5
+        const crop = t < 0.5 ? prev : cur
+        ctx.save()
+        ctx.scale(s, s)
+        ctx.globalAlpha = Math.max(0.15, 1 - (i / rings) * 0.8)
+        ctx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, -hw, -hh, canvasW, canvasH)
+        ctx.restore()
+      }
+      ctx.restore()
+
+      if (t > 0.4) {
+        ctx.save()
+        ctx.globalAlpha = (t - 0.4) / 0.6
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // Dark Vignette Punch / Cinematic Iris
+    if (state.transitionType === 'vignette-pulse') {
+      const t = progress
+      if (t < 0.5) {
+        ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, 0, canvasW, canvasH)
+      } else {
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+      }
+
+      const peak = Math.sin(t * Math.PI)
+      if (peak > 0.05) {
+        ctx.save()
+        const maxR = Math.hypot(canvasW, canvasH) * 0.7
+        const innerR = maxR * (1 - peak * 0.75)
+        const grad = ctx.createRadialGradient(
+          canvasW / 2,
+          canvasH / 2,
+          innerR,
+          canvasW / 2,
+          canvasH / 2,
+          maxR
+        )
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0)')
+        grad.addColorStop(1, `rgba(0, 0, 0, ${peak * 0.95})`)
+        ctx.fillStyle = grad
+        ctx.fillRect(0, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // Centrifugal Radial Blur Smear
+    if (state.transitionType === 'radial-smear') {
+      const t = progress
+      const peak = Math.sin(t * Math.PI)
+      const hw = canvasW / 2
+      const hh = canvasH / 2
+
+      ctx.save()
+      ctx.translate(hw, hh)
+
+      const passes = 5
+      const maxRot = peak * 0.12
+      const crop = t < 0.5 ? prev : cur
+
+      for (let p = -passes; p <= passes; p++) {
+        const a = (p / passes) * maxRot
+        ctx.save()
+        ctx.rotate(a)
+        ctx.globalAlpha = 1 / (passes * 2 + 1)
+        ctx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, -hw, -hh, canvasW, canvasH)
+        ctx.restore()
+      }
+      ctx.restore()
+
+      if (t > 0.45) {
+        ctx.save()
+        ctx.globalAlpha = (t - 0.45) / 0.55
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // Double Thump Heartbeat Bass Pump
+    if (state.transitionType === 'heartbeat-pulse') {
+      const t = progress
+      const thump1 = Math.sin(Math.min(1, t * 2.5) * Math.PI) * 0.16
+      const thump2 = t > 0.4 ? Math.sin(Math.min(1, (t - 0.4) * 2.5) * Math.PI) * 0.22 : 0
+      const s = 1.0 + thump1 + thump2
+
+      ctx.save()
+      ctx.translate(canvasW / 2, canvasH / 2)
+      ctx.scale(s, s)
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, -canvasW / 2, -canvasH / 2, canvasW, canvasH)
+      ctx.restore()
+      return
+    }
+
     // Default fallback
     ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
   }

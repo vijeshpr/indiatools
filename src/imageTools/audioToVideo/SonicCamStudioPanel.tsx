@@ -872,12 +872,85 @@ export const SonicCamStudioPanel: React.FC<SonicCamStudioPanelProps> = ({
         </div>
 
         {openSections.transitions && (
-          <div className="space-y-3 pt-2 border-t border-white/5">
+          <div className="space-y-3.5 pt-2 border-t border-white/5">
+            {/* Automatic Dynamic Beat Cycle Hero Box */}
+            <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-cyan-500/10 border border-amber-500/25 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🎲</span>
+                  <div>
+                    <div className="text-[11px] font-bold text-white flex items-center gap-1.5">
+                      Auto-Cycle Transitions on Every Beat
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-gradient-to-r from-amber-400 to-orange-400 text-black uppercase">
+                        Dynamic Beat Sync
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      Switches between all 24 transitions automatically on every beat drop
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateSonic((prev) => {
+                      const willBeActive = !(prev.autoCycleTransitions || prev.transition === 'auto-cycle')
+                      return {
+                        ...prev,
+                        autoCycleTransitions: willBeActive,
+                        transition: willBeActive ? 'auto-cycle' : 'snap-zoom',
+                      }
+                    })
+                  }
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                    sonic.autoCycleTransitions || sonic.transition === 'auto-cycle'
+                      ? 'bg-amber-400 text-black shadow-lg shadow-amber-400/30'
+                      : 'bg-slate-900 text-slate-400 border border-white/10 hover:text-white'
+                  }`}
+                >
+                  {sonic.autoCycleTransitions || sonic.transition === 'auto-cycle' ? 'ACTIVE ON' : 'ENABLE'}
+                </button>
+              </div>
+
+              {(sonic.autoCycleTransitions || sonic.transition === 'auto-cycle') && (
+                <div className="flex items-center gap-1.5 pt-1 border-t border-white/10">
+                  <span className="text-[10px] text-slate-400 shrink-0">Cycle Mode:</span>
+                  {(
+                    [
+                      { id: 'energy-reactive', label: '⚡ Bass & Energy Reactive' },
+                      { id: 'random', label: '🔀 Random Shuffle' },
+                      { id: 'sequential', label: '🔁 Full 24 Library Cycle' },
+                    ] as const
+                  ).map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => updateSonic((prev) => ({ ...prev, autoCycleMode: m.id }))}
+                      className={`px-2 py-1 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        (sonic.autoCycleMode || 'energy-reactive') === m.id
+                          ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40'
+                          : 'text-slate-400 hover:text-white bg-slate-900/60 border border-transparent'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Complete Library of 24 Transitions */}
             <div className="space-y-1.5">
-              <span className="text-[11px] text-slate-400">Transition Style:</span>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-white/5 text-center">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  Transition Style ({sonic.transition === 'auto-cycle' ? 'Auto-Cycle Active' : sonic.transition}):
+                </span>
+                <span className="text-[10px] text-amber-400 font-mono">24 Cinematic Styles</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-white/5 text-center max-h-[220px] overflow-y-auto">
                 {(
                   [
+                    { id: 'auto-cycle', label: 'Auto Cycle All', icon: '🎲', highlight: true },
                     { id: 'instant-cut', label: 'Instant Cut', icon: '⚡' },
                     { id: 'snap-zoom', label: 'Snap Zoom', icon: '🔍' },
                     { id: 'smooth-zoom-cut', label: 'Smooth Zoom', icon: '🌊' },
@@ -893,13 +966,36 @@ export const SonicCamStudioPanel: React.FC<SonicCamStudioPanelProps> = ({
                     { id: 'zoom-through', label: 'Hyper Zoom', icon: '🚀' },
                     { id: 'strobe-shutter', label: 'Strobe Shutter', icon: '⚡' },
                     { id: 'prism-split', label: 'Prism Split', icon: '💎' },
+                    { id: 'anamorphic-flare', label: 'Blue Flare', icon: '✨' },
+                    { id: 'rgb-shake', label: 'RGB Shake', icon: '📳' },
+                    { id: 'kaleidoscope', label: 'Kaleidoscope', icon: '🔯' },
+                    { id: 'pixelate-dissolve', label: 'Pixel Matrix', icon: '🟩' },
+                    { id: 'invert-negative', label: 'Invert Flash', icon: '🌓' },
+                    { id: 'tunnel-warp', label: 'Tunnel Warp', icon: '🕳️' },
+                    { id: 'vignette-pulse', label: 'Iris Punch', icon: '👁️' },
+                    { id: 'radial-smear', label: 'Radial Smear', icon: '💫' },
+                    { id: 'heartbeat-pulse', label: 'Bass Pump', icon: '💓' },
                   ] as const
                 ).map((tr) => (
                   <button
                     key={tr.id}
-                    onClick={() => updateSonic((prev) => ({ ...prev, transition: tr.id }))}
+                    onClick={() => {
+                      if (tr.id === 'auto-cycle') {
+                        updateSonic((prev) => ({
+                          ...prev,
+                          transition: 'auto-cycle',
+                          autoCycleTransitions: true,
+                        }))
+                      } else {
+                        updateSonic((prev) => ({
+                          ...prev,
+                          transition: tr.id,
+                          autoCycleTransitions: false,
+                        }))
+                      }
+                    }}
                     className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                      sonic.transition === tr.id
+                      sonic.transition === tr.id || (tr.id === 'auto-cycle' && sonic.autoCycleTransitions)
                         ? 'bg-amber-500/25 text-amber-300 border border-amber-400/50 shadow-md shadow-amber-500/10'
                         : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                     }`}

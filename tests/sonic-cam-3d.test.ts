@@ -267,7 +267,7 @@ describe('SonicCam — Beat-Synced Multi-Region Cinematic Studio Suite', () => {
         }, `SonicCamEngine must render preset ${preset.id} without throwing`)
       }
 
-      // Test all 15 cinematic transitions in active transition state (progress = 0.5)
+      // Test all 24 cinematic transitions + auto-cycle in active transition state (progress = 0.5)
       const allTransitions: SonicTransitionType[] = [
         'instant-cut',
         'snap-zoom',
@@ -284,6 +284,16 @@ describe('SonicCam — Beat-Synced Multi-Region Cinematic Studio Suite', () => {
         'zoom-through',
         'strobe-shutter',
         'prism-split',
+        'anamorphic-flare',
+        'rgb-shake',
+        'kaleidoscope',
+        'pixelate-dissolve',
+        'invert-negative',
+        'tunnel-warp',
+        'vignette-pulse',
+        'radial-smear',
+        'heartbeat-pulse',
+        'auto-cycle',
       ]
 
       for (const tr of allTransitions) {
@@ -300,6 +310,22 @@ describe('SonicCam — Beat-Synced Multi-Region Cinematic Studio Suite', () => {
           testEngine.render(mockCtx, 1920, 1080, transConfig, mockBands, 1.25, 30.0)
         }, `SonicCamEngine must render transition style '${tr}' without throwing`)
       }
+
+      // Test dynamic beat-to-beat transition rotation
+      const autoConfig: SonicCamStudioConfig = {
+        ...DEFAULT_SONIC_CAM_CONFIG,
+        sourceImageUrl: 'data:image/png;base64,mock',
+        enabled: true,
+        autoCycleTransitions: true,
+        autoCycleMode: 'energy-reactive',
+        regions: generateCinematicGrid(6),
+      }
+
+      const seq = new SonicCamSequencer()
+      const t1 = seq.resolveEffectiveTransition(autoConfig, 0, mockBands)
+      const t2 = seq.resolveEffectiveTransition(autoConfig, 1, mockBands)
+      assert.ok(t1 && t1.length > 0, 'Must resolve valid transition for shot 0')
+      assert.ok(t2 && t2.length > 0, 'Must resolve valid transition for shot 1')
 
       // Test Before/After comparison mode
       const beforeConfig: SonicCamStudioConfig = {

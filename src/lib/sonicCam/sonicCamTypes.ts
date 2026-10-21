@@ -53,6 +53,16 @@ export type SonicTransitionType =
   | 'zoom-through'
   | 'strobe-shutter'
   | 'prism-split'
+  | 'anamorphic-flare'
+  | 'rgb-shake'
+  | 'kaleidoscope'
+  | 'pixelate-dissolve'
+  | 'invert-negative'
+  | 'tunnel-warp'
+  | 'vignette-pulse'
+  | 'radial-smear'
+  | 'heartbeat-pulse'
+  | 'auto-cycle'
   | 'full-image-return'
 
 export interface BeatMarker {
@@ -136,12 +146,44 @@ export interface SonicCamStudioConfig {
   fullImageIntroOutro: boolean
   transition: SonicTransitionType
   transitionDurationSec: number // 0.0 (instant) to 0.6s
+  autoCycleTransitions: boolean // Automatic beat-synced dynamic transition rotation
+  autoCycleMode: 'sequential' | 'random' | 'energy-reactive' // Strategy for beat-to-beat transition cycling
   bassShake: BassShakeConfig
   innerMotion: InnerMotionConfig
   beatDetection: BeatDetectionConfig
   beatMarkers: BeatMarker[]
   customSequence: ShotSequenceEntry[]
 }
+
+/**
+ * Complete Library of Concrete Cinematic Shot Transitions (Excluding meta-modes)
+ */
+export const CONCRETE_TRANSITIONS: SonicTransitionType[] = [
+  'instant-cut',
+  'snap-zoom',
+  'smooth-zoom-cut',
+  'whip-pan',
+  'vertical-drop',
+  'directional-slide',
+  'flash-cut',
+  'crossfade',
+  'glitch-rgb',
+  'spin-twist',
+  'bass-shockwave',
+  'film-burn',
+  'zoom-through',
+  'strobe-shutter',
+  'prism-split',
+  'anamorphic-flare',
+  'rgb-shake',
+  'kaleidoscope',
+  'pixelate-dissolve',
+  'invert-negative',
+  'tunnel-warp',
+  'vignette-pulse',
+  'radial-smear',
+  'heartbeat-pulse',
+]
 
 /**
  * Default Palette for Visual Region Identification
@@ -186,6 +228,8 @@ export const DEFAULT_SONIC_CAM_CONFIG: SonicCamStudioConfig = {
   fullImageIntroOutro: true,
   transition: 'snap-zoom',
   transitionDurationSec: 0.22,
+  autoCycleTransitions: false,
+  autoCycleMode: 'energy-reactive',
   bassShake: {
     enabled: false,
     intensity: 45,

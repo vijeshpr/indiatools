@@ -9,6 +9,7 @@ import {
   BeatMarker,
   SonicTransitionType,
   NormalizedAudioBands,
+  CONCRETE_TRANSITIONS,
 } from './sonicCamTypes.ts'
 
 export interface CropRect {
@@ -114,8 +115,11 @@ export class SonicCamSequencer {
     const timeInShot = Math.max(0, currentTime - currentShot.startTime)
     const transDur = config.transitionDurationSec || 0.22
 
+    // Resolve dynamic beat-synced transition
+    const effectiveTransition = this.resolveEffectiveTransition(config, activeIdx, bands)
+
     let transitionProgress = transDur > 0 ? Math.min(1, timeInShot / transDur) : 1
-    if (config.transition === 'instant-cut') {
+    if (effectiveTransition === 'instant-cut') {
       transitionProgress = 1
     }
 
@@ -195,11 +199,15 @@ export class SonicCamSequencer {
 
     // Snap-zoom punch on cut
     let zoomBoost = 0
-    if (config.transition === 'snap-zoom' && transitionProgress < 1) {
-      // Punch up at start of transition then settle
-      zoomBoost = (1 - transitionProgress) * 0.12
+    if (
+      (effectiveTransition === 'snap-zoom' ||
+        effectiveTransition === 'heartbeat-pulse' ||
+        effectiveTransition === 'radial-smear') &&
+      transitionProgress < 1
+    ) {
+      zoomBoost = (1 - transitionProgress) * 0.14
     }
-    if (config.transition === 'bass-shockwave' && transitionProgress < 1) {
+    if (effectiveTransition === 'bass-shockwave' && transitionProgress < 1) {
       zoomBoost = (1 - transitionProgress) * 0.18
     }
     if (config.bassShake.zoomImpulseEnabled) {
@@ -208,9 +216,14 @@ export class SonicCamSequencer {
 
     // Flash cut brightness
     let flashBrightness = 0
-    if (config.transition === 'flash-cut' && transitionProgress < 0.6) {
-      flashBrightness = (1 - transitionProgress / 0.6) * 0.35
-    } else if (config.transition === 'strobe-shutter' && transitionProgress < 0.6) {
+    if (
+      (effectiveTransition === 'flash-cut' ||
+        effectiveTransition === 'anamorphic-flare' ||
+        effectiveTransition === 'invert-negative') &&
+      transitionProgress < 0.6
+    ) {
+      flashBrightness = (1 - transitionProgress / 0.6) * 0.38
+    } else if (effectiveTransition === 'strobe-shutter' && transitionProgress < 0.6) {
       const cycle = Math.floor(transitionProgress * 14)
       if (cycle % 2 === 1) {
         flashBrightness = 0.4
@@ -224,7 +237,7 @@ export class SonicCamSequencer {
       currentRegion,
       previousRegion: prevShot?.region || null,
       transitionProgress,
-      transitionType: config.transition,
+      transitionType: effectiveTransition,
       isFullImage,
       cropRect: targetCrop,
       previousCropRect: prevCrop,
@@ -234,6 +247,78 @@ export class SonicCamSequencer {
         (Math.sin(currentTime * 32) * this.bassShakeDecay * shakeRot * Math.PI) / 180,
       zoomBoost: (innerZoom - 1.0) + zoomBoost,
       flashBrightness,
+    }
+  }
+
+  /**
+   * Resolves the active transition style dynamically per shot
+   * Supports Sequential cycling, Random shuffle, or Energy-Reactive selection
+   */
+  public resolveEffectiveTransition(
+    config: SonicCamStudioConfig,
+    shotIndex: number,
+    bands: NormalizedAudioBands
+  ): SonicTransitionType {
+    if (config.transition !== 'auto-cycle' && !config.autoCycleTransitions) {
+      return config.transition
+    }
+
+    const mode = config.autoCycleMode || 'energy-reactive'
+
+    if (mode === 'sequential') {
+      return CONCRETE_TRANSITIONS[shotIndex % CONCRETE_TRANSITIONS.length]
+    }
+
+    if (mode === 'random') {
+      // Deterministic pseudo-random based on shotIndex to remain stable during the shot duration
+      const seed = Math.sin(shotIndex * 7919 + 104729) * 43758.5453
+      const randIdx = Math.floor(Math.abs(seed) % CONCRETE_TRANSITIONS.length)
+      return CONCRETE_TRANSITIONS[randIdx]
+    }
+
+    // mode === 'energy-reactive'
+    const bass = bands?.bass ?? 0.5
+    const overall = bands?.overall ?? 0.5
+    const isBeat = bands?.isBeatHit ?? false
+
+    if (isBeat || bass > 0.65) {
+      // High-impact bass transitions
+      const bassSet: SonicTransitionType[] = [
+        'bass-shockwave',
+        'zoom-through',
+        'glitch-rgb',
+        'strobe-shutter',
+        'heartbeat-pulse',
+        'snap-zoom',
+        'rgb-shake',
+        'anamorphic-flare',
+      ]
+      return bassSet[shotIndex % bassSet.length]
+    } else if (overall > 0.45) {
+      // Dynamic motion transitions
+      const motionSet: SonicTransitionType[] = [
+        'spin-twist',
+        'whip-pan',
+        'vertical-drop',
+        'directional-slide',
+        'tunnel-warp',
+        'flash-cut',
+        'radial-smear',
+        'invert-negative',
+      ]
+      return motionSet[shotIndex % motionSet.length]
+    } else {
+      // Smooth / Cinematic / Optical transitions
+      const smoothSet: SonicTransitionType[] = [
+        'smooth-zoom-cut',
+        'film-burn',
+        'prism-split',
+        'crossfade',
+        'kaleidoscope',
+        'pixelate-dissolve',
+        'vignette-pulse',
+      ]
+      return smoothSet[shotIndex % smoothSet.length]
     }
   }
 
