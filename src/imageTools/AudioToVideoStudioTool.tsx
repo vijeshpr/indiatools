@@ -126,7 +126,16 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
   // Composition State
   const [composition, setComposition] = useState<StudioCompositionConfig>(DEFAULT_STUDIO_COMPOSITION)
-  const [activeTab, setActiveTab] = useState<StudioTab>('visualizer')
+  const [activeTab, setActiveTab] = useState<StudioTab>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const tabParam = params.get('tab') as StudioTab
+      if (tabParam && ['soniccam', 'portal', 'photomotion', 'garden', 'background', 'visualizer', 'cinematic', 'typography', 'audio'].includes(tabParam)) {
+        return tabParam
+      }
+    }
+    return 'soniccam'
+  })
 
   // Portal VFX Studio State
   const [selectedPresetModal, setSelectedPresetModal] = useState<PortalPreset | null>(null)
