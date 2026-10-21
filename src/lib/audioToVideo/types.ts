@@ -4,6 +4,12 @@ import {
 } from './photoMotionTypes.ts'
 export * from './photoMotionTypes.ts'
 
+import {
+  CinematicPortalStudioConfig,
+  DEFAULT_PORTAL_VFX_CONFIG,
+} from '../portalVfx/portalTypes.ts'
+export * from '../portalVfx/portalTypes.ts'
+
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
 
@@ -167,6 +173,7 @@ export interface StudioCompositionConfig {
   cinematicFx: CinematicEffectsConfig
   textOverlay: TextOverlayConfig
   photoMotion?: PhotoMotionStudioConfig
+  portalVfx?: CinematicPortalStudioConfig
   performanceMode: boolean
 }
 
@@ -174,22 +181,22 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
   aspectRatio: '16:9',
   resolution: '1080p',
   background: {
-    mode: 'preset',
+    mode: 'single-image',
     presetId: 'night-city',
     singleImageUrl: null,
-    motionStyle: 'slow-zoom-in',
-    motionIntensity: 5,
+    motionStyle: 'none',
+    motionIntensity: 0,
     slideshow: [],
     slideshowTransitionDuration: 1.2,
     slideshowAutoSyncToAudio: true,
-    brightness: 85,
+    brightness: 100,
     blur: 0,
-    filmGrain: 15,
-    vignette: 40,
+    filmGrain: 0,
+    vignette: 0,
   },
   visualizer: {
-    spectrumStyle: 'circular',
-    waveformStyle: 'smooth-center',
+    spectrumStyle: 'none',
+    waveformStyle: 'none',
     barCount: 64,
     barWidth: 4,
     barGap: 3,
@@ -211,22 +218,22 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
     rainDensity: 50,
     rainSpeed: 1.2,
     rainWind: 5,
-    floatingParticlesEnabled: true,
+    floatingParticlesEnabled: false,
     particleCount: 60,
-    lightRaysEnabled: true,
+    lightRaysEnabled: false,
     lightRayIntensity: 40,
-    dreamyBokehEnabled: true,
+    dreamyBokehEnabled: false,
     bokehDensity: 15,
-    bassScaleEnabled: true,
+    bassScaleEnabled: false,
     bassScaleStrength: 5,
-    beatLightPulseEnabled: true,
+    beatLightPulseEnabled: false,
     beatPulseIntensity: 50,
     cameraShakeOnBeat: false,
   },
   textOverlay: {
-    title: 'Track Title',
-    artist: 'Artist Name',
-    subtitle: 'Official Visualizer',
+    title: '',
+    artist: '',
+    subtitle: '',
     customNotes: '',
     fontFamily: 'Inter',
     titleSize: 48,
@@ -241,5 +248,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
     fadeOutDuration: 1.5,
   },
   photoMotion: DEFAULT_PHOTO_MOTION_CONFIG,
+  portalVfx: DEFAULT_PORTAL_VFX_CONFIG,
   performanceMode: false,
 }

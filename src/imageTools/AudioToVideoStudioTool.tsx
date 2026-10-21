@@ -34,6 +34,17 @@ import {
   Camera,
   Droplets,
   RotateCw,
+  Orbit,
+  EyeOff,
+  Aperture,
+  CircleDot,
+  Flame,
+  RefreshCw,
+  BarChart3,
+  Disc,
+  Waves,
+  Tv,
+  SlidersHorizontal,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -59,6 +70,13 @@ import {
   DEFAULT_PHOTO_MOTION_CONFIG,
   PhotoMotionStudioConfig,
 } from '../lib/audioToVideo/photoMotionTypes'
+import {
+  CinematicPortalStudioConfig,
+  DEFAULT_PORTAL_VFX_CONFIG,
+  PORTAL_VFX_PRESETS,
+  PortalPreset,
+  PortalModuleId,
+} from '../lib/portalVfx/portalTypes'
 import { BACKGROUND_PRESETS } from '../lib/audioToVideo/backgroundPresets'
 import { AudioToVideoAudioEngine } from '../lib/audioToVideo/audioToVideoAudioEngine'
 import { AudioToVideoRenderEngine } from '../lib/audioToVideo/audioToVideoRenderEngine'
@@ -67,7 +85,7 @@ import {
   ExportProgress,
 } from '../lib/audioToVideo/audioToVideoExportEngine'
 
-type StudioTab = 'background' | 'photomotion' | 'visualizer' | 'cinematic' | 'typography' | 'audio'
+type StudioTab = 'portal' | 'photomotion' | 'background' | 'visualizer' | 'cinematic' | 'typography' | 'audio'
 
 export const AudioToVideoStudioTool: React.FC = () => {
   const tool = getToolBySlug('audio-to-video-studio')
@@ -75,7 +93,14 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
   // Composition State
   const [composition, setComposition] = useState<StudioCompositionConfig>(DEFAULT_STUDIO_COMPOSITION)
-  const [activeTab, setActiveTab] = useState<StudioTab>('background')
+  const [activeTab, setActiveTab] = useState<StudioTab>('portal')
+
+  // Portal VFX Studio State
+  const [selectedPresetModal, setSelectedPresetModal] = useState<PortalPreset | null>(null)
+  const [isDraggingPortal, setIsDraggingPortal] = useState<boolean>(false)
+  const [isResizingPortal, setIsResizingPortal] = useState<boolean>(false)
+  const portalImageInputRef = useRef<HTMLInputElement | null>(null)
+  const interiorBgInputRef = useRef<HTMLInputElement | null>(null)
 
   // 2.5D Photo Motion & Mask Studio State
   const [isMaskModalOpen, setIsMaskModalOpen] = useState<boolean>(false)
@@ -379,6 +404,202 @@ export const AudioToVideoStudioTool: React.FC = () => {
       },
     }))
     showToast(`Added ${newSlides.length} images to Slideshow Studio`, 'success')
+  }
+
+  // =========================================================
+  // CINEMATIC PORTAL VFX HANDLERS
+  // =========================================================
+
+  // Handle Main Photograph Import
+  const handlePortalImageUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload a valid image file (JPG, PNG, WebP)', 'error')
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setComposition((prev) => ({
+      ...prev,
+      background: {
+        ...prev.background,
+        mode: 'single-image',
+        singleImageUrl: url,
+        singleImageName: file.name,
+      },
+      portalVfx: {
+        ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+        sourceImageUrl: url,
+        sourceImageName: file.name,
+        isBeforePreviewActive: false,
+        masterAllEffectsEnabled: true,
+      },
+    }))
+    showToast(`Imported ${file.name} — Clean preview active with zero effects`, 'success')
+  }
+
+  // Handle Portal Interior Secondary Image Upload
+  const handleInteriorBgUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload an image file (JPG, PNG, WebP) for interior', 'error')
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setComposition((prev) => ({
+      ...prev,
+      portalVfx: {
+        ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+        interior: {
+          ...(prev.portalVfx?.interior || DEFAULT_PORTAL_VFX_CONFIG.interior),
+          enabled: true,
+          interiorBgUrl: url,
+          interiorBgName: file.name,
+        },
+      },
+    }))
+    showToast(`Loaded interior background: ${file.name}`, 'success')
+  }
+
+  const handleRemoveInteriorBg = () => {
+    setComposition((prev) => ({
+      ...prev,
+      portalVfx: {
+        ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+        interior: {
+          ...(prev.portalVfx?.interior || DEFAULT_PORTAL_VFX_CONFIG.interior),
+          interiorBgUrl: null,
+          interiorBgName: undefined,
+        },
+      },
+    }))
+    showToast('Interior background removed', 'info')
+  }
+
+  // Reset All Effects — Turns every module OFF and restores clean original preview
+  const handleResetAllPortalEffects = () => {
+    setComposition((prev) => ({
+      ...prev,
+      portalVfx: {
+        ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+        masterAllEffectsEnabled: true,
+        isBeforePreviewActive: false,
+        ring: { ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring), enabled: false },
+        energyFlow: { ...(prev.portalVfx?.energyFlow || DEFAULT_PORTAL_VFX_CONFIG.energyFlow), enabled: false },
+        interior: { ...(prev.portalVfx?.interior || DEFAULT_PORTAL_VFX_CONFIG.interior), enabled: false },
+        lightSpill: { ...(prev.portalVfx?.lightSpill || DEFAULT_PORTAL_VFX_CONFIG.lightSpill), enabled: false },
+        shockwave: { ...(prev.portalVfx?.shockwave || DEFAULT_PORTAL_VFX_CONFIG.shockwave), enabled: false },
+        particles: { ...(prev.portalVfx?.particles || DEFAULT_PORTAL_VFX_CONFIG.particles), enabled: false },
+        opening: { ...(prev.portalVfx?.opening || DEFAULT_PORTAL_VFX_CONFIG.opening), enabled: false },
+        exitTransition: { ...(prev.portalVfx?.exitTransition || DEFAULT_PORTAL_VFX_CONFIG.exitTransition), enabled: false },
+        audioReactivity: { ...(prev.portalVfx?.audioReactivity || DEFAULT_PORTAL_VFX_CONFIG.audioReactivity), enabled: false },
+      },
+    }))
+    showToast('Reset all effects — Clean original preview restored', 'info')
+  }
+
+  // Toggle Master Switch (Bypass / Enable without losing custom parameters)
+  const toggleMasterAllEffects = () => {
+    setComposition((prev) => {
+      const current = prev.portalVfx?.masterAllEffectsEnabled ?? true
+      const next = !current
+      showToast(next ? 'All effects enabled' : 'Master bypass active (all effects muted)', next ? 'success' : 'info')
+      return {
+        ...prev,
+        portalVfx: {
+          ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+          masterAllEffectsEnabled: next,
+        },
+      }
+    })
+  }
+
+  // Toggle Before / After (Temporary bypass)
+  const toggleBeforeAfter = () => {
+    setComposition((prev) => {
+      const current = prev.portalVfx?.isBeforePreviewActive ?? false
+      const next = !current
+      return {
+        ...prev,
+        portalVfx: {
+          ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+          isBeforePreviewActive: next,
+        },
+      }
+    })
+  }
+
+  // Explicit Preset Application with Confirmation
+  const handleApplyPreset = (preset: PortalPreset) => {
+    setComposition((prev) => ({
+      ...prev,
+      portalVfx: preset.apply(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+    }))
+    setSelectedPresetModal(null)
+    showToast(`Applied preset: ${preset.name}`, 'success')
+  }
+
+  // 1-Click Clean Sample Scene Synthesizer (Ancient Stone Chamber)
+  const handleLoadSamplePortalPhoto = () => {
+    try {
+      const offscreen = document.createElement('canvas')
+      offscreen.width = 1920
+      offscreen.height = 1080
+      const ctx = offscreen.getContext('2d')
+      if (!ctx) return
+
+      // Dark ancient stone chamber
+      const wallGrad = ctx.createLinearGradient(0, 0, 0, 1080)
+      wallGrad.addColorStop(0, '#07090E')
+      wallGrad.addColorStop(0.4, '#0F172A')
+      wallGrad.addColorStop(0.8, '#1E293B')
+      wallGrad.addColorStop(1, '#090D16')
+      ctx.fillStyle = wallGrad
+      ctx.fillRect(0, 0, 1920, 1080)
+
+      // Stone floor perspective grid
+      ctx.fillStyle = '#0B1120'
+      ctx.beginPath()
+      ctx.moveTo(0, 780)
+      ctx.lineTo(1920, 780)
+      ctx.lineTo(1920, 1080)
+      ctx.lineTo(0, 1080)
+      ctx.closePath()
+      ctx.fill()
+
+      // Floor stone joints
+      ctx.strokeStyle = '#1E293B'
+      ctx.lineWidth = 2
+      for (let x = -200; x <= 2120; x += 180) {
+        ctx.beginPath()
+        ctx.moveTo(960 + (x - 960) * 0.15, 780)
+        ctx.lineTo(x, 1080)
+        ctx.stroke()
+      }
+
+      // Massive stone pillars framing portal area
+      ctx.fillStyle = '#172033'
+      ctx.fillRect(280, 140, 120, 640)
+      ctx.fillRect(1520, 140, 120, 640)
+
+      // Stone arch header
+      ctx.strokeStyle = '#334155'
+      ctx.lineWidth = 18
+      ctx.strokeRect(340, 140, 1240, 640)
+
+      const url = offscreen.toDataURL('image/jpeg', 0.92)
+      setComposition((prev) => ({
+        ...prev,
+        background: { ...prev.background, singleImageUrl: url, mode: 'single-image' },
+        portalVfx: {
+          ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+          sourceImageUrl: url,
+          sourceImageName: 'Stargate_Ancient_Chamber_1080p.jpg',
+          isBeforePreviewActive: false,
+          masterAllEffectsEnabled: true,
+        },
+      }))
+      showToast('Loaded 1080p Ancient Chamber Photo — Clean neutral preview ready', 'success')
+    } catch {
+      showToast('Could not synthesize sample scene', 'error')
+    }
   }
 
   // =========================================================
@@ -823,12 +1044,173 @@ export const AudioToVideoStudioTool: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* LEFT 7/12: LIVE PREVIEW SCREEN & AUDIO SCRUBBER */}
           <div className="lg:col-span-7 flex flex-col gap-4">
+            {/* Viewport Action Controls Bar */}
+            <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-2.5 px-4 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xl">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1">
+                  <Aperture className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Viewport:</span>
+                </span>
+                {(['fit', 'fill', 'original'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() =>
+                      setComposition((prev) => ({
+                        ...prev,
+                        portalVfx: {
+                          ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                          imageFit: mode,
+                        },
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg font-bold capitalize transition-all ${
+                      (composition.portalVfx?.imageFit || 'fit') === mode
+                        ? 'bg-slate-800 text-cyan-300 border border-cyan-500/40'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Master All Effects Bypass/Enable */}
+                <button
+                  onClick={toggleMasterAllEffects}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                    composition.portalVfx?.masterAllEffectsEnabled
+                      ? 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shadow'
+                      : 'bg-amber-500/15 border border-amber-500/40 text-amber-300'
+                  }`}
+                  title="Toggle master bypass for all visual effects without deleting settings"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>{composition.portalVfx?.masterAllEffectsEnabled ? 'All Effects: ON' : 'All Effects: BYPASS'}</span>
+                </button>
+
+                {/* Before / After Preview Switch */}
+                <button
+                  onClick={toggleBeforeAfter}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                    composition.portalVfx?.isBeforePreviewActive
+                      ? 'bg-violet-600 text-white shadow-md'
+                      : 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white'
+                  }`}
+                  title="Toggle Before (100% clean photo) vs After (with active VFX)"
+                >
+                  {composition.portalVfx?.isBeforePreviewActive ? (
+                    <>
+                      <EyeOff className="w-3.5 h-3.5" />
+                      <span>Viewing: Clean Before</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Before / After</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Reset All Effects Button */}
+                <button
+                  onClick={handleResetAllPortalEffects}
+                  className="px-2.5 py-1.5 rounded-xl font-bold bg-slate-900 hover:bg-red-950/40 border border-white/10 text-slate-400 hover:text-red-300 flex items-center gap-1"
+                  title="Turn off every effect and restore the clean original photo"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reset Effects</span>
+                </button>
+              </div>
+            </div>
+
             {/* Visualizer Canvas Container */}
-            <div className="relative w-full aspect-video bg-[#05060A] rounded-2xl border border-white/10 overflow-hidden shadow-2xl flex items-center justify-center group">
+            <div
+              className="relative w-full aspect-video bg-[#05060A] rounded-2xl border border-white/10 overflow-hidden shadow-2xl flex items-center justify-center group select-none"
+              onMouseMove={(e) => {
+                if (!isDraggingPortal || !composition.portalVfx?.ring.enabled) return
+                const rect = e.currentTarget.getBoundingClientRect()
+                const newX = Math.max(5, Math.min(95, ((e.clientX - rect.left) / rect.width) * 100))
+                const newY = Math.max(5, Math.min(95, ((e.clientY - rect.top) / rect.height) * 100))
+                setComposition((prev) => ({
+                  ...prev,
+                  portalVfx: {
+                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                    ring: {
+                      ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                      posX: Math.round(newX),
+                      posY: Math.round(newY),
+                    },
+                  },
+                }))
+              }}
+              onMouseUp={() => setIsDraggingPortal(false)}
+              onMouseLeave={() => setIsDraggingPortal(false)}
+            >
               <canvas
                 ref={canvasRef}
                 className="w-full h-full object-contain pointer-events-none"
               />
+
+              {/* Clean Empty State Overlay (When no photo has been imported) */}
+              {!composition.background.singleImageUrl && !composition.portalVfx?.sourceImageUrl && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-[#07080D]/95 backdrop-blur-sm text-center space-y-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 p-0.5 shadow-xl">
+                    <div className="w-full h-full bg-[#090A0F] rounded-[14px] flex items-center justify-center">
+                      <Orbit className="w-8 h-8 text-cyan-400" />
+                    </div>
+                  </div>
+
+                  <div className="max-w-md">
+                    <h3 className="text-base sm:text-lg font-bold text-white">
+                      Cinematic Portal VFX Studio
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                      Import a photograph to composite dimensional portal rings, energy shockwaves, plasma flows, and light spills with zero automatic effects.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+                    <button
+                      onClick={() => portalImageInputRef.current?.click()}
+                      className="px-5 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white flex items-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
+                    >
+                      <Upload className="w-4 h-4" />
+                      <span>Import Photograph (JPG, PNG, WebP)</span>
+                    </button>
+                    <button
+                      onClick={handleLoadSamplePortalPhoto}
+                      className="px-4 py-2.5 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 hover:text-white flex items-center gap-2 transition-all"
+                    >
+                      <Sparkles className="w-4 h-4 text-violet-400" />
+                      <span>1-Click Test Scene</span>
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    100% Client-Side • Zero Server Uploads • Neutral Clean Preview
+                  </span>
+                </div>
+              )}
+
+              {/* On-Canvas Interactive Drag Handle (When Portal Ring is Enabled) */}
+              {activeTab === 'portal' &&
+                composition.portalVfx?.sourceImageUrl &&
+                composition.portalVfx?.ring.enabled && (
+                  <div
+                    style={{
+                      left: `${composition.portalVfx.ring.posX}%`,
+                      top: `${composition.portalVfx.ring.posY}%`,
+                    }}
+                    onMouseDown={() => setIsDraggingPortal(true)}
+                    className="absolute z-10 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-cyan-400 bg-black/60 backdrop-blur-md cursor-move flex items-center justify-center hover:scale-125 transition-transform shadow-lg shadow-cyan-500/40 group/handle"
+                    title="Click and drag to position portal"
+                  >
+                    <CircleDot className="w-4 h-4 text-cyan-300 animate-pulse" />
+                    <span className="absolute -top-6 px-1.5 py-0.5 rounded text-[9px] font-mono bg-black/80 text-cyan-300 border border-cyan-500/30 opacity-0 group-hover/handle:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
+                      Drag Portal ({composition.portalVfx.ring.posX}%, {composition.portalVfx.ring.posY}%)
+                    </span>
+                  </div>
+                )}
 
               {/* Central Play/Pause Hover Trigger */}
               <button
@@ -920,10 +1302,11 @@ export const AudioToVideoStudioTool: React.FC = () => {
           {/* RIGHT 5/12: MODULAR EDITING SUITE & STUDIO DOCK */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Dock Navigation Tabs */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
               {[
-                { id: 'background', label: 'Scene', icon: ImageIcon },
+                { id: 'portal', label: 'Portal VFX', icon: Orbit },
                 { id: 'photomotion', label: '2.5D Motion', icon: Film },
+                { id: 'background', label: 'Scene', icon: ImageIcon },
                 { id: 'visualizer', label: 'Spectrum', icon: Activity },
                 { id: 'cinematic', label: 'Effects', icon: Sparkles },
                 { id: 'typography', label: 'Titles', icon: Type },
@@ -950,6 +1333,1181 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
             {/* TAB CONTENT PANELS */}
             <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-5 shadow-2xl max-h-[580px] overflow-y-auto space-y-5">
+              {/* TAB 0: CINEMATIC PORTAL VFX STUDIO */}
+              {activeTab === 'portal' && (
+                <div className="space-y-6">
+                  {/* Hidden Photo Inputs */}
+                  <input
+                    type="file"
+                    ref={portalImageInputRef}
+                    onChange={(e) => e.target.files?.[0] && handlePortalImageUpload(e.target.files[0])}
+                    accept="image/*,.jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                  />
+                  <input
+                    type="file"
+                    ref={interiorBgInputRef}
+                    onChange={(e) => e.target.files?.[0] && handleInteriorBgUpload(e.target.files[0])}
+                    accept="image/*,.jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                  />
+
+                  {/* Header & Master Controls */}
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-0.5 flex items-center justify-center">
+                        <Orbit className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>Cinematic Portal VFX Studio</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            After Effects VFX
+                          </span>
+                        </h3>
+                        <p className="text-[11px] text-slate-400">
+                          Composite dimensional portals with energy arcs, light spill, and shockwaves
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={toggleMasterAllEffects}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          composition.portalVfx?.masterAllEffectsEnabled
+                            ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
+                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        }`}
+                        title="Master switch: Toggle all visual effects without deleting settings"
+                      >
+                        <Zap className="w-3.5 h-3.5" />
+                        <span>{composition.portalVfx?.masterAllEffectsEnabled ? 'Active' : 'Bypassed'}</span>
+                      </button>
+
+                      <button
+                        onClick={handleResetAllPortalEffects}
+                        className="p-1.5 rounded-xl bg-slate-800 hover:bg-red-950/50 text-slate-400 hover:text-red-300 border border-white/10"
+                        title="Reset all effects to clean preview"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SECTION 1: SOURCE PHOTOGRAPH IMPORT */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Base Photograph (Clean Canvas)</span>
+                      </span>
+                      {composition.portalVfx?.sourceImageUrl && (
+                        <span className="text-[10px] text-emerald-400 font-mono">● 100% Client-Side Loaded</span>
+                      )}
+                    </label>
+
+                    {composition.portalVfx?.sourceImageUrl ? (
+                      <div className="p-3 bg-slate-900/90 border border-white/10 rounded-xl flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={composition.portalVfx.sourceImageUrl}
+                            alt="Portal Base"
+                            className="w-14 h-14 rounded-lg object-cover border border-white/15 shrink-0 bg-slate-950"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-white truncate">
+                              {composition.portalVfx.sourceImageName || 'Photograph Loaded'}
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              Drag on canvas to position & resize portal
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => portalImageInputRef.current?.click()}
+                            className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10"
+                          >
+                            Replace
+                          </button>
+                          <button
+                            onClick={() =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                background: { ...prev.background, singleImageUrl: null },
+                                portalVfx: {
+                                  ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                  sourceImageUrl: null,
+                                  sourceImageName: undefined,
+                                },
+                              }))
+                            }
+                            className="p-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-white/10"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          onClick={() => portalImageInputRef.current?.click()}
+                          className="p-4 rounded-xl border border-white/10 bg-slate-900/80 hover:border-cyan-400/50 flex flex-col items-center justify-center gap-2 text-slate-300 hover:text-white transition-all group"
+                        >
+                          <Upload className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-bold">Import Photograph</span>
+                          <span className="text-[10px] text-slate-500">JPG, PNG, WebP</span>
+                        </button>
+
+                        <button
+                          onClick={handleLoadSamplePortalPhoto}
+                          className="p-4 rounded-xl border border-violet-500/30 bg-violet-950/20 hover:bg-violet-950/40 flex flex-col items-center justify-center gap-2 text-violet-300 hover:text-white transition-all group"
+                        >
+                          <Sparkles className="w-5 h-5 text-violet-400 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-bold">1-Click Test Scene</span>
+                          <span className="text-[10px] text-slate-400">Loads 1080p Ancient Chamber</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SECTION 2: CURATED VFX PRESETS (EXPLICIT USER CONFIRMATION) */}
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Curated VFX Presets (Optional)</span>
+                      </span>
+                      <span className="text-[10px] text-slate-500">Explicit User Action Only</span>
+                    </label>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {PORTAL_VFX_PRESETS.map((preset) => (
+                        <button
+                          key={preset.id}
+                          onClick={() => setSelectedPresetModal(preset)}
+                          className="p-2.5 rounded-xl border border-white/10 bg-slate-900/70 hover:border-cyan-400/50 text-left transition-all group"
+                        >
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0 group-hover:scale-125 transition-transform"
+                              style={{ backgroundColor: preset.accentColor }}
+                            />
+                            <span className="text-[11px] font-bold text-white truncate">{preset.name}</span>
+                          </div>
+                          <div className="text-[9px] text-slate-400 line-clamp-1">{preset.subtitle}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SECTION 3: 8 INDEPENDENT EFFECT MODULES (ALL OFF BY DEFAULT) */}
+                  <div className="space-y-4 pt-2 border-t border-white/5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Independent Effect Modules</span>
+                      </label>
+                      <span className="text-[10px] text-slate-400">All Modules Start OFF</span>
+                    </div>
+
+                    {/* MODULE A: PORTAL RING */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CircleDot className="w-4 h-4 text-cyan-400" />
+                          <span className="font-bold text-white">A. Portal Dimensional Ring</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.ring.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                ring: {
+                                  ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.ring.enabled && (
+                        <div className="space-y-3 pt-2 border-t border-white/5">
+                          {/* Shape selector */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-400 text-[11px]">Portal Shape</span>
+                            <div className="flex bg-slate-950 p-0.5 rounded-lg border border-white/10 text-[11px]">
+                              {(['circle', 'ellipse', 'oval'] as const).map((s) => (
+                                <button
+                                  key={s}
+                                  onClick={() =>
+                                    setComposition((prev) => ({
+                                      ...prev,
+                                      portalVfx: {
+                                        ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                        ring: {
+                                          ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                          shape: s,
+                                        },
+                                      },
+                                    }))
+                                  }
+                                  className={`px-2.5 py-1 rounded font-bold capitalize ${
+                                    (composition.portalVfx?.ring.shape || 'ellipse') === s
+                                      ? 'bg-cyan-500 text-black shadow'
+                                      : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  {s}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Dimensions & Rotation */}
+                          <div className="grid grid-cols-2 gap-3 text-[11px]">
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-400">Width</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.ring.width || 360}px
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="100"
+                                max="900"
+                                value={composition.portalVfx?.ring.width || 360}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      ring: {
+                                        ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                        width: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-400">Height</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.ring.height || 360}px
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="100"
+                                max="900"
+                                value={composition.portalVfx?.ring.height || 360}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      ring: {
+                                        ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                        height: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Thickness & Glow */}
+                          <div className="grid grid-cols-2 gap-3 text-[11px]">
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-400">Ring Thickness</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.ring.thickness || 14}px
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="2"
+                                max="40"
+                                value={composition.portalVfx?.ring.thickness || 14}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      ring: {
+                                        ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                        thickness: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-400">Glow Intensity</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.ring.glowIntensity || 65}%
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={composition.portalVfx?.ring.glowIntensity || 65}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      ring: {
+                                        ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                        glowIntensity: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Ring Colors */}
+                          <div className="grid grid-cols-2 gap-3 pt-1">
+                            <div className="flex items-center justify-between bg-slate-950 p-2 rounded-lg border border-white/5">
+                              <span className="text-[11px] text-slate-400">Primary Core</span>
+                              <input
+                                type="color"
+                                value={composition.portalVfx?.ring.primaryColor || '#00F0FF'}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      ring: {
+                                        ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                        primaryColor: e.target.value,
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-6 h-6 rounded cursor-pointer bg-transparent border-0"
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between bg-slate-950 p-2 rounded-lg border border-white/5">
+                              <span className="text-[11px] text-slate-400">Secondary Aura</span>
+                              <input
+                                type="color"
+                                value={composition.portalVfx?.ring.secondaryColor || '#A855F7'}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      ring: {
+                                        ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                                        secondaryColor: e.target.value,
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-6 h-6 rounded cursor-pointer bg-transparent border-0"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MODULE B: ENERGY FLOW */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Flame className="w-4 h-4 text-sky-400" />
+                          <span className="font-bold text-white">B. Plasma & Lightning Energy Flow</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.energyFlow.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                energyFlow: {
+                                  ...(prev.portalVfx?.energyFlow || DEFAULT_PORTAL_VFX_CONFIG.energyFlow),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.energyFlow.enabled && (
+                        <div className="space-y-3 pt-2 border-t border-white/5">
+                          <div className="grid grid-cols-2 gap-3 text-[11px]">
+                            <div>
+                              <span className="text-slate-400 mb-1 block">Energy Style</span>
+                              <select
+                                value={composition.portalVfx?.energyFlow.style || 'plasma'}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      energyFlow: {
+                                        ...(prev.portalVfx?.energyFlow || DEFAULT_PORTAL_VFX_CONFIG.energyFlow),
+                                        style: e.target.value as any,
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full bg-slate-950 border border-white/10 rounded-lg p-1.5 text-slate-200"
+                              >
+                                <option value="plasma">Plasma Streams</option>
+                                <option value="electric">Electric Lightning</option>
+                                <option value="ember">Fiery Embers</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <span className="text-slate-400 mb-1 block">Flow Direction</span>
+                              <select
+                                value={composition.portalVfx?.energyFlow.direction || 'clockwise'}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      energyFlow: {
+                                        ...(prev.portalVfx?.energyFlow || DEFAULT_PORTAL_VFX_CONFIG.energyFlow),
+                                        direction: e.target.value as any,
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full bg-slate-950 border border-white/10 rounded-lg p-1.5 text-slate-200"
+                              >
+                                <option value="clockwise">Clockwise</option>
+                                <option value="counter-clockwise">Counter-Clockwise</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between text-[11px] mb-1">
+                              <span className="text-slate-400">Flow Speed</span>
+                              <span className="text-cyan-400 font-mono">
+                                {(composition.portalVfx?.energyFlow.speed || 1.2).toFixed(1)}x
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0.2"
+                              max="3.0"
+                              step="0.1"
+                              value={composition.portalVfx?.energyFlow.speed || 1.2}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  portalVfx: {
+                                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                    energyFlow: {
+                                      ...(prev.portalVfx?.energyFlow || DEFAULT_PORTAL_VFX_CONFIG.energyFlow),
+                                      speed: parseFloat(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-cyan-400"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MODULE C: PORTAL INTERIOR DISTORTION */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Aperture className="w-4 h-4 text-indigo-400" />
+                          <span className="font-bold text-white">C. Masked Portal Interior Distortion</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.interior.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                interior: {
+                                  ...(prev.portalVfx?.interior || DEFAULT_PORTAL_VFX_CONFIG.interior),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.interior.enabled && (
+                        <div className="space-y-3 pt-2 border-t border-white/5">
+                          <p className="text-[11px] text-slate-400 leading-relaxed">
+                            Distortion is strictly confined to the interior of the portal opening. The surrounding photograph remains completely unaffected.
+                          </p>
+
+                          <div>
+                            <div className="flex justify-between text-[11px] mb-1">
+                              <span className="text-slate-400">Vortex Swirl Amount</span>
+                              <span className="text-cyan-400 font-mono">
+                                {composition.portalVfx?.interior.swirlAmount || 45}°
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="-180"
+                              max="180"
+                              value={composition.portalVfx?.interior.swirlAmount || 45}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  portalVfx: {
+                                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                    interior: {
+                                      ...(prev.portalVfx?.interior || DEFAULT_PORTAL_VFX_CONFIG.interior),
+                                      swirlAmount: parseInt(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-cyan-400"
+                            />
+                          </div>
+
+                          {/* Secondary Interior Background Image */}
+                          <div className="pt-1">
+                            <span className="text-[11px] font-bold text-slate-300 block mb-1">
+                              Alternate Dimension Interior Image (Optional)
+                            </span>
+                            {composition.portalVfx?.interior.interiorBgUrl ? (
+                              <div className="p-2.5 bg-slate-950 rounded-lg border border-white/10 flex items-center justify-between">
+                                <span className="text-[11px] text-cyan-300 truncate max-w-[200px]">
+                                  {composition.portalVfx.interior.interiorBgName || 'Interior Photo Loaded'}
+                                </span>
+                                <button
+                                  onClick={handleRemoveInteriorBg}
+                                  className="text-xs text-red-400 hover:text-red-300"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => interiorBgInputRef.current?.click()}
+                                className="w-full py-2 rounded-lg border border-dashed border-white/15 bg-slate-950/50 hover:bg-slate-950 text-slate-300 text-xs font-bold flex items-center justify-center gap-1.5"
+                              >
+                                <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                                <span>Upload Dimension Background</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MODULE D: CINEMATIC LIGHT SPILL */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Sun className="w-4 h-4 text-amber-400" />
+                          <span className="font-bold text-white">D. Cinematic Light Spill</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.lightSpill.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                lightSpill: {
+                                  ...(prev.portalVfx?.lightSpill || DEFAULT_PORTAL_VFX_CONFIG.lightSpill),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.lightSpill.enabled && (
+                        <div className="space-y-3 pt-2 border-t border-white/5">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <div className="flex justify-between text-[11px] mb-1">
+                                <span className="text-slate-400">Intensity</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.lightSpill.intensity || 50}%
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="10"
+                                max="100"
+                                value={composition.portalVfx?.lightSpill.intensity || 50}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      lightSpill: {
+                                        ...(prev.portalVfx?.lightSpill || DEFAULT_PORTAL_VFX_CONFIG.lightSpill),
+                                        intensity: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-[11px] mb-1">
+                                <span className="text-slate-400">Spread Radius</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.lightSpill.spreadRadius || 220}px
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="50"
+                                max="450"
+                                value={composition.portalVfx?.lightSpill.spreadRadius || 220}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      lightSpill: {
+                                        ...(prev.portalVfx?.lightSpill || DEFAULT_PORTAL_VFX_CONFIG.lightSpill),
+                                        spreadRadius: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MODULE E: ENERGY SHOCKWAVE */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Radio className="w-4 h-4 text-violet-400" />
+                          <span className="font-bold text-white">E. Expanding Energy Shockwave</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.shockwave.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                shockwave: {
+                                  ...(prev.portalVfx?.shockwave || DEFAULT_PORTAL_VFX_CONFIG.shockwave),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.shockwave.enabled && (
+                        <div className="space-y-3 pt-2 border-t border-white/5">
+                          <div className="grid grid-cols-2 gap-3 text-[11px]">
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-400">Wave Speed</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {(composition.portalVfx?.shockwave.speed || 1.2).toFixed(1)}x
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="0.5"
+                                max="3.0"
+                                step="0.1"
+                                value={composition.portalVfx?.shockwave.speed || 1.2}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      shockwave: {
+                                        ...(prev.portalVfx?.shockwave || DEFAULT_PORTAL_VFX_CONFIG.shockwave),
+                                        speed: parseFloat(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-400">Expansion Radius</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.shockwave.radius || 200}px
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="80"
+                                max="500"
+                                value={composition.portalVfx?.shockwave.radius || 200}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      shockwave: {
+                                        ...(prev.portalVfx?.shockwave || DEFAULT_PORTAL_VFX_CONFIG.shockwave),
+                                        radius: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MODULE F: PARTICLE SUCTION */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-cyan-300" />
+                          <span className="font-bold text-white">F. Event Horizon Particle Suction</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.particles.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                particles: {
+                                  ...(prev.portalVfx?.particles || DEFAULT_PORTAL_VFX_CONFIG.particles),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.particles.enabled && (
+                        <div className="space-y-3 pt-2 border-t border-white/5">
+                          <div className="grid grid-cols-2 gap-3 text-[11px]">
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-400">Particle Count</span>
+                                <span className="text-cyan-400 font-mono">
+                                  {composition.portalVfx?.particles.count || 75}
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="20"
+                                max="180"
+                                value={composition.portalVfx?.particles.count || 75}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      particles: {
+                                        ...(prev.portalVfx?.particles || DEFAULT_PORTAL_VFX_CONFIG.particles),
+                                        count: parseInt(e.target.value),
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="w-full accent-cyan-400"
+                              />
+                            </div>
+
+                            <div>
+                              <span className="text-slate-400 mb-1 block">Direction</span>
+                              <div className="flex bg-slate-950 p-0.5 rounded-lg border border-white/10">
+                                <button
+                                  onClick={() =>
+                                    setComposition((prev) => ({
+                                      ...prev,
+                                      portalVfx: {
+                                        ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                        particles: {
+                                          ...(prev.portalVfx?.particles || DEFAULT_PORTAL_VFX_CONFIG.particles),
+                                          direction: 'inward',
+                                        },
+                                      },
+                                    }))
+                                  }
+                                  className={`flex-1 py-1 rounded font-bold ${
+                                    (composition.portalVfx?.particles.direction || 'inward') === 'inward'
+                                      ? 'bg-cyan-500 text-black'
+                                      : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  Inward Suction
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    setComposition((prev) => ({
+                                      ...prev,
+                                      portalVfx: {
+                                        ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                        particles: {
+                                          ...(prev.portalVfx?.particles || DEFAULT_PORTAL_VFX_CONFIG.particles),
+                                          direction: 'outward',
+                                        },
+                                      },
+                                    }))
+                                  }
+                                  className={`flex-1 py-1 rounded font-bold ${
+                                    composition.portalVfx?.particles.direction === 'outward'
+                                      ? 'bg-cyan-500 text-black'
+                                      : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  Outward Embers
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MODULE G: OPENING & CLOSING ANIMATION */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Compass className="w-4 h-4 text-emerald-400" />
+                          <span className="font-bold text-white">G. Opening & Closing Animation</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.opening.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                opening: {
+                                  ...(prev.portalVfx?.opening || DEFAULT_PORTAL_VFX_CONFIG.opening),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.opening.enabled && (
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-[11px]">
+                          <div>
+                            <span className="text-slate-400 block mb-1">Open Duration</span>
+                            <input
+                              type="range"
+                              min="0.5"
+                              max="4.0"
+                              step="0.1"
+                              value={composition.portalVfx?.opening.openDuration || 1.5}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  portalVfx: {
+                                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                    opening: {
+                                      ...(prev.portalVfx?.opening || DEFAULT_PORTAL_VFX_CONFIG.opening),
+                                      openDuration: parseFloat(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-cyan-400"
+                            />
+                            <span className="text-cyan-400 font-mono text-[10px]">
+                              {composition.portalVfx?.opening.openDuration || 1.5}s
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-slate-400 block mb-1">Hold Duration</span>
+                            <input
+                              type="range"
+                              min="1.0"
+                              max="10.0"
+                              step="0.5"
+                              value={composition.portalVfx?.opening.holdDuration || 5.0}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  portalVfx: {
+                                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                    opening: {
+                                      ...(prev.portalVfx?.opening || DEFAULT_PORTAL_VFX_CONFIG.opening),
+                                      holdDuration: parseFloat(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-cyan-400"
+                            />
+                            <span className="text-cyan-400 font-mono text-[10px]">
+                              {composition.portalVfx?.opening.holdDuration || 5.0}s
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-slate-400 block mb-1">Close Duration</span>
+                            <input
+                              type="range"
+                              min="0.5"
+                              max="4.0"
+                              step="0.1"
+                              value={composition.portalVfx?.opening.closeDuration || 1.5}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  portalVfx: {
+                                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                    opening: {
+                                      ...(prev.portalVfx?.opening || DEFAULT_PORTAL_VFX_CONFIG.opening),
+                                      closeDuration: parseFloat(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-cyan-400"
+                            />
+                            <span className="text-cyan-400 font-mono text-[10px]">
+                              {composition.portalVfx?.opening.closeDuration || 1.5}s
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MODULE H: PORTAL EXIT TRANSITION */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Maximize2 className="w-4 h-4 text-purple-400" />
+                          <span className="font-bold text-white">H. Portal Exit Zoom Transition</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.exitTransition.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                exitTransition: {
+                                  ...(prev.portalVfx?.exitTransition || DEFAULT_PORTAL_VFX_CONFIG.exitTransition),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.exitTransition.enabled && (
+                        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5 text-[11px]">
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-slate-400">Trigger Start Time</span>
+                              <span className="text-cyan-400 font-mono">
+                                {composition.portalVfx?.exitTransition.startTime || 6.0}s
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="1.0"
+                              max="20.0"
+                              step="0.5"
+                              value={composition.portalVfx?.exitTransition.startTime || 6.0}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  portalVfx: {
+                                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                    exitTransition: {
+                                      ...(prev.portalVfx?.exitTransition || DEFAULT_PORTAL_VFX_CONFIG.exitTransition),
+                                      startTime: parseFloat(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-cyan-400"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-slate-400">Zoom Speed</span>
+                              <span className="text-cyan-400 font-mono">
+                                {(composition.portalVfx?.exitTransition.zoomSpeed || 1.6).toFixed(1)}x
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="1.0"
+                              max="3.0"
+                              step="0.1"
+                              value={composition.portalVfx?.exitTransition.zoomSpeed || 1.6}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  portalVfx: {
+                                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                    exitTransition: {
+                                      ...(prev.portalVfx?.exitTransition || DEFAULT_PORTAL_VFX_CONFIG.exitTransition),
+                                      zoomSpeed: parseFloat(e.target.value),
+                                    },
+                                  },
+                                }))
+                              }
+                              className="w-full accent-cyan-400"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MUSIC REACTIVITY (OFF BY DEFAULT) */}
+                    <div className="p-3.5 bg-slate-900/60 border border-white/10 rounded-xl space-y-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-cyan-400" />
+                          <div>
+                            <span className="font-bold text-white block">React to Music (Web Audio API)</span>
+                            <span className="text-[10px] text-slate-500">OFF by default • Modulates portal on beat</span>
+                          </div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={composition.portalVfx?.audioReactivity.enabled ?? false}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              portalVfx: {
+                                ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                audioReactivity: {
+                                  ...(prev.portalVfx?.audioReactivity || DEFAULT_PORTAL_VFX_CONFIG.audioReactivity),
+                                  enabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.portalVfx?.audioReactivity.enabled && (
+                        <div className="space-y-3 pt-2 border-t border-white/5">
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={composition.portalVfx?.audioReactivity.modulateGlow ?? true}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      audioReactivity: {
+                                        ...(prev.portalVfx?.audioReactivity || DEFAULT_PORTAL_VFX_CONFIG.audioReactivity),
+                                        modulateGlow: e.target.checked,
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="accent-cyan-400"
+                              />
+                              <span>Pulse Glow on Bass</span>
+                            </label>
+
+                            <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={composition.portalVfx?.audioReactivity.triggerShockwaveOnBeat ?? true}
+                                onChange={(e) =>
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    portalVfx: {
+                                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                                      audioReactivity: {
+                                        ...(prev.portalVfx?.audioReactivity || DEFAULT_PORTAL_VFX_CONFIG.audioReactivity),
+                                        triggerShockwaveOnBeat: e.target.checked,
+                                      },
+                                    },
+                                  }))
+                                }
+                                className="accent-cyan-400"
+                              />
+                              <span>Beat Shockwaves</span>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* TAB 1: BACKGROUND & MOTION STUDIO */}
               {activeTab === 'background' && (
                 <div className="space-y-5">
@@ -2217,62 +3775,220 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   </h3>
 
                   {/* Spectrum Style Cards */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-300">Spectrum Architecture</label>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {[
-                        { id: 'circular', label: 'Circular Halo' },
-                        { id: 'bars', label: 'Vertical Bars' },
-                        { id: 'mirrored', label: 'Mirrored Center' },
-                        { id: 'bottom-equalizer', label: 'Bottom Equalizer' },
-                      ].map((style) => (
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Spectrum Architecture</span>
+                      </label>
+                      {composition.visualizer.spectrumStyle !== 'none' ? (
                         <button
-                          key={style.id}
-                          onClick={() =>
+                          onClick={() => {
                             setComposition((prev) => ({
                               ...prev,
-                              visualizer: { ...prev.visualizer, spectrumStyle: style.id as any },
+                              visualizer: { ...prev.visualizer, spectrumStyle: 'none' },
                             }))
-                          }
-                          className={`p-2.5 rounded-xl border text-center font-bold ${
-                            composition.visualizer.spectrumStyle === style.id
-                              ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
-                              : 'bg-slate-900 border-white/5 text-slate-400 hover:text-white'
-                          }`}
+                            showToast('Deselected spectrum bars', 'info')
+                          }}
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40 transition-all flex items-center gap-1 cursor-pointer"
+                          title="Click to deselect and hide spectrum bars"
                         >
-                          {style.label}
+                          <EyeOff className="w-3 h-3" />
+                          <span>Deselect (Turn Off)</span>
                         </button>
-                      ))}
+                      ) : (
+                        <span className="text-[10px] text-slate-500 font-mono">None (Clean)</span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {[
+                        {
+                          id: 'circular',
+                          label: 'Circular Halo',
+                          desc: '360° radial pulsating halo ring',
+                          icon: Disc,
+                        },
+                        {
+                          id: 'bars',
+                          label: 'Vertical Bars',
+                          desc: 'Stereo vertical equalizer columns',
+                          icon: BarChart3,
+                        },
+                        {
+                          id: 'mirrored',
+                          label: 'Mirrored Center',
+                          desc: 'Symmetric center-split bounce',
+                          icon: Activity,
+                        },
+                        {
+                          id: 'bottom-equalizer',
+                          label: 'Bottom Equalizer',
+                          desc: 'Dynamic ground frequency bars',
+                          icon: SlidersHorizontal,
+                        },
+                        {
+                          id: 'none',
+                          label: 'Disabled (None)',
+                          desc: 'Turn off spectrum frequency bars',
+                          icon: EyeOff,
+                        },
+                      ].map((style) => {
+                        const Icon = style.icon
+                        const isSelected = composition.visualizer.spectrumStyle === style.id
+                        return (
+                          <button
+                            key={style.id}
+                            onClick={() => {
+                              // If already selected, clicking it again toggles/deselects it!
+                              const nextStyle = isSelected ? 'none' : style.id
+                              setComposition((prev) => ({
+                                ...prev,
+                                visualizer: { ...prev.visualizer, spectrumStyle: nextStyle as any },
+                              }))
+                              if (isSelected) {
+                                showToast(`Deselected ${style.label}`, 'info')
+                              }
+                            }}
+                            className={`p-3 rounded-xl border text-left transition-all relative group overflow-hidden cursor-pointer ${
+                              isSelected
+                                ? 'bg-gradient-to-tr from-cyan-500/20 via-indigo-600/20 to-violet-500/10 border-cyan-400 text-white shadow-lg shadow-cyan-500/20'
+                                : 'bg-slate-900/80 border-white/10 text-slate-400 hover:text-white hover:border-white/20 hover:bg-slate-800/60'
+                            } ${style.id === 'none' ? 'sm:col-span-2' : ''}`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                                  isSelected
+                                    ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/30'
+                                    : 'bg-slate-800 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-700'
+                                }`}
+                              >
+                                <Icon className="w-4 h-4" />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-bold text-xs truncate">{style.label}</span>
+                                  {isSelected && (
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      <span>Active</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-slate-500 truncate mt-0.5">{style.desc}</p>
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
 
                   {/* Waveform Style Cards */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-300">Time-Domain Waveform</label>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {[
-                        { id: 'smooth-center', label: 'Smooth Bezier Wave' },
-                        { id: 'oscilloscope', label: 'CRT Oscilloscope' },
-                        { id: 'dual-sided', label: 'Dual-Sided Ribbon' },
-                        { id: 'none', label: 'Disabled' },
-                      ].map((style) => (
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <Waves className="w-3.5 h-3.5 text-violet-400" />
+                        <span>Time-Domain Waveform</span>
+                      </label>
+                      {composition.visualizer.waveformStyle !== 'none' ? (
                         <button
-                          key={style.id}
-                          onClick={() =>
+                          onClick={() => {
                             setComposition((prev) => ({
                               ...prev,
-                              visualizer: { ...prev.visualizer, waveformStyle: style.id as any },
+                              visualizer: { ...prev.visualizer, waveformStyle: 'none' },
                             }))
-                          }
-                          className={`p-2.5 rounded-xl border text-center font-bold ${
-                            composition.visualizer.waveformStyle === style.id
-                              ? 'bg-violet-500/20 border-violet-400 text-violet-300'
-                              : 'bg-slate-900 border-white/5 text-slate-400 hover:text-white'
-                          }`}
+                            showToast('Deselected waveform', 'info')
+                          }}
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/10 text-violet-300 border border-violet-500/30 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40 transition-all flex items-center gap-1 cursor-pointer"
+                          title="Click to deselect and hide waveform"
                         >
-                          {style.label}
+                          <EyeOff className="w-3 h-3" />
+                          <span>Deselect (Turn Off)</span>
                         </button>
-                      ))}
+                      ) : (
+                        <span className="text-[10px] text-slate-500 font-mono">None (Clean)</span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {[
+                        {
+                          id: 'smooth-center',
+                          label: 'Smooth Bezier Wave',
+                          desc: 'Floating liquid audio ribbon',
+                          icon: Waves,
+                        },
+                        {
+                          id: 'oscilloscope',
+                          label: 'CRT Oscilloscope',
+                          desc: 'Retro analog cathode beam',
+                          icon: Tv,
+                        },
+                        {
+                          id: 'dual-sided',
+                          label: 'Dual-Sided Ribbon',
+                          desc: 'Mirrored acoustic envelope',
+                          icon: Activity,
+                        },
+                        {
+                          id: 'none',
+                          label: 'Disabled (None)',
+                          desc: 'Turn off waveform line',
+                          icon: EyeOff,
+                        },
+                      ].map((style) => {
+                        const Icon = style.icon
+                        const isSelected = composition.visualizer.waveformStyle === style.id
+                        return (
+                          <button
+                            key={style.id}
+                            onClick={() => {
+                              // If already selected, clicking it again toggles/deselects it!
+                              const nextStyle = isSelected ? 'none' : style.id
+                              setComposition((prev) => ({
+                                ...prev,
+                                visualizer: { ...prev.visualizer, waveformStyle: nextStyle as any },
+                              }))
+                              if (isSelected) {
+                                showToast(`Deselected ${style.label}`, 'info')
+                              }
+                            }}
+                            className={`p-3 rounded-xl border text-left transition-all relative group overflow-hidden cursor-pointer ${
+                              isSelected
+                                ? 'bg-gradient-to-tr from-violet-600/20 via-indigo-600/20 to-cyan-500/10 border-violet-400 text-white shadow-lg shadow-violet-500/20'
+                                : 'bg-slate-900/80 border-white/10 text-slate-400 hover:text-white hover:border-white/20 hover:bg-slate-800/60'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                                  isSelected
+                                    ? 'bg-violet-500 text-white shadow-md shadow-violet-500/30'
+                                    : 'bg-slate-800 text-slate-400 group-hover:text-violet-300 group-hover:bg-slate-700'
+                                }`}
+                              >
+                                <Icon className="w-4 h-4" />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-bold text-xs truncate">{style.label}</span>
+                                  {isSelected && (
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-violet-300 flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      <span>Active</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-slate-500 truncate mt-0.5">{style.desc}</p>
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
 
@@ -2542,6 +4258,70 @@ export const AudioToVideoStudioTool: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* ========================================================= */}
+        {/* PRESET CONFIRMATION MODAL (EXPLICIT USER CONFIRMATION)    */}
+        {/* ========================================================= */}
+        {selectedPresetModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+            <div className="bg-[#090A0F] border border-white/15 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full"
+                    style={{ backgroundColor: selectedPresetModal.accentColor }}
+                  />
+                  <h3 className="text-sm font-bold text-white">{selectedPresetModal.name}</h3>
+                </div>
+                <button
+                  onClick={() => setSelectedPresetModal(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {selectedPresetModal.subtitle}
+                </p>
+
+                <div className="p-3 bg-slate-950/70 border border-white/10 rounded-xl space-y-2">
+                  <div className="text-[11px] font-bold text-slate-400">Effects to be activated:</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedPresetModal.enabledModules.map((mod) => (
+                      <span
+                        key={mod}
+                        className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
+                      >
+                        ✓ {mod}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-slate-500">
+                  Other effects will remain OFF. Selecting a preset never activates hidden effects.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setSelectedPresetModal(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleApplyPreset(selectedPresetModal)}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 shadow-lg shadow-cyan-500/20"
+                >
+                  Confirm & Apply
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ========================================================= */}
         {/* EXPORT PROGRESS MODAL                                     */}

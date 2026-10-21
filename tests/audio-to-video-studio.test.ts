@@ -24,6 +24,14 @@ import {
   PhotoMotionStudioEngine,
   studioPhotoMotionEngine,
 } from '../src/lib/audioToVideo/photoMotionEngine.ts'
+import {
+  DEFAULT_PORTAL_VFX_CONFIG,
+  PORTAL_VFX_PRESETS,
+} from '../src/lib/portalVfx/portalTypes.ts'
+import {
+  PortalVfxEngine,
+  portalVfxEngine,
+} from '../src/lib/portalVfx/portalVfxEngine.ts'
 
 describe('IndiaTools Audio to Video Studio Suite', () => {
   it('should be correctly registered as Tool #69 in TOOLS registry', () => {
@@ -447,5 +455,132 @@ describe('IndiaTools Audio to Video Studio Suite', () => {
     assert.strictEqual(depthConfig.mode, 'single-2.5d')
     assert.ok(depthConfig.bgOverscanScale >= 1.05 && depthConfig.bgOverscanScale <= 1.3, 'Overscan scale must be safe (1.05-1.30)')
     assert.ok(depthConfig.parallaxRatio >= 0.5 && depthConfig.parallaxRatio <= 2.5, 'Parallax ratio must be within range')
+  })
+
+  it('should enforce NO automatic default effects and neutral clean launch configuration', () => {
+    // 1. All 8 Portal VFX modules must be strictly OFF initially
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.ring.enabled, false, 'Portal Ring must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.energyFlow.enabled, false, 'Energy Flow must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.interior.enabled, false, 'Interior Distortion must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.lightSpill.enabled, false, 'Light Spill must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.shockwave.enabled, false, 'Shockwave must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.particles.enabled, false, 'Particle Suction must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.opening.enabled, false, 'Opening Animation must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.exitTransition.enabled, false, 'Exit Transition must start OFF')
+    assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.audioReactivity.enabled, false, 'Audio Reactivity must start OFF')
+
+    // 2. Default studio composition must be clean and unpolluted
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.visualizer.spectrumStyle, 'none', 'Spectrum style must start none')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.visualizer.waveformStyle, 'none', 'Waveform style must start none')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.floatingParticlesEnabled, false, 'Particles must start OFF')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.lightRaysEnabled, false, 'Light rays must start OFF')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.dreamyBokehEnabled, false, 'Bokeh must start OFF')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.textOverlay.title, '', 'Default title must be empty')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.photoMotion?.enabled, false, 'Photo Motion must start OFF')
+  })
+
+  it('should execute PortalVfxEngine render pipeline without errors across all modules', () => {
+    const originalImage = (globalThis as any).Image
+    ;(globalThis as any).Image = class MockImage {
+      complete = true
+      naturalWidth = 1920
+      naturalHeight = 1080
+      src = ''
+    }
+
+    const gradMock = { addColorStop: () => {} }
+    const mockCtx = {
+      canvas: { width: 1920, height: 1080 },
+      save: () => {},
+      restore: () => {},
+      clearRect: () => {},
+      fillRect: () => {},
+      beginPath: () => {},
+      closePath: () => {},
+      arc: () => {},
+      ellipse: () => {},
+      clip: () => {},
+      moveTo: () => {},
+      lineTo: () => {},
+      stroke: () => {},
+      fill: () => {},
+      translate: () => {},
+      scale: () => {},
+      rotate: () => {},
+      drawImage: () => {},
+      createLinearGradient: () => gradMock,
+      createRadialGradient: () => gradMock,
+      fillStyle: '',
+      strokeStyle: '',
+      lineWidth: 1,
+      globalAlpha: 1,
+      globalCompositeOperation: 'source-over',
+      shadowBlur: 0,
+      shadowColor: '',
+    } as any
+
+    const mockBands = { bass: 0.8, mid: 0.5, treble: 0.6, subBass: 0.9, overall: 0.7, isBeatHit: true }
+
+    try {
+      // Test with all 8 modules enabled
+      const fullConfig = {
+        ...DEFAULT_PORTAL_VFX_CONFIG,
+        sourceImageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        ring: { ...DEFAULT_PORTAL_VFX_CONFIG.ring, enabled: true },
+        energyFlow: { ...DEFAULT_PORTAL_VFX_CONFIG.energyFlow, enabled: true },
+        interior: { ...DEFAULT_PORTAL_VFX_CONFIG.interior, enabled: true },
+        lightSpill: { ...DEFAULT_PORTAL_VFX_CONFIG.lightSpill, enabled: true },
+        shockwave: { ...DEFAULT_PORTAL_VFX_CONFIG.shockwave, enabled: true },
+        particles: { ...DEFAULT_PORTAL_VFX_CONFIG.particles, enabled: true },
+        opening: { ...DEFAULT_PORTAL_VFX_CONFIG.opening, enabled: true },
+        exitTransition: { ...DEFAULT_PORTAL_VFX_CONFIG.exitTransition, enabled: true, startTime: 1.0 },
+        audioReactivity: { ...DEFAULT_PORTAL_VFX_CONFIG.audioReactivity, enabled: true },
+      }
+
+      const mockImg = new (globalThis as any).Image()
+      assert.doesNotThrow(() => {
+        portalVfxEngine.render(mockCtx, 1920, 1080, fullConfig, mockImg, mockBands, 2.5, 15.0)
+      }, 'PortalVfxEngine must render full VFX stack without throwing')
+
+      // Test with master bypass
+      const bypassConfig = { ...fullConfig, masterAllEffectsEnabled: false }
+      assert.doesNotThrow(() => {
+        portalVfxEngine.render(mockCtx, 1920, 1080, bypassConfig, mockImg, mockBands, 2.5, 15.0)
+      }, 'PortalVfxEngine must render in bypass mode without throwing')
+
+      // Test with before/after active
+      const beforeConfig = { ...fullConfig, isBeforePreviewActive: true }
+      assert.doesNotThrow(() => {
+        portalVfxEngine.render(mockCtx, 1920, 1080, beforeConfig, mockImg, mockBands, 2.5, 15.0)
+      }, 'PortalVfxEngine must render in Before/After preview mode without throwing')
+    } finally {
+      ;(globalThis as any).Image = originalImage
+    }
+  })
+
+  it('should verify all 5 curated VFX presets and explicit module activations', () => {
+    assert.strictEqual(PORTAL_VFX_PRESETS.length, 5, 'Must provide exactly 5 curated VFX presets')
+
+    const expectedPresetIds = [
+      'dimensional-gateway',
+      'electric-rift',
+      'cosmic-vortex',
+      'ancient-magic',
+      'minimal-cinematic',
+    ]
+
+    const actualPresetIds = PORTAL_VFX_PRESETS.map((p) => p.id)
+    assert.deepStrictEqual(actualPresetIds, expectedPresetIds)
+
+    for (const preset of PORTAL_VFX_PRESETS) {
+      assert.ok(preset.name.length > 0, `Preset ${preset.id} must have a name`)
+      assert.ok(preset.subtitle.length > 0, `Preset ${preset.id} must have a subtitle`)
+      assert.ok(preset.accentColor.startsWith('#'), `Preset ${preset.id} accent color must be hex`)
+      assert.ok(preset.enabledModules.length > 0, `Preset ${preset.id} must explicitly declare enabled modules`)
+
+      // Apply preset and verify only expected modules are activated
+      const applied = preset.apply(DEFAULT_PORTAL_VFX_CONFIG)
+      assert.ok(applied.ring.enabled, `Preset ${preset.id} should enable portal ring`)
+    }
   })
 })
