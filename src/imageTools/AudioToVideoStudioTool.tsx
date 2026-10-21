@@ -1186,6 +1186,20 @@ export const AudioToVideoStudioTool: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
+                {/* 1-Click Garden Studio Mode Switch */}
+                <button
+                  onClick={() => setActiveTab('garden')}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    activeTab === 'garden'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400'
+                      : 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 hover:text-white hover:bg-emerald-900/60'
+                  }`}
+                  title="Switch directly to Music-Grown Garden Studio"
+                >
+                  <Flower2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                  <span>🌸 Garden Studio</span>
+                </button>
+
                 {/* Master All Effects Bypass/Enable */}
                 <button
                   onClick={toggleMasterAllEffects}
@@ -1390,14 +1404,21 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as StudioTab)}
-                    className={`flex flex-col items-center justify-center py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`flex flex-col items-center justify-center py-2.5 rounded-xl text-xs font-bold transition-all relative ${
                       isActive
-                        ? 'bg-gradient-to-tr from-violet-600/30 via-indigo-600/30 to-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-md'
+                        ? 'bg-gradient-to-tr from-emerald-600/30 via-teal-600/30 to-cyan-500/20 text-emerald-300 border border-emerald-400 shadow-md'
+                        : tab.id === 'garden'
+                        ? 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/40 hover:bg-emerald-900/50 hover:text-white'
                         : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
                     }`}
                   >
-                    <Icon className="w-4 h-4 mb-1" />
-                    <span>{tab.label}</span>
+                    <Icon className={`w-4 h-4 mb-1 ${tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
+                    <div className="flex items-center gap-1">
+                      <span>{tab.label}</span>
+                      {tab.id === 'garden' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                      )}
+                    </div>
                   </button>
                 )
               })}
