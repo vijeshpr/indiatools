@@ -267,6 +267,40 @@ describe('SonicCam — Beat-Synced Multi-Region Cinematic Studio Suite', () => {
         }, `SonicCamEngine must render preset ${preset.id} without throwing`)
       }
 
+      // Test all 15 cinematic transitions in active transition state (progress = 0.5)
+      const allTransitions: SonicTransitionType[] = [
+        'instant-cut',
+        'snap-zoom',
+        'smooth-zoom-cut',
+        'whip-pan',
+        'vertical-drop',
+        'directional-slide',
+        'flash-cut',
+        'crossfade',
+        'glitch-rgb',
+        'spin-twist',
+        'bass-shockwave',
+        'film-burn',
+        'zoom-through',
+        'strobe-shutter',
+        'prism-split',
+      ]
+
+      for (const tr of allTransitions) {
+        const transConfig: SonicCamStudioConfig = {
+          ...DEFAULT_SONIC_CAM_CONFIG,
+          sourceImageUrl: 'data:image/png;base64,mock',
+          enabled: true,
+          transition: tr,
+          transitionDurationSec: 0.5,
+          regions: generateCinematicGrid(6),
+        }
+
+        assert.doesNotThrow(() => {
+          testEngine.render(mockCtx, 1920, 1080, transConfig, mockBands, 1.25, 30.0)
+        }, `SonicCamEngine must render transition style '${tr}' without throwing`)
+      }
+
       // Test Before/After comparison mode
       const beforeConfig: SonicCamStudioConfig = {
         ...DEFAULT_SONIC_CAM_CONFIG,

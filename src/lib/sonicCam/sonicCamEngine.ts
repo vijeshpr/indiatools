@@ -191,6 +191,240 @@ export class SonicCamEngine {
       return
     }
 
+    // Vertical Drop Whip
+    if (state.transitionType === 'vertical-drop') {
+      const t = this.easeInOutCubic(progress)
+      const dropOffset = (1 - t) * canvasH
+
+      ctx.save()
+      // Outgoing shot drops downward
+      ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, t * canvasH * 0.5, canvasW, canvasH)
+      // Incoming shot drops in from top
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, -dropOffset, canvasW, canvasH)
+      ctx.restore()
+      return
+    }
+
+    // Glitch RGB Split
+    if (state.transitionType === 'glitch-rgb') {
+      const peak = Math.sin(progress * Math.PI)
+      const slices = 12
+      const sliceH = canvasH / slices
+      const maxShift = 32 * peak
+
+      for (let i = 0; i < slices; i++) {
+        const sy = i * sliceH
+        const seed = Math.sin(i * 91.3 + progress * 43.7) * 10000
+        const jitter = (seed - Math.floor(seed)) - 0.5
+        const shiftX = jitter * maxShift * 2
+        const useCur = (i + Math.floor(progress * 12)) % 3 !== 0
+        const crop = useCur ? cur : prev
+        const imgSy = crop.sy + (sy / canvasH) * crop.sh
+        const imgSh = (sliceH / canvasH) * crop.sh
+        ctx.drawImage(img, crop.sx, imgSy, crop.sw, imgSh, shiftX, sy, canvasW, sliceH)
+      }
+
+      if (peak > 0.08) {
+        ctx.save()
+        ctx.globalCompositeOperation = 'screen'
+        ctx.fillStyle = `rgba(0, 240, 255, ${peak * 0.4})`
+        ctx.fillRect(maxShift * 0.6, 0, canvasW, canvasH)
+        ctx.fillStyle = `rgba(255, 0, 110, ${peak * 0.4})`
+        ctx.fillRect(-maxShift * 0.6, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // Spin Twist / Vortex
+    if (state.transitionType === 'spin-twist') {
+      const t = this.easeInOutCubic(progress)
+      const angle = t * Math.PI * 0.4
+
+      ctx.save()
+      ctx.translate(canvasW / 2, canvasH / 2)
+
+      if (t < 0.6) {
+        const scaleOut = 1.0 - t * 0.4
+        ctx.save()
+        ctx.rotate(angle)
+        ctx.scale(scaleOut, scaleOut)
+        ctx.globalAlpha = Math.max(0, 1 - t / 0.6)
+        ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, -canvasW / 2, -canvasH / 2, canvasW, canvasH)
+        ctx.restore()
+      }
+
+      const scaleIn = 1.4 - (1 - t) * 0.4
+      ctx.save()
+      ctx.rotate(-(1 - t) * Math.PI * 0.4)
+      ctx.scale(scaleIn, scaleIn)
+      ctx.globalAlpha = Math.min(1, t / 0.6)
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, -canvasW / 2, -canvasH / 2, canvasW, canvasH)
+      ctx.restore()
+
+      ctx.restore()
+      return
+    }
+
+    // Bass Shockwave
+    if (state.transitionType === 'bass-shockwave') {
+      const t = progress
+      const punch = 1.0 + (1 - t) * 0.16
+
+      ctx.save()
+      ctx.translate(canvasW / 2, canvasH / 2)
+      ctx.scale(punch, punch)
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, -canvasW / 2, -canvasH / 2, canvasW, canvasH)
+      ctx.restore()
+
+      const maxR = Math.hypot(canvasW, canvasH) * 0.65
+      const r = t * maxR
+      const alpha = (1 - t) * 0.85
+
+      if (alpha > 0.02) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(canvasW / 2, canvasH / 2, r, 0, Math.PI * 2)
+        ctx.lineWidth = Math.max(2, (1 - t) * 14)
+        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`
+        ctx.stroke()
+
+        ctx.beginPath()
+        ctx.arc(canvasW / 2, canvasH / 2, Math.max(0, r - 18), 0, Math.PI * 2)
+        ctx.lineWidth = Math.max(1.5, (1 - t) * 8)
+        ctx.strokeStyle = `rgba(236, 72, 153, ${alpha * 0.75})`
+        ctx.stroke()
+        ctx.restore()
+      }
+      return
+    }
+
+    // Light Leak Film Burn
+    if (state.transitionType === 'film-burn') {
+      const t = progress
+
+      ctx.save()
+      ctx.globalAlpha = 1 - t
+      ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, 0, canvasW, canvasH)
+      ctx.globalAlpha = t
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+      ctx.restore()
+
+      const peak = Math.sin(t * Math.PI)
+      if (peak > 0.02) {
+        ctx.save()
+        ctx.globalCompositeOperation = 'screen'
+        const leakX = (t * 1.5 - 0.25) * canvasW
+        const grad = ctx.createRadialGradient(
+          leakX,
+          canvasH * 0.35,
+          10,
+          leakX,
+          canvasH * 0.5,
+          canvasW * 0.75
+        )
+        grad.addColorStop(0, `rgba(255, 248, 220, ${peak * 0.95})`)
+        grad.addColorStop(0.25, `rgba(255, 130, 20, ${peak * 0.85})`)
+        grad.addColorStop(0.55, `rgba(244, 63, 94, ${peak * 0.65})`)
+        grad.addColorStop(0.85, `rgba(168, 85, 247, ${peak * 0.35})`)
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = grad
+        ctx.fillRect(0, 0, canvasW, canvasH)
+        ctx.restore()
+      }
+      return
+    }
+
+    // Hyper Zoom Dive (Crash Zoom Through)
+    if (state.transitionType === 'zoom-through') {
+      const t = this.easeInOutQuad(progress)
+
+      ctx.save()
+      ctx.translate(canvasW / 2, canvasH / 2)
+
+      if (t < 0.5) {
+        const p = t * 2
+        const s = 1.0 + p * 2.5
+        ctx.scale(s, s)
+        ctx.globalAlpha = Math.max(0, 1 - p * 0.8)
+        ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, -canvasW / 2, -canvasH / 2, canvasW, canvasH)
+      } else {
+        const p = (t - 0.5) * 2
+        const s = 0.35 + p * 0.65
+        ctx.scale(s, s)
+        ctx.globalAlpha = p
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, -canvasW / 2, -canvasH / 2, canvasW, canvasH)
+      }
+      ctx.restore()
+
+      const peak = Math.sin(t * Math.PI)
+      if (peak > 0.35) {
+        ctx.save()
+        ctx.globalCompositeOperation = 'screen'
+        ctx.strokeStyle = `rgba(255, 255, 255, ${(peak - 0.35) * 0.6})`
+        ctx.lineWidth = 1.5
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+          const x1 = canvasW / 2 + Math.cos(a) * (canvasW * 0.12)
+          const y1 = canvasH / 2 + Math.sin(a) * (canvasH * 0.12)
+          const x2 = canvasW / 2 + Math.cos(a) * (canvasW * 0.72)
+          const y2 = canvasH / 2 + Math.sin(a) * (canvasH * 0.72)
+          ctx.beginPath()
+          ctx.moveTo(x1, y1)
+          ctx.lineTo(x2, y2)
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+      return
+    }
+
+    // Strobe Shutter
+    if (state.transitionType === 'strobe-shutter') {
+      const t = progress
+      const cycle = Math.floor(t * 10)
+
+      if (t < 0.25) {
+        ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, 0, canvasW, canvasH)
+      } else if (cycle % 2 === 0 && t < 0.7) {
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(0, 0, canvasW, canvasH)
+      } else {
+        ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+        if (t < 0.5) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.35)'
+          ctx.fillRect(0, 0, canvasW, canvasH)
+        }
+      }
+      return
+    }
+
+    // Prism Glass Split
+    if (state.transitionType === 'prism-split') {
+      const t = this.easeInOutQuad(progress)
+      const splitDist = (1 - t) * 36
+      const alpha = Math.min(1, t * 1.5)
+
+      ctx.save()
+      if (t < 0.45) {
+        ctx.globalAlpha = 1 - t * 2
+        ctx.drawImage(img, prev.sx, prev.sy, prev.sw, prev.sh, 0, 0, canvasW, canvasH)
+      }
+
+      ctx.globalCompositeOperation = 'screen'
+
+      ctx.globalAlpha = alpha * 0.45
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, -splitDist, -splitDist * 0.4, canvasW, canvasH)
+
+      ctx.globalAlpha = alpha * 0.45
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, splitDist, splitDist * 0.4, canvasW, canvasH)
+
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.globalAlpha = alpha
+      ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
+      ctx.restore()
+      return
+    }
+
     // Default fallback
     ctx.drawImage(img, cur.sx, cur.sy, cur.sw, cur.sh, 0, 0, canvasW, canvasH)
   }

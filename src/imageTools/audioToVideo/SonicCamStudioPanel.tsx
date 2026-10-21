@@ -875,28 +875,37 @@ export const SonicCamStudioPanel: React.FC<SonicCamStudioPanelProps> = ({
           <div className="space-y-3 pt-2 border-t border-white/5">
             <div className="space-y-1.5">
               <span className="text-[11px] text-slate-400">Transition Style:</span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-slate-950 p-1 rounded-lg text-center">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-white/5 text-center">
                 {(
                   [
-                    { id: 'instant-cut', label: 'Instant Cut' },
-                    { id: 'snap-zoom', label: 'Snap Zoom' },
-                    { id: 'smooth-zoom-cut', label: 'Smooth Zoom Cut' },
-                    { id: 'whip-pan', label: 'Whip Pan' },
-                    { id: 'directional-slide', label: 'Directional Slide' },
-                    { id: 'flash-cut', label: 'Flash Cut' },
-                    { id: 'crossfade', label: 'Crossfade' },
+                    { id: 'instant-cut', label: 'Instant Cut', icon: '⚡' },
+                    { id: 'snap-zoom', label: 'Snap Zoom', icon: '🔍' },
+                    { id: 'smooth-zoom-cut', label: 'Smooth Zoom', icon: '🌊' },
+                    { id: 'whip-pan', label: 'Whip Pan', icon: '↔️' },
+                    { id: 'vertical-drop', label: 'Vertical Drop', icon: '⬇️' },
+                    { id: 'directional-slide', label: 'Slide Cut', icon: '↗️' },
+                    { id: 'flash-cut', label: 'Flash Cut', icon: '💥' },
+                    { id: 'crossfade', label: 'Crossfade', icon: '🌫️' },
+                    { id: 'glitch-rgb', label: 'Glitch RGB', icon: '👾' },
+                    { id: 'spin-twist', label: 'Spin Vortex', icon: '🌀' },
+                    { id: 'bass-shockwave', label: 'Bass Shock', icon: '🔊' },
+                    { id: 'film-burn', label: 'Film Burn', icon: '🔥' },
+                    { id: 'zoom-through', label: 'Hyper Zoom', icon: '🚀' },
+                    { id: 'strobe-shutter', label: 'Strobe Shutter', icon: '⚡' },
+                    { id: 'prism-split', label: 'Prism Split', icon: '💎' },
                   ] as const
                 ).map((tr) => (
                   <button
                     key={tr.id}
                     onClick={() => updateSonic((prev) => ({ ...prev, transition: tr.id }))}
-                    className={`px-2 py-1 rounded text-[10px] font-bold ${
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                       sonic.transition === tr.id
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                        : 'text-slate-400'
+                        ? 'bg-amber-500/25 text-amber-300 border border-amber-400/50 shadow-md shadow-amber-500/10'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                     }`}
                   >
-                    {tr.label}
+                    <span>{tr.icon}</span>
+                    <span>{tr.label}</span>
                   </button>
                 ))}
               </div>

@@ -199,6 +199,9 @@ export class SonicCamSequencer {
       // Punch up at start of transition then settle
       zoomBoost = (1 - transitionProgress) * 0.12
     }
+    if (config.transition === 'bass-shockwave' && transitionProgress < 1) {
+      zoomBoost = (1 - transitionProgress) * 0.18
+    }
     if (config.bassShake.zoomImpulseEnabled) {
       zoomBoost += this.bassShakeDecay * 0.04
     }
@@ -207,6 +210,11 @@ export class SonicCamSequencer {
     let flashBrightness = 0
     if (config.transition === 'flash-cut' && transitionProgress < 0.6) {
       flashBrightness = (1 - transitionProgress / 0.6) * 0.35
+    } else if (config.transition === 'strobe-shutter' && transitionProgress < 0.6) {
+      const cycle = Math.floor(transitionProgress * 14)
+      if (cycle % 2 === 1) {
+        flashBrightness = 0.4
+      }
     }
 
     const shakeDisp = config.bassShake.enabled ? config.bassShake.maxDisplacementPx || 12 : 0

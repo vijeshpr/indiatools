@@ -42,9 +42,17 @@ export type SonicTransitionType =
   | 'snap-zoom'
   | 'smooth-zoom-cut'
   | 'whip-pan'
+  | 'vertical-drop'
   | 'directional-slide'
   | 'flash-cut'
   | 'crossfade'
+  | 'glitch-rgb'
+  | 'spin-twist'
+  | 'bass-shockwave'
+  | 'film-burn'
+  | 'zoom-through'
+  | 'strobe-shutter'
+  | 'prism-split'
   | 'full-image-return'
 
 export interface BeatMarker {
