@@ -1,5 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
+import fs from 'node:fs'
+import path from 'node:path'
 import { TOOLS, getToolBySlug, CATEGORIES } from '../src/data/tools.ts'
 import {
   ASPECT_RATIO_RESOLUTIONS,
@@ -746,5 +748,13 @@ describe('IndiaTools Audio to Video Studio Suite', () => {
     } finally {
       ;(globalThis as any).Image = originalImage
     }
+  })
+
+  it('should verify Studio Default Audio Track asset presence and metadata', () => {
+    const audioFilePath = path.join(process.cwd(), 'public', 'audio', 'default-studio-track.mp3')
+
+    assert.ok(fs.existsSync(audioFilePath), 'default-studio-track.mp3 must exist in public/audio directory')
+    const stats = fs.statSync(audioFilePath)
+    assert.ok(stats.size > 1000000, `Audio file should be complete (>1MB), found ${stats.size} bytes`)
   })
 })

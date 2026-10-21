@@ -144,14 +144,14 @@ export const AudioToVideoStudioTool: React.FC = () => {
     isBeatHit: false,
   })
 
-  // Audio Playback & Track State
+  // Audio Playback & Track State (Default: High-Energy Studio Anthem 02:51)
   const [audioTrack, setAudioTrack] = useState<AudioTrackMetadata>({
     file: null,
-    url: null,
-    name: 'No audio loaded',
-    duration: 0,
-    sizeBytes: 0,
-    type: '',
+    url: '/audio/default-studio-track.mp3',
+    name: 'Cinematic Anthem (Studio Default)',
+    duration: 171,
+    sizeBytes: 4118843,
+    type: 'audio/mpeg',
     fadeInSec: 1.0,
     fadeOutSec: 1.0,
   })
@@ -176,9 +176,26 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
   // Initialize Web Audio & Render Engines once on mount
   useEffect(() => {
-    audioEngineRef.current = new AudioToVideoAudioEngine()
+    const audio = new AudioToVideoAudioEngine()
+    audioEngineRef.current = audio
     renderEngineRef.current = new AudioToVideoRenderEngine()
     exportEngineRef.current = new AudioToVideoExportEngine()
+
+    // Auto-preload the default studio anthem so playback is instantly ready
+    if (typeof window !== 'undefined') {
+      audio
+        .loadAudio('/audio/default-studio-track.mp3')
+        .then(({ duration, name }) => {
+          setAudioTrack((prev) => ({
+            ...prev,
+            duration: duration || 171,
+            name: name || 'Cinematic Anthem (Studio Default)',
+          }))
+        })
+        .catch(() => {
+          // Preload graceful fallback
+        })
+    }
 
     return () => {
       if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current)
@@ -403,14 +420,15 @@ export const AudioToVideoStudioTool: React.FC = () => {
   }
 
   // Playback Control Handlers
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
     if (!audioEngineRef.current) return
     if (!audioEngineRef.current.isAudioLoaded()) {
-      showToast('Synthesizing demo beat for playback...', 'info')
-      handleGenerateDemoAudio().then(() => {
-        audioEngineRef.current?.play().then(() => setIsPlaying(true))
-      })
-      return
+      try {
+        await audioEngineRef.current.loadAudio(audioTrack.url || '/audio/default-studio-track.mp3')
+      } catch {
+        showToast('Synthesizing demo beat for playback...', 'info')
+        await handleGenerateDemoAudio()
+      }
     }
     if (isPlaying) {
       audioEngineRef.current.pause()
@@ -420,6 +438,29 @@ export const AudioToVideoStudioTool: React.FC = () => {
         .play()
         .then(() => setIsPlaying(true))
         .catch(() => showToast('Click to allow audio playback', 'info'))
+    }
+  }
+
+  // Restore / Play Studio Default Track
+  const handleResetToDefaultAudio = async () => {
+    if (!audioEngineRef.current) return
+    try {
+      const { duration, name } = await audioEngineRef.current.loadAudio('/audio/default-studio-track.mp3')
+      setAudioTrack({
+        file: null,
+        url: '/audio/default-studio-track.mp3',
+        name: name || 'Cinematic Anthem (Studio Default)',
+        duration: duration || 171,
+        sizeBytes: 4118843,
+        type: 'audio/mpeg',
+        fadeInSec: 1.0,
+        fadeOutSec: 1.0,
+      })
+      setCurrentTime(0)
+      setIsPlaying(false)
+      showToast('Loaded Studio Default: Cinematic Anthem (02:51)', 'success')
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to load default track', 'error')
     }
   }
 
@@ -1016,7 +1057,15 @@ export const AudioToVideoStudioTool: React.FC = () => {
     const exporter = exportEngineRef.current
     if (!canvas || !audio || !exporter) return
 
-    const totalDuration = audio.getDuration() || 15
+    if (!audio.isAudioLoaded()) {
+      try {
+        await audio.loadAudio(audioTrack.url || '/audio/default-studio-track.mp3')
+      } catch {
+        await handleGenerateDemoAudio()
+      }
+    }
+
+    const totalDuration = audio.getDuration() || audioTrack.duration || 15
     if (totalDuration <= 0) {
       showToast('Please load an audio file before exporting', 'error')
       return
@@ -1027,10 +1076,10 @@ export const AudioToVideoStudioTool: React.FC = () => {
     audio.play().catch(() => {})
     setIsPlaying(true)
 
-    const audioTrack = audio.getAudioExportTrack()
+    const exportAudioTrack = audio.getAudioExportTrack()
 
     try {
-      await exporter.startExport(canvas, audioTrack, totalDuration, 30, (prog) => {
+      await exporter.startExport(canvas, exportAudioTrack, totalDuration, 30, (prog) => {
         setExportProgress(prog)
       })
       showToast('Video export completed successfully!', 'success')
@@ -5469,10 +5518,10 @@ export const AudioToVideoStudioTool: React.FC = () => {
                     className="hidden"
                   />
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
                       onClick={() => audioInputRef.current?.click()}
-                      className="p-4 rounded-xl border border-white/10 bg-slate-900 hover:border-cyan-400/50 flex flex-col items-center justify-center gap-2 text-slate-300 hover:text-white transition-all"
+                      className="p-4 rounded-xl border border-white/10 bg-slate-900 hover:border-cyan-400/50 flex flex-col items-center justify-center gap-2 text-slate-300 hover:text-white transition-all text-center"
                     >
                       <Upload className="w-5 h-5 text-cyan-400" />
                       <span className="text-xs font-bold">Import Audio File</span>
@@ -5480,20 +5529,36 @@ export const AudioToVideoStudioTool: React.FC = () => {
                     </button>
 
                     <button
+                      onClick={handleResetToDefaultAudio}
+                      className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 hover:bg-cyan-950/40 flex flex-col items-center justify-center gap-2 text-cyan-300 hover:text-white transition-all text-center"
+                    >
+                      <Music className="w-5 h-5 text-cyan-400" />
+                      <span className="text-xs font-bold">Studio Default Anthem</span>
+                      <span className="text-[10px] text-slate-400">Cinematic Beat • 02:51</span>
+                    </button>
+
+                    <button
                       onClick={handleGenerateDemoAudio}
-                      className="p-4 rounded-xl border border-violet-500/30 bg-violet-950/20 hover:bg-violet-950/40 flex flex-col items-center justify-center gap-2 text-violet-300 hover:text-white transition-all"
+                      className="p-4 rounded-xl border border-violet-500/30 bg-violet-950/20 hover:bg-violet-950/40 flex flex-col items-center justify-center gap-2 text-violet-300 hover:text-white transition-all text-center"
                     >
                       <Sparkles className="w-5 h-5 text-violet-400" />
                       <span className="text-xs font-bold">1-Click Test Demo</span>
-                      <span className="text-[10px] text-slate-400">Synthesizes 15s Ambient Beat</span>
+                      <span className="text-[10px] text-slate-400">Synthesizes 15s Ambient</span>
                     </button>
                   </div>
 
                   {/* Loaded Metadata Card */}
                   <div className="p-3.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">File Name:</span>
-                      <span className="font-bold text-white truncate max-w-[200px]">{audioTrack.name}</span>
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="text-slate-400 shrink-0">Active Track:</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        {audioTrack.url?.includes('default-studio-track') && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">
+                            Preloaded Studio Default
+                          </span>
+                        )}
+                        <span className="font-bold text-white truncate max-w-[200px]">{audioTrack.name}</span>
+                      </div>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Duration:</span>

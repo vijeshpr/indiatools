@@ -71,7 +71,9 @@ export class AudioToVideoAudioEngine {
       fileName = fileOrUrl.name
     } else {
       url = fileOrUrl
-      fileName = 'Demo Audio'
+      fileName = fileOrUrl.includes('default-studio-track')
+        ? 'Cinematic Anthem (Studio Default)'
+        : 'Demo Audio'
     }
 
     this.audioElement.src = url
