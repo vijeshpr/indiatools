@@ -1,7 +1,8 @@
-/**
- * IndiaTools — Audio to Video Studio
- * Core Type Definitions
- */
+import {
+  PhotoMotionStudioConfig,
+  DEFAULT_PHOTO_MOTION_CONFIG,
+} from './photoMotionTypes.ts'
+export * from './photoMotionTypes.ts'
 
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
@@ -165,6 +166,7 @@ export interface StudioCompositionConfig {
   visualizer: VisualizerConfig
   cinematicFx: CinematicEffectsConfig
   textOverlay: TextOverlayConfig
+  photoMotion?: PhotoMotionStudioConfig
   performanceMode: boolean
 }
 
@@ -238,5 +240,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
     fadeInDuration: 1.5,
     fadeOutDuration: 1.5,
   },
+  photoMotion: DEFAULT_PHOTO_MOTION_CONFIG,
   performanceMode: false,
 }

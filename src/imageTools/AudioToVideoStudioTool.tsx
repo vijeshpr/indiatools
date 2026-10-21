@@ -28,6 +28,12 @@ import {
   CloudRain,
   Activity,
   Radio,
+  Brush,
+  Wind,
+  Compass,
+  Camera,
+  Droplets,
+  RotateCw,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -43,6 +49,16 @@ import {
   SlideshowImage,
   AudioTrackMetadata,
 } from '../lib/audioToVideo/types'
+import {
+  CameraMotionPreset,
+  CameraEasing,
+  DepthMode,
+  AtmosphericParticleType,
+  CinematicColorPreset,
+  CINEMATIC_COLOR_PRESETS,
+  DEFAULT_PHOTO_MOTION_CONFIG,
+  PhotoMotionStudioConfig,
+} from '../lib/audioToVideo/photoMotionTypes'
 import { BACKGROUND_PRESETS } from '../lib/audioToVideo/backgroundPresets'
 import { AudioToVideoAudioEngine } from '../lib/audioToVideo/audioToVideoAudioEngine'
 import { AudioToVideoRenderEngine } from '../lib/audioToVideo/audioToVideoRenderEngine'
@@ -51,7 +67,7 @@ import {
   ExportProgress,
 } from '../lib/audioToVideo/audioToVideoExportEngine'
 
-type StudioTab = 'audio' | 'background' | 'visualizer' | 'cinematic' | 'typography'
+type StudioTab = 'background' | 'photomotion' | 'visualizer' | 'cinematic' | 'typography' | 'audio'
 
 export const AudioToVideoStudioTool: React.FC = () => {
   const tool = getToolBySlug('audio-to-video-studio')
@@ -60,6 +76,15 @@ export const AudioToVideoStudioTool: React.FC = () => {
   // Composition State
   const [composition, setComposition] = useState<StudioCompositionConfig>(DEFAULT_STUDIO_COMPOSITION)
   const [activeTab, setActiveTab] = useState<StudioTab>('background')
+
+  // 2.5D Photo Motion & Mask Studio State
+  const [isMaskModalOpen, setIsMaskModalOpen] = useState<boolean>(false)
+  const [brushSize, setBrushSize] = useState<number>(36)
+  const [isEraser, setIsEraser] = useState<boolean>(false)
+  const [isPainting, setIsPainting] = useState<boolean>(false)
+  const maskCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const photoMotionInputRef = useRef<HTMLInputElement | null>(null)
+  const foregroundInputRef = useRef<HTMLInputElement | null>(null)
 
   // Audio Playback & Track State
   const [audioTrack, setAudioTrack] = useState<AudioTrackMetadata>({
@@ -356,6 +381,302 @@ export const AudioToVideoStudioTool: React.FC = () => {
     showToast(`Added ${newSlides.length} images to Slideshow Studio`, 'success')
   }
 
+  // =========================================================
+  // 2.5D PHOTO MOTION & BRUSH MASK HANDLERS
+  // =========================================================
+
+  // Handle Photo Motion Image Upload
+  const handlePhotoMotionImageUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload a valid image file (JPG, PNG, WebP)', 'error')
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setComposition((prev) => ({
+      ...prev,
+      photoMotion: {
+        ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+        enabled: true,
+        sourceImageUrl: url,
+        sourceImageName: file.name,
+      },
+    }))
+    showToast(`Loaded ${file.name} into 2.5D Motion Studio`, 'success')
+  }
+
+  // Handle Foreground Layer Upload (Dual-Layer Parallax Mode)
+  const handleForegroundLayerUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload a PNG or image with transparency for Foreground', 'error')
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setComposition((prev) => ({
+      ...prev,
+      photoMotion: {
+        ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+        enabled: true,
+        depth: {
+          ...(prev.photoMotion?.depth || DEFAULT_PHOTO_MOTION_CONFIG.depth),
+          mode: 'manual-layers',
+          foregroundUrl: url,
+        },
+      },
+    }))
+    showToast('Foreground parallax layer loaded', 'success')
+  }
+
+  // Synthesize Instant 1080p Cozy Mountain Cabin Scene (1-Click Test)
+  const handleLoadSamplePhoto = () => {
+    try {
+      const offscreen = document.createElement('canvas')
+      offscreen.width = 1920
+      offscreen.height = 1080
+      const ctx = offscreen.getContext('2d')
+      if (!ctx) return
+
+      // Sky & Twilight Horizon
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 750)
+      skyGrad.addColorStop(0, '#060B18')
+      skyGrad.addColorStop(0.4, '#0F1D38')
+      skyGrad.addColorStop(0.7, '#1B2E4B')
+      skyGrad.addColorStop(1, '#2F4858')
+      ctx.fillStyle = skyGrad
+      ctx.fillRect(0, 0, 1920, 1080)
+
+      // Distant Misty Mountain Silhouettes
+      ctx.fillStyle = '#111E38'
+      ctx.beginPath()
+      ctx.moveTo(0, 700)
+      ctx.lineTo(320, 430)
+      ctx.lineTo(680, 600)
+      ctx.lineTo(1100, 380)
+      ctx.lineTo(1520, 570)
+      ctx.lineTo(1920, 440)
+      ctx.lineTo(1920, 1080)
+      ctx.lineTo(0, 1080)
+      ctx.closePath()
+      ctx.fill()
+
+      // Midground Pine Forest Ridge
+      ctx.fillStyle = '#062B28'
+      for (let x = 0; x < 1920; x += 32) {
+        const treeH = 100 + Math.sin(x * 0.04) * 55 + Math.cos(x * 0.1) * 20
+        ctx.beginPath()
+        ctx.moveTo(x, 780)
+        ctx.lineTo(x + 16, 780 - treeH)
+        ctx.lineTo(x + 32, 780)
+        ctx.closePath()
+        ctx.fill()
+      }
+
+      // Foreground Cozy Cabin Wood Frame
+      ctx.fillStyle = '#1A120B'
+      ctx.fillRect(0, 0, 240, 1080) // Left wall
+      ctx.fillRect(1680, 0, 240, 1080) // Right wall
+      ctx.fillRect(0, 0, 1920, 150) // Top beam
+      ctx.fillRect(0, 910, 1920, 170) // Bottom wooden sill
+      ctx.fillRect(940, 150, 40, 760) // Center mullion
+      ctx.fillRect(240, 520, 1440, 35) // Horizontal crossbar
+
+      // Warm Golden Bedside Lamp on Sill
+      const lampGrad = ctx.createRadialGradient(420, 870, 8, 420, 870, 260)
+      lampGrad.addColorStop(0, 'rgba(251, 191, 36, 0.88)')
+      lampGrad.addColorStop(0.35, 'rgba(245, 158, 11, 0.35)')
+      lampGrad.addColorStop(1, 'rgba(245, 158, 11, 0)')
+      ctx.fillStyle = lampGrad
+      ctx.beginPath()
+      ctx.arc(420, 870, 260, 0, Math.PI * 2)
+      ctx.fill()
+
+      // Lamp Base & Shade
+      ctx.fillStyle = '#B45309'
+      ctx.fillRect(405, 840, 30, 70)
+      ctx.beginPath()
+      ctx.arc(420, 835, 25, Math.PI, 0)
+      ctx.fill()
+
+      const dataUrl = offscreen.toDataURL('image/jpeg', 0.92)
+      setComposition((prev) => ({
+        ...prev,
+        photoMotion: {
+          ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+          enabled: true,
+          sourceImageUrl: dataUrl,
+          sourceImageName: 'Cozy_Mountain_Cabin_1080p.jpg',
+          camera: {
+            ...(prev.photoMotion?.camera || DEFAULT_PHOTO_MOTION_CONFIG.camera),
+            preset: 'gentle-float',
+            speed: 1.0,
+            intensity: 6,
+          },
+          atmosphere: {
+            ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+            rainEnabled: true,
+            windowDropletsOverlay: true,
+            fogEnabled: true,
+            particlesEnabled: true,
+            particleType: 'fireflies',
+            particleCount: 50,
+          },
+          lighting: {
+            ...(prev.photoMotion?.lighting || DEFAULT_PHOTO_MOTION_CONFIG.lighting),
+            preset: 'romantic-rain',
+            vignette: 50,
+            ambientGlow: 40,
+          },
+        },
+      }))
+      showToast('Loaded 1080p Cozy Cabin Scene into 2.5D Motion Studio', 'success')
+    } catch {
+      showToast('Could not synthesize sample scene', 'error')
+    }
+  }
+
+  // Remove Photo Motion
+  const handleRemovePhotoMotion = () => {
+    setComposition((prev) => ({
+      ...prev,
+      photoMotion: {
+        ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+        enabled: false,
+        sourceImageUrl: null,
+        sourceImageName: undefined,
+      },
+    }))
+    showToast('Photo Motion cleared', 'info')
+  }
+
+  // Brush Mask Canvas Editor Handlers
+  const openMaskEditor = () => {
+    if (!composition.photoMotion?.sourceImageUrl) {
+      showToast('Please upload or load a photo first before creating a mask', 'info')
+      return
+    }
+    setIsMaskModalOpen(true)
+  }
+
+  // Initialize or re-sync Mask Canvas when modal opens
+  useEffect(() => {
+    if (!isMaskModalOpen || !maskCanvasRef.current || !composition.photoMotion?.sourceImageUrl) return
+    const canvas = maskCanvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    canvas.width = 960
+    canvas.height = 540
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // If a saved mask exists, draw it back onto the canvas
+    if (composition.photoMotion.depth.maskDataUrl) {
+      const savedMask = new Image()
+      savedMask.onload = () => {
+        ctx.drawImage(savedMask, 0, 0, canvas.width, canvas.height)
+      }
+      savedMask.src = composition.photoMotion.depth.maskDataUrl
+    }
+  }, [isMaskModalOpen, composition.photoMotion?.sourceImageUrl, composition.photoMotion?.depth.maskDataUrl])
+
+  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = maskCanvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+    const rect = canvas.getBoundingClientRect()
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
+    }
+  }
+
+  const startMaskDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    setIsPainting(true)
+    drawMask(e)
+  }
+
+  const drawMask = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isPainting && e.type !== 'mousedown' && e.type !== 'touchstart') return
+    const canvas = maskCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const { x, y } = getCanvasCoords(e)
+
+    ctx.save()
+    if (isEraser) {
+      ctx.globalCompositeOperation = 'destination-out'
+      ctx.beginPath()
+      ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2)
+      ctx.fillStyle = '#000000'
+      ctx.fill()
+    } else {
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.beginPath()
+      ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.75)'
+      ctx.shadowColor = 'rgba(239, 68, 68, 0.4)'
+      ctx.shadowBlur = 4
+      ctx.fill()
+    }
+    ctx.restore()
+  }
+
+  const stopMaskDrawing = () => {
+    setIsPainting(false)
+  }
+
+  const handleClearMask = () => {
+    const canvas = maskCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
+    showToast('Mask cleared', 'info')
+  }
+
+  const handleInvertMask = () => {
+    const canvas = maskCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const data = imgData.data
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] > 10) {
+        data[i + 3] = 0 // clear drawn
+      } else {
+        data[i] = 239
+        data[i + 1] = 68
+        data[i + 2] = 68
+        data[i + 3] = 190 // fill inverse
+      }
+    }
+    ctx.putImageData(imgData, 0, 0)
+    showToast('Mask inverted', 'info')
+  }
+
+  const handleSaveMask = () => {
+    const canvas = maskCanvasRef.current
+    if (!canvas) return
+    const maskDataUrl = canvas.toDataURL('image/png')
+    setComposition((prev) => ({
+      ...prev,
+      photoMotion: {
+        ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+        enabled: true,
+        depth: {
+          ...(prev.photoMotion?.depth || DEFAULT_PHOTO_MOTION_CONFIG.depth),
+          mode: 'brush-mask',
+          maskDataUrl,
+        },
+      },
+    }))
+    setIsMaskModalOpen(false)
+    showToast('Brush mask applied to 2.5D Parallax Compositor!', 'success')
+  }
+
   // Handle Export Video
   const handleStartExport = async () => {
     const canvas = canvasRef.current
@@ -599,9 +920,10 @@ export const AudioToVideoStudioTool: React.FC = () => {
           {/* RIGHT 5/12: MODULAR EDITING SUITE & STUDIO DOCK */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Dock Navigation Tabs */}
-            <div className="grid grid-cols-5 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
               {[
                 { id: 'background', label: 'Scene', icon: ImageIcon },
+                { id: 'photomotion', label: '2.5D Motion', icon: Film },
                 { id: 'visualizer', label: 'Spectrum', icon: Activity },
                 { id: 'cinematic', label: 'Effects', icon: Sparkles },
                 { id: 'typography', label: 'Titles', icon: Type },
@@ -871,7 +1193,1022 @@ export const AudioToVideoStudioTool: React.FC = () => {
                 </div>
               )}
 
-              {/* TAB 2: VISUALIZER & SPECTRUM */}
+              {/* TAB 2: 2.5D PHOTO MOTION STUDIO */}
+              {activeTab === 'photomotion' && (
+                <div className="space-y-6">
+                  {/* Header & Master Toggle */}
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-0.5 flex items-center justify-center">
+                        <Film className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>2.5D Photo Motion Studio</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            Cinematic Parallax
+                          </span>
+                        </h3>
+                        <p className="text-[11px] text-slate-400">
+                          Transform photos into moving camera shots with atmospheric depth
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        setComposition((prev) => ({
+                          ...prev,
+                          photoMotion: {
+                            ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                            enabled: !(prev.photoMotion?.enabled ?? false),
+                          },
+                        }))
+                      }
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                        composition.photoMotion?.enabled
+                          ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
+                          : 'bg-slate-800 text-slate-400 hover:text-white border border-white/10'
+                      }`}
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      <span>{composition.photoMotion?.enabled ? 'Active' : 'Disabled'}</span>
+                    </button>
+                  </div>
+
+                  {/* Hidden Photo Inputs */}
+                  <input
+                    type="file"
+                    ref={photoMotionInputRef}
+                    onChange={(e) => e.target.files?.[0] && handlePhotoMotionImageUpload(e.target.files[0])}
+                    accept="image/*,.jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                  />
+                  <input
+                    type="file"
+                    ref={foregroundInputRef}
+                    onChange={(e) => e.target.files?.[0] && handleForegroundLayerUpload(e.target.files[0])}
+                    accept="image/*,.png,.webp"
+                    className="hidden"
+                  />
+
+                  {/* SECTION 1: PHOTO SOURCE SELECTION */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Source Photograph</span>
+                      </span>
+                      {composition.photoMotion?.sourceImageUrl && (
+                        <span className="text-[10px] text-cyan-400 font-mono">100% Client-Side</span>
+                      )}
+                    </label>
+
+                    {composition.photoMotion?.sourceImageUrl ? (
+                      <div className="p-3 bg-slate-900/90 border border-white/10 rounded-xl flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={composition.photoMotion.sourceImageUrl}
+                            alt="2.5D Motion Source"
+                            className="w-14 h-14 rounded-lg object-cover border border-white/15 shrink-0 bg-slate-950"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-white truncate">
+                              {composition.photoMotion.sourceImageName || 'Custom Photo Loaded'}
+                            </div>
+                            <div className="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5">
+                              <span className="text-emerald-400 font-semibold">● Ready for 2.5D Motion</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => photoMotionInputRef.current?.click()}
+                            className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10"
+                            title="Replace photo"
+                          >
+                            Replace
+                          </button>
+                          <button
+                            onClick={handleRemovePhotoMotion}
+                            className="p-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-white/10"
+                            title="Clear photo"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          onClick={() => photoMotionInputRef.current?.click()}
+                          className="p-4 rounded-xl border border-white/10 bg-slate-900/80 hover:border-cyan-400/50 flex flex-col items-center justify-center gap-2 text-slate-300 hover:text-white transition-all group"
+                        >
+                          <Upload className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-bold">Import Photograph</span>
+                          <span className="text-[10px] text-slate-500">JPG, PNG, WebP</span>
+                        </button>
+
+                        <button
+                          onClick={handleLoadSamplePhoto}
+                          className="p-4 rounded-xl border border-violet-500/30 bg-violet-950/20 hover:bg-violet-950/40 flex flex-col items-center justify-center gap-2 text-violet-300 hover:text-white transition-all group"
+                        >
+                          <Sparkles className="w-5 h-5 text-violet-400 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-bold">1-Click Test Scene</span>
+                          <span className="text-[10px] text-slate-400">Loads 1080p Cozy Cabin</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SECTION 2: DEPTH & PARALLAX MODE */}
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Depth & Parallax Separation</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {composition.photoMotion?.depth.mode === 'single-2.5d'
+                          ? 'Single-Image Warp'
+                          : composition.photoMotion?.depth.mode === 'manual-layers'
+                          ? 'Dual-Layer Parallax'
+                          : 'Brush Mask Cutout'}
+                      </span>
+                    </label>
+
+                    {/* Mode Selector Tabs */}
+                    <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-xl border border-white/10 text-xs">
+                      {[
+                        { id: 'single-2.5d', label: 'Single 2.5D' },
+                        { id: 'manual-layers', label: 'Dual Layer' },
+                        { id: 'brush-mask', label: 'Brush Mask' },
+                      ].map((m) => {
+                        const isCurrent = (composition.photoMotion?.depth.mode || 'single-2.5d') === m.id
+                        return (
+                          <button
+                            key={m.id}
+                            onClick={() =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  enabled: true,
+                                  depth: {
+                                    ...(prev.photoMotion?.depth || DEFAULT_PHOTO_MOTION_CONFIG.depth),
+                                    mode: m.id as DepthMode,
+                                  },
+                                },
+                              }))
+                            }
+                            className={`py-1.5 px-2 rounded-lg font-bold transition-all text-center ${
+                              isCurrent
+                                ? 'bg-gradient-to-r from-violet-600 to-cyan-600 text-white shadow'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            {m.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Mode A: Single-Image 2.5D Controls */}
+                    {composition.photoMotion?.depth.mode === 'single-2.5d' && (
+                      <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-3 text-xs">
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          Automated 2.5D perspective projection. Employs focal depth scaling and background overscan safeguards to prevent exposed canvas edges.
+                        </p>
+                        <div>
+                          <div className="flex justify-between text-[11px] mb-1">
+                            <span className="text-slate-400">Background Overscan Safeguard</span>
+                            <span className="text-cyan-400 font-mono">
+                              {((composition.photoMotion?.depth.bgOverscanScale || 1.15) * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="1.05"
+                            max="1.30"
+                            step="0.01"
+                            value={composition.photoMotion?.depth.bgOverscanScale || 1.15}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  depth: {
+                                    ...(prev.photoMotion?.depth || DEFAULT_PHOTO_MOTION_CONFIG.depth),
+                                    bgOverscanScale: parseFloat(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mode B: Dual-Layer Manual Controls */}
+                    {composition.photoMotion?.depth.mode === 'manual-layers' && (
+                      <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-300 font-bold">Foreground Layer (Cutout PNG)</span>
+                          <button
+                            onClick={() => foregroundInputRef.current?.click()}
+                            className="px-2.5 py-1 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center gap-1"
+                          >
+                            <Upload className="w-3 h-3" />
+                            <span>{composition.photoMotion.depth.foregroundUrl ? 'Replace FG' : 'Upload FG'}</span>
+                          </button>
+                        </div>
+
+                        {composition.photoMotion.depth.foregroundUrl && (
+                          <div className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-semibold">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Foreground layer loaded and synchronized with camera</span>
+                          </div>
+                        )}
+
+                        <div>
+                          <div className="flex justify-between text-[11px] mb-1">
+                            <span className="text-slate-400">Parallax Speed Multiplier</span>
+                            <span className="text-cyan-400 font-mono">
+                              {(composition.photoMotion?.depth.parallaxRatio || 1.35).toFixed(2)}x
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.5"
+                            max="2.5"
+                            step="0.05"
+                            value={composition.photoMotion?.depth.parallaxRatio || 1.35}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  depth: {
+                                    ...(prev.photoMotion?.depth || DEFAULT_PHOTO_MOTION_CONFIG.depth),
+                                    parallaxRatio: parseFloat(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between text-[11px] mb-1">
+                            <span className="text-slate-400">Background Depth Blur (DOF)</span>
+                            <span className="text-cyan-400 font-mono">
+                              {composition.photoMotion?.depth.bgBlurPx || 0}px
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="15"
+                            value={composition.photoMotion?.depth.bgBlurPx || 0}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  depth: {
+                                    ...(prev.photoMotion?.depth || DEFAULT_PHOTO_MOTION_CONFIG.depth),
+                                    bgBlurPx: parseInt(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mode C: Brush Mask Cutout Controls */}
+                    {composition.photoMotion?.depth.mode === 'brush-mask' && (
+                      <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-300 font-bold">Interactive Brush Mask</span>
+                          <button
+                            onClick={openMaskEditor}
+                            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow"
+                          >
+                            <Brush className="w-3.5 h-3.5" />
+                            <span>Paint Subject Mask</span>
+                          </button>
+                        </div>
+
+                        {composition.photoMotion.depth.maskDataUrl ? (
+                          <div className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-semibold">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Subject mask painted & active for 2.5D parallax cutout</span>
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-slate-400 leading-relaxed">
+                            Click <strong>Paint Subject Mask</strong> to paint over your foreground subject (e.g., character, window, trees) to separate it into a 2.5D parallax plane.
+                          </p>
+                        )}
+
+                        <div>
+                          <div className="flex justify-between text-[11px] mb-1">
+                            <span className="text-slate-400">Foreground Parallax Ratio</span>
+                            <span className="text-cyan-400 font-mono">
+                              {(composition.photoMotion?.depth.parallaxRatio || 1.35).toFixed(2)}x
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.5"
+                            max="2.5"
+                            step="0.05"
+                            value={composition.photoMotion?.depth.parallaxRatio || 1.35}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  depth: {
+                                    ...(prev.photoMotion?.depth || DEFAULT_PHOTO_MOTION_CONFIG.depth),
+                                    parallaxRatio: parseFloat(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SECTION 3: 10 CAMERA MOTION PRESETS */}
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Camera Motion Presets (10 Cinematic Shots)</span>
+                      </span>
+                      <span className="text-[10px] text-cyan-400 font-mono">
+                        {composition.photoMotion?.camera.preset}
+                      </span>
+                    </label>
+
+                    {/* Presets 2-Column Grid */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'slow-push-in', label: 'Slow Push-In', desc: 'Dolly forward towards center' },
+                        { id: 'slow-pull-back', label: 'Slow Pull-Back', desc: 'Dolly outward revealing scene' },
+                        { id: 'pan-left', label: 'Pan Left', desc: 'Horizontal cinematic tracking' },
+                        { id: 'pan-right', label: 'Pan Right', desc: 'Horizontal cinematic tracking' },
+                        { id: 'pan-up', label: 'Pan Up', desc: 'Vertical crane tilt upward' },
+                        { id: 'pan-down', label: 'Pan Down', desc: 'Vertical crane tilt downward' },
+                        { id: 'diagonal-drift', label: 'Diagonal Drift', desc: 'Sweeping corner glide' },
+                        { id: 'ken-burns', label: 'Ken Burns', desc: 'Documentary curve pan & zoom' },
+                        { id: 'gentle-float', label: 'Gentle Float', desc: 'Handheld drone Lissajous motion' },
+                        { id: 'orbit-perspective', label: 'Orbit 3D Tilt', desc: 'Circular 3D perspective orbit' },
+                      ].map((cam) => {
+                        const isSelected = (composition.photoMotion?.camera.preset || 'slow-push-in') === cam.id
+                        return (
+                          <button
+                            key={cam.id}
+                            onClick={() =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  enabled: true,
+                                  camera: {
+                                    ...(prev.photoMotion?.camera || DEFAULT_PHOTO_MOTION_CONFIG.camera),
+                                    preset: cam.id as CameraMotionPreset,
+                                  },
+                                },
+                              }))
+                            }
+                            className={`p-2.5 rounded-xl border text-left transition-all ${
+                              isSelected
+                                ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-md'
+                                : 'bg-slate-900/60 border-white/5 text-slate-400 hover:border-white/20 hover:text-white'
+                            }`}
+                          >
+                            <div className="text-xs font-bold flex items-center justify-between">
+                              <span>{cam.label}</span>
+                              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />}
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{cam.desc}</div>
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Camera Speed & Motion Controls */}
+                    <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
+                      <div>
+                        <div className="flex justify-between text-[11px] mb-1">
+                          <span className="text-slate-400">Camera Speed</span>
+                          <span className="text-cyan-400 font-mono">
+                            {(composition.photoMotion?.camera.speed || 1.0).toFixed(1)}x
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.2"
+                          max="2.5"
+                          step="0.1"
+                          value={composition.photoMotion?.camera.speed || 1.0}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                camera: {
+                                  ...(prev.photoMotion?.camera || DEFAULT_PHOTO_MOTION_CONFIG.camera),
+                                  speed: parseFloat(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-cyan-400"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-[11px] mb-1">
+                          <span className="text-slate-400">Motion Intensity</span>
+                          <span className="text-cyan-400 font-mono">
+                            {composition.photoMotion?.camera.intensity || 5}/10
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={composition.photoMotion?.camera.intensity || 5}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                camera: {
+                                  ...(prev.photoMotion?.camera || DEFAULT_PHOTO_MOTION_CONFIG.camera),
+                                  intensity: parseInt(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-cyan-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Camera Easing Selector */}
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] text-slate-400">Camera Easing & Looping</span>
+                      <div className="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-white/10 text-xs">
+                        {[
+                          { id: 'smooth-sine', label: 'Smooth' },
+                          { id: 'ease-in-out', label: 'Ease In-Out' },
+                          { id: 'pendulum-loop', label: 'Pendulum' },
+                          { id: 'linear', label: 'Linear' },
+                        ].map((ea) => {
+                          const isCurrent = (composition.photoMotion?.camera.easing || 'smooth-sine') === ea.id
+                          return (
+                            <button
+                              key={ea.id}
+                              onClick={() =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  photoMotion: {
+                                    ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                    camera: {
+                                      ...(prev.photoMotion?.camera || DEFAULT_PHOTO_MOTION_CONFIG.camera),
+                                      easing: ea.id as CameraEasing,
+                                    },
+                                  },
+                                }))
+                              }
+                              className={`py-1 rounded-lg font-bold text-[11px] transition-all ${
+                                isCurrent ? 'bg-cyan-500 text-black shadow' : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              {ea.label}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 4: ATMOSPHERIC EFFECTS STUDIO */}
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <CloudRain className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Atmospheric Rain, Fog & Particles</span>
+                      </span>
+                    </label>
+
+                    {/* Rain Controls */}
+                    <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-2.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-200 flex items-center gap-1.5">
+                          <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Cinematic Multi-Plane Rain</span>
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={composition.photoMotion?.atmosphere.rainEnabled ?? true}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                atmosphere: {
+                                  ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                  rainEnabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.photoMotion?.atmosphere.rainEnabled && (
+                        <div className="space-y-2 pt-1">
+                          <div className="flex justify-between text-[11px]">
+                            <span className="text-slate-400">Rain Intensity</span>
+                            <span className="text-cyan-400 font-mono">
+                              {composition.photoMotion?.atmosphere.rainIntensity ?? 65}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="10"
+                            max="100"
+                            value={composition.photoMotion?.atmosphere.rainIntensity ?? 65}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                    rainIntensity: parseInt(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[11px] text-slate-300">Window Condensation Droplets</span>
+                            <input
+                              type="checkbox"
+                              checked={composition.photoMotion?.atmosphere.windowDropletsOverlay ?? true}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  photoMotion: {
+                                    ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                    atmosphere: {
+                                      ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                      windowDropletsOverlay: e.target.checked,
+                                    },
+                                  },
+                                }))
+                              }
+                              className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Fog & Mist Controls */}
+                    <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-2.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-200 flex items-center gap-1.5">
+                          <Wind className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>Volumetric Fog & Mountain Mist</span>
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={composition.photoMotion?.atmosphere.fogEnabled ?? true}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                atmosphere: {
+                                  ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                  fogEnabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.photoMotion?.atmosphere.fogEnabled && (
+                        <div className="space-y-2 pt-1">
+                          <div className="flex justify-between text-[11px]">
+                            <span className="text-slate-400">Fog Density</span>
+                            <span className="text-cyan-400 font-mono">
+                              {composition.photoMotion?.atmosphere.fogDensity ?? 40}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="10"
+                            max="100"
+                            value={composition.photoMotion?.atmosphere.fogDensity ?? 40}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                    fogDensity: parseInt(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Particle Systems (Dust, Snow, Fireflies, Stars, Bokeh) */}
+                    <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-2.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-200 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Floating Particles & Fireflies</span>
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={composition.photoMotion?.atmosphere.particlesEnabled ?? true}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                atmosphere: {
+                                  ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                  particlesEnabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                        />
+                      </div>
+
+                      {composition.photoMotion?.atmosphere.particlesEnabled && (
+                        <div className="space-y-2 pt-1">
+                          <div className="grid grid-cols-5 gap-1 bg-slate-950 p-1 rounded-lg border border-white/10 text-[11px]">
+                            {(['dust', 'snow', 'fireflies', 'stars', 'bokeh'] as AtmosphericParticleType[]).map((type) => {
+                              const isCurrent = (composition.photoMotion?.atmosphere.particleType || 'dust') === type
+                              return (
+                                <button
+                                  key={type}
+                                  onClick={() =>
+                                    setComposition((prev) => ({
+                                      ...prev,
+                                      photoMotion: {
+                                        ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                        atmosphere: {
+                                          ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                          particleType: type,
+                                        },
+                                      },
+                                    }))
+                                  }
+                                  className={`py-1 rounded font-bold capitalize transition-all ${
+                                    isCurrent ? 'bg-amber-500 text-black' : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  {type}
+                                </button>
+                              )
+                            })}
+                          </div>
+
+                          <div className="flex justify-between text-[11px]">
+                            <span className="text-slate-400">Particle Count</span>
+                            <span className="text-cyan-400 font-mono">
+                              {composition.photoMotion?.atmosphere.particleCount ?? 60}
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="20"
+                            max="150"
+                            value={composition.photoMotion?.atmosphere.particleCount ?? 60}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  atmosphere: {
+                                    ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                    particleCount: parseInt(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Volumetric God-Rays & 35mm Grain */}
+                    <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-2.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-200 flex items-center gap-1.5">
+                          <Sun className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Volumetric God-Rays & 35mm Grain</span>
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={composition.photoMotion?.atmosphere.lightRaysEnabled ?? true}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                atmosphere: {
+                                  ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                  lightRaysEnabled: e.target.checked,
+                                },
+                              },
+                            }))
+                          }
+                          className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="space-y-2 pt-1">
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-slate-400">Film Grain Intensity</span>
+                          <span className="text-cyan-400 font-mono">
+                            {composition.photoMotion?.atmosphere.filmGrainIntensity ?? 12}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="40"
+                          value={composition.photoMotion?.atmosphere.filmGrainIntensity ?? 12}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                atmosphere: {
+                                  ...(prev.photoMotion?.atmosphere || DEFAULT_PHOTO_MOTION_CONFIG.atmosphere),
+                                  filmGrainIntensity: parseInt(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-cyan-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 5: 8 CINEMATIC COLOR GRADING PRESETS */}
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Palette className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Cinematic LUT Color Grading (8 Presets)</span>
+                      </span>
+                      <span className="text-[10px] text-cyan-400 font-mono">
+                        {composition.photoMotion?.lighting.preset}
+                      </span>
+                    </label>
+
+                    {/* Presets Cards */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {CINEMATIC_COLOR_PRESETS.map((lut) => {
+                        const isSelected = (composition.photoMotion?.lighting.preset || 'romantic-rain') === lut.id
+                        return (
+                          <button
+                            key={lut.id}
+                            onClick={() =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  lighting: {
+                                    ...(prev.photoMotion?.lighting || DEFAULT_PHOTO_MOTION_CONFIG.lighting),
+                                    preset: lut.id,
+                                    ...lut.settings,
+                                  },
+                                },
+                              }))
+                            }
+                            className={`p-2 rounded-xl border text-left transition-all ${
+                              isSelected
+                                ? 'bg-slate-800 border-cyan-400 shadow'
+                                : 'bg-slate-900/60 border-white/5 text-slate-400 hover:border-white/20 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full shrink-0"
+                                style={{ backgroundColor: lut.accentColor }}
+                              />
+                              <span className="text-[11px] font-bold text-white truncate">{lut.name}</span>
+                            </div>
+                            <div className="text-[9px] text-slate-500 line-clamp-1">{lut.subtitle}</div>
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Fine-Tuning Sliders */}
+                    <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
+                      <div>
+                        <div className="flex justify-between text-[11px] mb-1">
+                          <span className="text-slate-400">Color Temperature</span>
+                          <span className="text-cyan-400 font-mono">
+                            {(composition.photoMotion?.lighting.temperature ?? 10) > 0 ? '+' : ''}
+                            {composition.photoMotion?.lighting.temperature ?? 10}
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="-50"
+                          max="50"
+                          value={composition.photoMotion?.lighting.temperature ?? 10}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                lighting: {
+                                  ...(prev.photoMotion?.lighting || DEFAULT_PHOTO_MOTION_CONFIG.lighting),
+                                  temperature: parseInt(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-cyan-400"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-[11px] mb-1">
+                          <span className="text-slate-400">Vignette Shading</span>
+                          <span className="text-cyan-400 font-mono">
+                            {composition.photoMotion?.lighting.vignette ?? 45}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={composition.photoMotion?.lighting.vignette ?? 45}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              photoMotion: {
+                                ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                lighting: {
+                                  ...(prev.photoMotion?.lighting || DEFAULT_PHOTO_MOTION_CONFIG.lighting),
+                                  vignette: parseInt(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-cyan-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 6: AUDIO REACTIVITY CONTROLS */}
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Web Audio Reactivity Modulation</span>
+                      </label>
+                      <input
+                        type="checkbox"
+                        checked={composition.photoMotion?.audioReactivity.enabled ?? true}
+                        onChange={(e) =>
+                          setComposition((prev) => ({
+                            ...prev,
+                            photoMotion: {
+                              ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                              audioReactivity: {
+                                ...(prev.photoMotion?.audioReactivity || DEFAULT_PHOTO_MOTION_CONFIG.audioReactivity),
+                                enabled: e.target.checked,
+                              },
+                            },
+                          }))
+                        }
+                        className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                      />
+                    </div>
+
+                    {composition.photoMotion?.audioReactivity.enabled && (
+                      <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl space-y-2.5 text-xs">
+                        <div>
+                          <div className="flex justify-between text-[11px] mb-1">
+                            <span className="text-slate-400">Audio Sensitivity Multiplier</span>
+                            <span className="text-cyan-400 font-mono">
+                              {(composition.photoMotion?.audioReactivity.sensitivity ?? 1.2).toFixed(1)}x
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.5"
+                            max="2.5"
+                            step="0.1"
+                            value={composition.photoMotion?.audioReactivity.sensitivity ?? 1.2}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                photoMotion: {
+                                  ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                  audioReactivity: {
+                                    ...(prev.photoMotion?.audioReactivity || DEFAULT_PHOTO_MOTION_CONFIG.audioReactivity),
+                                    sensitivity: parseFloat(e.target.value),
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                          <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input
+                              type="checkbox"
+                              checked={composition.photoMotion?.audioReactivity.modulateLight ?? true}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  photoMotion: {
+                                    ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                    audioReactivity: {
+                                      ...(prev.photoMotion?.audioReactivity || DEFAULT_PHOTO_MOTION_CONFIG.audioReactivity),
+                                      modulateLight: e.target.checked,
+                                    },
+                                  },
+                                }))
+                              }
+                              className="accent-cyan-400 w-3.5 h-3.5"
+                            />
+                            <span>Modulate Lamp Glow</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input
+                              type="checkbox"
+                              checked={composition.photoMotion?.audioReactivity.modulateParticles ?? true}
+                              onChange={(e) =>
+                                setComposition((prev) => ({
+                                  ...prev,
+                                  photoMotion: {
+                                    ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                                    audioReactivity: {
+                                      ...(prev.photoMotion?.audioReactivity || DEFAULT_PHOTO_MOTION_CONFIG.audioReactivity),
+                                      modulateParticles: e.target.checked,
+                                    },
+                                  },
+                                }))
+                              }
+                              className="accent-cyan-400 w-3.5 h-3.5"
+                            />
+                            <span>Modulate Fireflies</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: VISUALIZER & SPECTRUM */}
               {activeTab === 'visualizer' && (
                 <div className="space-y-5">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -1286,6 +2623,124 @@ export const AudioToVideoStudioTool: React.FC = () => {
                     Cancel Export
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* BRUSH MASK PAINTER STUDIO MODAL                           */}
+        {/* ========================================================= */}
+        {isMaskModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+            <div className="bg-[#090A0F] border border-white/15 rounded-3xl p-5 sm:p-6 max-w-4xl w-full shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-600 to-cyan-500 p-0.5 flex items-center justify-center">
+                    <Brush className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>2.5D Brush Mask Studio</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                        Interactive Cutout
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Paint over the foreground subject (window, character, object) to create a parallax layer.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsMaskModalOpen(false)}
+                  className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Painting Canvas Viewport */}
+              <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center select-none">
+                {composition.photoMotion?.sourceImageUrl && (
+                  <img
+                    src={composition.photoMotion.sourceImageUrl}
+                    alt="Mask Background"
+                    className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none opacity-80"
+                  />
+                )}
+                <canvas
+                  ref={maskCanvasRef}
+                  onMouseDown={startMaskDrawing}
+                  onMouseMove={drawMask}
+                  onMouseUp={stopMaskDrawing}
+                  onMouseLeave={stopMaskDrawing}
+                  onTouchStart={startMaskDrawing}
+                  onTouchMove={drawMask}
+                  onTouchEnd={stopMaskDrawing}
+                  className="absolute inset-0 w-full h-full object-contain cursor-crosshair touch-none"
+                />
+              </div>
+
+              {/* Tool Controls Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex bg-slate-900 p-1 rounded-xl border border-white/10 text-xs">
+                    <button
+                      onClick={() => setIsEraser(false)}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 ${
+                        !isEraser ? 'bg-red-500 text-white shadow' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Brush className="w-3.5 h-3.5" />
+                      <span>Brush</span>
+                    </button>
+                    <button
+                      onClick={() => setIsEraser(true)}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 ${
+                        isEraser ? 'bg-cyan-500 text-black shadow' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span>Eraser</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-slate-400">Size:</span>
+                    <input
+                      type="range"
+                      min="8"
+                      max="100"
+                      value={brushSize}
+                      onChange={(e) => setBrushSize(parseInt(e.target.value))}
+                      className="w-24 accent-red-400"
+                    />
+                    <span className="font-mono text-cyan-400 text-[11px] w-6">{brushSize}px</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleInvertMask}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10"
+                  >
+                    Invert
+                  </button>
+                  <button
+                    onClick={handleClearMask}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-red-950/60 text-slate-300 hover:text-red-400 border border-white/10"
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    onClick={handleSaveMask}
+                    className="px-4 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white shadow-lg flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Apply Mask</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

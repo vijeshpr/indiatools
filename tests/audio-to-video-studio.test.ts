@@ -13,6 +13,17 @@ import {
 import { AudioToVideoAudioEngine } from '../src/lib/audioToVideo/audioToVideoAudioEngine.ts'
 import { AudioToVideoRenderEngine } from '../src/lib/audioToVideo/audioToVideoRenderEngine.ts'
 import { AudioToVideoExportEngine } from '../src/lib/audioToVideo/audioToVideoExportEngine.ts'
+import {
+  DEFAULT_PHOTO_MOTION_CONFIG,
+  CINEMATIC_COLOR_PRESETS,
+  CameraMotionPreset,
+  CameraEasing,
+  AtmosphericParticleType,
+} from '../src/lib/audioToVideo/photoMotionTypes.ts'
+import {
+  PhotoMotionStudioEngine,
+  studioPhotoMotionEngine,
+} from '../src/lib/audioToVideo/photoMotionEngine.ts'
 
 describe('IndiaTools Audio to Video Studio Suite', () => {
   it('should be correctly registered as Tool #69 in TOOLS registry', () => {
@@ -280,5 +291,161 @@ describe('IndiaTools Audio to Video Studio Suite', () => {
     const exporter = new AudioToVideoExportEngine()
     assert.strictEqual(exporter.isBusy(), false)
     assert.doesNotThrow(() => exporter.cancel())
+  })
+
+  it('should calculate camera trajectories across all 10 presets and easings', () => {
+    const engine = new PhotoMotionStudioEngine()
+    assert.ok(engine, 'PhotoMotionStudioEngine must instantiate successfully')
+
+    const presets: CameraMotionPreset[] = [
+      'slow-push-in',
+      'slow-pull-back',
+      'pan-left',
+      'pan-right',
+      'pan-up',
+      'pan-down',
+      'diagonal-drift',
+      'ken-burns',
+      'gentle-float',
+      'orbit-perspective',
+      'custom',
+    ]
+
+    const easings: CameraEasing[] = ['linear', 'ease-in-out', 'smooth-sine', 'pendulum-loop']
+
+    const mockBands = { bass: 0.8, mid: 0.5, treble: 0.4, subBass: 0.9, overall: 0.65, isBeatHit: true }
+
+    for (const preset of presets) {
+      for (const easing of easings) {
+        const camConfig = {
+          ...DEFAULT_PHOTO_MOTION_CONFIG.camera,
+          preset,
+          easing,
+        }
+
+        // Test at t=0, t=0.5, and t=1.0
+        for (const t of [0, 0.5, 1.0]) {
+          const state = engine.calculateCameraState(camConfig, t, mockBands, {
+            enabled: true,
+            sensitivity: 1.2,
+            modulateLight: true,
+            modulateFog: true,
+            modulateParticles: true,
+            modulateCameraPunch: true,
+          })
+
+          assert.ok(state.zoom >= 1.0, `Preset ${preset} zoom must be >= 1.0`)
+          assert.ok(typeof state.panX === 'number' && !isNaN(state.panX), `Preset ${preset} panX must be a valid number`)
+          assert.ok(typeof state.panY === 'number' && !isNaN(state.panY), `Preset ${preset} panY must be a valid number`)
+          assert.ok(typeof state.perspectiveX === 'number', `Preset ${preset} perspectiveX must be a number`)
+          assert.ok(typeof state.perspectiveY === 'number', `Preset ${preset} perspectiveY must be a number`)
+        }
+      }
+    }
+  })
+
+  it('should verify all 8 Cinematic Color Grading presets and defaults', () => {
+    assert.strictEqual(CINEMATIC_COLOR_PRESETS.length, 9, 'Should include none + 8 color grade presets')
+
+    const expectedIds = [
+      'none',
+      'romantic-rain',
+      'dreamy-night',
+      'golden-hour',
+      'moonlight',
+      'dark-cinema',
+      'soft-morning',
+      'blue-hour',
+      'vintage-film',
+    ]
+
+    const actualIds = CINEMATIC_COLOR_PRESETS.map((p) => p.id)
+    assert.deepStrictEqual(actualIds, expectedIds)
+
+    for (const preset of CINEMATIC_COLOR_PRESETS) {
+      assert.ok(preset.name.length > 0, `Preset ${preset.id} must have a name`)
+      assert.ok(preset.accentColor.startsWith('#'), `Preset ${preset.id} accent color must be hex`)
+      assert.ok(typeof preset.settings.vignette === 'number', `Preset ${preset.id} must define vignette`)
+    }
+  })
+
+  it('should execute 2.5D Photo Motion render pipeline on Canvas context without throwing errors', () => {
+    const originalImage = (globalThis as any).Image
+    ;(globalThis as any).Image = class MockImage {
+      complete = true
+      naturalWidth = 1920
+      naturalHeight = 1080
+      src = ''
+    }
+
+    const gradMock = { addColorStop: () => {} }
+    const mockCtx = {
+      canvas: { width: 1920, height: 1080 },
+      save: () => {},
+      restore: () => {},
+      clearRect: () => {},
+      fillRect: () => {},
+      beginPath: () => {},
+      closePath: () => {},
+      arc: () => {},
+      moveTo: () => {},
+      lineTo: () => {},
+      quadraticCurveTo: () => {},
+      stroke: () => {},
+      fill: () => {},
+      translate: () => {},
+      scale: () => {},
+      transform: () => {},
+      drawImage: () => {},
+      createLinearGradient: () => gradMock,
+      createRadialGradient: () => gradMock,
+      getImageData: () => ({ data: new Uint8ClampedArray(100) }),
+      putImageData: () => {},
+      fillStyle: '',
+      strokeStyle: '',
+      lineWidth: 1,
+      globalAlpha: 1,
+      globalCompositeOperation: 'source-over',
+      shadowBlur: 0,
+      shadowColor: '',
+    } as any
+
+    const mockBands = { bass: 0.6, mid: 0.5, treble: 0.4, subBass: 0.7, overall: 0.55, isBeatHit: false }
+
+    const particleTypes: AtmosphericParticleType[] = ['dust', 'snow', 'fireflies', 'stars', 'bokeh']
+
+    try {
+      for (const pType of particleTypes) {
+        const config = {
+          ...DEFAULT_PHOTO_MOTION_CONFIG,
+          enabled: true,
+          sourceImageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+          atmosphere: {
+            ...DEFAULT_PHOTO_MOTION_CONFIG.atmosphere,
+            particleType: pType,
+            rainEnabled: true,
+            windowDropletsOverlay: true,
+            fogEnabled: true,
+            lightRaysEnabled: true,
+            filmGrainIntensity: 15,
+          },
+        }
+
+        assert.doesNotThrow(() => {
+          studioPhotoMotionEngine.render(mockCtx, 1920, 1080, config, mockBands, 2.5, 30.0)
+        }, `Photo motion rendering with particle type ${pType} must not throw`)
+      }
+    } finally {
+      ;(globalThis as any).Image = originalImage
+    }
+  })
+
+  it('should verify 2.5D depth modes and overscan safeguards', () => {
+    const depthConfig = DEFAULT_PHOTO_MOTION_CONFIG.depth
+
+    // Single-Image 2.5D mode
+    assert.strictEqual(depthConfig.mode, 'single-2.5d')
+    assert.ok(depthConfig.bgOverscanScale >= 1.05 && depthConfig.bgOverscanScale <= 1.3, 'Overscan scale must be safe (1.05-1.30)')
+    assert.ok(depthConfig.parallaxRatio >= 0.5 && depthConfig.parallaxRatio <= 2.5, 'Parallax ratio must be within range')
   })
 })

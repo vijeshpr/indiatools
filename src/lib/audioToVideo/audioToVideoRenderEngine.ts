@@ -9,6 +9,7 @@ import {
   SlideshowImage,
 } from './types.ts'
 import { drawProceduralBackground } from './backgroundPresets.ts'
+import { studioPhotoMotionEngine } from './photoMotionEngine.ts'
 
 interface Particle {
   x: number
@@ -114,11 +115,13 @@ export class AudioToVideoRenderEngine {
       ctx.translate(-width / 2, -height / 2)
     }
 
-    // 2. Background Layer (Preset OR Single Image OR Slideshow)
-    this.renderBackground(ctx, width, height, config, bands, currentTime, duration)
-
-    // 3. Cinematic FX Layer
-    this.renderCinematicEffects(ctx, width, height, config, bands, currentTime)
+    // 2. Scene Layer: 2.5D Photo Motion Studio OR Standard Background + Cinematic FX
+    if (config.photoMotion?.enabled && config.photoMotion.sourceImageUrl) {
+      studioPhotoMotionEngine.render(ctx, width, height, config.photoMotion, bands, currentTime, duration)
+    } else {
+      this.renderBackground(ctx, width, height, config, bands, currentTime, duration)
+      this.renderCinematicEffects(ctx, width, height, config, bands, currentTime)
+    }
 
     // 4. Visualizer Layer
     this.renderVisualizer(ctx, width, height, config, bands, freqData, timeData, currentTime)
