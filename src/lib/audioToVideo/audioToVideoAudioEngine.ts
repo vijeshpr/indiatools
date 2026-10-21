@@ -136,6 +136,10 @@ export class AudioToVideoAudioEngine {
     return this.audioElement?.ended ?? false
   }
 
+  public isAudioLoaded(): boolean {
+    return this.isLoaded
+  }
+
   /**
    * Samples real-time frequency and time-domain data, returning normalized DSP bands
    */

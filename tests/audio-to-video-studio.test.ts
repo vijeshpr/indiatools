@@ -469,9 +469,10 @@ describe('IndiaTools Audio to Video Studio Suite', () => {
     assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.exitTransition.enabled, false, 'Exit Transition must start OFF')
     assert.strictEqual(DEFAULT_PORTAL_VFX_CONFIG.audioReactivity.enabled, false, 'Audio Reactivity must start OFF')
 
-    // 2. Default studio composition must be clean and unpolluted
-    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.visualizer.spectrumStyle, 'none', 'Spectrum style must start none')
+    // 2. Default studio composition must display visible active visualizer & bass zoom by default
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.visualizer.spectrumStyle, 'bottom-equalizer', 'Spectrum style must start with bottom equalizer')
     assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.visualizer.waveformStyle, 'none', 'Waveform style must start none')
+    assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.bassScaleEnabled, true, 'Bass scale zoom punch must start enabled')
     assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.floatingParticlesEnabled, false, 'Particles must start OFF')
     assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.lightRaysEnabled, false, 'Light rays must start OFF')
     assert.strictEqual(DEFAULT_STUDIO_COMPOSITION.cinematicFx.dreamyBokehEnabled, false, 'Bokeh must start OFF')

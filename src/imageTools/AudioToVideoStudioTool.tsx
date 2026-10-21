@@ -93,7 +93,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
   // Composition State
   const [composition, setComposition] = useState<StudioCompositionConfig>(DEFAULT_STUDIO_COMPOSITION)
-  const [activeTab, setActiveTab] = useState<StudioTab>('portal')
+  const [activeTab, setActiveTab] = useState<StudioTab>('visualizer')
 
   // Portal VFX Studio State
   const [selectedPresetModal, setSelectedPresetModal] = useState<PortalPreset | null>(null)
@@ -163,14 +163,50 @@ export const AudioToVideoStudioTool: React.FC = () => {
       if (canvas && audio && renderer) {
         const ctx = canvas.getContext('2d')
         if (ctx) {
-          const { bands, freqData, timeData } = audio.analyze()
-          const time = audio.getCurrentTime()
+          let { bands, freqData, timeData } = audio.analyze()
+          let time = audio.getCurrentTime()
           const dur = audio.getDuration() || 30
 
+          // Standby preview animation: if no audio track is loaded yet, generate smooth rhythmic pulses so the video canvas is visibly active with equalizer movement and bass punch!
+          if (!audio.isAudioLoaded()) {
+            const now = performance.now() / 1000
+            time = now
+            // Gentle rhythmic bass kick pulse (~120 BPM, cycle every 0.5s)
+            const kickPhase = (now % 0.5) / 0.5
+            const ambientBass = Math.max(0, Math.exp(-kickPhase * 5) * 0.85)
+            const ambientMid = 0.3 + 0.15 * Math.sin(now * 3.2)
+            const ambientTreble = 0.25 + 0.12 * Math.cos(now * 4.8)
+            bands = {
+              bass: ambientBass,
+              mid: ambientMid,
+              treble: ambientTreble,
+              subBass: ambientBass * 0.9,
+              overall: (ambientBass + ambientMid + ambientTreble) / 3,
+              isBeatHit: ambientBass > 0.6,
+            }
+
+            const dummyFreq = new Uint8Array(1024)
+            for (let i = 0; i < 128; i++) {
+              const wave1 = Math.sin(i * 0.18 + now * 5) * 0.5 + 0.5
+              const wave2 = Math.cos(i * 0.32 - now * 3.5) * 0.5 + 0.5
+              const falloff = Math.max(0.08, 1 - i / 96)
+              dummyFreq[i] = Math.min(255, Math.floor((wave1 * 0.5 + wave2 * 0.3 + ambientBass * 0.7) * falloff * 230))
+            }
+            freqData = dummyFreq
+
+            const dummyTime = new Uint8Array(1024)
+            for (let i = 0; i < 1024; i++) {
+              dummyTime[i] = Math.floor(128 + Math.sin(i * 0.04 + now * 7) * 32 * (ambientBass * 0.8 + 0.3))
+            }
+            timeData = dummyTime
+          }
+
           // Update playback time state throttled
-          setCurrentTime(time)
-          if (audio.isEnded() && isPlaying) {
-            setIsPlaying(false)
+          if (audio.isAudioLoaded()) {
+            setCurrentTime(time)
+            if (audio.isEnded() && isPlaying) {
+              setIsPlaying(false)
+            }
           }
 
           renderer.render(
@@ -330,6 +366,13 @@ export const AudioToVideoStudioTool: React.FC = () => {
   // Playback Control Handlers
   const togglePlayPause = () => {
     if (!audioEngineRef.current) return
+    if (!audioEngineRef.current.isAudioLoaded()) {
+      showToast('Synthesizing demo beat for playback...', 'info')
+      handleGenerateDemoAudio().then(() => {
+        audioEngineRef.current?.play().then(() => setIsPlaying(true))
+      })
+      return
+    }
     if (isPlaying) {
       audioEngineRef.current.pause()
       setIsPlaying(false)
@@ -1151,46 +1194,6 @@ export const AudioToVideoStudioTool: React.FC = () => {
                 ref={canvasRef}
                 className="w-full h-full object-contain pointer-events-none"
               />
-
-              {/* Clean Empty State Overlay (When no photo has been imported) */}
-              {!composition.background.singleImageUrl && !composition.portalVfx?.sourceImageUrl && (
-                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-[#07080D]/95 backdrop-blur-sm text-center space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 p-0.5 shadow-xl">
-                    <div className="w-full h-full bg-[#090A0F] rounded-[14px] flex items-center justify-center">
-                      <Orbit className="w-8 h-8 text-cyan-400" />
-                    </div>
-                  </div>
-
-                  <div className="max-w-md">
-                    <h3 className="text-base sm:text-lg font-bold text-white">
-                      Cinematic Portal VFX Studio
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                      Import a photograph to composite dimensional portal rings, energy shockwaves, plasma flows, and light spills with zero automatic effects.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-                    <button
-                      onClick={() => portalImageInputRef.current?.click()}
-                      className="px-5 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white flex items-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
-                    >
-                      <Upload className="w-4 h-4" />
-                      <span>Import Photograph (JPG, PNG, WebP)</span>
-                    </button>
-                    <button
-                      onClick={handleLoadSamplePortalPhoto}
-                      className="px-4 py-2.5 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 hover:text-white flex items-center gap-2 transition-all"
-                    >
-                      <Sparkles className="w-4 h-4 text-violet-400" />
-                      <span>1-Click Test Scene</span>
-                    </button>
-                  </div>
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    100% Client-Side • Zero Server Uploads • Neutral Clean Preview
-                  </span>
-                </div>
-              )}
 
               {/* On-Canvas Interactive Drag Handle (When Portal Ring is Enabled) */}
               {activeTab === 'portal' &&
@@ -4034,6 +4037,144 @@ export const AudioToVideoStudioTool: React.FC = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Bass-Reactive Camera Scale Zoom & Beat Punch */}
+                  <div className="space-y-3 pt-3 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Bass-Reactive Camera Scale Zoom</span>
+                      </label>
+                      {composition.cinematicFx.bassScaleEnabled ? (
+                        <button
+                          onClick={() => {
+                            setComposition((prev) => ({
+                              ...prev,
+                              cinematicFx: { ...prev.cinematicFx, bassScaleEnabled: false },
+                            }))
+                            showToast('Deselected Bass Zoom punch', 'info')
+                          }}
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40 transition-all flex items-center gap-1 cursor-pointer"
+                          title="Click to deselect / turn off camera bass punch"
+                        >
+                          <EyeOff className="w-3 h-3" />
+                          <span>Deselect (Turn Off)</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setComposition((prev) => ({
+                              ...prev,
+                              cinematicFx: { ...prev.cinematicFx, bassScaleEnabled: true },
+                            }))
+                            showToast('Enabled Bass Zoom punch', 'success')
+                          }}
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-white/10 hover:border-cyan-500/40 hover:text-cyan-300 transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-3 h-3 text-cyan-400" />
+                          <span>Turn On Bass Zoom</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div
+                      onClick={() => {
+                        const nextState = !composition.cinematicFx.bassScaleEnabled
+                        setComposition((prev) => ({
+                          ...prev,
+                          cinematicFx: { ...prev.cinematicFx, bassScaleEnabled: nextState },
+                        }))
+                        showToast(nextState ? 'Bass Zoom Punch enabled' : 'Deselected Bass Zoom punch', 'info')
+                      }}
+                      className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
+                        composition.cinematicFx.bassScaleEnabled
+                          ? 'bg-gradient-to-tr from-cyan-500/20 via-indigo-600/20 to-violet-500/10 border-cyan-400 shadow-lg shadow-cyan-500/20'
+                          : 'bg-slate-900/80 border-white/10 hover:border-white/20 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                              composition.cinematicFx.bassScaleEnabled
+                                ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/30'
+                                : 'bg-slate-800 text-slate-400 group-hover:text-cyan-300'
+                            }`}
+                          >
+                            <Activity className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">Dynamic Bass Camera Punch</span>
+                              {composition.cinematicFx.bassScaleEnabled ? (
+                                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  <span>Active</span>
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-medium text-slate-500">Disabled (Static)</span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              Pulsates the camera scale dynamically in sync with low frequency bass kicks
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="relative inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={composition.cinematicFx.bassScaleEnabled}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                cinematicFx: {
+                                  ...prev.cinematicFx,
+                                  bassScaleEnabled: e.target.checked,
+                                },
+                              }))
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-4 h-4 accent-cyan-400 rounded cursor-pointer"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Strength slider if active */}
+                      {composition.cinematicFx.bassScaleEnabled && (
+                        <div className="mt-3 pt-3 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex justify-between text-[11px] text-slate-300 mb-1">
+                            <span>Bass Punch Strength</span>
+                            <span className="font-mono text-cyan-400 font-bold">
+                              {composition.cinematicFx.bassScaleStrength * 10}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            step="1"
+                            value={composition.cinematicFx.bassScaleStrength}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                cinematicFx: {
+                                  ...prev.cinematicFx,
+                                  bassScaleStrength: parseInt(e.target.value),
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400 cursor-pointer"
+                          />
+                          <div className="flex justify-between text-[9px] text-slate-500 mt-0.5">
+                            <span>Subtle (1)</span>
+                            <span>Standard (5)</span>
+                            <span>Extreme Kick (10)</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -4075,26 +4216,75 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   ].map((fx) => (
                     <div
                       key={fx.key}
-                      className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-white/5"
+                      className="p-3 rounded-xl bg-slate-900 border border-white/5 space-y-2"
                     >
-                      <div>
-                        <div className="text-xs font-bold text-white">{fx.label}</div>
-                        <div className="text-[10px] text-slate-400">{fx.desc}</div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-white flex items-center gap-2">
+                            <span>{fx.label}</span>
+                            {fx.key === 'bassScaleEnabled' && (composition.cinematicFx as any)[fx.key] && (
+                              <button
+                                onClick={() => {
+                                  setComposition((prev) => ({
+                                    ...prev,
+                                    cinematicFx: { ...prev.cinematicFx, bassScaleEnabled: false },
+                                  }))
+                                  showToast('Deselected Bass Zoom punch', 'info')
+                                }}
+                                className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-red-500/20 hover:text-red-300 transition-all flex items-center gap-1 cursor-pointer"
+                                title="Click to deselect"
+                              >
+                                <EyeOff className="w-2.5 h-2.5" />
+                                <span>Deselect</span>
+                              </button>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-400">{fx.desc}</div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={(composition.cinematicFx as any)[fx.key]}
+                          onChange={(e) =>
+                            setComposition((prev) => ({
+                              ...prev,
+                              cinematicFx: {
+                                ...prev.cinematicFx,
+                                [fx.key]: e.target.checked,
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-cyan-400 rounded cursor-pointer"
+                        />
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={(composition.cinematicFx as any)[fx.key]}
-                        onChange={(e) =>
-                          setComposition((prev) => ({
-                            ...prev,
-                            cinematicFx: {
-                              ...prev.cinematicFx,
-                              [fx.key]: e.target.checked,
-                            },
-                          }))
-                        }
-                        className="w-4 h-4 accent-cyan-400 rounded cursor-pointer"
-                      />
+
+                      {/* Special slider for bass scale zoom strength */}
+                      {fx.key === 'bassScaleEnabled' && composition.cinematicFx.bassScaleEnabled && (
+                        <div className="pt-2 border-t border-white/5">
+                          <div className="flex justify-between text-[11px] text-slate-300 mb-1">
+                            <span>Scale Strength</span>
+                            <span className="font-mono text-cyan-400 font-bold">
+                              {composition.cinematicFx.bassScaleStrength * 10}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            step="1"
+                            value={composition.cinematicFx.bassScaleStrength}
+                            onChange={(e) =>
+                              setComposition((prev) => ({
+                                ...prev,
+                                cinematicFx: {
+                                  ...prev.cinematicFx,
+                                  bassScaleStrength: parseInt(e.target.value),
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-400 cursor-pointer"
+                          />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
