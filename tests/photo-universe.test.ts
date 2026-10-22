@@ -4,6 +4,7 @@ import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_LIGHT_TRAILS,
+  DEFAULT_UNIVERSE_SUPERNOVA,
   PhotoUniverseStudioConfig,
   UniversePhoto,
 } from '../src/lib/photoUniverse/photoUniverseTypes.ts'
@@ -28,6 +29,7 @@ import { universeCameraScoreGenerator } from '../src/lib/photoUniverse/universeC
 import { universeBackgroundRenderer } from '../src/lib/photoUniverse/universeBackground.ts'
 import { universeEngine } from '../src/lib/photoUniverse/universeEngine.ts'
 import { universeLightTrailsRenderer } from '../src/lib/photoUniverse/universeLightTrails.ts'
+import { universeSupernovaManager } from '../src/lib/photoUniverse/universeSupernova.ts'
 import {
   DEFAULT_STUDIO_COMPOSITION,
   NormalizedAudioBands,
@@ -568,10 +570,11 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       // High treble transient
       const trebleSpike: NormalizedAudioBands = {
         bass: 0.2,
-        lowMid: 0.3,
+        subBass: 0.1,
         mid: 0.4,
-        highMid: 0.5,
         treble: 0.9,
+        overall: 0.5,
+        isBeatHit: false,
       }
 
       const smoothed1 = universeLightTrailsRenderer.updateTrebleFilter(trebleSpike, 'melody-ambient')
@@ -583,10 +586,11 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       // Treble drops to zero (release phase)
       const zeroTreble: NormalizedAudioBands = {
         bass: 0,
-        lowMid: 0,
+        subBass: 0,
         mid: 0,
-        highMid: 0,
         treble: 0,
+        overall: 0,
+        isBeatHit: false,
       }
       const decaying = universeLightTrailsRenderer.updateTrebleFilter(zeroTreble, 'melody-ambient')
       assert.ok(decaying < smoothed2 && decaying > 0, 'Treble decay should be gradual, not instantly 0')
@@ -613,6 +617,114 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       assert.doesNotThrow(() => {
         universeLightTrailsRenderer.resetTrails()
       })
+    })
+  })
+
+  describe('12. Supernova Shockwave: Cinematic Music Climax Suite', () => {
+    const testPhotos = [
+      { id: 'p1', x: 200, y: 100, z: -400 },
+      { id: 'p2', x: -220, y: 150, z: -500 },
+      { id: 'p3', x: 0, y: -200, z: -350 },
+    ]
+
+    it('validates default Supernova configuration values and boundaries', () => {
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.enabled, true)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.triggerSensitivity, 'balanced')
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.explosionIntensity, 75)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.attractionStrength, 60)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.shockwaveRadius, 750)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.flashBrightness, 80)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.cameraImpact, 65)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.recoveryDuration, 2.5)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.cooldownDuration, 12)
+      assert.strictEqual(DEFAULT_UNIVERSE_SUPERNOVA.maxEventsPerTrack, 3)
+    })
+
+    it('generates deterministic climax timestamps in audio fallback analysis', () => {
+      const analysis = universeAudioAnalyzer.generateFallbackAnalysis(30, 'steady-rhythm')
+      assert.ok(analysis.climaxTimestamps)
+      assert.ok(analysis.climaxTimestamps.length > 0)
+      assert.ok(analysis.climaxTimestamps[0] >= 5.0, 'First climax must not happen immediately in intro')
+    })
+
+    it('executes the full state machine from trigger to attraction, supernova, expansion, recovery, and idle', () => {
+      universeSupernovaManager.reset()
+
+      // Trigger manual supernova at t=10.0s
+      universeSupernovaManager.triggerManual(10.0, DEFAULT_UNIVERSE_SUPERNOVA)
+
+      // 1. Attraction Phase (at t=10.5s)
+      const stateAttract = universeSupernovaManager.evaluate(10.5, testPhotos, DEFAULT_UNIVERSE_SUPERNOVA)
+      assert.strictEqual(stateAttract.phase, 'attraction')
+      assert.ok(stateAttract.progress > 0 && stateAttract.progress < 1.0)
+      assert.ok(stateAttract.photoDisplacements.has('p1'))
+      // p1 at x=200 should have a negative displacement towards center (x=0)
+      const p1Disp = stateAttract.photoDisplacements.get('p1')!
+      assert.ok(p1Disp.x < 0, 'Photo must experience attraction force toward center x=0')
+
+      // 2. Supernova Flash Phase (at t=11.45s, around climaxTime 11.35s)
+      const stateFlash = universeSupernovaManager.evaluate(11.45, testPhotos, DEFAULT_UNIVERSE_SUPERNOVA)
+      assert.strictEqual(stateFlash.phase, 'supernova')
+      assert.ok(stateFlash.flashAlpha > 0, 'Flash alpha must peak during supernova')
+      assert.ok(stateFlash.shockwaveRadius > 0, 'Shockwave radius must initiate')
+      assert.ok(Math.abs(stateFlash.cameraImpulse.z) > 0, 'Camera must experience shockwave impulse kick')
+
+      // 3. Radial Expansion Phase (at t=12.0s)
+      const stateExpand = universeSupernovaManager.evaluate(12.0, testPhotos, DEFAULT_UNIVERSE_SUPERNOVA)
+      assert.strictEqual(stateExpand.phase, 'expansion')
+      assert.ok(stateExpand.shockwaveRadius > stateFlash.shockwaveRadius, 'Shockwave radius must expand outward')
+      assert.ok(stateExpand.photoDisplacements.size === 3)
+
+      // 4. Recovery Phase (at t=13.5s)
+      const stateRecovery = universeSupernovaManager.evaluate(13.5, testPhotos, DEFAULT_UNIVERSE_SUPERNOVA)
+      assert.strictEqual(stateRecovery.phase, 'recovery')
+      assert.ok(stateRecovery.progress >= 0 && stateRecovery.progress <= 1.0)
+
+      // 5. Idle Phase (at t=17.0s after complete recovery duration)
+      const stateIdle = universeSupernovaManager.evaluate(17.0, testPhotos, DEFAULT_UNIVERSE_SUPERNOVA)
+      assert.strictEqual(stateIdle.phase, 'idle')
+      assert.strictEqual(stateIdle.flashAlpha, 0)
+      assert.strictEqual(stateIdle.shockwaveRadius, 0)
+    })
+
+    it('renders 2D Canvas shockwave and core flash effects without throwing', () => {
+      const state = universeSupernovaManager.evaluate(11.45, testPhotos, DEFAULT_UNIVERSE_SUPERNOVA)
+      const mockGradient = { addColorStop: () => {} }
+      const mockCtx = {
+        save: () => {},
+        restore: () => {},
+        beginPath: () => {},
+        arc: () => {},
+        stroke: () => {},
+        fill: () => {},
+        fillRect: () => {},
+        createRadialGradient: () => mockGradient,
+        globalCompositeOperation: 'source-over',
+        strokeStyle: '',
+        fillStyle: '',
+        lineWidth: 1,
+      } as unknown as CanvasRenderingContext2D
+
+      assert.doesNotThrow(() => {
+        universeSupernovaManager.renderCanvasEffects(mockCtx, 1280, 720, state, DEFAULT_UNIVERSE_SUPERNOVA)
+      })
+    })
+
+    it('preserves supernova configuration when applying universe presets', () => {
+      const customConfig: PhotoUniverseStudioConfig = {
+        ...DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        supernova: {
+          ...DEFAULT_UNIVERSE_SUPERNOVA,
+          explosionIntensity: 90,
+          shockwaveRadius: 900,
+          triggerSensitivity: 'high',
+        },
+      }
+
+      const presetApplied = applyUniversePreset(customConfig, 'rhythmic-beat-odyssey')
+      assert.strictEqual(presetApplied.supernova.explosionIntensity, 90)
+      assert.strictEqual(presetApplied.supernova.shockwaveRadius, 900)
+      assert.strictEqual(presetApplied.supernova.triggerSensitivity, 'high')
     })
   })
 })

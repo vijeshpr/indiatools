@@ -54,6 +54,8 @@ import {
   DEFAULT_UNIVERSE_LIGHT_TRAILS,
   TrailColorPalette,
   TrailReactivityLevel,
+  DEFAULT_UNIVERSE_SUPERNOVA,
+  SupernovaTriggerSensitivity,
 } from '../../lib/photoUniverse/photoUniverseTypes.ts'
 import {
   UNIVERSE_PRESETS,
@@ -83,7 +85,7 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const bgFileInputRef = useRef<HTMLInputElement | null>(null)
   const [activeSection, setActiveSection] = useState<
-    'all' | 'analysis' | 'motion' | 'photos' | 'background' | 'camera' | 'dof' | 'shake' | 'trails'
+    'all' | 'analysis' | 'motion' | 'photos' | 'background' | 'camera' | 'dof' | 'shake' | 'trails' | 'supernova'
   >('all')
 
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
@@ -671,6 +673,16 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
           }`}
         >
           Light Trails
+        </button>
+        <button
+          onClick={() => setActiveSection('supernova')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            activeSection === 'supernova'
+              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Supernova Climax
         </button>
       </div>
 
@@ -1723,7 +1735,327 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
         </div>
       )}
 
-      {/* 12. Footer Actions: Re-plan Route & Reset Defaults */}
+      {/* 12. Supernova Shockwave: Cinematic Music Climax */}
+      {(activeSection === 'all' || activeSection === 'supernova') && (
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/30 via-gray-900 to-black border border-purple-500/30 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                <Flame className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h4 className="text-sm font-bold text-white">Supernova Shockwave: Musical Climax</h4>
+                  <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full font-mono">
+                    Cinematic Burst
+                  </span>
+                </div>
+                <p className="text-[10px] text-gray-400">
+                  Blackhole attraction, luminous shockwave explosion & kinetic recovery at major musical drops
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0">
+              {/* Preview Trigger Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  universeEngine.triggerSupernova(currentTime, config.supernova)
+                  showToast('Triggered Supernova Shockwave Climax!', 'success')
+                }}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-black text-xs font-bold rounded-xl shadow transition-all cursor-pointer"
+                title="Preview actual supernova effect immediately"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>Preview Trigger</span>
+              </button>
+
+              {/* Master Enable/Disable Button */}
+              <button
+                type="button"
+                onClick={() =>
+                  updateConfig((prev) => ({
+                    ...prev,
+                    supernova: {
+                      ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                      enabled: !(prev.supernova?.enabled ?? true),
+                    },
+                  }))
+                }
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  (config.supernova?.enabled ?? true)
+                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
+                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                {(config.supernova?.enabled ?? true) ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span>{(config.supernova?.enabled ?? true) ? 'SUPERNOVA ACTIVE' : 'ENABLE EFFECT'}</span>
+              </button>
+            </div>
+          </div>
+
+          {(config.supernova?.enabled ?? true) && (
+            <div className="space-y-4 pt-1">
+              {/* Trigger Sensitivity Selector */}
+              <div>
+                <label className="text-xs font-semibold text-gray-300 block mb-2">
+                  Climax Trigger Sensitivity
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'low', label: 'Low', desc: 'Major drops only (conservative)' },
+                    { id: 'balanced', label: 'Balanced', desc: 'Main drops & chorus peaks' },
+                    { id: 'high', label: 'High', desc: 'Responsive on medium & high peaks' },
+                  ].map((item) => {
+                    const isSelected = (config.supernova?.triggerSensitivity || 'balanced') === item.id
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() =>
+                          updateConfig((prev) => ({
+                            ...prev,
+                            supernova: {
+                              ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                              triggerSensitivity: item.id as SupernovaTriggerSensitivity,
+                            },
+                          }))
+                        }
+                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-purple-500/20 border-purple-400 text-white shadow-sm'
+                            : 'bg-gray-950/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                        }`}
+                      >
+                        <div className="text-xs font-bold">{item.label}</div>
+                        <div className="text-[10px] text-gray-500">{item.desc}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Sliders Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
+                {/* Explosion Intensity */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Explosion Intensity</span>
+                    <span className="font-mono text-purple-300">
+                      {config.supernova?.explosionIntensity ?? 75}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="20"
+                    max="100"
+                    value={config.supernova?.explosionIntensity ?? 75}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          explosionIntensity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+
+                {/* Attraction Strength */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Attraction Strength</span>
+                    <span className="font-mono text-purple-300">
+                      {config.supernova?.attractionStrength ?? 60}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="20"
+                    max="100"
+                    value={config.supernova?.attractionStrength ?? 60}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          attractionStrength: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+
+                {/* Shockwave Radius */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Shockwave Radius</span>
+                    <span className="font-mono text-purple-300">
+                      {config.supernova?.shockwaveRadius ?? 750}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="200"
+                    max="1200"
+                    step="25"
+                    value={config.supernova?.shockwaveRadius ?? 750}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          shockwaveRadius: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+
+                {/* Flash Brightness */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Flash Brightness</span>
+                    <span className="font-mono text-purple-300">
+                      {config.supernova?.flashBrightness ?? 80}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.supernova?.flashBrightness ?? 80}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          flashBrightness: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+
+                {/* Camera Impact */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Camera Impact</span>
+                    <span className="font-mono text-purple-300">
+                      {config.supernova?.cameraImpact ?? 65}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={config.supernova?.cameraImpact ?? 65}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          cameraImpact: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+
+                {/* Recovery Duration */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Recovery Duration</span>
+                    <span className="font-mono text-purple-300">
+                      {(config.supernova?.recoveryDuration ?? 2.5).toFixed(1)}s
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1.0"
+                    max="5.0"
+                    step="0.1"
+                    value={config.supernova?.recoveryDuration ?? 2.5}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          recoveryDuration: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+
+                {/* Cooldown Duration */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Cooldown Between Events</span>
+                    <span className="font-mono text-purple-300">
+                      {config.supernova?.cooldownDuration ?? 12}s
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="5"
+                    max="30"
+                    step="1"
+                    value={config.supernova?.cooldownDuration ?? 12}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          cooldownDuration: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+
+                {/* Maximum Events Per Track */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Max Events Per Track</span>
+                    <span className="font-mono text-purple-300">
+                      {config.supernova?.maxEventsPerTrack ?? 3} bursts
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="6"
+                    step="1"
+                    value={config.supernova?.maxEventsPerTrack ?? 3}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        supernova: {
+                          ...(prev.supernova || DEFAULT_UNIVERSE_SUPERNOVA),
+                          maxEventsPerTrack: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-purple-400"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 13. Footer Actions: Re-plan Route & Reset Defaults */}
       <div className="flex items-center justify-between pt-2">
         <button
           onClick={() => {

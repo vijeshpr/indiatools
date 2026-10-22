@@ -22,6 +22,7 @@ import { universeBackgroundRenderer } from './universeBackground.ts'
 import { universeCameraScoreGenerator } from './universeCameraScore.ts'
 import { universeAudioAnalyzer } from './universeAudioAnalyzer.ts'
 import { universeLightTrailsRenderer } from './universeLightTrails.ts'
+import { universeSupernovaManager } from './universeSupernova.ts'
 
 interface CachedPhotoAssets {
   texture: THREE.Texture
@@ -77,6 +78,16 @@ export class PhotoUniverseEngine {
 
   public getCurrentScore(): TimestampedCameraScore | null {
     return this.currentScore
+  }
+
+  /**
+   * Manually trigger preview supernova at current playback timestamp
+   */
+  public triggerSupernova(
+    currentTime: number,
+    config?: PhotoUniverseStudioConfig['supernova']
+  ): void {
+    universeSupernovaManager.triggerManual(currentTime, config)
   }
 
   /**
@@ -418,7 +429,17 @@ export class PhotoUniverseEngine {
       1.0
     )
 
-    // 5. Refined Audio Signal Processing & Transient Impulses
+    // 5. Evaluate Supernova Shockwave Cinematic Climax State Machine
+    const supernovaState = universeSupernovaManager.evaluate(
+      currentTime,
+      this.currentNodes.map((n) => ({ id: n.photo.id, x: n.position.x, y: n.position.y, z: n.position.z })),
+      config.supernova,
+      this.cachedAnalysisResult?.climaxTimestamps,
+      bands,
+      this.cachedAnalysisResult?.detectedProfile || 'balanced-cinematic'
+    )
+
+    // 6. Refined Audio Signal Processing & Transient Impulses
     const audioState = universeBeatDetector.process(
       bands,
       currentTime,
@@ -435,11 +456,11 @@ export class PhotoUniverseEngine {
       ? audioState.shakeOffset
       : { x: 0, y: 0, z: 0, pitch: 0, roll: 0 }
 
-    const effectiveCamX = cameraState.position.x + shake.x
-    const effectiveCamY = cameraState.position.y + shake.y
-    const effectiveCamZ = cameraState.position.z + shake.z
+    const effectiveCamX = cameraState.position.x + shake.x + supernovaState.cameraImpulse.x
+    const effectiveCamY = cameraState.position.y + shake.y + supernovaState.cameraImpulse.y
+    const effectiveCamZ = cameraState.position.z + shake.z + supernovaState.cameraImpulse.z
 
-    // 6. RENDER VISUALLY RICH SPACE & GALAXY ENVIRONMENT DIRECTLY ONTO CANVAS
+    // 7. RENDER VISUALLY RICH SPACE & GALAXY ENVIRONMENT DIRECTLY ONTO CANVAS
     // Guaranteed visible on every frame even before uploading photos or audio
     universeBackgroundRenderer.renderToCanvas(
       ctx,
@@ -452,23 +473,23 @@ export class PhotoUniverseEngine {
       bands
     )
 
-    // 7. Background Three.js Synchronization
+    // 8. Background Three.js Synchronization
     const bgKey = `${config.background.type}_${config.background.customImage?.url}_${config.background.galaxyTint}_${config.background.starCount}`
     if (bgKey !== this.lastBackgroundKey && this.scene) {
       universeBackgroundRenderer.attachToScene(this.scene, config.background)
       this.lastBackgroundKey = bgKey
     }
 
-    // 8. Apply Camera Position + LookAt + Additive Damped Shake to Three.js
+    // 9. Apply Camera Position + LookAt + Additive Damped Shake to Three.js
     if (this.camera) {
       this.camera.position.set(effectiveCamX, effectiveCamY, effectiveCamZ)
       this.camera.lookAt(
-        cameraState.lookAt.x + shake.x * 0.2,
-        cameraState.lookAt.y + shake.y * 0.2,
+        cameraState.lookAt.x + (shake.x + supernovaState.cameraImpulse.x) * 0.2,
+        cameraState.lookAt.y + (shake.y + supernovaState.cameraImpulse.y) * 0.2,
         cameraState.lookAt.z
       )
-      this.camera.rotation.z += shake.roll
-      this.camera.rotation.x += shake.pitch
+      this.camera.rotation.z += shake.roll + supernovaState.cameraImpulse.roll
+      this.camera.rotation.x += shake.pitch + supernovaState.cameraImpulse.pitch
 
       // Update background parallax in Three.js
       universeBackgroundRenderer.update(effectiveCamX, effectiveCamY, currentTime)
@@ -506,6 +527,14 @@ export class PhotoUniverseEngine {
         posX += Math.sin(currentTime * 0.32 + phase) * 28
         posY += Math.cos(currentTime * 0.26 + phase * 1.2) * 20
         posZ += Math.sin(currentTime * 0.22 + phase * 0.8) * 24
+      }
+
+      // Add Supernova Gravitational / Explosive Displacement
+      const sDisp = supernovaState.photoDisplacements.get(node.photo.id)
+      if (sDisp) {
+        posX += sDisp.x
+        posY += sDisp.y
+        posZ += sDisp.z
       }
 
       group.position.set(posX, posY, posZ)
@@ -591,10 +620,20 @@ export class PhotoUniverseEngine {
 
     // 10. Update Audio-Reactive Cosmic Light Trails
     if (config.lightTrails && config.lightTrails.enabled && this.camera) {
+      // Climax Boost: When Supernova bursts, light trails widen and glow brighter
+      const activeTrailsConfig =
+        supernovaState.overallIntensity > 0
+          ? {
+              ...config.lightTrails,
+              glowIntensity: Math.min(100, config.lightTrails.glowIntensity + supernovaState.overallIntensity * 35),
+              trailWidth: Math.min(32, config.lightTrails.trailWidth + supernovaState.overallIntensity * 10),
+            }
+          : config.lightTrails
+
       universeLightTrailsRenderer.update(
         photoPositions,
         this.camera,
-        config.lightTrails,
+        activeTrailsConfig,
         bands,
         currentTime,
         this.cachedAnalysisResult?.detectedProfile || 'balanced-cinematic'
@@ -613,7 +652,16 @@ export class PhotoUniverseEngine {
       ctx.save()
       ctx.drawImage(this.webglCanvas, 0, 0, width, height)
 
-      // 13. Optional Cinematic Vignette Overlay
+      // 13. Render Supernova Shockwave Rings, Flash and Cosmic Core Effects
+      universeSupernovaManager.renderCanvasEffects(
+        ctx,
+        width,
+        height,
+        supernovaState,
+        config.supernova
+      )
+
+      // 14. Optional Cinematic Vignette Overlay
       if (config.visualDetails.vignetteEnabled) {
         const strength = (config.visualDetails.vignetteStrength || 40) / 100
         const radius = Math.max(width, height) * 0.72
@@ -673,6 +721,7 @@ export class PhotoUniverseEngine {
 
     universeBackgroundRenderer.dispose()
     universeLightTrailsRenderer.dispose()
+    universeSupernovaManager.reset()
 
     this.renderer?.dispose()
     this.renderer = null

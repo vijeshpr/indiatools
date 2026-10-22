@@ -199,6 +199,59 @@ export class UniverseAudioAnalyzer {
       recommendedBaseSpeed = 1.25
     }
 
+    // Detect Genuine Musical Climaxes / Drops
+    const climaxTimestamps: number[] = []
+    let lastClimaxTime = -12.0
+    const minClimaxInterval = 10.0 // At least 10s cooldown
+    const maxClimaxes = 4
+    const windowFrames = Math.max(10, Math.floor((sampleRate * 2.0) / stepSize))
+
+    for (let f = windowFrames; f < totalFrames - 20; f++) {
+      const timeSec = (f * stepSize) / sampleRate
+      if (timeSec - lastClimaxTime < minClimaxInterval) continue
+      if (timeSec < 4.0 || timeSec > durationSec - 3.0) continue // Skip extreme intro/outro
+
+      // Recent baseline before this moment (1.5s to 2s prior)
+      let baselineSum = 0
+      const baselineStart = Math.max(0, f - windowFrames)
+      const baselineEnd = Math.max(1, f - 10)
+      for (let b = baselineStart; b < baselineEnd; b++) {
+        baselineSum += energies[b]
+      }
+      const baselineAvg = baselineSum / Math.max(1, baselineEnd - baselineStart)
+
+      const currentEng = energies[f]
+      const currentBass = bassEnergies[f]
+
+      // Climax condition:
+      // 1. Current energy is at least 1.55x the preceding baseline
+      // 2. High bass energy (kick/drop impact)
+      // 3. Significant absolute energy (> 55% of max energy)
+      const isSurge = currentEng > baselineAvg * 1.55 && currentEng > maxEnergy * 0.55
+      const isBassDrop = currentBass > averageEnergy * 1.4
+
+      if (isSurge && isBassDrop) {
+        climaxTimestamps.push(Number(timeSec.toFixed(2)))
+        lastClimaxTime = timeSec
+        if (climaxTimestamps.length >= maxClimaxes) break
+      }
+    }
+
+    // Fallback climax if none passed threshold on calm or steady track
+    if (climaxTimestamps.length === 0 && durationSec >= 15.0) {
+      let highestEnergy = 0
+      let peakTime = durationSec * 0.5
+      for (let f = windowFrames; f < totalFrames - windowFrames; f++) {
+        if (energies[f] > highestEnergy) {
+          highestEnergy = energies[f]
+          peakTime = (f * stepSize) / sampleRate
+        }
+      }
+      if (highestEnergy > averageEnergy * 1.3) {
+        climaxTimestamps.push(Number(peakTime.toFixed(2)))
+      }
+    }
+
     return {
       durationSec,
       detectedProfile,
@@ -210,6 +263,7 @@ export class UniverseAudioAnalyzer {
       timelinePoints,
       recommendedHoldDuration,
       recommendedBaseSpeed,
+      climaxTimestamps,
     }
   }
 
@@ -251,6 +305,16 @@ export class UniverseAudioAnalyzer {
         ? 1.25
         : 0.95
 
+    const climaxTimestamps: number[] = []
+    if (durationSec >= 16.0) {
+      climaxTimestamps.push(Number((durationSec * 0.38).toFixed(2)))
+      if (durationSec >= 28.0) {
+        climaxTimestamps.push(Number((durationSec * 0.72).toFixed(2)))
+      }
+    } else {
+      climaxTimestamps.push(Number((durationSec * 0.5).toFixed(2)))
+    }
+
     return {
       durationSec,
       detectedProfile: profile,
@@ -262,6 +326,7 @@ export class UniverseAudioAnalyzer {
       timelinePoints,
       recommendedHoldDuration: holdDuration,
       recommendedBaseSpeed: baseSpeed,
+      climaxTimestamps,
     }
   }
 

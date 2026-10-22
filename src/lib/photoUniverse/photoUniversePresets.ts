@@ -252,5 +252,9 @@ export function applyUniversePreset(
       ...current.lightTrails,
       ...(found.config.lightTrails || {}),
     },
+    supernova: {
+      ...current.supernova,
+      ...(found.config.supernova || {}),
+    },
   }
 }

@@ -110,6 +110,36 @@ export const DEFAULT_UNIVERSE_LIGHT_TRAILS: UniverseLightTrailsConfig = {
   musicReactivity: 'balanced',
 }
 
+export type SupernovaTriggerSensitivity = 'low' | 'balanced' | 'high'
+
+export type SupernovaPhase = 'idle' | 'attraction' | 'supernova' | 'expansion' | 'recovery'
+
+export interface UniverseSupernovaConfig {
+  enabled: boolean
+  triggerSensitivity: SupernovaTriggerSensitivity // default: 'balanced'
+  explosionIntensity: number // 20 to 100% (default: 75%)
+  attractionStrength: number // 20 to 100% (default: 60%)
+  shockwaveRadius: number // 200 to 1200px (default: 750px)
+  flashBrightness: number // 10 to 100% (default: 80%)
+  cameraImpact: number // 0 to 100% (default: 65%)
+  recoveryDuration: number // 1.0 to 5.0s (default: 2.5s)
+  cooldownDuration: number // 5 to 30s (default: 12s)
+  maxEventsPerTrack: number // 1 to 6 (default: 3)
+}
+
+export const DEFAULT_UNIVERSE_SUPERNOVA: UniverseSupernovaConfig = {
+  enabled: true,
+  triggerSensitivity: 'balanced',
+  explosionIntensity: 75,
+  attractionStrength: 60,
+  shockwaveRadius: 750,
+  flashBrightness: 80,
+  cameraImpact: 65,
+  recoveryDuration: 2.5,
+  cooldownDuration: 12,
+  maxEventsPerTrack: 3,
+}
+
 export interface UniverseVisualDetails {
   particlesEnabled: boolean
   particleIntensity: number // 10 to 100
@@ -141,6 +171,7 @@ export interface UniverseAudioAnalysisResult {
   timelinePoints: TimelineEnergyPoint[]
   recommendedHoldDuration: number // seconds
   recommendedBaseSpeed: number
+  climaxTimestamps?: number[]
 }
 
 export interface CameraScoreSegment {
@@ -208,6 +239,9 @@ export interface PhotoUniverseStudioConfig {
   // Audio-Reactive Cosmic Light Trails
   lightTrails: UniverseLightTrailsConfig
 
+  // Supernova Shockwave: Cinematic Music Climax
+  supernova: UniverseSupernovaConfig
+
   // Director
   directorMode: DirectorMode
   manualOrder: string[] // Ordered array of photo IDs
@@ -274,6 +308,7 @@ export const DEFAULT_PHOTO_UNIVERSE_CONFIG: PhotoUniverseStudioConfig = {
   bassShake: DEFAULT_UNIVERSE_BASS_SHAKE,
   background: DEFAULT_UNIVERSE_BACKGROUND,
   lightTrails: DEFAULT_UNIVERSE_LIGHT_TRAILS,
+  supernova: DEFAULT_UNIVERSE_SUPERNOVA,
   directorMode: 'auto',
   manualOrder: [],
   visualDetails: DEFAULT_UNIVERSE_VISUAL_DETAILS,
