@@ -415,91 +415,129 @@
     <priority>0.85</priority>
   </url>
 
-  <url>
+    <url>
     <loc>https://indiatools-rho.vercel.app/tools/invisible-document-watermarker</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="mr-IN" href="https://indiatools-rho.vercel.app/mr/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="gu-IN" href="https://indiatools-rho.vercel.app/gu/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="pa-IN" href="https://indiatools-rho.vercel.app/pa/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="or-IN" href="https://indiatools-rho.vercel.app/or/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="as-IN" href="https://indiatools-rho.vercel.app/as/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="ur-IN" href="https://indiatools-rho.vercel.app/ur/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="ks-IN" href="https://indiatools-rho.vercel.app/ks/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="sd-IN" href="https://indiatools-rho.vercel.app/sd/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="sa-IN" href="https://indiatools-rho.vercel.app/sa/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="ne-IN" href="https://indiatools-rho.vercel.app/ne/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="kok-IN" href="https://indiatools-rho.vercel.app/kok/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="mai-IN" href="https://indiatools-rho.vercel.app/mai/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="doi-IN" href="https://indiatools-rho.vercel.app/doi/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="brx-IN" href="https://indiatools-rho.vercel.app/brx/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="mni-IN" href="https://indiatools-rho.vercel.app/mni/tools/invisible-document-watermarker" />
-    <xhtml:link rel="alternate" hreflang="sat-IN" href="https://indiatools-rho.vercel.app/sat/tools/invisible-document-watermarker" />
   </url>
 
-  <url>
+    <url>
     <loc>https://indiatools-rho.vercel.app/tools/smart-document-scanner</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/smart-document-scanner" />
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/smart-document-scanner" />
-    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/smart-document-scanner" />
-    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/smart-document-scanner" />
-    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/smart-document-scanner" />
-    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/smart-document-scanner" />
-    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/smart-document-scanner" />
-    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/smart-document-scanner" />
   </url>
-  <url>
+    <url>
     <loc>https://indiatools-rho.vercel.app/tools/batch-image-watermarker</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/batch-image-watermarker" />
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/batch-image-watermarker" />
-    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/batch-image-watermarker" />
-    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/batch-image-watermarker" />
-    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/batch-image-watermarker" />
-    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/batch-image-watermarker" />
-    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/batch-image-watermarker" />
-    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/batch-image-watermarker" />
   </url>
-  <url>
+    <url>
     <loc>https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
     <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
     <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
     <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
     <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
     <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
     <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
+  </url>
+  <url>
+    <loc>https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="bn-IN" href="https://indiatools-rho.vercel.app/bn/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/fast-inpainting-watermark-remover" />
+    <xhtml:link rel="alternate" hreflang="kn-IN" href="https://indiatools-rho.vercel.app/kn/tools/fast-inpainting-watermark-remover" />
   </url>
 
-  <url>
+    <url>
     <loc>https://indiatools-rho.vercel.app/tools/scan-to-print</loc>
-    <lastmod>2026-10-14</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://indiatools-rho.vercel.app/tools/scan-to-print" />
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://indiatools-rho.vercel.app/tools/scan-to-print" />
-    <xhtml:link rel="alternate" hreflang="ml-IN" href="https://indiatools-rho.vercel.app/ml/tools/scan-to-print" />
-    <xhtml:link rel="alternate" hreflang="hi-IN" href="https://indiatools-rho.vercel.app/hi/tools/scan-to-print" />
-    <xhtml:link rel="alternate" hreflang="ta-IN" href="https://indiatools-rho.vercel.app/ta/tools/scan-to-print" />
-    <xhtml:link rel="alternate" hreflang="te-IN" href="https://indiatools-rho.vercel.app/te/tools/scan-to-print" />
   </url>
 
   <url>

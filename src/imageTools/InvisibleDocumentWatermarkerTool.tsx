@@ -93,7 +93,6 @@ export const InvisibleDocumentWatermarkerTool: React.FC = () => {
       customH1={t.title}
       customSubtitle={t.subtitle}
       maxWidthClass="max-w-6xl"
-      hreflangs={hreflangs}
       hideDefaultFaqs={true}
       hideDefaultGuide={true}
     >

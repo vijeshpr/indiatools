@@ -76,7 +76,6 @@ export const BatchImageWatermarkerTool: React.FC = () => {
       customH1={t.title}
       customSubtitle={t.subtitle}
       maxWidthClass="max-w-7xl"
-      hreflangs={hreflangs}
       customJsonLd={customJsonLd}
       hideDefaultFaqs={true}
       hideDefaultGuide={true}

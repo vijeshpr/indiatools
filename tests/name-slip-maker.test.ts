@@ -272,10 +272,10 @@ describe('Name Slip Maker for Kids Test Suite', () => {
       assert.strictEqual(CATEGORIES.create.toolCount, 29)
     })
 
-    it('sitemap.xml contains 218 production URLs including all 23 localized name-slip-maker entries', () => {
+    it('sitemap.xml contains 224 production URLs including all 23 localized name-slip-maker entries', () => {
       const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
       const matches = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-      assert.strictEqual(matches.length, 218)
+      assert.strictEqual(matches.length, 224)
 
       assert.ok(sitemap.includes('https://indiatools-rho.vercel.app/tools/name-slip-maker'))
       for (const code of ALL_NAME_SLIP_LANG_CODES) {

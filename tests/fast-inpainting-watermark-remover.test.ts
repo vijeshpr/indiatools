@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
+import fs from 'node:fs'
 import { TOOLS, CATEGORIES, getToolBySlug } from '../src/data/tools.ts'
 import { runTeleaInpainting } from '../src/lib/inpainting/teleaInpainter.ts'
 import { MaskHistoryManager } from '../src/lib/inpainting/historyStack.ts'
@@ -9,6 +10,7 @@ import {
   getInpaintingTranslation,
 } from '../src/lib/inpainting/i18n.ts'
 import type { InpaintingLocale } from '../src/lib/inpainting/types.ts'
+import { INPAINTING_SEO_LANGUAGES, INPAINTING_SEO_LANG_CODES } from '../src/data/inpaintingSeoData.ts'
 
 // Polyfill ImageData for headless test environment if missing
 if (typeof globalThis.ImageData === 'undefined') {
@@ -195,6 +197,45 @@ describe('Fast Inpainting Watermark Remover & Object Eraser Test Suite', () => {
       // @ts-ignore
       const fallback = getInpaintingTranslation('unknown-lang' as InpaintingLocale)
       assert.strictEqual(fallback.title, INPAINTING_TRANSLATIONS.en.title)
+    })
+  })
+
+  describe('Sitemap, Prerender & Multilingual SEO Compliance Suite', () => {
+    it('sitemap.xml contains English and all 6 localized inpainting URLs with 224 total URLs', () => {
+      const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
+      const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
+      assert.strictEqual(locs.length, 224, 'Sitemap should contain exactly 224 production URLs')
+
+      // Main English URL
+      assert.ok(locs.includes('https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover'))
+
+      // All 6 regional languages
+      const regionalCodes = ['bn', 'ml', 'hi', 'ta', 'te', 'kn']
+      for (const code of regionalCodes) {
+        const regionalUrl = `https://indiatools-rho.vercel.app/${code}/tools/fast-inpainting-watermark-remover`
+        assert.ok(locs.includes(regionalUrl), `Sitemap must contain <loc> for ${regionalUrl}`)
+      }
+    })
+
+    it('INPAINTING_SEO_LANGUAGES defines comprehensive metadata for all 7 languages', () => {
+      assert.strictEqual(INPAINTING_SEO_LANG_CODES.length, 7)
+      for (const code of INPAINTING_SEO_LANG_CODES) {
+        const data = INPAINTING_SEO_LANGUAGES[code]
+        assert.ok(data, `SEO data must exist for ${code}`)
+        assert.ok(data.title.includes('IndiaTools') || data.title.length > 20, `Title must be descriptive for ${code}`)
+        assert.ok(data.metaDescription.length > 50, `Description must be descriptive for ${code}`)
+        assert.ok(data.h1.length > 10, `H1 must be present for ${code}`)
+        assert.ok(data.guideSteps.length >= 5, `Guide steps must be at least 5 for ${code}`)
+        assert.ok(data.useCases.length >= 4, `Use cases must be at least 4 for ${code}`)
+        assert.ok(data.faqs.length >= 5, `FAQs must be at least 5 for ${code}`)
+        assert.ok(data.canonicalUrl.startsWith('https://indiatools-rho.vercel.app'), `Canonical URL must be production URL for ${code}`)
+      }
+    })
+
+    it('prerender.cjs contains dedicated multilingual inpainting handler', () => {
+      const prerenderCode = fs.readFileSync('scripts/prerender.cjs', 'utf8')
+      assert.ok(prerenderCode.includes("urlPath.includes('fast-inpainting-watermark-remover')"), 'prerender.cjs must handle inpainting URL')
+      assert.ok(prerenderCode.includes('INPAINTING_SEO_LANGUAGES'), 'prerender.cjs must use INPAINTING_SEO_LANGUAGES')
     })
   })
 })

@@ -32,6 +32,7 @@ const friendshipMod = loadTs('src/i18n/friendshipCostI18n.ts');
 const repairMod = loadTs('src/i18n/repairVsReplaceI18n.ts');
 const luckyMod = loadTs('src/i18n/luckyDrawTeamI18n.ts');
 const nameSlipMod = loadTs('src/i18n/nameSlipI18n.ts');
+const inpaintingMod = loadTs('src/data/inpaintingSeoData.ts');
 
 const TOOLS = toolsMod.TOOLS;
 const CATEGORIES = toolsMod.CATEGORIES;
@@ -45,6 +46,8 @@ const LUCKY_TOOL_I18N = luckyMod.LUCKY_TOOL_I18N;
 const LUCKY_LOCALES = luckyMod.LUCKY_LOCALES;
 const NAME_SLIP_TOOL_I18N = nameSlipMod.NAME_SLIP_TOOL_I18N;
 const NAME_SLIP_LOCALES = nameSlipMod.NAME_SLIP_LOCALES;
+const INPAINTING_SEO_LANGUAGES = inpaintingMod.INPAINTING_SEO_LANGUAGES;
+const INPAINTING_SEO_LANG_CODES = inpaintingMod.INPAINTING_SEO_LANG_CODES;
 
 const directoryLocalesMod = loadTs('src/data/directory/locales.ts');
 const DIRECTORY_LOCALES = directoryLocalesMod.DIRECTORY_LOCALES;
@@ -74,6 +77,9 @@ function getDirectoryToolDestinationUrl(tool, langCode) {
   }
   if (tool.slug === 'name-slip-maker') {
     return `/${langCode}/tools/name-slip-maker`;
+  }
+  if (tool.slug === 'fast-inpainting-watermark-remover' && INPAINTING_SEO_LANG_CODES.includes(langCode)) {
+    return `/${langCode}/tools/fast-inpainting-watermark-remover`;
   }
   if (tool.slug === 'lucky-draw-team-splitter') {
     return `/${langCode}/tools/lucky-draw-team-splitter`;
@@ -1019,6 +1025,180 @@ for (const fullUrl of sitemapUrls) {
         {
           "@type": "FAQPage",
           mainEntity: (slipContent.faqs || []).map(f => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer
+            }
+          }))
+        }
+      ]
+    };
+  }
+
+  // 10b. Fast Inpainting & Watermark Remover Tool (Multilingual + English)
+  else if (urlPath.includes('fast-inpainting-watermark-remover')) {
+    const langMatch = urlPath.match(/^\/([a-z]{2,3})\/tools\/fast-inpainting-watermark-remover/);
+    const langKey = langMatch ? langMatch[1] : 'en';
+    const inpaintContent = INPAINTING_SEO_LANGUAGES[langKey] || INPAINTING_SEO_LANGUAGES['en'];
+
+    meta = {
+      title: inpaintContent.title,
+      description: inpaintContent.metaDescription,
+      canonicalUrl: inpaintContent.canonicalUrl
+    };
+
+    hreflangs = Object.keys(INPAINTING_SEO_LANGUAGES).map(code => ({
+      lang: INPAINTING_SEO_LANGUAGES[code].localeCode,
+      href: INPAINTING_SEO_LANGUAGES[code].canonicalUrl
+    }));
+    hreflangs.push({
+      lang: 'x-default',
+      href: `${BASE_URL}/tools/fast-inpainting-watermark-remover`
+    });
+
+    bodyContent = `
+      <nav aria-label="Breadcrumb" style="font-size: 0.8rem; color: #94A3B8; margin-bottom: 16px;">
+        <a href="/" style="color: #94A3B8; text-decoration: none;">Home</a> &gt; 
+        <a href="/tools" style="color: #94A3B8; text-decoration: none;">Tools</a> &gt; 
+        <a href="/category/create" style="color: #D8B879; text-decoration: none; text-transform: uppercase;">Photo &amp; Document Studio</a> &gt; 
+        <span style="color: #FFFFFF;">${escapeHtml(inpaintContent.h1)}</span>
+      </nav>
+
+      <article>
+        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
+          <span style="background: rgba(16,185,129,0.15); color: #10B981; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; text-transform: uppercase;">PHOTO &amp; DOCUMENT STUDIO</span>
+          <span style="background: rgba(216,184,121,0.15); color: #D8B879; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 6px;">TELEA FAST MARCHING</span>
+          <span style="font-size: 0.75rem; color: #34D399; background: #062418; padding: 3px 10px; border-radius: 6px;">100% Client-Side Privacy</span>
+        </div>
+
+        <h1 style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF; margin: 0 0 10px 0; line-height: 1.25;">${escapeHtml(inpaintContent.h1)}</h1>
+        <p style="font-size: 1.05rem; color: #CBD5E1; line-height: 1.6; max-width: 800px; margin-bottom: 24px;">${escapeHtml(inpaintContent.subtitle)}</p>
+
+        <!-- Step by Step Guide -->
+        <section style="background: #0E261B; border: 1px solid rgba(16,185,129,0.25); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin: 0 0 16px 0;">${escapeHtml(inpaintContent.guideTitle)}</h2>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            ${inpaintContent.guideSteps.map(step => `
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <span style="background: #10B981; color: #07130E; font-weight: 800; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.85rem;">${step.step}</span>
+                <div>
+                  <h3 style="font-size: 0.95rem; color: #F3F0E5; margin: 0 0 4px 0; font-weight: 700;">${escapeHtml(step.title)}</h3>
+                  <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.5; margin: 0;">${escapeHtml(step.description)}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- Real-World Use Cases -->
+        <section style="background: #0A1E15; border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin: 0 0 16px 0;">${escapeHtml(inpaintContent.useCasesTitle)}</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+            ${inpaintContent.useCases.map(uc => `
+              <div style="background: #0E261B; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px;">
+                <h3 style="font-size: 0.95rem; color: #D8B879; margin: 0 0 6px 0;">${escapeHtml(uc.title)}</h3>
+                <p style="font-size: 0.82rem; color: #94A3B8; line-height: 1.5; margin: 0;">${escapeHtml(uc.description)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- Technical Specs & Privacy -->
+        <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div style="background: #0E261B; border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; padding: 20px;">
+            <h3 style="font-size: 1.05rem; color: #FFFFFF; margin: 0 0 10px 0;">${escapeHtml(inpaintContent.techSpecsTitle)}</h3>
+            <p style="font-size: 0.85rem; color: #CBD5E1; line-height: 1.6; margin: 0 0 8px 0;"><strong>Supported Formats:</strong> ${escapeHtml(inpaintContent.supportedFormats)}</p>
+            <p style="font-size: 0.82rem; color: #94A3B8; line-height: 1.5; margin: 0;"><strong>Limitations:</strong> ${escapeHtml(inpaintContent.limitations)}</p>
+          </div>
+          <div style="background: #0E261B; border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; padding: 20px;">
+            <h3 style="font-size: 1.05rem; color: #10B981; margin: 0 0 10px 0;">${escapeHtml(inpaintContent.privacyTitle)}</h3>
+            <p style="font-size: 0.85rem; color: #CBD5E1; line-height: 1.6; margin: 0;">${escapeHtml(inpaintContent.privacyNote)}</p>
+          </div>
+        </section>
+
+        <!-- FAQs -->
+        <section style="background: #0E261B; border: 1px solid rgba(16,185,129,0.25); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <h2 style="font-size: 1.3rem; color: #FFFFFF; margin: 0 0 16px 0;">Frequently Asked Questions</h2>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            ${inpaintContent.faqs.map(faq => `
+              <div>
+                <h3 style="font-size: 1rem; color: #D8B879; margin: 0 0 6px 0;">${escapeHtml(faq.question)}</h3>
+                <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.6; margin: 0;">${escapeHtml(faq.answer)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- Related Tools -->
+        <section style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <h3 style="font-size: 1.2rem; color: #FFFFFF; margin-bottom: 14px;">Related Practical Tools</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+            <div style="background: #0A1E15; border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 14px;">
+              <h4 style="font-size: 0.95rem; margin: 0 0 4px 0;">
+                <a href="/tools/50kb-photo" style="color: #FFFFFF; text-decoration: none;">50KB Photo &amp; Signature Resizer</a>
+              </h4>
+              <p style="font-size: 0.75rem; color: #94A3B8; margin: 0 0 8px 0; line-height: 1.4;">Compress &amp; resize photos under 50KB or 20KB for SSC, UPSC, and State PSC forms.</p>
+              <a href="/tools/50kb-photo" style="color: #10B981; font-size: 0.8rem; font-weight: 700; text-decoration: none;">Launch Tool →</a>
+            </div>
+            <div style="background: #0A1E15; border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 14px;">
+              <h4 style="font-size: 0.95rem; margin: 0 0 4px 0;">
+                <a href="/tools/batch-image-watermarker" style="color: #FFFFFF; text-decoration: none;">Batch Image Watermarker</a>
+              </h4>
+              <p style="font-size: 0.75rem; color: #94A3B8; margin: 0 0 8px 0; line-height: 1.4;">Add copyright text or logo watermarks to multiple photos simultaneously.</p>
+              <a href="/tools/batch-image-watermarker" style="color: #10B981; font-size: 0.8rem; font-weight: 700; text-decoration: none;">Launch Tool →</a>
+            </div>
+            <div style="background: #0A1E15; border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 14px;">
+              <h4 style="font-size: 0.95rem; margin: 0 0 4px 0;">
+                <a href="/tools/smart-document-scanner" style="color: #FFFFFF; text-decoration: none;">Smart Document Scanner &amp; Filter</a>
+              </h4>
+              <p style="font-size: 0.75rem; color: #94A3B8; margin: 0 0 8px 0; line-height: 1.4;">Perspective crop and high-contrast B&amp;W enhancement for paper documents.</p>
+              <a href="/tools/smart-document-scanner" style="color: #10B981; font-size: 0.8rem; font-weight: 700; text-decoration: none;">Launch Tool →</a>
+            </div>
+          </div>
+        </section>
+      </article>
+    `;
+
+    jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          name: inpaintContent.h1,
+          description: inpaintContent.metaDescription,
+          url: inpaintContent.canonicalUrl,
+          applicationCategory: "MultimediaApplication",
+          operatingSystem: "All",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "INR"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${BASE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Tools", item: `${BASE_URL}/tools` },
+            { "@type": "ListItem", position: 3, name: "Photo & Document Studio", item: `${BASE_URL}/category/create` },
+            { "@type": "ListItem", position: 4, name: inpaintContent.h1, item: inpaintContent.canonicalUrl }
+          ]
+        },
+        {
+          "@type": "HowTo",
+          name: inpaintContent.guideTitle,
+          step: inpaintContent.guideSteps.map(s => ({
+            "@type": "HowToStep",
+            position: s.step,
+            name: s.title,
+            text: s.description
+          }))
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: inpaintContent.faqs.map(f => ({
             "@type": "Question",
             name: f.question,
             acceptedAnswer: {

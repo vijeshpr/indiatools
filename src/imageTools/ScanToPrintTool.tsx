@@ -284,7 +284,6 @@ export const ScanToPrintTool: React.FC = () => {
       customTitle={tool.seo.title}
       customDescription={tool.seo.metaDescription}
       customCanonicalPath={tool.seo.canonicalPath}
-      hreflangs={hreflangs}
       customJsonLd={customJsonLd}
     >
       {/* Strict Standard A4 Print CSS Injection */}

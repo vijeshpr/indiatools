@@ -144,10 +144,10 @@ describe('All IndiaTools Multilingual SEO Directory', () => {
     assert.ok(footerCode.includes('All Tools in 22 Languages'))
   })
 
-  it('sitemap.xml contains 218 total URLs including all 23 directory URLs with reciprocal hreflangs', () => {
+  it('sitemap.xml contains 224 total URLs including all 23 directory URLs with reciprocal hreflangs', () => {
     const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-    assert.strictEqual(locs.length, 218)
+    assert.strictEqual(locs.length, 224)
 
     assert.ok(locs.includes('https://indiatools-rho.vercel.app/all-tools'))
     for (const code of DIRECTORY_LANG_CODES) {

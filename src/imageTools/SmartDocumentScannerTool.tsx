@@ -75,7 +75,6 @@ export const SmartDocumentScannerTool: React.FC = () => {
       customH1={t.title}
       customSubtitle={t.subtitle}
       maxWidthClass="max-w-6xl"
-      hreflangs={hreflangs}
       customJsonLd={customJsonLd}
       hideDefaultFaqs={true}
       hideDefaultGuide={true}
