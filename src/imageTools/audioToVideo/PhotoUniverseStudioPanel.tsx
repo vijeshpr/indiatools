@@ -19,6 +19,7 @@ import {
   Eye,
   EyeOff,
   Flame,
+  Droplets,
   Layers,
   Aperture,
   Image as ImageIcon,
@@ -55,6 +56,8 @@ import {
   HolographicCardStyle,
   HoloMusicReactivity,
   HoloPhotoFit,
+  DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+  LiquidLightMaterial,
   DEFAULT_UNIVERSE_SUPERNOVA,
   SupernovaTriggerSensitivity,
 } from '../../lib/photoUniverse/photoUniverseTypes.ts'
@@ -86,7 +89,7 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const bgFileInputRef = useRef<HTMLInputElement | null>(null)
   const [activeSection, setActiveSection] = useState<
-    'all' | 'analysis' | 'motion' | 'photos' | 'cards' | 'background' | 'camera' | 'dof' | 'shake' | 'supernova'
+    'all' | 'analysis' | 'motion' | 'photos' | 'cards' | 'liquid' | 'background' | 'camera' | 'dof' | 'shake' | 'supernova'
   >('all')
 
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
@@ -674,6 +677,20 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
           }`}
         >
           Holo Cards
+        </button>
+        <button
+          onClick={() => setActiveSection('liquid')}
+          className={`px-3 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
+            activeSection === 'liquid'
+              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          <Droplets className="w-3.5 h-3.5" />
+          <span>Liquid Light</span>
+          {config.liquidLight?.enabled && (
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          )}
         </button>
         <button
           onClick={() => setActiveSection('supernova')}
@@ -1765,6 +1782,287 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
                       }))
                     }
                     className="w-full accent-cyan-400"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 12. Liquid Light Transformation: Molten Metal Flowing Edge Ribbon */}
+      {(activeSection === 'all' || activeSection === 'liquid') && (
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-950/20 via-gray-900 to-black border border-amber-500/30 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <Droplets className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h4 className="text-sm font-bold text-white">Liquid Light Transformation</h4>
+                  <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-mono">
+                    Molten Metal Perimeter
+                  </span>
+                </div>
+                <p className="text-[10px] text-gray-400">
+                  Luminous liquid gold, silver & iridescent ribbon flowing smoothly along photograph borders
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0">
+              {/* Reset to defaults */}
+              <button
+                type="button"
+                onClick={() =>
+                  updateConfig((prev) => ({
+                    ...prev,
+                    liquidLight: {
+                      ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+                      enabled: prev.liquidLight?.enabled ?? false,
+                    },
+                  }))
+                }
+                className="px-2.5 py-1 text-[11px] text-gray-400 hover:text-white bg-gray-800/80 hover:bg-gray-700/80 rounded-lg border border-gray-700 transition-all flex items-center space-x-1 cursor-pointer"
+                title="Reset Liquid Light to defaults"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
+
+              {/* Master Enable/Disable Button */}
+              <button
+                type="button"
+                onClick={() =>
+                  updateConfig((prev) => ({
+                    ...prev,
+                    liquidLight: {
+                      ...(prev.liquidLight || DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG),
+                      enabled: !(prev.liquidLight?.enabled ?? false),
+                    },
+                  }))
+                }
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  config.liquidLight?.enabled
+                    ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow-lg shadow-amber-500/20'
+                    : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
+                }`}
+              >
+                {config.liquidLight?.enabled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span>{config.liquidLight?.enabled ? 'ACTIVE' : 'DISABLED'}</span>
+              </button>
+            </div>
+          </div>
+
+          {config.liquidLight?.enabled && (
+            <div className="space-y-4 pt-2 border-t border-gray-800/80">
+              {/* 1. Material Selector Cards */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-300">
+                  Liquid Material Mode
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {[
+                    {
+                      id: 'liquid-gold' as LiquidLightMaterial,
+                      name: 'Liquid Gold',
+                      desc: 'Molten 24k gold with deep amber depth & radiant crests',
+                      bgClass: 'from-amber-600/30 via-yellow-500/20 to-amber-950/40 border-amber-500/50',
+                      indicator: 'bg-gradient-to-r from-amber-400 to-yellow-300',
+                    },
+                    {
+                      id: 'liquid-silver' as LiquidLightMaterial,
+                      name: 'Liquid Silver',
+                      desc: 'Polished liquid mercury & platinum with mirror chrome glints',
+                      bgClass: 'from-slate-400/20 via-sky-300/10 to-slate-900/40 border-slate-400/40',
+                      indicator: 'bg-gradient-to-r from-slate-200 via-sky-200 to-white',
+                    },
+                    {
+                      id: 'iridescent' as LiquidLightMaterial,
+                      name: 'Subtle Iridescent',
+                      desc: 'Prismatic pearlescent opal ribbon shifting across rainbow hues',
+                      bgClass: 'from-violet-500/20 via-cyan-400/20 to-rose-500/20 border-pink-500/40',
+                      indicator: 'bg-gradient-to-r from-cyan-400 via-purple-400 to-rose-400',
+                    },
+                  ].map((mat) => {
+                    const isSelected = (config.liquidLight?.material ?? 'liquid-gold') === mat.id
+                    return (
+                      <button
+                        key={mat.id}
+                        type="button"
+                        onClick={() =>
+                          updateConfig((prev) => ({
+                            ...prev,
+                            liquidLight: {
+                              ...(prev.liquidLight || DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG),
+                              material: mat.id,
+                            },
+                          }))
+                        }
+                        className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden bg-gradient-to-br cursor-pointer ${mat.bgClass} ${
+                          isSelected
+                            ? 'ring-2 ring-amber-400 shadow-md shadow-amber-500/10'
+                            : 'opacity-70 hover:opacity-100 border-gray-800'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-bold text-white">{mat.name}</span>
+                          <span className={`w-3 h-3 rounded-full ${mat.indicator}`} />
+                        </div>
+                        <p className="text-[10px] text-gray-300 line-clamp-2 leading-relaxed">
+                          {mat.desc}
+                        </p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* 2. Feature Toggles (Music Reactivity & Cinematic Transition) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {/* Music Reactivity */}
+                <div className="p-3 rounded-xl bg-gray-950/60 border border-gray-800/80 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-semibold text-gray-200 flex items-center space-x-1.5">
+                      <Music className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Music-Reactive Waves</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400">
+                      Modulate fluid speed & ripple harmonics with audio presence
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        liquidLight: {
+                          ...(prev.liquidLight || DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG),
+                          musicReactivity: !(prev.liquidLight?.musicReactivity ?? true),
+                        },
+                      }))
+                    }
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      config.liquidLight?.musicReactivity ?? true
+                        ? 'bg-amber-500/30 text-amber-200 border border-amber-500/50'
+                        : 'bg-gray-800 text-gray-400 border border-gray-700'
+                    }`}
+                  >
+                    {config.liquidLight?.musicReactivity ?? true ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+
+                {/* Cinematic Image Transition Bridge */}
+                <div className="p-3 rounded-xl bg-gray-950/60 border border-gray-800/80 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-semibold text-gray-200 flex items-center space-x-1.5">
+                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Cinematic Transition Bridge</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400">
+                      Luminous liquid handover bridging outgoing and incoming photos
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        liquidLight: {
+                          ...(prev.liquidLight || DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG),
+                          cinematicTransition: !(prev.liquidLight?.cinematicTransition ?? true),
+                        },
+                      }))
+                    }
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      config.liquidLight?.cinematicTransition ?? true
+                        ? 'bg-amber-500/30 text-amber-200 border border-amber-500/50'
+                        : 'bg-gray-800 text-gray-400 border border-gray-700'
+                    }`}
+                  >
+                    {config.liquidLight?.cinematicTransition ?? true ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+              </div>
+
+              {/* 3. Sliders: Intensity, Flow Speed, Edge Width */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                {/* Intensity */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Luminous Intensity</span>
+                    <span className="text-amber-300 font-mono">
+                      {config.liquidLight?.intensity ?? 75}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.liquidLight?.intensity ?? 75}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        liquidLight: {
+                          ...(prev.liquidLight || DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG),
+                          intensity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                {/* Flow Speed */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Fluid Flow Speed</span>
+                    <span className="text-amber-300 font-mono">
+                      {config.liquidLight?.flowSpeed ?? 50}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.liquidLight?.flowSpeed ?? 50}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        liquidLight: {
+                          ...(prev.liquidLight || DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG),
+                          flowSpeed: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                {/* Edge Width */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Ribbon Width</span>
+                    <span className="text-amber-300 font-mono">
+                      {config.liquidLight?.edgeWidth ?? 14}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4"
+                    max="32"
+                    value={config.liquidLight?.edgeWidth ?? 14}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        liquidLight: {
+                          ...(prev.liquidLight || DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG),
+                          edgeWidth: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
                   />
                 </div>
               </div>

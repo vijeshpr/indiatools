@@ -109,6 +109,28 @@ export const DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG: UniverseHolographicCardConfig 
   photoFit: 'cover',
 }
 
+export type LiquidLightMaterial = 'liquid-gold' | 'liquid-silver' | 'iridescent'
+
+export interface UniverseLiquidLightConfig {
+  enabled: boolean // default: false (Safety first: disabled by default)
+  material: LiquidLightMaterial // default: 'liquid-gold'
+  intensity: number // 0 to 100, default: 75
+  flowSpeed: number // 10 to 100, default: 50
+  edgeWidth: number // 4 to 32, default: 14
+  musicReactivity: boolean // default: true
+  cinematicTransition: boolean // default: true
+}
+
+export const DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG: UniverseLiquidLightConfig = {
+  enabled: false,
+  material: 'liquid-gold',
+  intensity: 75,
+  flowSpeed: 50,
+  edgeWidth: 14,
+  musicReactivity: true,
+  cinematicTransition: true,
+}
+
 export type SupernovaTriggerSensitivity = 'low' | 'balanced' | 'high'
 
 export type SupernovaPhase = 'idle' | 'attraction' | 'supernova' | 'expansion' | 'recovery'
@@ -267,6 +289,9 @@ export interface PhotoUniverseStudioConfig {
   // Holographic Memory Cards: 3D Crystal-Glass Display Cards
   holographicCards: UniverseHolographicCardConfig
 
+  // Liquid Light Transformation: Luminous Molten Edge Ribbon & Camera-Responsive Sweep
+  liquidLight: UniverseLiquidLightConfig
+
   // Supernova Shockwave: Cinematic Music Climax
   supernova: UniverseSupernovaConfig
 
@@ -337,6 +362,7 @@ export const DEFAULT_PHOTO_UNIVERSE_CONFIG: PhotoUniverseStudioConfig = {
   bassShake: DEFAULT_UNIVERSE_BASS_SHAKE,
   background: DEFAULT_UNIVERSE_BACKGROUND,
   holographicCards: DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+  liquidLight: DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
   supernova: DEFAULT_UNIVERSE_SUPERNOVA,
   directorMode: 'auto',
   manualOrder: [],

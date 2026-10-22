@@ -9,6 +9,7 @@ import {
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_BASS_SHAKE,
   DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+  DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
 } from './photoUniverseTypes.ts'
 
 export interface UniversePreset {
@@ -65,6 +66,13 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         cardStyle: 'crystal-glass',
         edgeReflectionIntensity: 65,
       },
+      liquidLight: {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'liquid-gold',
+        intensity: 75,
+        flowSpeed: 50,
+        edgeWidth: 14,
+      },
     },
   },
   {
@@ -112,6 +120,13 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         edgeReflectionIntensity: 75,
         rainbowSpectrumIntensity: 60,
       },
+      liquidLight: {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'liquid-silver',
+        intensity: 80,
+        flowSpeed: 65,
+        edgeWidth: 16,
+      },
     },
   },
   {
@@ -157,6 +172,13 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         edgeReflectionIntensity: 55,
         glassTransparency: 80,
       },
+      liquidLight: {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'iridescent',
+        intensity: 70,
+        flowSpeed: 40,
+        edgeWidth: 12,
+      },
     },
   },
   {
@@ -199,6 +221,13 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
         cardStyle: 'crystal-glass',
         edgeReflectionIntensity: 70,
+      },
+      liquidLight: {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'liquid-silver',
+        intensity: 75,
+        flowSpeed: 55,
+        edgeWidth: 14,
       },
     },
   },
@@ -245,6 +274,13 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         edgeReflectionIntensity: 45,
         rainbowSpectrumIntensity: 25,
       },
+      liquidLight: {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'liquid-gold',
+        intensity: 55,
+        flowSpeed: 35,
+        edgeWidth: 10,
+      },
     },
   },
 ]
@@ -280,6 +316,11 @@ export function applyUniversePreset(
     holographicCards: {
       ...current.holographicCards,
       ...(found.config.holographicCards || {}),
+    },
+    liquidLight: {
+      ...current.liquidLight,
+      ...(found.config.liquidLight || {}),
+      enabled: current.liquidLight?.enabled ?? DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.enabled,
     },
     supernova: {
       ...current.supernova,

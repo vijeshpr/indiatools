@@ -6,6 +6,9 @@ import {
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_SUPERNOVA,
   DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+  DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+  UniverseLiquidLightConfig,
+  LiquidLightMaterial,
   PhotoUniverseStudioConfig,
   UniversePhoto,
 } from '../src/lib/photoUniverse/photoUniverseTypes.ts'
@@ -35,6 +38,10 @@ import {
   createRoundedRectShape,
   calculateHoloSpectralColor,
 } from '../src/lib/photoUniverse/universeHolographicCards.ts'
+import {
+  universeLiquidLight,
+  createLiquidRibbonGeometry,
+} from '../src/lib/photoUniverse/universeLiquidLight.ts'
 import {
   DEFAULT_STUDIO_COMPOSITION,
   NormalizedAudioBands,
@@ -942,6 +949,304 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
 
       const minimalPreset = applyUniversePreset(initial, 'clean-minimalist-showcase')
       assert.strictEqual(minimalPreset.holographicCards.cardStyle, 'minimal-glass')
+    })
+  })
+
+  describe('15. Liquid Light Transformation: Molten Metal Edge Ribbon & Camera-Responsive Sweep', () => {
+    it('should be disabled by default (Safety First Rule)', () => {
+      assert.strictEqual(
+        DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.enabled,
+        false,
+        'Liquid Light must start disabled by default'
+      )
+      assert.strictEqual(
+        DEFAULT_PHOTO_UNIVERSE_CONFIG.liquidLight.enabled,
+        false,
+        'Global photo universe config must have liquidLight disabled initially'
+      )
+      assert.strictEqual(DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.material, 'liquid-gold')
+      assert.strictEqual(DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.intensity, 75)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.flowSpeed, 50)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.edgeWidth, 14)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.musicReactivity, true)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.cinematicTransition, true)
+    })
+
+    it('generates seamless closed quad-strip ribbon geometry around rounded photo boundaries', () => {
+      const geo = createLiquidRibbonGeometry(320, 180, 14, 16, 120)
+      assert.ok(geo instanceof THREE.BufferGeometry)
+
+      const pos = geo.getAttribute('position')
+      const uv = geo.getAttribute('uv')
+      const norm = geo.getAttribute('normal')
+      const index = geo.getIndex()
+
+      assert.ok(pos && pos.count > 0, 'Geometry must contain position attribute')
+      assert.ok(uv && uv.count > 0, 'Geometry must contain UV attribute')
+      assert.ok(norm && norm.count > 0, 'Geometry must contain normal attribute')
+      assert.ok(index && index.count === 120 * 6, 'Index count must match 120 quads * 6 = 720 indices')
+
+      // Check UV bounds
+      const uvs = uv.array as Float32Array
+      let minU = 1, maxU = 0, minV = 1, maxV = 0
+      for (let i = 0; i < uvs.length; i += 2) {
+        minU = Math.min(minU, uvs[i])
+        maxU = Math.max(maxU, uvs[i])
+        minV = Math.min(minV, uvs[i + 1])
+        maxV = Math.max(maxV, uvs[i + 1])
+      }
+      assert.strictEqual(minU, 0.0)
+      assert.strictEqual(maxU, 1.0)
+      assert.strictEqual(minV, 0.0)
+      assert.strictEqual(maxV, 1.0)
+    })
+
+    it('builds liquid ribbon mesh inside photo group without covering inner photo area', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const group = new THREE.Group()
+
+      // Add a base photo mesh
+      const photoGeo = new THREE.PlaneGeometry(nodes[0].worldWidth, nodes[0].worldHeight)
+      const photoMesh = new THREE.Mesh(photoGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }))
+      photoMesh.name = 'photoMesh'
+      group.add(photoMesh)
+
+      const config: UniverseLiquidLightConfig = {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        enabled: true,
+        material: 'liquid-gold',
+        edgeWidth: 16,
+      }
+
+      const ribbon = universeLiquidLight.buildOrUpdateLiquidRibbon(group, nodes[0], config, 16)
+      assert.ok(ribbon)
+      assert.strictEqual(ribbon.name, 'liquidRibbonMesh')
+
+      // Inner photo dimensions must remain sharp and untouched
+      const foundPhoto = group.getObjectByName('photoMesh') as THREE.Mesh
+      assert.ok(foundPhoto)
+      assert.strictEqual(
+        (foundPhoto.geometry as THREE.PlaneGeometry).parameters.width,
+        nodes[0].worldWidth
+      )
+    })
+
+    it('supports all 3 liquid materials: Liquid Gold, Liquid Silver, and Subtle Iridescent', () => {
+      const matGold = universeLiquidLight.createMaterial({
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'liquid-gold',
+      })
+      assert.strictEqual(matGold.uniforms.uMaterial.value, 0)
+
+      const matSilver = universeLiquidLight.createMaterial({
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'liquid-silver',
+      })
+      assert.strictEqual(matSilver.uniforms.uMaterial.value, 1)
+
+      const matIrid = universeLiquidLight.createMaterial({
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        material: 'iridescent',
+      })
+      assert.strictEqual(matIrid.uniforms.uMaterial.value, 2)
+    })
+
+    it('intensifies highlight sweep and approach factor as camera draws near', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const group = new THREE.Group()
+      group.position.set(nodes[0].position.x, nodes[0].position.y, nodes[0].position.z)
+
+      const config: UniverseLiquidLightConfig = {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        enabled: true,
+        intensity: 85,
+      }
+
+      const ribbon = universeLiquidLight.buildOrUpdateLiquidRibbon(group, nodes[0], config, 16)
+      const mat = ribbon.material as THREE.ShaderMaterial
+
+      const camera = new THREE.PerspectiveCamera(50, 16 / 9, 10, 5000)
+      camera.position.set(nodes[0].position.x, nodes[0].position.y, nodes[0].position.z + 400)
+
+      const cameraState = {
+        position: camera.position,
+        lookAt: nodes[0].lookAtPoint,
+        targetNodeIndex: 0,
+        focusDistance: 400,
+        focusWeight: 1.0,
+        travelPhase: 'approach' as const,
+        phaseProgress: 0.65,
+        shakeAllowed: true,
+      }
+
+      universeLiquidLight.updatePhoto(
+        group,
+        nodes[0],
+        config,
+        camera,
+        undefined,
+        1.5,
+        true,
+        cameraState,
+        undefined,
+        0,
+        nodes.length
+      )
+
+      assert.strictEqual(mat.uniforms.uApproachFactor.value, 1.0)
+      assert.ok(mat.uniforms.uSweepProgress.value > 0)
+    })
+
+    it('activates luminous transition bridge during photo departure and handover', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const outgoingGroup = new THREE.Group()
+      const incomingGroup = new THREE.Group()
+
+      const config: UniverseLiquidLightConfig = {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        enabled: true,
+        cinematicTransition: true,
+      }
+
+      const outRibbon = universeLiquidLight.buildOrUpdateLiquidRibbon(outgoingGroup, nodes[0], config, 16)
+      const inRibbon = universeLiquidLight.buildOrUpdateLiquidRibbon(incomingGroup, nodes[1], config, 16)
+
+      const camera = new THREE.PerspectiveCamera(50, 16 / 9, 10, 5000)
+      const cameraState = {
+        position: camera.position,
+        lookAt: nodes[0].lookAtPoint,
+        targetNodeIndex: 0,
+        focusDistance: 500,
+        focusWeight: 0.4,
+        travelPhase: 'transition' as const,
+        phaseProgress: 0.5,
+        shakeAllowed: true,
+      }
+
+      // Update outgoing photo
+      universeLiquidLight.updatePhoto(
+        outgoingGroup,
+        nodes[0],
+        config,
+        camera,
+        undefined,
+        4.0,
+        true,
+        cameraState,
+        undefined,
+        0,
+        nodes.length
+      )
+
+      // Update incoming photo (index 1)
+      universeLiquidLight.updatePhoto(
+        incomingGroup,
+        nodes[1],
+        config,
+        camera,
+        undefined,
+        4.0,
+        false,
+        cameraState,
+        undefined,
+        1,
+        nodes.length
+      )
+
+      const outMat = outRibbon.material as THREE.ShaderMaterial
+      const inMat = inRibbon.material as THREE.ShaderMaterial
+
+      assert.ok(
+        outMat.uniforms.uTransitionBridge.value > 0.7,
+        'Outgoing photo should have elevated transition bridge'
+      )
+      assert.ok(
+        inMat.uniforms.uTransitionBridge.value > 0.8,
+        'Incoming photo should have elevated transition bridge'
+      )
+    })
+
+    it('reacts to music presence and climax events while preserving neutral flow when reactivity is off', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const group = new THREE.Group()
+
+      const config: UniverseLiquidLightConfig = {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        enabled: true,
+        musicReactivity: true,
+      }
+
+      const ribbon = universeLiquidLight.buildOrUpdateLiquidRibbon(group, nodes[0], config, 16)
+      const mat = ribbon.material as THREE.ShaderMaterial
+      const camera = new THREE.PerspectiveCamera(50, 16 / 9, 10, 5000)
+
+      const activeBands: NormalizedAudioBands = {
+        bass: 0.95,
+        mid: 0.7,
+        treble: 0.8,
+        subBass: 0.9,
+        overall: 0.85,
+        isBeatHit: true,
+      }
+
+      const cameraState = {
+        position: camera.position,
+        lookAt: nodes[0].lookAtPoint,
+        targetNodeIndex: 0,
+        focusDistance: 400,
+        focusWeight: 1.0,
+        travelPhase: 'hold' as const,
+        phaseProgress: 0.5,
+        shakeAllowed: false,
+      }
+
+      // Music reactive mode on
+      universeLiquidLight.updatePhoto(
+        group,
+        nodes[0],
+        config,
+        camera,
+        activeBands,
+        3.0,
+        true,
+        cameraState,
+        { phase: 'supernova', flashOpacity: 0.9 },
+        0,
+        nodes.length
+      )
+
+      assert.ok(mat.uniforms.uAudioEnergy.value > 0.7)
+      assert.ok(mat.uniforms.uClimaxBoost.value >= 0.6)
+
+      // When musicReactivity is disabled, falls back to neutral flow
+      const neutralConfig: UniverseLiquidLightConfig = {
+        ...config,
+        musicReactivity: false,
+      }
+      universeLiquidLight.updatePhoto(
+        group,
+        nodes[0],
+        neutralConfig,
+        camera,
+        activeBands,
+        3.0,
+        true,
+        cameraState,
+        undefined,
+        0,
+        nodes.length
+      )
+
+      assert.strictEqual(mat.uniforms.uAudioEnergy.value, 0)
+      assert.strictEqual(mat.uniforms.uClimaxBoost.value, 0)
+    })
+
+    it('disposes GPU geometry and material caches safely without memory leaks', () => {
+      universeLiquidLight.dispose()
+      // Calling dispose again should execute without throwing
+      assert.doesNotThrow(() => {
+        universeLiquidLight.dispose()
+      })
     })
   })
 })

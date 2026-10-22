@@ -23,6 +23,7 @@ import { universeCameraScoreGenerator } from './universeCameraScore.ts'
 import { universeAudioAnalyzer } from './universeAudioAnalyzer.ts'
 import { universeSupernovaManager } from './universeSupernova.ts'
 import { universeHolographicCards } from './universeHolographicCards.ts'
+import { universeLiquidLight } from './universeLiquidLight.ts'
 
 interface CachedPhotoAssets {
   texture: THREE.Texture
@@ -45,6 +46,7 @@ export class PhotoUniverseEngine {
   private lastPhotoConfigKey: string = ''
   private lastBackgroundKey: string = ''
   private lastHoloConfigKey: string = ''
+  private lastLiquidConfigKey: string = ''
 
   // Camera Score Cache
   private currentScore: TimestampedCameraScore | null = null
@@ -302,6 +304,7 @@ export class PhotoUniverseEngine {
 
     const activeIds = new Set<string>()
     const holoKey = `${config.holographicCards?.enabled}_${config.holographicCards?.cardStyle}_${config.holographicCards?.cornerRadius}_${config.holographicCards?.photoFit}`
+    const liquidKey = `${config.liquidLight?.enabled}_${config.liquidLight?.material}_${config.liquidLight?.edgeWidth}_${config.liquidLight?.intensity}`
     const needsHoloRebuild = holoKey !== this.lastHoloConfigKey
 
     for (const node of nodes) {
@@ -383,9 +386,20 @@ export class PhotoUniverseEngine {
           mat.needsUpdate = true
         }
       }
+
+      // 3. Liquid Light Ribbon Synchronization
+      if (config.liquidLight?.enabled) {
+        const cornerRadius = config.holographicCards?.enabled
+          ? (config.holographicCards.cornerRadius ?? 16)
+          : 12
+        universeLiquidLight.buildOrUpdateLiquidRibbon(group, node, config.liquidLight, cornerRadius)
+      } else {
+        universeLiquidLight.removeRibbonFromGroup(group)
+      }
     }
 
     this.lastHoloConfigKey = holoKey
+    this.lastLiquidConfigKey = liquidKey
 
     // Remove meshes for photos no longer in collection
     for (const [id, group] of this.photoMeshMap.entries()) {
@@ -650,6 +664,23 @@ export class PhotoUniverseEngine {
           cameraState.focusWeight
         )
       }
+
+      // 5. Update Liquid Light Transformation: Molten Edge Flow, Highlight Sweep & Transition Bridging
+      if (config.liquidLight?.enabled && this.camera) {
+        universeLiquidLight.updatePhoto(
+          group,
+          node,
+          config.liquidLight,
+          this.camera,
+          bands,
+          currentTime,
+          isCurrentTarget,
+          cameraState,
+          supernovaState,
+          i,
+          this.currentNodes.length
+        )
+      }
     }
 
     // 9. Ambient Stardust Particle Movement
@@ -749,6 +780,7 @@ export class PhotoUniverseEngine {
 
     universeBackgroundRenderer.dispose()
     universeHolographicCards.dispose()
+    universeLiquidLight.dispose()
     universeSupernovaManager.reset()
 
     this.renderer?.dispose()
