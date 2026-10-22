@@ -21,6 +21,7 @@ import { universeCameraDirector, CameraFrameState } from './universeCameraDirect
 import { universeBackgroundRenderer } from './universeBackground.ts'
 import { universeCameraScoreGenerator } from './universeCameraScore.ts'
 import { universeAudioAnalyzer } from './universeAudioAnalyzer.ts'
+import { universeLightTrailsRenderer } from './universeLightTrails.ts'
 
 interface CachedPhotoAssets {
   texture: THREE.Texture
@@ -149,6 +150,9 @@ export class PhotoUniverseEngine {
 
       // Initialize ambient particles
       this.initParticles()
+
+      // Attach Audio-Reactive Cosmic Light Trails
+      universeLightTrailsRenderer.attachToScene(this.scene)
     } catch (e) {
       console.warn('WebGL initialization failed in PhotoUniverseEngine:', e)
     }
@@ -476,14 +480,40 @@ export class PhotoUniverseEngine {
     const dofSpread =
       dofMode === 'strong' ? 260 : dofMode === 'cinematic' ? 420 : dofMode === 'subtle' ? 750 : 99999
 
+    const photoPositions: { id: string; x: number; y: number; z: number }[] = []
+
     for (let i = 0; i < this.currentNodes.length; i++) {
       const node = this.currentNodes[i]
       const group = this.photoMeshMap.get(node.photo.id)
       if (!group || !this.camera) continue
 
-      const dx = node.position.x - this.camera.position.x
-      const dy = node.position.y - this.camera.position.y
-      const dz = node.position.z - this.camera.position.z
+      // Compute smooth celestial drift so moving photos stream dynamic light trails
+      let posX = node.position.x
+      let posY = node.position.y
+      let posZ = node.position.z
+
+      const phase = i * 1.618
+      if (config.photoMotion === 'subtle-float') {
+        posX += Math.sin(currentTime * 0.42 + phase) * 45
+        posY += Math.cos(currentTime * 0.35 + phase * 1.3) * 30
+        posZ += Math.sin(currentTime * 0.28 + phase * 0.7) * 38
+      } else if (config.photoMotion === 'music-micro') {
+        posX += Math.sin(currentTime * 0.48 + phase) * 38
+        posY += Math.cos(currentTime * 0.40 + phase * 1.2) * 26
+        posZ += Math.sin(currentTime * 0.32 + phase * 0.8) * 32
+      } else {
+        // Gentle celestial float in static mode
+        posX += Math.sin(currentTime * 0.32 + phase) * 28
+        posY += Math.cos(currentTime * 0.26 + phase * 1.2) * 20
+        posZ += Math.sin(currentTime * 0.22 + phase * 0.8) * 24
+      }
+
+      group.position.set(posX, posY, posZ)
+      photoPositions.push({ id: node.photo.id, x: posX, y: posY, z: posZ })
+
+      const dx = posX - this.camera.position.x
+      const dy = posY - this.camera.position.y
+      const dz = posZ - this.camera.position.z
       const distToCamera = Math.sqrt(dx * dx + dy * dy + dz * dz)
 
       const deltaFocus = Math.abs(distToCamera - focusPlane)
@@ -559,17 +589,31 @@ export class PhotoUniverseEngine {
       this.particlesMesh.visible = false
     }
 
-    // 10. Render Three.js Scene into WebGL Canvas with Transparent Background
+    // 10. Update Audio-Reactive Cosmic Light Trails
+    if (config.lightTrails && config.lightTrails.enabled && this.camera) {
+      universeLightTrailsRenderer.update(
+        photoPositions,
+        this.camera,
+        config.lightTrails,
+        bands,
+        currentTime,
+        this.cachedAnalysisResult?.detectedProfile || 'balanced-cinematic'
+      )
+    } else {
+      universeLightTrailsRenderer.resetTrails()
+    }
+
+    // 11. Render Three.js Scene into WebGL Canvas with Transparent Background
     if (this.renderer && this.scene && this.camera && this.webglCanvas) {
       this.renderer.setClearColor(0x000000, 0)
       this.scene.background = null
       this.renderer.render(this.scene, this.camera)
 
-      // 11. Composite WebGL scene onto 2D Studio Canvas
+      // 12. Composite WebGL scene onto 2D Studio Canvas
       ctx.save()
       ctx.drawImage(this.webglCanvas, 0, 0, width, height)
 
-      // 12. Optional Cinematic Vignette Overlay
+      // 13. Optional Cinematic Vignette Overlay
       if (config.visualDetails.vignetteEnabled) {
         const strength = (config.visualDetails.vignetteStrength || 40) / 100
         const radius = Math.max(width, height) * 0.72
@@ -628,6 +672,7 @@ export class PhotoUniverseEngine {
     }
 
     universeBackgroundRenderer.dispose()
+    universeLightTrailsRenderer.dispose()
 
     this.renderer?.dispose()
     this.renderer = null

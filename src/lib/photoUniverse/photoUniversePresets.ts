@@ -248,5 +248,9 @@ export function applyUniversePreset(
       ...current.bassShake,
       ...(found.config.bassShake || {}),
     },
+    lightTrails: {
+      ...current.lightTrails,
+      ...(found.config.lightTrails || {}),
+    },
   }
 }

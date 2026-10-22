@@ -3,6 +3,7 @@ import assert from 'node:assert'
 import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_BACKGROUND,
+  DEFAULT_UNIVERSE_LIGHT_TRAILS,
   PhotoUniverseStudioConfig,
   UniversePhoto,
 } from '../src/lib/photoUniverse/photoUniverseTypes.ts'
@@ -26,6 +27,7 @@ import { universeAudioAnalyzer } from '../src/lib/photoUniverse/universeAudioAna
 import { universeCameraScoreGenerator } from '../src/lib/photoUniverse/universeCameraScore.ts'
 import { universeBackgroundRenderer } from '../src/lib/photoUniverse/universeBackground.ts'
 import { universeEngine } from '../src/lib/photoUniverse/universeEngine.ts'
+import { universeLightTrailsRenderer } from '../src/lib/photoUniverse/universeLightTrails.ts'
 import {
   DEFAULT_STUDIO_COMPOSITION,
   NormalizedAudioBands,
@@ -524,6 +526,93 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       assert.ok(score)
       assert.ok(score.segments.length > 0)
       assert.strictEqual(universeEngine.getCurrentScore(), score)
+    })
+  })
+
+  describe('11. Audio-Reactive Cosmic Light Trails Suite', () => {
+    it('verifies default light trails config values and structure', () => {
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.enabled, true)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.trailLength, 28)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.glowIntensity, 65)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.trebleSensitivity, 60)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.fadeDuration, 1.4)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.trailWidth, 14)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.colorPalette, 'cosmic-blue')
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.particleAccents, true)
+      assert.strictEqual(DEFAULT_UNIVERSE_LIGHT_TRAILS.musicReactivity, 'balanced')
+    })
+
+    it('resolves distinct 3-tier colors for all signature palettes', () => {
+      const cosmic = universeLightTrailsRenderer.resolvePalette('cosmic-blue')
+      assert.ok(cosmic.head)
+      assert.ok(cosmic.body)
+      assert.ok(cosmic.tail)
+      assert.strictEqual(cosmic.body.getHexString(), '00f0ff') // Electric Cyan
+
+      const violet = universeLightTrailsRenderer.resolvePalette('aurora-violet')
+      assert.strictEqual(violet.body.getHexString(), 'c084fc') // Luminous Violet
+
+      const sunset = universeLightTrailsRenderer.resolvePalette('sunset-nebula')
+      assert.strictEqual(sunset.body.getHexString(), 'f59e0b') // Amber Solar Gold
+
+      const ice = universeLightTrailsRenderer.resolvePalette('ice-white')
+      assert.strictEqual(ice.body.getHexString(), 'e0f2fe') // Glacial White
+
+      const custom = universeLightTrailsRenderer.resolvePalette('custom', '#10b981')
+      assert.strictEqual(custom.body.getHexString(), '10b981')
+    })
+
+    it('smooths raw treble audio with profile-aware attack and release dynamics', () => {
+      universeLightTrailsRenderer.resetTrails()
+
+      // High treble transient
+      const trebleSpike: NormalizedAudioBands = {
+        bass: 0.2,
+        lowMid: 0.3,
+        mid: 0.4,
+        highMid: 0.5,
+        treble: 0.9,
+      }
+
+      const smoothed1 = universeLightTrailsRenderer.updateTrebleFilter(trebleSpike, 'melody-ambient')
+      assert.ok(smoothed1 > 0 && smoothed1 < 0.9, 'Treble should rise smoothly without instant discontinuous jump')
+
+      const smoothed2 = universeLightTrailsRenderer.updateTrebleFilter(trebleSpike, 'melody-ambient')
+      assert.ok(smoothed2 > smoothed1, 'Consecutive high treble inputs should ramp up smoothed output')
+
+      // Treble drops to zero (release phase)
+      const zeroTreble: NormalizedAudioBands = {
+        bass: 0,
+        lowMid: 0,
+        mid: 0,
+        highMid: 0,
+        treble: 0,
+      }
+      const decaying = universeLightTrailsRenderer.updateTrebleFilter(zeroTreble, 'melody-ambient')
+      assert.ok(decaying < smoothed2 && decaying > 0, 'Treble decay should be gradual, not instantly 0')
+    })
+
+    it('preserves light trails settings across curated universe presets', () => {
+      const customConfig: PhotoUniverseStudioConfig = {
+        ...DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        lightTrails: {
+          ...DEFAULT_UNIVERSE_LIGHT_TRAILS,
+          trailLength: 42,
+          colorPalette: 'aurora-violet',
+          musicReactivity: 'strong',
+        },
+      }
+
+      const presetApplied = applyUniversePreset(customConfig, 'cosmic-gallery')
+      assert.strictEqual(presetApplied.lightTrails.trailLength, 42)
+      assert.strictEqual(presetApplied.lightTrails.colorPalette, 'aurora-violet')
+      assert.strictEqual(presetApplied.lightTrails.musicReactivity, 'strong')
+    })
+
+    it('clears trail history and resets particles on resetTrails() without errors', () => {
+      assert.doesNotThrow(() => {
+        universeLightTrailsRenderer.resetTrails()
+      })
     })
   })
 })

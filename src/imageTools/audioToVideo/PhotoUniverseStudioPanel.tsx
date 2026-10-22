@@ -51,6 +51,9 @@ import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_BASS_SHAKE,
+  DEFAULT_UNIVERSE_LIGHT_TRAILS,
+  TrailColorPalette,
+  TrailReactivityLevel,
 } from '../../lib/photoUniverse/photoUniverseTypes.ts'
 import {
   UNIVERSE_PRESETS,
@@ -80,7 +83,7 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const bgFileInputRef = useRef<HTMLInputElement | null>(null)
   const [activeSection, setActiveSection] = useState<
-    'all' | 'analysis' | 'motion' | 'photos' | 'background' | 'camera' | 'dof' | 'shake'
+    'all' | 'analysis' | 'motion' | 'photos' | 'background' | 'camera' | 'dof' | 'shake' | 'trails'
   >('all')
 
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
@@ -658,6 +661,16 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
           }`}
         >
           Bass Shake
+        </button>
+        <button
+          onClick={() => setActiveSection('trails')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            activeSection === 'trails'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Light Trails
         </button>
       </div>
 
@@ -1402,7 +1415,315 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
         </div>
       )}
 
-      {/* 11. Footer Actions: Re-plan Route & Reset Defaults */}
+      {/* 11. Audio-Reactive Cosmic Light Trails */}
+      {(activeSection === 'all' || activeSection === 'trails') && (
+        <div className="p-4 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <div>
+                <h4 className="text-sm font-bold text-white">Audio-Reactive Cosmic Light Trails</h4>
+                <p className="text-[10px] text-gray-400">
+                  Comet-like 3D ribbons following moving photos — reacting dynamically to musical treble, hi-hats & melody
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() =>
+                updateConfig((prev) => ({
+                  ...prev,
+                  lightTrails: {
+                    ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                    enabled: !(prev.lightTrails?.enabled ?? true),
+                  },
+                }))
+              }
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                (config.lightTrails?.enabled ?? true)
+                  ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
+                  : 'bg-gray-800 text-gray-400 hover:text-white'
+              }`}
+            >
+              {(config.lightTrails?.enabled ?? true) ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              <span>{(config.lightTrails?.enabled ?? true) ? 'TRAILS ACTIVE' : 'ENABLE TRAILS'}</span>
+            </button>
+          </div>
+
+          {(config.lightTrails?.enabled ?? true) && (
+            <div className="space-y-4 pt-1">
+              {/* Color Palette Selector */}
+              <div>
+                <label className="text-xs font-semibold text-gray-300 block mb-2">
+                  Trail Color Palette
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {[
+                    { id: 'cosmic-blue', label: 'Cosmic Blue', bg: 'from-cyan-400 to-blue-600' },
+                    { id: 'aurora-violet', label: 'Aurora Violet', bg: 'from-purple-400 to-indigo-600' },
+                    { id: 'sunset-nebula', label: 'Sunset Nebula', bg: 'from-amber-400 to-rose-600' },
+                    { id: 'ice-white', label: 'Ice White', bg: 'from-white to-slate-400' },
+                    { id: 'custom', label: 'Custom Hex', bg: 'from-emerald-400 to-teal-600' },
+                  ].map((p) => {
+                    const isSelected = (config.lightTrails?.colorPalette || 'cosmic-blue') === p.id
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() =>
+                          updateConfig((prev) => ({
+                            ...prev,
+                            lightTrails: {
+                              ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                              colorPalette: p.id as TrailColorPalette,
+                            },
+                          }))
+                        }
+                        className={`p-2.5 rounded-xl border text-center transition-all ${
+                          isSelected
+                            ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-sm'
+                            : 'bg-gray-950/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                        }`}
+                      >
+                        <div className={`h-1.5 w-full rounded-full bg-gradient-to-r ${p.bg} mb-1.5`} />
+                        <span className="text-xs font-medium">{p.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {config.lightTrails?.colorPalette === 'custom' && (
+                  <div className="mt-2.5 flex items-center space-x-3 bg-gray-950 p-2.5 rounded-xl border border-gray-800">
+                    <input
+                      type="color"
+                      value={config.lightTrails.customColor || '#00F0FF'}
+                      onChange={(e) =>
+                        updateConfig((prev) => ({
+                          ...prev,
+                          lightTrails: {
+                            ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                            customColor: e.target.value,
+                          },
+                        }))
+                      }
+                      className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0"
+                    />
+                    <span className="text-xs text-gray-400">Custom Trail Glow Color:</span>
+                    <span className="font-mono text-xs text-cyan-300">
+                      {config.lightTrails.customColor || '#00F0FF'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Music Reactivity Mode */}
+              <div>
+                <label className="text-xs font-semibold text-gray-300 block mb-2">
+                  Music Reactivity (Treble / Cymbal Dynamics)
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'off', label: 'Off', desc: 'Constant glow' },
+                    { id: 'subtle', label: 'Subtle', desc: 'Gentle shimmer' },
+                    { id: 'balanced', label: 'Balanced', desc: 'Rhythmic flow' },
+                    { id: 'strong', label: 'Strong', desc: 'Vibrant bursts' },
+                  ].map((mode) => {
+                    const isSelected = (config.lightTrails?.musicReactivity || 'balanced') === mode.id
+                    return (
+                      <button
+                        key={mode.id}
+                        onClick={() =>
+                          updateConfig((prev) => ({
+                            ...prev,
+                            lightTrails: {
+                              ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                              musicReactivity: mode.id as TrailReactivityLevel,
+                            },
+                          }))
+                        }
+                        className={`p-2 rounded-xl border text-center transition-all ${
+                          isSelected
+                            ? 'bg-cyan-500/20 border-cyan-400 text-white'
+                            : 'bg-gray-950/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                        }`}
+                      >
+                        <div className="text-xs font-bold">{mode.label}</div>
+                        <div className="text-[10px] text-gray-500">{mode.desc}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Sliders Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
+                {/* Trail Length */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Trail Length</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.lightTrails?.trailLength ?? 28} points
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="8"
+                    max="48"
+                    step="2"
+                    value={config.lightTrails?.trailLength ?? 28}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        lightTrails: {
+                          ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                          trailLength: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Glow Intensity */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Glow Intensity</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.lightTrails?.glowIntensity ?? 65}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="20"
+                    max="100"
+                    value={config.lightTrails?.glowIntensity ?? 65}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        lightTrails: {
+                          ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                          glowIntensity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Treble Sensitivity */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Treble Sensitivity</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.lightTrails?.trebleSensitivity ?? 60}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.lightTrails?.trebleSensitivity ?? 60}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        lightTrails: {
+                          ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                          trebleSensitivity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Fade Duration */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Fade Duration</span>
+                    <span className="font-mono text-cyan-300">
+                      {(config.lightTrails?.fadeDuration ?? 1.4).toFixed(1)}s
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="3.0"
+                    step="0.1"
+                    value={config.lightTrails?.fadeDuration ?? 1.4}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        lightTrails: {
+                          ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                          fadeDuration: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Trail Width */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Ribbon Width</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.lightTrails?.trailWidth ?? 14}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4"
+                    max="32"
+                    step="1"
+                    value={config.lightTrails?.trailWidth ?? 14}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        lightTrails: {
+                          ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                          trailWidth: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Sparkle Particle Accents */}
+                <div className="flex flex-col justify-center">
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-950 border border-gray-800">
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-200">Treble Sparks</div>
+                      <div className="text-[10px] text-gray-500">Break-off sparkle particles</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateConfig((prev) => ({
+                          ...prev,
+                          lightTrails: {
+                            ...(prev.lightTrails || DEFAULT_UNIVERSE_LIGHT_TRAILS),
+                            particleAccents: !(prev.lightTrails?.particleAccents ?? true),
+                          },
+                        }))
+                      }
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                        (config.lightTrails?.particleAccents ?? true)
+                          ? 'bg-cyan-500 text-black'
+                          : 'bg-gray-800 text-gray-400'
+                      }`}
+                    >
+                      {(config.lightTrails?.particleAccents ?? true) ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 12. Footer Actions: Re-plan Route & Reset Defaults */}
       <div className="flex items-center justify-between pt-2">
         <button
           onClick={() => {
