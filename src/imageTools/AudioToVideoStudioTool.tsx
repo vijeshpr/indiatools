@@ -103,6 +103,8 @@ import { sonicCamEngine } from '../lib/sonicCam/sonicCamEngine'
 import { SonicCamStudioPanel } from './audioToVideo/SonicCamStudioPanel'
 import { MemoryBurstStudioPanel } from './audioToVideo/MemoryBurstStudioPanel'
 import { DEFAULT_MEMORY_BURST_CONFIG } from '../lib/memoryBurst/memoryBurstTypes'
+import { PhotoUniverseStudioPanel } from './audioToVideo/PhotoUniverseStudioPanel'
+import { DEFAULT_PHOTO_UNIVERSE_CONFIG } from '../lib/photoUniverse/photoUniverseTypes'
 import { BACKGROUND_PRESETS } from '../lib/audioToVideo/backgroundPresets'
 import { AudioToVideoAudioEngine } from '../lib/audioToVideo/audioToVideoAudioEngine'
 import { AudioToVideoRenderEngine } from '../lib/audioToVideo/audioToVideoRenderEngine'
@@ -112,6 +114,7 @@ import {
 } from '../lib/audioToVideo/audioToVideoExportEngine'
 
 type StudioTab =
+  | 'photouniverse'
   | 'memoryburst'
   | 'soniccam'
   | 'portal'
@@ -133,11 +136,11 @@ export const AudioToVideoStudioTool: React.FC = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const tabParam = params.get('tab') as StudioTab
-      if (tabParam && ['memoryburst', 'soniccam', 'portal', 'photomotion', 'garden', 'background', 'visualizer', 'cinematic', 'typography', 'audio'].includes(tabParam)) {
+      if (tabParam && ['photouniverse', 'memoryburst', 'soniccam', 'portal', 'photomotion', 'garden', 'background', 'visualizer', 'cinematic', 'typography', 'audio'].includes(tabParam)) {
         return tabParam
       }
     }
-    return 'soniccam'
+    return 'photouniverse'
   })
 
   // Portal VFX Studio State
@@ -1287,6 +1290,29 @@ export const AudioToVideoStudioTool: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
+                {/* 1-Click 3D Photo Universe Mode Switch */}
+                <button
+                  onClick={() => {
+                    setActiveTab('photouniverse')
+                    setComposition((prev) => ({
+                      ...prev,
+                      photoUniverse: {
+                        ...(prev.photoUniverse || DEFAULT_PHOTO_UNIVERSE_CONFIG),
+                        enabled: true,
+                      },
+                    }))
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    activeTab === 'photouniverse'
+                      ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-cyan-500/30 border border-cyan-400'
+                      : 'bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-cyan-900/60'
+                  }`}
+                  title="Switch directly to 3D Floating Photo Universe"
+                >
+                  <Compass className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                  <span>🌌 Photo Universe</span>
+                </button>
+
                 {/* 1-Click Memory Burst Studio Mode Switch */}
                 <button
                   onClick={() => {
@@ -1534,8 +1560,9 @@ export const AudioToVideoStudioTool: React.FC = () => {
           {/* RIGHT 5/12: MODULAR EDITING SUITE & STUDIO DOCK */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Dock Navigation Tabs */}
-            <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-5 sm:grid-cols-11 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
               {[
+                { id: 'photouniverse', label: 'Universe', icon: Compass },
                 { id: 'memoryburst', label: 'Burst', icon: Zap },
                 { id: 'soniccam', label: 'SonicCam', icon: Camera },
                 { id: 'portal', label: 'Portal VFX', icon: Orbit },
@@ -1555,13 +1582,17 @@ export const AudioToVideoStudioTool: React.FC = () => {
                     onClick={() => setActiveTab(tab.id as StudioTab)}
                     className={`flex flex-col items-center justify-center py-2 rounded-xl text-[11px] font-bold transition-all relative ${
                       isActive
-                        ? tab.id === 'memoryburst'
+                        ? tab.id === 'photouniverse'
+                          ? 'bg-gradient-to-tr from-cyan-600/30 via-blue-600/30 to-indigo-500/20 text-cyan-300 border border-cyan-400 shadow-md'
+                          : tab.id === 'memoryburst'
                           ? 'bg-gradient-to-tr from-amber-600/30 via-rose-600/30 to-pink-500/20 text-rose-300 border border-rose-400 shadow-md'
                           : tab.id === 'soniccam'
                           ? 'bg-gradient-to-tr from-sky-600/30 via-cyan-600/30 to-blue-500/20 text-sky-300 border border-sky-400 shadow-md'
                           : tab.id === 'garden'
                           ? 'bg-gradient-to-tr from-emerald-600/30 via-teal-600/30 to-cyan-500/20 text-emerald-300 border border-emerald-400 shadow-md'
                           : 'bg-gradient-to-tr from-violet-600/30 via-purple-600/30 to-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-md'
+                        : tab.id === 'photouniverse'
+                        ? 'text-cyan-300 bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/50 hover:text-white'
                         : tab.id === 'memoryburst'
                         ? 'text-rose-300 bg-rose-950/40 border border-rose-500/40 hover:bg-rose-900/50 hover:text-white'
                         : tab.id === 'soniccam'
@@ -1571,9 +1602,12 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 mb-1 ${tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
+                    <Icon className={`w-3.5 h-3.5 mb-1 ${tab.id === 'photouniverse' && !isActive ? 'text-cyan-400' : tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
                     <div className="flex items-center gap-1">
                       <span>{tab.label}</span>
+                      {tab.id === 'photouniverse' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                      )}
                       {tab.id === 'memoryburst' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse shrink-0" />
                       )}
@@ -1591,6 +1625,19 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
             {/* TAB CONTENT PANELS */}
             <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-5 shadow-2xl max-h-[580px] overflow-y-auto space-y-5">
+              {/* TAB: 3D FLOATING PHOTO UNIVERSE STUDIO */}
+              {activeTab === 'photouniverse' && (
+                <PhotoUniverseStudioPanel
+                  composition={composition}
+                  setComposition={setComposition}
+                  liveBands={liveBands}
+                  currentTime={currentTime}
+                  duration={audioTrack.duration || 30}
+                  audioUrl={audioTrack.url}
+                  showToast={showToast}
+                />
+              )}
+
               {/* TAB: MEMORY BURST BEAT-SYNCED MULTI-PHOTO STUDIO */}
               {activeTab === 'memoryburst' && (
                 <MemoryBurstStudioPanel

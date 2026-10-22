@@ -30,6 +30,13 @@ import {
 export * from '../memoryBurst/memoryBurstTypes.ts'
 export * from '../memoryBurst/memoryBurstPresets.ts'
 
+import {
+  PhotoUniverseStudioConfig,
+  DEFAULT_PHOTO_UNIVERSE_CONFIG,
+} from '../photoUniverse/photoUniverseTypes.ts'
+export * from '../photoUniverse/photoUniverseTypes.ts'
+export * from '../photoUniverse/photoUniversePresets.ts'
+
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
 
@@ -197,6 +204,7 @@ export interface StudioCompositionConfig {
   gardenStudio?: MusicGrownGardenConfig
   sonicCam3d?: SonicCamStudioConfig
   memoryBurst?: MemoryBurstStudioConfig
+  photoUniverse?: PhotoUniverseStudioConfig
   performanceMode: boolean
 }
 
@@ -275,5 +283,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
   gardenStudio: DEFAULT_GARDEN_CONFIG,
   sonicCam3d: DEFAULT_SONIC_CAM_CONFIG,
   memoryBurst: DEFAULT_MEMORY_BURST_CONFIG,
+  photoUniverse: DEFAULT_PHOTO_UNIVERSE_CONFIG,
   performanceMode: false,
 }

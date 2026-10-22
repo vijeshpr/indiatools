@@ -14,6 +14,7 @@ import { portalVfxEngine } from '../portalVfx/portalVfxEngine.ts'
 import { musicGrownGardenEngine } from '../garden/gardenEngine.ts'
 import { sonicCamEngine } from '../sonicCam/sonicCamEngine.ts'
 import { memoryBurstEngine } from '../memoryBurst/memoryBurstEngine.ts'
+import { photoUniverseEngine } from '../photoUniverse/universeEngine.ts'
 
 interface Particle {
   x: number
@@ -133,13 +134,15 @@ export class AudioToVideoRenderEngine {
         config.portalVfx.exitTransition.enabled ||
         config.portalVfx.isBeforePreviewActive)
 
-    // 2. Scene Layer: Memory Burst Studio OR SonicCam 3D OR Garden Studio OR Portal VFX OR 2.5D Photo Motion Studio OR Standard Background + Cinematic FX
+    // 2. Scene Layer: Photo Universe 3D OR Memory Burst Studio OR SonicCam 3D OR Garden Studio OR Portal VFX OR 2.5D Photo Motion Studio OR Standard Background + Cinematic FX
     const sonicCamPhotoUrl =
       config.sonicCam3d?.sourceImageUrl ||
       config.portalVfx?.sourceImageUrl ||
       config.background.singleImageUrl
 
-    if (config.memoryBurst?.enabled) {
+    if (config.photoUniverse?.enabled) {
+      photoUniverseEngine.render(ctx, width, height, config.photoUniverse, bands, currentTime, duration)
+    } else if (config.memoryBurst?.enabled) {
       memoryBurstEngine.render(ctx, width, height, config.memoryBurst, bands, currentTime, duration)
     } else if (config.sonicCam3d?.enabled) {
       const activeSonicCamConfig = {
