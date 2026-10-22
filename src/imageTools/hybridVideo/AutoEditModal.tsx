@@ -111,6 +111,9 @@ export const AutoEditModal: React.FC<AutoEditModalProps> = ({
         bpmConfidence: 0.5,
         beats: [],
         onsets: [],
+        downbeats: [],
+        phraseBoundaries: [],
+        events: [],
         energyEnvelope: [],
         sections: [
           {
@@ -146,6 +149,7 @@ export const AutoEditModal: React.FC<AutoEditModalProps> = ({
         ],
         dominantMood: 'energetic',
         overallMelodyScore: 0.5,
+        vocalActivityConfidence: 0.5,
         climaxStartSec: musicAsset.durationSec * 0.8,
         climaxEndSec: musicAsset.durationSec,
         suggestedCutPoints: [],

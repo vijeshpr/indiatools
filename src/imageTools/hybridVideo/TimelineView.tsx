@@ -31,6 +31,10 @@ interface TimelineViewProps {
   onDeleteClip: (clipId: string) => void
   onSplitClip: (clipId: string, splitTimeSec: number) => void
   onUpdateTrack: (trackId: string, updates: Partial<Track>) => void
+  musicBeats?: number[]
+  musicPhrases?: number[]
+  showMusicMarkers?: boolean
+  onToggleMusicMarkers?: () => void
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
@@ -45,6 +49,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onDeleteClip,
   onSplitClip,
   onUpdateTrack,
+  musicBeats = [],
+  musicPhrases = [],
+  showMusicMarkers = true,
+  onToggleMusicMarkers,
 }) => {
   const [pxPerSec, setPxPerSec] = useState(60) // timeline zoom level
   const [snapEnabled, setSnapEnabled] = useState(true)
@@ -164,6 +172,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             <Magnet className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Snap</span>
           </button>
+
+          {/* Music Markers toggle */}
+          {onToggleMusicMarkers && (
+            <button
+              type="button"
+              title={showMusicMarkers ? 'Music Beat & Phrase Markers (Visible)' : 'Music Beat & Phrase Markers (Hidden)'}
+              onClick={onToggleMusicMarkers}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors ${
+                showMusicMarkers ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              <Music className="w-3.5 h-3.5 text-yellow-400" />
+              <span className="hidden md:inline">Beat Markers</span>
+            </button>
+          )}
         </div>
 
         {/* Zoom controls */}
@@ -273,6 +296,30 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   {sec}s
                 </div>
               ))}
+
+              {/* Music Beat & Phrase Markers overlay */}
+              {showMusicMarkers && (
+                <>
+                  {musicPhrases.map((phraseSec, idx) => (
+                    <div
+                      key={`phrase-${idx}`}
+                      style={{ left: `${phraseSec * pxPerSec}px` }}
+                      title={`Phrase Boundary: ${phraseSec.toFixed(2)}s`}
+                      className="absolute top-0 bottom-0 w-0.5 bg-purple-400 z-10 pointer-events-none"
+                    >
+                      <span className="absolute top-0 -left-1 w-2 h-2 rounded-full bg-purple-400 shadow-sm shadow-purple-500/80" />
+                    </div>
+                  ))}
+                  {musicBeats.map((beatSec, idx) => (
+                    <div
+                      key={`beat-${idx}`}
+                      style={{ left: `${beatSec * pxPerSec}px` }}
+                      title={`Beat: ${beatSec.toFixed(2)}s`}
+                      className="absolute top-0 h-2.5 w-0.5 bg-yellow-400/70 z-10 pointer-events-none"
+                    />
+                  ))}
+                </>
+              )}
             </div>
 
             {/* Red Vertical Playhead Needle */}

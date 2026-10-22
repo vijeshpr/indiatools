@@ -1,7 +1,12 @@
 /**
  * IndiaTools — Hybrid Video Studio Auto-Edit Generator
- * Constructs a fully editable, music-synchronized multi-track timeline
- * based on signal analysis, melody dominance, and curated editing styles.
+ * Event-Driven Music Synchronization & Timeline Automation Engine
+ *
+ * Anchors visual cuts strictly to analyzed audio events:
+ * - Downbeats & Rhythmic Beats
+ * - Musical Phrase Boundaries & Vocal Envelopes
+ * - Structural Sections (Intro, Melody, Buildup, Climax, Outro)
+ * - Produces human-readable diagnostic explanations for every cut
  */
 
 import type {
@@ -9,15 +14,21 @@ import type {
   MediaAsset,
   TimelineClip,
   ClipTransition,
-  ClipTransform,
 } from './types.ts'
 import {
   DEFAULT_TRANSFORM,
   DEFAULT_EFFECTS,
   DEFAULT_AUDIO_PROPS,
 } from './types.ts'
-import type { MusicAnalysisResult, MusicSection } from './musicIntelligence.ts'
+import type { MusicAnalysisResult, MusicSection, MusicEvent } from './musicIntelligence.ts'
 import { calculateTotalProjectDuration } from './timelineEngine.ts'
+
+export type SyncMode = 'beat-sync' | 'melody-vocal' | 'balanced'
+export type CutIntensity = 'slow' | 'balanced' | 'fast'
+export type BeatSensitivity = 'low' | 'medium' | 'high'
+export type TransitionAmount = 'minimal' | 'balanced' | 'cinematic'
+export type VisualMotion = 'off' | 'subtle' | 'dynamic'
+export type SyncStrength = 'gentle' | 'strong'
 
 export type AutoEditStyle =
   | 'melody-emotion'
@@ -34,9 +45,14 @@ export interface AutoEditStyleDef {
   name: string
   description: string
   iconName: string
+  syncMode: SyncMode
+  cutIntensity: CutIntensity
+  transitionAmount: TransitionAmount
+  visualMotion: VisualMotion
+  syncStrength: SyncStrength
   baseShotDurationSec: number
-  melodyMultiplier: number // multiplier for melody passages (e.g. 1.5x longer)
-  climaxMultiplier: number // multiplier for climax passages (e.g. 0.3x shorter)
+  melodyMultiplier: number
+  climaxMultiplier: number
   defaultTransition: ClipTransition['type']
   transitionDurationSec: number
   enableSlowZoomDrift: boolean
@@ -50,7 +66,12 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Melody & Emotion',
     description: 'Longer holds, gentle crossfades, slow zoom drift, and breathing room for soulful tracks.',
     iconName: 'Heart',
-    baseShotDurationSec: 4.2,
+    syncMode: 'melody-vocal',
+    cutIntensity: 'slow',
+    transitionAmount: 'cinematic',
+    visualMotion: 'subtle',
+    syncStrength: 'gentle',
+    baseShotDurationSec: 4.5,
     melodyMultiplier: 1.6,
     climaxMultiplier: 0.5,
     defaultTransition: 'crossfade',
@@ -64,6 +85,11 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Cinematic Story',
     description: 'Balanced pacing, deliberate transitions, narrative build-up, and an emotional climax.',
     iconName: 'Film',
+    syncMode: 'balanced',
+    cutIntensity: 'balanced',
+    transitionAmount: 'balanced',
+    visualMotion: 'subtle',
+    syncStrength: 'gentle',
     baseShotDurationSec: 3.0,
     melodyMultiplier: 1.3,
     climaxMultiplier: 0.4,
@@ -78,6 +104,11 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Beat Sync',
     description: 'Rhythmic cuts aligned to musical beats, transient accents, and kick pulses.',
     iconName: 'Zap',
+    syncMode: 'beat-sync',
+    cutIntensity: 'fast',
+    transitionAmount: 'minimal',
+    visualMotion: 'dynamic',
+    syncStrength: 'strong',
     baseShotDurationSec: 1.4,
     melodyMultiplier: 1.1,
     climaxMultiplier: 0.35,
@@ -92,9 +123,14 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Climax Memory Rewind',
     description: 'Viral Indian cinema memory flashback with rapid cuts accelerating during peak climax.',
     iconName: 'Rewind',
+    syncMode: 'balanced',
+    cutIntensity: 'fast',
+    transitionAmount: 'balanced',
+    visualMotion: 'dynamic',
+    syncStrength: 'strong',
     baseShotDurationSec: 2.8,
     melodyMultiplier: 1.4,
-    climaxMultiplier: 0.18, // rapid cuts down to ~0.25s during climax
+    climaxMultiplier: 0.18,
     defaultTransition: 'crossfade',
     transitionDurationSec: 0.4,
     enableSlowZoomDrift: true,
@@ -106,6 +142,11 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Fast & Energetic',
     description: 'High-tempo cuts, dynamic whip pans, and vigorous momentum for reels and gym edits.',
     iconName: 'Flame',
+    syncMode: 'beat-sync',
+    cutIntensity: 'fast',
+    transitionAmount: 'minimal',
+    visualMotion: 'dynamic',
+    syncStrength: 'strong',
     baseShotDurationSec: 1.2,
     melodyMultiplier: 1.1,
     climaxMultiplier: 0.25,
@@ -120,7 +161,12 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Travel Film',
     description: 'Scenic holds for landscapes, gradual directional wipes, and ambient pacing.',
     iconName: 'Compass',
-    baseShotDurationSec: 3.6,
+    syncMode: 'melody-vocal',
+    cutIntensity: 'slow',
+    transitionAmount: 'cinematic',
+    visualMotion: 'subtle',
+    syncStrength: 'gentle',
+    baseShotDurationSec: 3.8,
     melodyMultiplier: 1.35,
     climaxMultiplier: 0.5,
     defaultTransition: 'fade-wipe-left',
@@ -134,6 +180,11 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Minimal Clean',
     description: 'Pure cuts with zero decorative filters or distractions, letting photos speak for themselves.',
     iconName: 'Square',
+    syncMode: 'balanced',
+    cutIntensity: 'balanced',
+    transitionAmount: 'minimal',
+    visualMotion: 'off',
+    syncStrength: 'strong',
     baseShotDurationSec: 2.5,
     melodyMultiplier: 1.2,
     climaxMultiplier: 0.6,
@@ -148,6 +199,11 @@ export const AUTO_EDIT_STYLES: Record<AutoEditStyle, AutoEditStyleDef> = {
     name: 'Custom Studio Style',
     description: 'Fully customized shot durations, transition choices, and acceleration curves.',
     iconName: 'Sliders',
+    syncMode: 'balanced',
+    cutIntensity: 'balanced',
+    transitionAmount: 'balanced',
+    visualMotion: 'subtle',
+    syncStrength: 'gentle',
     baseShotDurationSec: 2.5,
     melodyMultiplier: 1.3,
     climaxMultiplier: 0.35,
@@ -163,10 +219,16 @@ export function recommendStyleForMusic(analysis: MusicAnalysisResult): {
   recommendedStyle: AutoEditStyle
   reason: string
 } {
-  if (analysis.overallMelodyScore > 0.65 || analysis.dominantMood === 'romantic' || analysis.dominantMood === 'calm') {
+  if (
+    analysis.overallMelodyScore > 0.65 ||
+    analysis.dominantMood === 'romantic' ||
+    analysis.dominantMood === 'calm'
+  ) {
     return {
       recommendedStyle: 'melody-emotion',
-      reason: `Estimated as high-melody (${Math.round(analysis.overallMelodyScore * 100)}%) with a ${analysis.dominantMood} emotional profile. Melody & Emotion will keep shots graceful.`,
+      reason: `Estimated as high-melody (${Math.round(
+        analysis.overallMelodyScore * 100
+      )}%) with a ${analysis.dominantMood} emotional profile. Melody & Emotion will keep shots graceful with phrase holds.`,
     }
   }
 
@@ -180,7 +242,9 @@ export function recommendStyleForMusic(analysis: MusicAnalysisResult): {
   if (analysis.beats.length > 20 && analysis.bpmConfidence > 0.7) {
     return {
       recommendedStyle: 'beat-sync',
-      reason: `Clear rhythm with high beat detection confidence (${Math.round(analysis.bpmConfidence * 100)}%). Beat Sync will align cuts tightly to musical accents.`,
+      reason: `Clear rhythm with high beat detection confidence (${Math.round(
+        analysis.bpmConfidence * 100
+      )}%). Beat Sync will align cuts tightly to musical accents.`,
     }
   }
 
@@ -191,13 +255,28 @@ export function recommendStyleForMusic(analysis: MusicAnalysisResult): {
 }
 
 export interface AutoEditGeneratorOptions {
-  style: AutoEditStyle
-  assetOrder: 'original' | 'shuffle'
-  mediaFilter: 'all' | 'images-only' | 'videos-only'
+  style?: AutoEditStyle
+  syncMode?: SyncMode
+  cutIntensity?: CutIntensity
+  transitionAmount?: TransitionAmount
+  visualMotion?: VisualMotion
+  syncStrength?: SyncStrength
+  usePhraseBoundaries?: boolean
+  assetOrder?: 'original' | 'shuffle'
+  mediaFilter?: 'all' | 'images-only' | 'videos-only'
   customBaseDurationSec?: number
-  pacingOffsetMultiplier?: number // 0.8 for faster, 1.25 for slower
+  pacingOffsetMultiplier?: number
   keepMelodyCalm?: boolean
   endingHoldFrame?: boolean
+}
+
+interface PlannedCutPoint {
+  timeSec: number
+  reason: string
+  isDownbeat: boolean
+  isPhraseBoundary: boolean
+  isClimax: boolean
+  isMelodyHold: boolean
 }
 
 export function generateAutoEditTimeline(
@@ -207,11 +286,25 @@ export function generateAutoEditTimeline(
   availableMedia: MediaAsset[],
   options: AutoEditGeneratorOptions
 ): { updatedProject: HybridVideoProject; clipCount: number; summary: string } {
-  // 1. Filter and order visual media
+  // 1. Resolve style and effective options
+  const styleKey: AutoEditStyle = options.style || 'cinematic-story'
+  const styleDef = AUTO_EDIT_STYLES[styleKey] || AUTO_EDIT_STYLES['cinematic-story']
+
+  const syncMode: SyncMode = options.syncMode || styleDef.syncMode
+  const cutIntensity: CutIntensity = options.cutIntensity || styleDef.cutIntensity
+  const transitionAmount: TransitionAmount = options.transitionAmount || styleDef.transitionAmount
+  const visualMotion: VisualMotion = options.visualMotion || styleDef.visualMotion
+  const syncStrength: SyncStrength = options.syncStrength || styleDef.syncStrength
+  const usePhraseBoundaries = options.usePhraseBoundaries ?? true
+  const endingHold = options.endingHoldFrame ?? true
+  const pacingMultiplier = options.pacingOffsetMultiplier || 1.0
+
+  // 2. Filter and order visual media pool
+  const filterType = options.mediaFilter || 'all'
   let pool = availableMedia.filter((a) => {
-    if (a.id === musicAsset.id) return false // don't add music asset as visual clip
-    if (options.mediaFilter === 'images-only') return a.type === 'image'
-    if (options.mediaFilter === 'videos-only') return a.type === 'video'
+    if (a.id === musicAsset.id) return false // omit audio track from visuals
+    if (filterType === 'images-only') return a.type === 'image'
+    if (filterType === 'videos-only') return a.type === 'video'
     return a.type === 'image' || a.type === 'video'
   })
 
@@ -220,83 +313,221 @@ export function generateAutoEditTimeline(
   }
 
   if (options.assetOrder === 'shuffle') {
-    const shuffled = [...pool]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-    pool = shuffled
+    pool = [...pool].sort(() => Math.random() - 0.5)
   }
 
-  const styleDef = AUTO_EDIT_STYLES[options.style] || AUTO_EDIT_STYLES['cinematic-story']
-  const pacingMultiplier = options.pacingOffsetMultiplier || 1.0
-  const baseShotSec = (options.customBaseDurationSec || styleDef.baseShotDurationSec) * pacingMultiplier
+  // 3. Target track identification
+  const videoTrack =
+    project.tracks.find((t) => t.type === 'video') ||
+    project.tracks.find((t) => t.type === 'image') ||
+    project.tracks[0]
 
-  const totalDuration = musicAsset.durationSec || musicAnalysis.durationSec || 30.0
+  const audioTrack =
+    project.tracks.find((t) => t.type === 'audio') ||
+    project.tracks[project.tracks.length - 1]
 
-  // 2. Identify primary tracks (V1 for visual clips, A1 for music)
-  const videoTrack = project.tracks.find((t) => t.type === 'video') || project.tracks[2] || project.tracks[0]
-  const audioTrack = project.tracks.find((t) => t.type === 'audio') || project.tracks[3] || project.tracks[0]
+  if (!videoTrack || !audioTrack) {
+    throw new Error('Missing primary video or audio track on timeline.')
+  }
 
-  // 3. Generate visual shot boundaries based on sections and beats
-  const shotTimestamps: { startSec: number; durationSec: number; section: MusicSection }[] = []
+  const totalDuration = Math.max(3.0, musicAsset.durationSec || 30.0)
+
+  // 4. PLAN REAL CUT POINTS ANCHORED TO ANALYZED MUSIC EVENTS
+  const plannedCuts: PlannedCutPoint[] = []
+
+  // Always start with cut at 0.000s
+  plannedCuts.push({
+    timeSec: 0,
+    reason: `Image begins at 00:00.000 — intro exposition, initial sequence hold`,
+    isDownbeat: false,
+    isPhraseBoundary: true,
+    isClimax: false,
+    isMelodyHold: true,
+  })
+
+  // Determine nominal shot interval parameters based on Cut Intensity
+  let nominalMinSec = 1.6 * pacingMultiplier
+  let nominalTargetSec = 2.8 * pacingMultiplier
+  let nominalMaxSec = 4.8 * pacingMultiplier
+
+  if (cutIntensity === 'slow') {
+    nominalMinSec = 3.2 * pacingMultiplier
+    nominalTargetSec = 4.8 * pacingMultiplier
+    nominalMaxSec = 7.5 * pacingMultiplier
+  } else if (cutIntensity === 'fast') {
+    nominalMinSec = 0.6 * pacingMultiplier
+    nominalTargetSec = 1.3 * pacingMultiplier
+    nominalMaxSec = 2.4 * pacingMultiplier
+  }
+
+  // Active pool of analyzed events
+  const analyzedBeats = musicAnalysis.beats || []
+  const analyzedDownbeats = musicAnalysis.downbeats || []
+  const analyzedPhrases = musicAnalysis.phraseBoundaries || []
+  const climaxStart = musicAnalysis.climaxStartSec || totalDuration * 0.75
+  const climaxEnd = musicAnalysis.climaxEndSec || totalDuration * 0.95
+
   let cursorSec = 0
 
-  for (const section of musicAnalysis.sections) {
-    if (cursorSec >= totalDuration - 0.5) break
-
-    // Calculate section-specific shot duration
-    let sectionShotSec = baseShotSec
-
-    if (section.type === 'climax') {
-      sectionShotSec = Math.max(0.25, baseShotSec * styleDef.climaxMultiplier)
-    } else if (section.type === 'buildup') {
-      sectionShotSec = Math.max(0.6, baseShotSec * 0.65)
-    } else if (section.isMelodyDominant || section.type === 'calm') {
-      const calmBonus = options.keepMelodyCalm ? 1.8 : styleDef.melodyMultiplier
-      sectionShotSec = baseShotSec * calmBonus
-    } else if (section.type === 'intro' || section.type === 'outro') {
-      sectionShotSec = baseShotSec * 1.25
+  while (cursorSec < totalDuration - 0.8) {
+    // Current section lookup
+    const currentSection = musicAnalysis.sections.find(
+      (s) => cursorSec >= s.startSec && cursorSec < s.endSec
+    ) || {
+      id: 'sec-active',
+      name: 'Main Flow',
+      startSec: cursorSec,
+      endSec: totalDuration,
+      type: 'melody' as const,
+      energyLevel: 0.5,
+      isMelodyDominant: true,
+      melodyProfile: 'soft-melody' as const,
     }
 
-    let sectionCursor = Math.max(cursorSec, section.startSec)
-    const sectionEnd = Math.min(totalDuration, section.endSec)
+    const inClimax = cursorSec >= climaxStart - 0.2 && cursorSec <= climaxEnd
+    const inMelody = currentSection.isMelodyDominant || currentSection.type === 'calm'
 
-    while (sectionCursor < sectionEnd - 0.2) {
-      let shotDur = sectionShotSec
+    // Adjust target duration by section and sync mode
+    let targetMin = nominalMinSec
+    let targetNominal = nominalTargetSec
+    let targetMax = nominalMaxSec
 
-      // If in climax memory rewind, progressively accelerate cuts
-      if (options.style === 'climax-rewind' && section.type === 'climax') {
-        const progressInClimax = (sectionCursor - section.startSec) / Math.max(1, section.endSec - section.startSec)
-        shotDur = Math.max(0.18, 0.5 * (1 - progressInClimax * 0.6))
+    if (inClimax) {
+      if (cutIntensity === 'fast' || styleKey === 'climax-rewind') {
+        targetMin = 0.22
+        targetNominal = 0.5
+        targetMax = 1.0
+      } else {
+        targetMin = 0.6
+        targetNominal = 1.2
+        targetMax = 2.0
       }
-
-      const remainingInSec = sectionEnd - sectionCursor
-      if (remainingInSec < shotDur * 1.3) {
-        shotDur = remainingInSec
-      }
-
-      shotTimestamps.push({
-        startSec: Number(sectionCursor.toFixed(3)),
-        durationSec: Number(shotDur.toFixed(3)),
-        section,
-      })
-
-      sectionCursor += shotDur
-      cursorSec = sectionCursor
+    } else if (inMelody && (syncMode === 'melody-vocal' || options.keepMelodyCalm)) {
+      targetMin = Math.max(nominalMinSec, 3.2)
+      targetNominal = Math.max(nominalTargetSec, 5.0)
+      targetMax = Math.max(nominalMaxSec, 8.0)
     }
+
+    const windowStart = cursorSec + targetMin
+    const windowEnd = Math.min(totalDuration - 0.5, cursorSec + targetMax)
+
+    if (windowStart >= totalDuration - 0.5) break
+
+    // Find candidate analyzed events in window [windowStart, windowEnd]
+    let chosenTimeSec: number | null = null
+    let cutReason = ''
+    let isDownbeat = false
+    let isPhraseBoundary = false
+    let isClimaxCut = inClimax
+    let isMelodyHold = inMelody && targetNominal >= 3.5
+
+    if (syncMode === 'beat-sync' || inClimax) {
+      // Prioritize downbeats first, then beats
+      const candDownbeat = analyzedDownbeats.find((db) => db >= windowStart && db <= windowEnd)
+      const candBeat = analyzedBeats.find((b) => b >= windowStart && b <= windowEnd)
+
+      if (candDownbeat) {
+        chosenTimeSec = candDownbeat
+        isDownbeat = true
+        cutReason = `Image begins at ${formatTimecode(candDownbeat)} — strong bar downbeat in ${currentSection.name}`
+      } else if (candBeat) {
+        chosenTimeSec = candBeat
+        cutReason = `Image begins at ${formatTimecode(candBeat)} — rhythmic beat pulse in ${currentSection.name}`
+      }
+    } else if (syncMode === 'melody-vocal' && usePhraseBoundaries) {
+      // Prioritize phrase boundaries & section transitions
+      const candPhrase = analyzedPhrases.find((p) => p >= windowStart && p <= windowEnd)
+      const candSection = musicAnalysis.sections.find(
+        (s) => s.startSec >= windowStart && s.startSec <= windowEnd
+      )
+
+      if (candSection) {
+        chosenTimeSec = candSection.startSec
+        isPhraseBoundary = true
+        cutReason = `Image begins at ${formatTimecode(candSection.startSec)} — transition into ${candSection.name} (${candSection.melodyProfile})`
+      } else if (candPhrase) {
+        chosenTimeSec = candPhrase
+        isPhraseBoundary = true
+        cutReason = `Image begins at ${formatTimecode(candPhrase)} — musical phrase boundary (vocal/melody line)`
+      } else {
+        const candDownbeat = analyzedDownbeats.find((db) => db >= windowStart && db <= windowEnd)
+        if (candDownbeat) {
+          chosenTimeSec = candDownbeat
+          isDownbeat = true
+          cutReason = `Image begins at ${formatTimecode(candDownbeat)} — downbeat accent in melodic passage`
+        }
+      }
+    } else {
+      // Balanced mode: hybrid of phrase boundaries and downbeats
+      const candPhrase = usePhraseBoundaries
+        ? analyzedPhrases.find((p) => p >= windowStart && p <= windowEnd)
+        : null
+      const candDownbeat = analyzedDownbeats.find((db) => db >= windowStart && db <= windowEnd)
+      const candBeat = analyzedBeats.find((b) => b >= windowStart && b <= windowEnd)
+
+      if (candPhrase && inMelody) {
+        chosenTimeSec = candPhrase
+        isPhraseBoundary = true
+        cutReason = `Image begins at ${formatTimecode(candPhrase)} — phrase boundary in ${currentSection.name}`
+      } else if (candDownbeat) {
+        chosenTimeSec = candDownbeat
+        isDownbeat = true
+        cutReason = `Image begins at ${formatTimecode(candDownbeat)} — downbeat in ${currentSection.name}`
+      } else if (candBeat) {
+        chosenTimeSec = candBeat
+        cutReason = `Image begins at ${formatTimecode(candBeat)} — rhythmic beat in ${currentSection.name}`
+      }
+    }
+
+    // Fallback: If no event within window, snap to nominal beat spacing or nominal target
+    if (chosenTimeSec === null) {
+      const beatSec = 60 / Math.max(60, musicAnalysis.bpm || 120)
+      const beatsCount = Math.round(targetNominal / beatSec)
+      chosenTimeSec = Number((cursorSec + Math.max(1, beatsCount) * beatSec).toFixed(3))
+      cutReason = `Image begins at ${formatTimecode(chosenTimeSec)} — ${beatsCount}-beat bar interval timing`
+    }
+
+    // Strong sync enforcement: snap within ±80ms to the nearest beat if close
+    if (syncStrength === 'strong') {
+      const nearestBeat = analyzedBeats.find((b) => Math.abs(b - chosenTimeSec!) <= 0.09)
+      if (nearestBeat) {
+        chosenTimeSec = nearestBeat
+      }
+    }
+
+    // Ensure strictly advancing cursor
+    if (chosenTimeSec <= cursorSec + 0.18) {
+      chosenTimeSec = cursorSec + 0.25
+    }
+
+    plannedCuts.push({
+      timeSec: Number(chosenTimeSec.toFixed(3)),
+      reason: cutReason,
+      isDownbeat,
+      isPhraseBoundary,
+      isClimax: isClimaxCut,
+      isMelodyHold,
+    })
+
+    cursorSec = chosenTimeSec
   }
 
-  // 4. Distribute pool assets across the shot slots without immediate repetition
+  // 5. DISTRIBUTE MEDIA ASSETS ACROSS PLANNED CUT SLOTS
   const generatedClips: TimelineClip[] = []
   let poolIndex = 0
   let lastAssetId = ''
 
-  for (let s = 0; s < shotTimestamps.length; s++) {
-    const slot = shotTimestamps[s]
-    const isEndingShot = s === shotTimestamps.length - 1
+  for (let s = 0; s < plannedCuts.length; s++) {
+    const currentCut = plannedCuts[s]
+    const nextCutTime = s < plannedCuts.length - 1 ? plannedCuts[s + 1].timeSec : totalDuration
+    let shotDuration = Number(Math.max(0.18, nextCutTime - currentCut.timeSec).toFixed(3))
 
-    // Pick next asset avoiding immediate repetition
+    const isEndingShot = s === plannedCuts.length - 1
+    if (isEndingShot && endingHold) {
+      shotDuration = Math.max(shotDuration, styleDef.endingHoldSec)
+    }
+
+    // Pick next asset without immediate repetition
     let asset = pool[poolIndex % pool.length]
     if (asset.id === lastAssetId && pool.length > 1) {
       poolIndex++
@@ -305,39 +536,39 @@ export function generateAutoEditTimeline(
     lastAssetId = asset.id
     poolIndex++
 
-    // Determine transition based on section and style
+    // Determine transition based on section, cut type and transitionAmount
     let transIn: ClipTransition = { type: 'none', durationSec: 0 }
     let transOut: ClipTransition = { type: 'none', durationSec: 0 }
 
-    if (slot.section.type === 'climax' && styleDef.enableClimaxScalePunch) {
-      transIn = { type: 'scale-punch', durationSec: Math.min(0.3, slot.durationSec * 0.4) }
-    } else if (slot.section.isMelodyDominant) {
-      transIn = { type: 'crossfade', durationSec: Math.min(0.6, slot.durationSec * 0.3) }
+    if (transitionAmount === 'minimal') {
+      transIn = { type: 'none', durationSec: 0 }
+    } else if (currentCut.isClimax && styleDef.enableClimaxScalePunch) {
+      transIn = { type: 'scale-punch', durationSec: Math.min(0.25, shotDuration * 0.35) }
+    } else if (currentCut.isPhraseBoundary || currentCut.isMelodyHold) {
+      const transDur = transitionAmount === 'cinematic' ? 0.75 : 0.4
+      transIn = { type: 'crossfade', durationSec: Math.min(transDur, shotDuration * 0.3) }
     } else if (styleDef.defaultTransition !== 'none') {
       transIn = {
         type: styleDef.defaultTransition,
-        durationSec: Math.min(styleDef.transitionDurationSec, slot.durationSec * 0.3),
+        durationSec: Math.min(styleDef.transitionDurationSec, shotDuration * 0.3),
       }
     }
 
-    // Ending shot hold / fade
-    let shotDuration = slot.durationSec
-    if (isEndingShot && (options.endingHoldFrame ?? true)) {
-      shotDuration = Math.max(shotDuration, styleDef.endingHoldSec)
+    if (isEndingShot) {
       transOut = { type: 'fade-black', durationSec: 1.0 }
     }
 
-    // Keyframe subtle Ken Burns zoom drift if enabled for melody / story
+    // Ken Burns slow zoom drift for visualMotion
     const keyframes = []
-    if (styleDef.enableSlowZoomDrift && slot.section.isMelodyDominant) {
-      const zoomDir = s % 2 === 0 ? 1.06 : 0.96
+    if (visualMotion !== 'off' && (currentCut.isMelodyHold || styleDef.enableSlowZoomDrift)) {
+      const zoomTarget = s % 2 === 0 ? 1.06 : 0.95
       keyframes.push(
         { id: `kf-${s}-0`, timeSec: 0, transform: { scale: 1.0 } },
-        { id: `kf-${s}-1`, timeSec: shotDuration, transform: { scale: zoomDir } }
+        { id: `kf-${s}-1`, timeSec: shotDuration, transform: { scale: zoomTarget } }
       )
     }
 
-    // For video clips, ensure trimStartSec doesn't exceed source duration
+    // Trim offset calculation for videos
     let trimStartSec = 0
     if (asset.type === 'video') {
       const maxPossibleTrim = Math.max(0, asset.durationSec - shotDuration)
@@ -345,12 +576,12 @@ export function generateAutoEditTimeline(
     }
 
     const clip: TimelineClip = {
-      id: `clip-auto-${Date.now()}-${s}`,
+      id: `clip-auto-${Date.now()}-${s}-${Math.random().toString(36).substring(2, 6)}`,
       trackId: videoTrack.id,
       assetId: asset.id,
       name: asset.name,
       type: asset.type,
-      startSec: slot.startSec,
+      startSec: currentCut.timeSec,
       durationSec: shotDuration,
       trimStartSec,
       trimEndSec: 0,
@@ -365,12 +596,13 @@ export function generateAutoEditTimeline(
       transitionIn: transIn,
       transitionOut: transOut,
       audioProps: { ...DEFAULT_AUDIO_PROPS },
+      cutReason: currentCut.reason,
     }
 
     generatedClips.push(clip)
   }
 
-  // 5. Add/Update music track on timeline (A1)
+  // 6. Synchronized Music Track on Timeline (Audio Track A1)
   const musicClip: TimelineClip = {
     id: `clip-music-${Date.now()}`,
     trackId: audioTrack.id,
@@ -388,6 +620,7 @@ export function generateAutoEditTimeline(
     transitionIn: { type: 'none', durationSec: 0 },
     transitionOut: { type: 'none', durationSec: 0 },
     audioProps: { volume: 1.0, fadeInSec: 0.5, fadeOutSec: 2.0, muted: false },
+    cutReason: 'Master music audio synchronized across entire video timeline',
   }
 
   // Retain non-primary tracks (e.g. text/overlays), replace V1 and A1
@@ -398,7 +631,30 @@ export function generateAutoEditTimeline(
   const finalClips = [...existingOtherClips, ...generatedClips, musicClip]
   const finalProjectDuration = calculateTotalProjectDuration(finalClips, totalDuration)
 
-  const summary = `Auto-created ${generatedClips.length} cuts in "${styleDef.name}" style (${finalProjectDuration.toFixed(1)}s total).`
+  // 7. HONEST DYNAMIC SUMMARY CALCULATED FROM GENERATED TIMELINE
+  let beatAlignedCount = 0
+  let phraseBoundaryCount = 0
+  let melodyHoldCount = 0
+  let climaxCutsCount = 0
+
+  for (const c of plannedCuts) {
+    if (c.isDownbeat || analyzedBeats.some((b) => Math.abs(b - c.timeSec) < 0.06)) {
+      beatAlignedCount++
+    }
+    if (c.isPhraseBoundary) {
+      phraseBoundaryCount++
+    }
+    if (c.isMelodyHold) {
+      melodyHoldCount++
+    }
+    if (c.isClimax) {
+      climaxCutsCount++
+    }
+  }
+
+  const summary = `Auto-created ${generatedClips.length} cuts in "${styleDef.name}" style (${finalProjectDuration.toFixed(1)}s total): ${beatAlignedCount} cuts aligned to detected beats • ${phraseBoundaryCount} phrase-boundary cuts • ${melodyHoldCount} melody holds${
+    climaxCutsCount > 0 ? ` • ${climaxCutsCount} cuts in climax burst` : ''
+  }.`
 
   return {
     updatedProject: {
@@ -412,4 +668,10 @@ export function generateAutoEditTimeline(
     clipCount: generatedClips.length,
     summary,
   }
+}
+
+function formatTimecode(sec: number): string {
+  const m = Math.floor(sec / 60)
+  const s = (sec % 60).toFixed(2)
+  return `${m.toString().padStart(2, '0')}:${parseFloat(s) < 10 ? '0' : ''}${s}`
 }

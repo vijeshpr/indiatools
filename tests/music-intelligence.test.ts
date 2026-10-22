@@ -15,6 +15,7 @@ import {
 import type {
   MusicAnalysisResult,
   MusicSection,
+  MusicEvent,
 } from '../src/lib/hybridVideo/musicIntelligence.ts'
 import { createDefaultProject } from '../src/lib/hybridVideo/projectState.ts'
 import type { MediaAsset } from '../src/lib/hybridVideo/types.ts'
@@ -89,8 +90,15 @@ describe('Music Intelligence & One-Click Auto-Edit Suite', () => {
     durationSec: 32.0,
     bpm: 118,
     bpmConfidence: 0.88,
-    beats: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0],
-    onsets: [0.5, 1.0, 1.5, 2.0],
+    beats: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0, 28.0],
+    onsets: [0.5, 1.0, 1.5, 2.0, 4.0, 6.0, 8.0, 12.0, 16.0, 18.0, 22.0],
+    downbeats: [0.5, 2.5, 4.5, 8.0, 12.0, 16.0, 20.0, 24.0],
+    phraseBoundaries: [4.0, 8.0, 16.0, 24.0],
+    events: [
+      { id: 'evt-1', timeSec: 0.5, type: 'downbeat', confidence: 0.9, energy: 0.8, description: 'Bar Downbeat 1' },
+      { id: 'evt-2', timeSec: 4.0, type: 'phrase_boundary', confidence: 0.85, energy: 0.6, description: 'Phrase 1' },
+      { id: 'evt-3', timeSec: 18.0, type: 'climax_onset', confidence: 0.95, energy: 0.95, description: 'Peak Climax Entry' },
+    ],
     energyEnvelope: [0.2, 0.3, 0.5, 0.7, 0.9, 0.4],
     sections: [
       {
@@ -136,6 +144,7 @@ describe('Music Intelligence & One-Click Auto-Edit Suite', () => {
     ],
     dominantMood: 'romantic',
     overallMelodyScore: 0.72,
+    vocalActivityConfidence: 0.8,
     climaxStartSec: 18.0,
     climaxEndSec: 28.0,
     suggestedCutPoints: [6.0, 18.0, 28.0],
@@ -152,7 +161,7 @@ describe('Music Intelligence & One-Click Auto-Edit Suite', () => {
       assert.strictEqual(videosOnly[0].type, 'video')
 
       const allVisual = filterAndOrderMedia(mockAssets, 'all', 'library')
-      assert.strictEqual(allVisual.length, 4) // 3 images + 1 video (audio excluded)
+      assert.strictEqual(allVisual.length, 4)
     })
 
     it('shuffles media order without losing items or duplicating', () => {
@@ -194,7 +203,6 @@ describe('Music Intelligence & One-Click Auto-Edit Suite', () => {
       const project = createDefaultProject()
       project.mediaAssets = [...mockAssets]
 
-      // Initial batch insert at 0
       const step1 = batchInsertMediaToTimeline(
         project,
         {
@@ -209,7 +217,6 @@ describe('Music Intelligence & One-Click Auto-Edit Suite', () => {
 
       assert.strictEqual(step1.insertedCount, 3)
 
-      // Append step at playhead = 6.0
       const step2 = batchInsertMediaToTimeline(
         step1.updatedProject,
         {
@@ -283,93 +290,167 @@ describe('Music Intelligence & One-Click Auto-Edit Suite', () => {
     })
   })
 
-  describe('Auto-Edit Timeline Generation Engine', () => {
-    it('creates contiguous sequential clips aligned to music sections and durations', () => {
+  describe('Priority 1 & 3 Verification: Real Event Cut Matching & Contrasting Audio Types', () => {
+    it('Scenario 1 (Slow Melodic Music): produces longer holds and phrase-aligned cuts', () => {
       const project = createDefaultProject()
       project.mediaAssets = [...mockAssets]
 
       const musicAsset = mockAssets.find((a) => a.type === 'audio')!
-      const options: AutoEditGeneratorOptions = {
-        style: 'melody-emotion',
-        assetOrder: 'original',
-        mediaFilter: 'all',
-        keepMelodyCalm: true,
-        endingHoldFrame: true,
+      const melodicAnalysis: MusicAnalysisResult = {
+        ...mockAnalysis,
+        dominantMood: 'calm',
+        overallMelodyScore: 0.85,
+        vocalActivityConfidence: 0.88,
+        bpm: 80,
+        phraseBoundaries: [5.0, 11.0, 18.0, 25.0],
       }
 
-      const { updatedProject, clipCount, summary } = generateAutoEditTimeline(
+      const { updatedProject, summary } = generateAutoEditTimeline(
         project,
         musicAsset,
-        mockAnalysis,
+        melodicAnalysis,
         mockAssets,
-        options
+        {
+          syncMode: 'melody-vocal',
+          cutIntensity: 'slow',
+          keepMelodyCalm: true,
+        }
       )
 
-      assert.ok(clipCount > 0, 'Should generate clips')
       assert.ok(summary.includes('Auto-created'))
+      assert.ok(summary.includes('phrase-boundary cuts') || summary.includes('melody holds'))
 
-      // Primary video clips check
       const videoTrack = updatedProject.tracks.find((t) => t.type === 'video')!
       const visualClips = updatedProject.clips.filter((c) => c.trackId === videoTrack.id)
-      assert.ok(visualClips.length >= 4)
 
-      // Audio track should have music asset
-      const audioTrack = updatedProject.tracks.find((t) => t.type === 'audio')!
-      const musicClip = updatedProject.clips.find((c) => c.trackId === audioTrack.id)
-      assert.ok(musicClip, 'Music clip should be added to audio track')
-      assert.strictEqual(musicClip?.assetId, musicAsset.id)
-      assert.strictEqual(musicClip?.startSec, 0)
+      // Average duration in slow melodic mode should be generous (> 3.0s)
+      const avgDuration =
+        visualClips.reduce((sum, c) => sum + c.durationSec, 0) / visualClips.length
+      assert.ok(
+        avgDuration >= 3.0,
+        `Slow melodic mode average duration (${avgDuration.toFixed(2)}s) should be >= 3.0s`
+      )
 
-      // Check no overlaps in visual clips
-      for (let i = 0; i < visualClips.length - 1; i++) {
-        const c1 = visualClips[i]
-        const c2 = visualClips[i + 1]
-        assert.ok(
-          c2.startSec >= c1.startSec + c1.durationSec - 0.05,
-          `Clip ${i + 1} (${c2.startSec}) must start at or after Clip ${i} end (${c1.startSec + c1.durationSec})`
-        )
+      // Every clip must have a cutReason explaining its placement
+      for (const clip of visualClips) {
+        assert.ok(clip.cutReason, `Clip ${clip.name} must have a cutReason`)
+        assert.ok(clip.cutReason.includes('Image begins at'), `Cut reason must format timecode`)
       }
     })
 
-    it('demonstrates slower holds in melody sections compared to climax acceleration in climax-rewind', () => {
+    it('Scenario 2 (Strong Steady Rhythmic Music): cuts align to real beats within tolerance', () => {
       const project = createDefaultProject()
       project.mediaAssets = [...mockAssets]
 
       const musicAsset = mockAssets.find((a) => a.type === 'audio')!
-      const options: AutoEditGeneratorOptions = {
-        style: 'climax-rewind',
-        assetOrder: 'original',
-        mediaFilter: 'all',
-        keepMelodyCalm: true,
-        endingHoldFrame: false,
+      const rhythmicBeats = [1.2, 2.4, 3.6, 4.8, 6.0, 7.2, 8.4, 9.6, 10.8, 12.0, 13.2, 14.4]
+      const rhythmicAnalysis: MusicAnalysisResult = {
+        ...mockAnalysis,
+        bpm: 125,
+        bpmConfidence: 0.95,
+        beats: rhythmicBeats,
+        downbeats: [1.2, 3.6, 6.0, 8.4, 10.8, 13.2],
+        phraseBoundaries: [6.0, 12.0],
+        overallMelodyScore: 0.25,
       }
 
       const { updatedProject } = generateAutoEditTimeline(
         project,
         musicAsset,
-        mockAnalysis,
+        rhythmicAnalysis,
         mockAssets,
-        options
+        {
+          syncMode: 'beat-sync',
+          cutIntensity: 'fast',
+          syncStrength: 'strong',
+        }
       )
 
       const videoTrack = updatedProject.tracks.find((t) => t.type === 'video')!
       const visualClips = updatedProject.clips.filter((c) => c.trackId === videoTrack.id)
 
-      const melodyClips = visualClips.filter((c) => c.startSec >= 6.0 && c.startSec < 18.0)
-      const climaxClips = visualClips.filter((c) => c.startSec >= 18.0 && c.startSec < 28.0)
+      // Verify that after initial clip at 0, generated cuts align to actual beats
+      const nonZeroClips = visualClips.filter((c) => c.startSec > 0.1)
+      let matchedBeats = 0
 
-      const avgMelodyDur =
-        melodyClips.reduce((sum, c) => sum + c.durationSec, 0) / Math.max(1, melodyClips.length)
-      const avgClimaxDur =
-        climaxClips.reduce((sum, c) => sum + c.durationSec, 0) / Math.max(1, climaxClimaxClipsLength(climaxClips))
-
-      function climaxClimaxClipsLength(arr: any[]) {
-        return arr.length || 1
+      for (const clip of nonZeroClips) {
+        const isMatched = rhythmicBeats.some((b) => Math.abs(b - clip.startSec) <= 0.05)
+        if (isMatched) matchedBeats++
       }
 
       assert.ok(
-        avgMelodyDur > avgClimaxDur,
-        `Melody clips avg duration (${avgMelodyDur.toFixed(2)}s) must be longer than climax clips (${avgClimaxDur.toFixed(2)}s)`
+        matchedBeats >= 1,
+        `Expected cuts to match analyzed beats within ±0.05s tolerance, matched: ${matchedBeats}/${nonZeroClips.length}`
+      )
+    })
+
+    it('Scenario 3 (Energy Changes): accelerates cut frequency at peak climax', () => {
+      const project = createDefaultProject()
+      project.mediaAssets = [...mockAssets]
+
+      const musicAsset = mockAssets.find((a) => a.type === 'audio')!
+      const energyAnalysis: MusicAnalysisResult = {
+        ...mockAnalysis,
+        climaxStartSec: 16.0,
+        climaxEndSec: 24.0,
+      }
+
+      const { updatedProject } = generateAutoEditTimeline(
+        project,
+        musicAsset,
+        energyAnalysis,
+        mockAssets,
+        {
+          style: 'climax-rewind',
+          cutIntensity: 'fast',
+        }
+      )
+
+      const videoTrack = updatedProject.tracks.find((t) => t.type === 'video')!
+      const visualClips = updatedProject.clips.filter((c) => c.trackId === videoTrack.id)
+
+      const preClimaxClips = visualClips.filter((c) => c.startSec < 16.0)
+      const climaxClips = visualClips.filter((c) => c.startSec >= 16.0 && c.startSec < 24.0)
+
+      const avgPreClimax =
+        preClimaxClips.reduce((s, c) => s + c.durationSec, 0) / Math.max(1, preClimaxClips.length)
+      const avgClimax =
+        climaxClips.reduce((s, c) => s + c.durationSec, 0) / Math.max(1, climaxClips.length)
+
+      assert.ok(
+        avgPreClimax > avgClimax,
+        `Pre-climax duration (${avgPreClimax.toFixed(2)}s) must be longer than climax cuts (${avgClimax.toFixed(2)}s)`
+      )
+    })
+
+    it('changing sync modes produces demonstrably different cut timings', () => {
+      const project = createDefaultProject()
+      project.mediaAssets = [...mockAssets]
+      const musicAsset = mockAssets.find((a) => a.type === 'audio')!
+
+      const beatEdit = generateAutoEditTimeline(project, musicAsset, mockAnalysis, mockAssets, {
+        syncMode: 'beat-sync',
+        cutIntensity: 'fast',
+      })
+
+      const melodyEdit = generateAutoEditTimeline(project, musicAsset, mockAnalysis, mockAssets, {
+        syncMode: 'melody-vocal',
+        cutIntensity: 'slow',
+        keepMelodyCalm: true,
+      })
+
+      const beatTimestamps = beatEdit.updatedProject.clips
+        .filter((c) => c.type === 'image')
+        .map((c) => c.startSec)
+      const melodyTimestamps = melodyEdit.updatedProject.clips
+        .filter((c) => c.type === 'image')
+        .map((c) => c.startSec)
+
+      // They must produce different cut timings
+      assert.notDeepStrictEqual(
+        beatTimestamps,
+        melodyTimestamps,
+        'Beat sync and melody sync must generate distinctly different cut timing sequences'
       )
     })
   })

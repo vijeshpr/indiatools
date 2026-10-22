@@ -14,6 +14,7 @@ import {
   Clock,
   Gauge,
   Sliders,
+  Sparkles,
 } from 'lucide-react'
 import type { TimelineClip, ClipTransform, FitMode } from '../../lib/hybridVideo/types.ts'
 
@@ -119,6 +120,19 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
+        {/* Music Sync Diagnostic Explanation */}
+        {selectedClip.cutReason && (
+          <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/25 text-xs">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-purple-300 mb-1">
+              <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+              <span>Music Sync Diagnostic</span>
+            </div>
+            <p className="text-[11px] text-white/80 leading-relaxed font-mono">
+              {selectedClip.cutReason}
+            </p>
+          </div>
+        )}
+
         {/* Transform Card */}
         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
           <label className="text-[11px] font-semibold text-white/70 uppercase tracking-wider block flex items-center gap-1.5">

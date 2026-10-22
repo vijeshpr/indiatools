@@ -170,6 +170,7 @@ export interface TimelineClip {
   transitionOut: ClipTransition
   textProps?: ClipTextProperties
   audioProps: ClipAudioProperties
+  cutReason?: string // Diagnostic explanation of why cut was placed at this timestamp
 }
 
 export interface ProjectSettings {

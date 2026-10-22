@@ -3,11 +3,13 @@
  * 100% Client-Side Web Audio API Signal Processing & Structure Analysis
  *
  * Estimates:
- * - BPM / Tempo and beat onsets
+ * - BPM / Tempo and beat onsets with confidence rating
  * - Energy and Loudness Envelope
+ * - Discrete Musical Event Map (Downbeats, Beats, Phrase Boundaries, Accents)
  * - Structural regions (Intro, Calm, Melody, Build-up, Climax, Outro)
  * - Melody Profile vs Rhythm Dominance
- * - Emotional Energy & Suggested Cut Points
+ * - Vocal / Mid-Band Melody Activity Estimation
+ * - Suggested Cut Points with diagnostic reasoning
  */
 
 export type MelodyProfileType =
@@ -28,6 +30,22 @@ export type EmotionalMood =
   | 'energetic'
   | 'intense'
 
+export interface MusicEvent {
+  id: string
+  timeSec: number
+  type:
+    | 'downbeat'
+    | 'beat'
+    | 'onset'
+    | 'phrase_boundary'
+    | 'section_change'
+    | 'climax_onset'
+    | 'vocal_onset'
+  confidence: number // 0 to 1
+  energy: number // 0 to 1
+  description: string
+}
+
 export interface MusicSection {
   id: string
   name: string
@@ -47,10 +65,14 @@ export interface MusicAnalysisResult {
   bpmConfidence: number // 0 to 1
   beats: number[] // timestamps of detected beats in seconds
   onsets: number[] // all transient timestamps
+  downbeats: number[] // primary musical bar downbeats
+  phraseBoundaries: number[] // timestamps of structural phrase transitions
+  events: MusicEvent[] // comprehensive discrete musical events
   energyEnvelope: number[] // normalized 0-1 for visualization (20 samples per second)
   sections: MusicSection[]
   dominantMood: EmotionalMood
   overallMelodyScore: number // 0 (pure rhythm/bass) to 1 (pure melody)
+  vocalActivityConfidence: number // 0 to 1 estimated confidence of vocal/melodic presence
   climaxStartSec: number
   climaxEndSec: number
   suggestedCutPoints: number[]
@@ -66,7 +88,7 @@ export async function analyzeAudioBuffer(
   const durationSec = audioBuffer.duration
   const channelData = audioBuffer.getChannelData(0)
 
-  // 1. Compute frame-by-frame RMS energy and spectral approximations
+  // 1. Compute frame-by-frame RMS energy and spectral sub-band approximations
   const frameRate = 20 // 20 frames per second (50ms per frame)
   const frameSize = Math.floor(sampleRate / frameRate)
   const totalFrames = Math.floor(channelData.length / frameSize)
@@ -80,11 +102,11 @@ export async function analyzeAudioBuffer(
   let maxBass = 0.0001
   let maxMid = 0.0001
 
-  // Simple IIR low-pass and high-pass filters for sub-band energy
+  // Simple IIR low-pass and mid-pass filters for sub-band energy
   let lowPrev = 0
   let highPrev = 0
   const lowAlpha = 0.15 // approximates ~250 Hz cut at 44.1kHz
-  const highAlpha = 0.75
+  const highAlpha = 0.75 // separates mid band ~300Hz-3.4kHz
 
   for (let f = 0; f < totalFrames; f++) {
     const offset = f * frameSize
@@ -156,8 +178,11 @@ export async function analyzeAudioBuffer(
       const timeSec = Number((f / frameRate).toFixed(3))
       onsets.push(timeSec)
 
-      // Check if candidate beat (prominent bass/kick energy and debounced)
-      if (f - lastBeatFrame >= debounceFrames && (bassEnvelope[f] > 0.25 || energyEnvelope[f] > 0.4)) {
+      // Candidate beat: prominent bass/kick energy or high energy pulse and debounced
+      if (
+        f - lastBeatFrame >= debounceFrames &&
+        (bassEnvelope[f] > 0.25 || energyEnvelope[f] > 0.4)
+      ) {
         beats.push(timeSec)
         lastBeatFrame = f
       }
@@ -167,12 +192,39 @@ export async function analyzeAudioBuffer(
   // 3. Tempo / BPM Estimation via autocorrelation of beat intervals
   const { bpm, confidence: bpmConfidence } = estimateBpmFromBeats(beats, durationSec)
 
-  // 4. Structure Segmentation (Intro, Calm, Melody, Build-up, Climax, Outro)
+  // 4. Extract Primary Downbeats (Beat 1 of musical measures in 4/4 time)
+  const downbeats = extractDownbeats(beats, energyEnvelope, bassEnvelope, bpm, frameRate)
+
+  // 5. Structure Segmentation (Intro, Calm, Melody, Build-up, Climax, Outro)
   const { sections, climaxStartSec, climaxEndSec, overallMelodyScore, dominantMood } =
     segmentMusicalStructure(energyEnvelope, bassEnvelope, midHighEnvelope, frameRate, durationSec)
 
-  // 5. Generate suggested cut points aligned to musical accents
-  const suggestedCutPoints = generateSuggestedCutPoints(sections, beats, durationSec)
+  // 6. Detect Musical Phrase Boundaries (transitions between 4/8-bar phrases or section shifts)
+  const phraseBoundaries = detectPhraseBoundaries(
+    sections,
+    energyEnvelope,
+    midHighEnvelope,
+    frameRate,
+    durationSec,
+    bpm
+  )
+
+  // 7. Estimate Vocal / Mid-Band Melody Activity Confidence
+  const vocalActivityConfidence = estimateVocalActivityConfidence(midHighEnvelope, energyEnvelope)
+
+  // 8. Compile Comprehensive Discrete Musical Events Map
+  const events = buildMusicalEventMap(
+    downbeats,
+    beats,
+    phraseBoundaries,
+    sections,
+    climaxStartSec,
+    climaxEndSec,
+    bpmConfidence
+  )
+
+  // 9. Generate suggested cut points aligned to actual musical events
+  const suggestedCutPoints = generateSuggestedCutPoints(sections, downbeats, beats, phraseBoundaries)
 
   return {
     assetId,
@@ -182,17 +234,24 @@ export async function analyzeAudioBuffer(
     bpmConfidence,
     beats,
     onsets,
+    downbeats,
+    phraseBoundaries,
+    events,
     energyEnvelope,
     sections,
     dominantMood,
     overallMelodyScore,
+    vocalActivityConfidence,
     climaxStartSec,
     climaxEndSec,
     suggestedCutPoints,
   }
 }
 
-function estimateBpmFromBeats(beats: number[], durationSec: number): { bpm: number; confidence: number } {
+function estimateBpmFromBeats(
+  beats: number[],
+  _durationSec: number
+): { bpm: number; confidence: number } {
   if (beats.length < 4) {
     return { bpm: 120, confidence: 0.3 }
   }
@@ -214,7 +273,7 @@ function estimateBpmFromBeats(beats: number[], durationSec: number): { bpm: numb
   const medianInterval = intervals[Math.floor(intervals.length / 2)]
   let rawBpm = Math.round(60 / medianInterval)
 
-  // Normalize BPM to standard 70 - 160 range
+  // Normalize BPM to standard 70 - 165 range
   while (rawBpm < 70) rawBpm *= 2
   while (rawBpm > 165) rawBpm = Math.round(rawBpm / 2)
 
@@ -226,6 +285,177 @@ function estimateBpmFromBeats(beats: number[], durationSec: number): { bpm: numb
   const confidence = Math.min(0.95, Math.max(0.4, inliers / intervals.length))
 
   return { bpm: rawBpm, confidence: Number(confidence.toFixed(2)) }
+}
+
+function extractDownbeats(
+  beats: number[],
+  energy: number[],
+  bass: number[],
+  bpm: number,
+  frameRate: number
+): number[] {
+  if (beats.length === 0) return []
+
+  const beatSec = 60 / Math.max(60, bpm)
+  const barSec = beatSec * 4 // standard 4/4 measure duration
+
+  const downbeats: number[] = []
+  let nextExpectedTime = beats[0]
+
+  for (const b of beats) {
+    if (b >= nextExpectedTime - 0.15) {
+      const f = Math.min(energy.length - 1, Math.max(0, Math.floor(b * frameRate)))
+      const score = (bass[f] || 0) * 0.6 + (energy[f] || 0) * 0.4
+
+      if (score > 0.25 || downbeats.length === 0) {
+        downbeats.push(b)
+        nextExpectedTime = b + barSec
+      }
+    }
+  }
+
+  return downbeats
+}
+
+function detectPhraseBoundaries(
+  sections: MusicSection[],
+  energy: number[],
+  midHigh: number[],
+  frameRate: number,
+  durationSec: number,
+  bpm: number
+): number[] {
+  const boundariesSet = new Set<number>()
+
+  // 1. Add all section boundaries
+  for (const sec of sections) {
+    if (sec.startSec > 0.5 && sec.startSec < durationSec - 1.0) {
+      boundariesSet.add(Number(sec.startSec.toFixed(2)))
+    }
+  }
+
+  // 2. Identify 8-bar musical phrase shifts
+  const beatSec = 60 / Math.max(60, bpm)
+  const phraseSec = beatSec * 8 // 8-bar phrase interval (typically 3.5s - 6s)
+
+  let cursor = phraseSec
+  while (cursor < durationSec - 1.5) {
+    const f = Math.min(energy.length - 1, Math.floor(cursor * frameRate))
+    // If there is significant energy or a local drop/rise, anchor phrase boundary
+    const isDipOrPeak =
+      f > 1 && f < energy.length - 2 && (energy[f] < energy[f - 1] || midHigh[f] > 0.5)
+
+    if (isDipOrPeak) {
+      boundariesSet.add(Number(cursor.toFixed(2)))
+    }
+    cursor += phraseSec
+  }
+
+  return Array.from(boundariesSet).sort((a, b) => a - b)
+}
+
+function estimateVocalActivityConfidence(midHigh: number[], energy: number[]): number {
+  if (midHigh.length === 0) return 0.5
+
+  let vocalFrames = 0
+  let stableFrames = 0
+
+  for (let f = 1; f < midHigh.length; f++) {
+    const midRatio = midHigh[f] / Math.max(0.01, energy[f])
+    if (midRatio > 0.45 && midHigh[f] > 0.2) {
+      vocalFrames++
+      if (Math.abs(midHigh[f] - midHigh[f - 1]) < 0.15) {
+        stableFrames++
+      }
+    }
+  }
+
+  const ratio = vocalFrames / midHigh.length
+  const stability = vocalFrames > 0 ? stableFrames / vocalFrames : 0.5
+  const confidence = Math.min(0.92, Math.max(0.3, ratio * 0.6 + stability * 0.4))
+
+  return Number(confidence.toFixed(2))
+}
+
+function buildMusicalEventMap(
+  downbeats: number[],
+  beats: number[],
+  phraseBoundaries: number[],
+  sections: MusicSection[],
+  climaxStartSec: number,
+  climaxEndSec: number,
+  bpmConfidence: number
+): MusicEvent[] {
+  const events: MusicEvent[] = []
+
+  // Add Climax Entry Event
+  if (climaxStartSec > 0) {
+    events.push({
+      id: `evt-climax-${climaxStartSec.toFixed(2)}`,
+      timeSec: Number(climaxStartSec.toFixed(3)),
+      type: 'climax_onset',
+      confidence: 0.95,
+      energy: 0.98,
+      description: 'Peak Climax Acceleration Entry',
+    })
+  }
+
+  // Add Section Changes
+  for (const sec of sections) {
+    events.push({
+      id: `evt-sec-${sec.id}`,
+      timeSec: Number(sec.startSec.toFixed(3)),
+      type: 'section_change',
+      confidence: 0.9,
+      energy: sec.energyLevel,
+      description: `Transition into ${sec.name} (${sec.type})`,
+    })
+  }
+
+  // Add Phrase Boundaries
+  for (let i = 0; i < phraseBoundaries.length; i++) {
+    const t = phraseBoundaries[i]
+    events.push({
+      id: `evt-phrase-${i}-${t.toFixed(2)}`,
+      timeSec: Number(t.toFixed(3)),
+      type: 'phrase_boundary',
+      confidence: 0.85,
+      energy: 0.6,
+      description: `Musical Phrase Boundary ~${t.toFixed(1)}s`,
+    })
+  }
+
+  // Add Primary Downbeats
+  for (let i = 0; i < downbeats.length; i++) {
+    const t = downbeats[i]
+    events.push({
+      id: `evt-downbeat-${i}-${t.toFixed(2)}`,
+      timeSec: Number(t.toFixed(3)),
+      type: 'downbeat',
+      confidence: bpmConfidence,
+      energy: 0.8,
+      description: `Bar Downbeat (Measure ${i + 1})`,
+    })
+  }
+
+  // Add Selected Strong Beats
+  for (let i = 0; i < beats.length; i++) {
+    const t = beats[i]
+    const isAlreadyDownbeat = downbeats.some((db) => Math.abs(db - t) < 0.05)
+    if (!isAlreadyDownbeat) {
+      events.push({
+        id: `evt-beat-${i}-${t.toFixed(2)}`,
+        timeSec: Number(t.toFixed(3)),
+        type: 'beat',
+        confidence: bpmConfidence * 0.9,
+        energy: 0.65,
+        description: `Rhythmic Beat Pulse ~${t.toFixed(2)}s`,
+      })
+    }
+  }
+
+  // Sort events chronologically
+  return events.sort((a, b) => a.timeSec - b.timeSec)
 }
 
 function segmentMusicalStructure(
@@ -268,102 +498,88 @@ function segmentMusicalStructure(
     chunkMid.push(sumM / len)
   }
 
-  // Find peak climax chunk window (1 or 2 highest consecutive chunks)
-  let maxEnergySum = 0
-  let climaxChunkIndex = Math.min(chunkCount - 1, Math.floor(chunkCount * 0.65))
-
-  for (let c = 0; c < chunkCount - 1; c++) {
-    const sum2 = chunkEnergies[c] + chunkEnergies[c + 1]
-    if (sum2 > maxEnergySum) {
-      maxEnergySum = sum2
-      climaxChunkIndex = c
+  // Find peak energy chunk (climax candidate)
+  let peakChunk = 0
+  let maxChunkE = 0
+  for (let c = 0; c < chunkCount; c++) {
+    if (chunkEnergies[c] > maxChunkE) {
+      maxChunkE = chunkEnergies[c]
+      peakChunk = c
     }
   }
 
-  const climaxStartSec = Number((climaxChunkIndex * windowSec).toFixed(2))
-  const climaxEndSec = Number(Math.min(durationSec, (climaxChunkIndex + 2) * windowSec).toFixed(2))
+  // Climax window spans around peak chunk (at least 6-10s duration)
+  const climaxStartChunk = Math.max(0, peakChunk - 1)
+  const climaxEndChunk = Math.min(chunkCount - 1, peakChunk + 1)
+  const climaxStartSec = Number((climaxStartChunk * windowSec).toFixed(2))
+  const climaxEndSec = Number(Math.min(durationSec, (climaxEndChunk + 1) * windowSec).toFixed(2))
 
-  // Construct Sections
+  // Compute overall melody vs rhythm ratio
+  const avgBass = chunkBass.reduce((a, b) => a + b, 0) / chunkCount
+  const avgMid = chunkMid.reduce((a, b) => a + b, 0) / chunkCount
+  const overallMelodyScore = Number(Math.min(1, Math.max(0, avgMid / (avgMid + avgBass + 0.001))).toFixed(2))
+
+  // Emotional mood
+  let dominantMood: EmotionalMood = 'energetic'
+  if (overallMelodyScore > 0.65 && maxChunkE < 0.6) dominantMood = 'calm'
+  else if (overallMelodyScore > 0.6) dominantMood = 'romantic'
+  else if (maxChunkE > 0.85 && avgBass > 0.4) dominantMood = 'intense'
+  else if (maxChunkE > 0.75) dominantMood = 'dramatic'
+  else if (overallMelodyScore > 0.5) dominantMood = 'gentle'
+
+  // Construct standard narrative sections
   const sections: MusicSection[] = []
 
-  for (let c = 0; c < chunkCount; c++) {
-    const startSec = Number((c * windowSec).toFixed(2))
-    const endSec = Number(Math.min(durationSec, (c + 1) * windowSec).toFixed(2))
-    const avgE = chunkEnergies[c]
-    const avgB = chunkBass[c]
-    const avgM = chunkMid[c]
+  // Section 1: Intro / Exposition
+  const introEndSec = Math.min(6.0, durationSec * 0.2)
+  sections.push({
+    id: 'sec-intro',
+    name: 'Intro / Exposition',
+    startSec: 0,
+    endSec: Number(introEndSec.toFixed(2)),
+    type: 'intro',
+    energyLevel: Number((chunkEnergies[0] || 0.3).toFixed(2)),
+    isMelodyDominant: overallMelodyScore > 0.45,
+    melodyProfile: overallMelodyScore > 0.55 ? 'soft-melody' : 'uncertain',
+  })
 
-    const melodyRatio = avgM / Math.max(0.01, avgB + 0.1)
-    const isMelodyDominant = melodyRatio > 0.85 && avgB < 0.65
+  // Section 2: Main Melody / Verse
+  const melodyEndSec = climaxStartSec > introEndSec ? climaxStartSec : durationSec * 0.7
+  sections.push({
+    id: 'sec-melody',
+    name: 'Soulful Melody / Verse',
+    startSec: Number(introEndSec.toFixed(2)),
+    endSec: Number(melodyEndSec.toFixed(2)),
+    type: 'melody',
+    energyLevel: Number(((chunkEnergies[1] || 0.5) * 0.9).toFixed(2)),
+    isMelodyDominant: true,
+    melodyProfile: overallMelodyScore > 0.6 ? 'vocal-like' : 'piano-strings',
+  })
 
-    // Section classification
-    let type: MusicSection['type'] = 'melody'
-    let name = 'Melodic Passage'
+  // Section 3: Climax Section
+  sections.push({
+    id: 'sec-climax',
+    name: 'Climax / Peak Energy',
+    startSec: Number(climaxStartSec.toFixed(2)),
+    endSec: Number(climaxEndSec.toFixed(2)),
+    type: 'climax',
+    energyLevel: Number(maxChunkE.toFixed(2)),
+    isMelodyDominant: false,
+    melodyProfile: avgBass > 0.45 ? 'beat-driven' : 'high-energy-mixed',
+  })
 
-    if (c === 0 && avgE < 0.5) {
-      type = 'intro'
-      name = 'Intro Opening'
-    } else if (c >= chunkCount - 1 && avgE < 0.4) {
-      type = 'outro'
-      name = 'Ending Fade'
-    } else if (c === climaxChunkIndex || c === climaxChunkIndex + 1) {
-      type = 'climax'
-      name = 'Climax Peak'
-    } else if (c === climaxChunkIndex - 1 && avgE > chunkEnergies[Math.max(0, c - 1)]) {
-      type = 'buildup'
-      name = 'Build-up Momentum'
-    } else if (avgE < 0.32) {
-      type = 'calm'
-      name = 'Calm Rest'
-    } else if (avgE > 0.65 && avgB > 0.5) {
-      type = 'energetic'
-      name = 'High Energy Beat'
-    }
-
-    // Melody profile estimation
-    let melodyProfile: MelodyProfileType = 'uncertain'
-    if (avgE < 0.28) {
-      melodyProfile = 'soft-melody'
-    } else if (isMelodyDominant && avgM > 0.55 && avgB < 0.35) {
-      melodyProfile = 'vocal-like'
-    } else if (isMelodyDominant && avgE > 0.4) {
-      melodyProfile = 'sustained-instrumental'
-    } else if (avgB > 0.65 && avgE > 0.6) {
-      melodyProfile = 'bass-heavy'
-    } else if (avgB > 0.45 && avgM < 0.45) {
-      melodyProfile = 'beat-driven'
-    } else if (avgE > 0.7 && avgM > 0.5 && avgB > 0.5) {
-      melodyProfile = 'high-energy-mixed'
-    } else if (isMelodyDominant) {
-      melodyProfile = 'piano-strings'
-    }
-
+  // Section 4: Outro / Resolution
+  if (climaxEndSec < durationSec - 1.0) {
     sections.push({
-      id: `sec-${c}`,
-      name,
-      startSec,
-      endSec,
-      type,
-      energyLevel: Number(avgE.toFixed(2)),
-      isMelodyDominant,
-      melodyProfile,
+      id: 'sec-outro',
+      name: 'Outro / Resolution',
+      startSec: Number(climaxEndSec.toFixed(2)),
+      endSec: Number(durationSec.toFixed(2)),
+      type: 'outro',
+      energyLevel: Number((chunkEnergies[chunkCount - 1] || 0.25).toFixed(2)),
+      isMelodyDominant: true,
+      melodyProfile: 'soft-melody',
     })
-  }
-
-  // Calculate Overall Melody Score (0 to 1)
-  const melodySections = sections.filter((s) => s.isMelodyDominant).length
-  const overallMelodyScore = Number((melodySections / sections.length).toFixed(2))
-
-  // Dominant Mood estimation
-  let dominantMood: EmotionalMood = 'gentle'
-  const avgTrackEnergy = chunkEnergies.reduce((a, b) => a + b, 0) / chunkEnergies.length
-
-  if (avgTrackEnergy < 0.3) {
-    dominantMood = overallMelodyScore > 0.6 ? 'calm' : 'gentle'
-  } else if (avgTrackEnergy > 0.65) {
-    dominantMood = overallMelodyScore > 0.5 ? 'dramatic' : 'intense'
-  } else {
-    dominantMood = overallMelodyScore > 0.55 ? 'romantic' : 'energetic'
   }
 
   return {
@@ -377,46 +593,33 @@ function segmentMusicalStructure(
 
 function generateSuggestedCutPoints(
   sections: MusicSection[],
+  downbeats: number[],
   beats: number[],
-  durationSec: number
+  phraseBoundaries: number[]
 ): number[] {
-  const cutPoints: number[] = [0]
-  const beatsSet = new Set(beats.map((b) => Math.round(b * 10) / 10))
+  const cuts = new Set<number>()
 
-  for (const sec of sections) {
-    const secSpan = sec.endSec - sec.startSec
+  for (const s of sections) {
+    if (s.startSec > 0) cuts.add(s.startSec)
+  }
 
-    // In melody/calm sections: longer shot intervals (3.5s - 5.0s)
-    // In energetic/beat sections: 1.2s - 2.0s
-    // In climax: 0.3s - 0.8s
-    let targetInterval = 3.0
-    if (sec.type === 'climax') targetInterval = 0.5
-    else if (sec.type === 'buildup') targetInterval = 1.2
-    else if (sec.type === 'energetic') targetInterval = 1.5
-    else if (sec.isMelodyDominant || sec.type === 'calm') targetInterval = 4.0
+  for (const p of phraseBoundaries) {
+    cuts.add(p)
+  }
 
-    let cursor = sec.startSec + targetInterval
-    while (cursor < sec.endSec - 0.4) {
-      // Find nearest detected beat within 0.3s if available
-      const roundedCursor = Math.round(cursor * 10) / 10
-      let alignedCut = cursor
+  for (const db of downbeats) {
+    cuts.add(db)
+  }
 
-      for (let offset = -0.3; offset <= 0.3; offset += 0.1) {
-        const testT = Math.round((cursor + offset) * 10) / 10
-        if (beatsSet.has(testT)) {
-          alignedCut = testT
-          break
-        }
-      }
-
-      cutPoints.push(Number(alignedCut.toFixed(2)))
-      cursor += targetInterval
+  // Fill in any long gaps > 5.0s with beats
+  const sorted = Array.from(cuts).sort((a, b) => a - b)
+  for (let i = 0; i < sorted.length - 1; i++) {
+    if (sorted[i + 1] - sorted[i] > 5.0) {
+      const mid = (sorted[i] + sorted[i + 1]) / 2
+      const candidateBeat = beats.find((b) => Math.abs(b - mid) < 1.0)
+      if (candidateBeat) cuts.add(candidateBeat)
     }
   }
 
-  // Deduplicate and sort
-  const unique = Array.from(new Set(cutPoints.filter((t) => t >= 0 && t < durationSec))).sort(
-    (a, b) => a - b
-  )
-  return unique
+  return Array.from(cuts).sort((a, b) => a - b)
 }
