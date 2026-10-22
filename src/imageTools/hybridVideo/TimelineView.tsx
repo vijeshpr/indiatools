@@ -16,7 +16,7 @@ import {
   Image as ImageIcon,
   Music,
 } from 'lucide-react'
-import type { TimelineClip, Track } from '../../lib/hybridVideo/types.ts'
+import type { TimelineClip, Track, AutoDuckingConfig } from '../../lib/hybridVideo/types.ts'
 import { findSnapTime, splitClipAtTime, trimClipStart, trimClipEnd } from '../../lib/hybridVideo/timelineEngine.ts'
 
 interface TimelineViewProps {
@@ -35,6 +35,7 @@ interface TimelineViewProps {
   musicPhrases?: number[]
   showMusicMarkers?: boolean
   onToggleMusicMarkers?: () => void
+  autoDucking?: AutoDuckingConfig
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
@@ -53,6 +54,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   musicPhrases = [],
   showMusicMarkers = true,
   onToggleMusicMarkers,
+  autoDucking,
 }) => {
   const [pxPerSec, setPxPerSec] = useState(60) // timeline zoom level
   const [snapEnabled, setSnapEnabled] = useState(true)
@@ -233,6 +235,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <span className="truncate text-[11px] font-medium" title={track.name}>
                   {track.name}
                 </span>
+                {autoDucking?.enabled && track.id === autoDucking.voiceTrackId && (
+                  <span className="shrink-0 px-1 py-0.5 rounded text-[8px] bg-emerald-500/20 text-emerald-300 font-mono font-medium border border-emerald-500/30">
+                    VOICE
+                  </span>
+                )}
+                {autoDucking?.enabled && autoDucking.targetTrackIds.includes(track.id) && (
+                  <span className="shrink-0 px-1 py-0.5 rounded text-[8px] bg-violet-500/20 text-violet-300 font-mono font-medium border border-violet-500/30">
+                    DUCKED
+                  </span>
+                )}
               </div>
 
               {/* Mute, Lock, Hide track buttons */}

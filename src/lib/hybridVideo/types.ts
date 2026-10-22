@@ -369,6 +369,39 @@ export interface TimelineClip {
   cutReason?: string // Diagnostic explanation of why cut was placed at this timestamp
 }
 
+export type AutoDuckingPresetId =
+  | 'podcast'
+  | 'voice-priority'
+  | 'cinematic-dialogue'
+  | 'subtle-background'
+  | 'custom'
+
+export interface AutoDuckingConfig {
+  enabled: boolean
+  voiceTrackId: string // Which audio or video track is the voice source
+  targetTrackIds: string[] // Which music tracks get ducked
+  duckAmountDb: number // e.g. -12dB (-24dB to -3dB)
+  thresholdDb: number // Detection sensitivity (-45dB to -10dB, default -28dB)
+  attackSec: number // Drop speed (0.02s to 0.4s, default 0.08s)
+  holdSec: number // Pause bridge hold (0.2s to 2.0s, default 0.6s)
+  releaseSec: number // Recovery speed (0.1s to 2.5s, default 0.5s)
+  minMusicVolume: number // Floor limit (0.05 to 0.5, default 0.15)
+  preset?: AutoDuckingPresetId
+}
+
+export const DEFAULT_AUTO_DUCKING: AutoDuckingConfig = {
+  enabled: false,
+  voiceTrackId: 'track-audio-voice',
+  targetTrackIds: ['track-audio-1'],
+  duckAmountDb: -12,
+  thresholdDb: -28,
+  attackSec: 0.08,
+  holdSec: 0.6,
+  releaseSec: 0.5,
+  minMusicVolume: 0.15,
+  preset: 'podcast',
+}
+
 export interface ProjectSettings {
   version: number
   id: string
@@ -378,6 +411,7 @@ export interface ProjectSettings {
   durationSec: number
   backgroundColor: string
   musicReactivity?: MusicReactivityConfig // Global composition reactivity
+  autoDucking?: AutoDuckingConfig // Smart Auto-Ducking Mix
 }
 
 export interface HybridVideoProject {
@@ -386,6 +420,7 @@ export interface HybridVideoProject {
   clips: TimelineClip[]
   mediaAssets: MediaAsset[]
   musicReactivity?: MusicReactivityConfig
+  autoDucking?: AutoDuckingConfig
 }
 
 export interface ExportConfig {

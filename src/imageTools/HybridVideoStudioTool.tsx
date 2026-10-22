@@ -54,7 +54,9 @@ import {
   DEFAULT_AUDIO_PROPS,
   DEFAULT_TEXT_PROPS,
   DEFAULT_MUSIC_REACTIVITY,
+  DEFAULT_AUTO_DUCKING,
   type MusicReactivityConfig,
+  type AutoDuckingConfig,
 } from '../lib/hybridVideo/types.ts'
 import {
   createReactivityConfig,
@@ -216,7 +218,8 @@ export const HybridVideoStudioTool: React.FC = () => {
       return
     }
 
-    hybridAudio.playAt(playheadSec, project.clips, project.tracks, mediaAssetsMapRef.current)
+    const autoDucking = project.settings?.autoDucking ?? project.autoDucking
+    hybridAudio.playAt(playheadSec, project.clips, project.tracks, mediaAssetsMapRef.current, autoDucking)
     lastPlayheadTimeRef.current = performance.now()
 
     let running = true
@@ -231,7 +234,7 @@ export const HybridVideoStudioTool: React.FC = () => {
         const next = prev + deltaSec
         if (next >= project.settings.durationSec) {
           if (isLooping) {
-            hybridAudio.playAt(0, project.clips, project.tracks, mediaAssetsMapRef.current)
+            hybridAudio.playAt(0, project.clips, project.tracks, mediaAssetsMapRef.current, autoDucking)
             return 0
           } else {
             setIsPlaying(false)
@@ -729,6 +732,28 @@ export const HybridVideoStudioTool: React.FC = () => {
     })
   }
 
+  // Auto-Ducking Configuration
+  const handleUpdateAutoDucking = (autoDucking: AutoDuckingConfig) => {
+    const updatedProject: HybridVideoProject = {
+      ...project,
+      settings: {
+        ...project.settings,
+        autoDucking,
+      },
+      autoDucking,
+    }
+    pushState(updatedProject)
+    if (isPlaying) {
+      hybridAudio.playAt(
+        playheadSec,
+        updatedProject.clips,
+        updatedProject.tracks,
+        mediaAssetsMapRef.current,
+        autoDucking
+      )
+    }
+  }
+
   const selectedClip = project.clips.find((c) => c.id === selectedClipId) || null
 
   return (
@@ -879,7 +904,15 @@ export const HybridVideoStudioTool: React.FC = () => {
                   />
                 )}
                 {activeTab === 'audio' && (
-                  <AudioLibraryPanel tracks={project.tracks} onUpdateTrack={handleUpdateTrack} />
+                  <AudioLibraryPanel
+                    tracks={project.tracks}
+                    clips={project.clips}
+                    autoDucking={project.settings.autoDucking ?? project.autoDucking ?? DEFAULT_AUTO_DUCKING}
+                    onUpdateTrack={handleUpdateTrack}
+                    onUpdateAutoDucking={handleUpdateAutoDucking}
+                    playheadSec={playheadSec}
+                    isPlaying={isPlaying}
+                  />
                 )}
               </div>
             )}
@@ -1005,6 +1038,7 @@ export const HybridVideoStudioTool: React.FC = () => {
             musicPhrases={musicAnalysis?.phraseBoundaries || []}
             showMusicMarkers={showMusicMarkers}
             onToggleMusicMarkers={() => setShowMusicMarkers(!showMusicMarkers)}
+            autoDucking={project.settings.autoDucking ?? project.autoDucking}
           />
         </div>
       </div>

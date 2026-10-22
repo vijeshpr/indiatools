@@ -143,7 +143,8 @@ export class HybridVideoExporter {
 
     // Start audio playback synchronized to 0s
     if (config.includeAudio) {
-      hybridAudio.playAt(0, project.clips, project.tracks, mediaAssets)
+      const autoDucking = project.settings?.autoDucking ?? project.autoDucking
+      hybridAudio.playAt(0, project.clips, project.tracks, mediaAssets, autoDucking)
     }
 
     recorder.start(250) // collect chunks every 250ms
