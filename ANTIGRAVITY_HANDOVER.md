@@ -47,7 +47,8 @@
 - **Chat Responses:** Explain changes clearly and politely, using concise Malayalam or English as requested.
 
 ### 5. Git & Deployment Boundaries
-- **NEVER** commit, push to GitHub, or trigger production deployment without explicit user permission.
+- **Standing User Preference:** The user has explicitly instructed to **always push and update to website** upon completing coding features, passing all tests, and completing verification builds.
+- Ensure all 34 test suites, 60/60 SEO checks, and production prerender build pass cleanly before pushing to `origin/main`.
 - Only run `git add`, `git commit`, and `git push origin main` when the user explicitly prompts (e.g., *"update to website"* / *"websitelkk update chyyuka"*).
 - When asked to push, verify tests and SEO audits locally first.
 
@@ -181,11 +182,12 @@ cmd /c npm run build
 ## G. Git and Deployment State
 
 - **Current Git Branch:** `main`
-- **Latest Commit Hash:** `1a12ec2`
-- **Latest Commit Subject:** `style(memoryburst): use clean English title Rhythm Cinematic Zoom without Malayalam subtitle`
-- **Remote Origin:** Repository origin on GitHub (run `git remote get-url origin` to verify).
+- **Latest Commit Hash:** `79f8704`
+- **Latest Commit Subject:** `feat(hybrid-video): add music-reactive VFX panel, beat-synced transitions, and 8 presets`
+- **Remote Origin:** Repository origin on GitHub (`https://github.com/vijeshpr/indiatools.git`).
 - **Working Tree:** Clean (all files committed and pushed to `origin/main`).
-- **Live Vercel URL:** `https://indiatools-rho.vercel.app/tools/audio-to-video-studio?tab=memoryburst`
+- **Live Vercel Production URL:** `https://indiatools-rho.vercel.app/tools/hybrid-video-studio`
+- **Total Tools in Registry:** 70 Tools (all 34 test suites passing 100%, 60/60 SEO checks passing, 218 prerendered pages).
 
 ---
 
@@ -193,16 +195,16 @@ cmd /c npm run build
 
 1. **Verify Workspace State:**
    - Run `git status` to verify clean working tree.
-   - Run `cmd /c npx tsc --noEmit` to confirm TypeScript health.
+   - Run `cmd /c npx tsc -b` to confirm TypeScript health.
 2. **Launch Local Preview (if testing):**
    - Run `cmd /c npx vite preview --port 4173 --host` as a background task.
-   - Access preview on local port 4173: `/tools/audio-to-video-studio?tab=memoryburst`.
+   - Access preview on local port 4173: `/tools/hybrid-video-studio`.
 3. **If User Requests New Features or Tweaks:**
    - Follow all permanent rules in Section B.
    - Ensure all optional decorative effects remain OFF by default.
    - Keep UI labels strictly in English.
-   - Run the 4 verification scripts in Section F.2.
-   - Wait for explicit user instruction before pushing to GitHub.
+   - Run the verification scripts (`npx tsc -b`, `run-all-tests.cjs`, `seo-audit.cjs`, `npm run build`).
+   - Push to `origin/main` to update the production website on Vercel as instructed.
 
 ---
 
