@@ -23,6 +23,13 @@ import {
 export * from '../sonicCam/sonicCamTypes.ts'
 export * from '../sonicCam/sonicCamPresets.ts'
 
+import {
+  MemoryBurstStudioConfig,
+  DEFAULT_MEMORY_BURST_CONFIG,
+} from '../memoryBurst/memoryBurstTypes.ts'
+export * from '../memoryBurst/memoryBurstTypes.ts'
+export * from '../memoryBurst/memoryBurstPresets.ts'
+
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
 
@@ -189,6 +196,7 @@ export interface StudioCompositionConfig {
   portalVfx?: CinematicPortalStudioConfig
   gardenStudio?: MusicGrownGardenConfig
   sonicCam3d?: SonicCamStudioConfig
+  memoryBurst?: MemoryBurstStudioConfig
   performanceMode: boolean
 }
 
@@ -266,5 +274,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
   portalVfx: DEFAULT_PORTAL_VFX_CONFIG,
   gardenStudio: DEFAULT_GARDEN_CONFIG,
   sonicCam3d: DEFAULT_SONIC_CAM_CONFIG,
+  memoryBurst: DEFAULT_MEMORY_BURST_CONFIG,
   performanceMode: false,
 }
