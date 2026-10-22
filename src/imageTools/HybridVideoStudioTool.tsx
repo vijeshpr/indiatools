@@ -28,6 +28,7 @@ import { EffectsLibraryPanel } from './hybridVideo/EffectsLibraryPanel.tsx'
 import { TransitionsLibraryPanel } from './hybridVideo/TransitionsLibraryPanel.tsx'
 import { AudioLibraryPanel } from './hybridVideo/AudioLibraryPanel.tsx'
 import { MusicIntelligencePanel } from './hybridVideo/MusicIntelligencePanel.tsx'
+import { MusicReactivityPanel } from './hybridVideo/MusicReactivityPanel.tsx'
 import { PreviewPlayer } from './hybridVideo/PreviewPlayer.tsx'
 import { PropertiesPanel } from './hybridVideo/PropertiesPanel.tsx'
 import { TimelineView } from './hybridVideo/TimelineView.tsx'
@@ -52,7 +53,14 @@ import {
   DEFAULT_EFFECTS,
   DEFAULT_AUDIO_PROPS,
   DEFAULT_TEXT_PROPS,
+  DEFAULT_MUSIC_REACTIVITY,
+  type MusicReactivityConfig,
 } from '../lib/hybridVideo/types.ts'
+import {
+  createReactivityConfig,
+  type ReactivityPresetId,
+} from '../lib/hybridVideo/musicReactivityEngine.ts'
+import { applyTransitionToAllCuts } from '../lib/hybridVideo/transitionsEngine.ts'
 import {
   createDefaultProject,
   saveProjectToLocalStorage,
@@ -85,8 +93,13 @@ export const HybridVideoStudioTool: React.FC = () => {
   // Selection & Navigation
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<
-    'media' | 'music-ai' | 'text' | 'effects' | 'transitions' | 'audio'
+    'media' | 'music-ai' | 'reactivity' | 'text' | 'effects' | 'transitions' | 'audio'
   >('media')
+
+  // Music Reactivity State (OFF by default)
+  const [musicReactivity, setMusicReactivity] = useState<MusicReactivityConfig>(() => {
+    return project.settings.musicReactivity || project.musicReactivity || DEFAULT_MUSIC_REACTIVITY
+  })
 
   // Panel Collapsibility
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true)
@@ -256,10 +269,13 @@ export const HybridVideoStudioTool: React.FC = () => {
       mediaAssets: mediaAssetsMapRef.current,
       videoElements: videoElementsMapRef.current,
       imageElements: imageElementsMapRef.current,
+      musicAnalysis,
+      musicReactivity,
+      selectedClipId,
     }
 
     drawCompositionFrame(renderCtx, playheadSec)
-  }, [playheadSec, project])
+  }, [playheadSec, project, musicAnalysis, musicReactivity, selectedClipId])
 
   const togglePlay = () => {
     if (playheadSec >= project.settings.durationSec) {
@@ -614,6 +630,53 @@ export const HybridVideoStudioTool: React.FC = () => {
     handleUpdateClip(selectedClipId, updates)
   }
 
+  // Batch Apply Transition Across All Cuts on Video/Image Tracks
+  const handleApplyTransitionToAllCuts = (
+    transition: ClipTransition,
+    target: 'in' | 'out' | 'both'
+  ) => {
+    const updatedClips = applyTransitionToAllCuts(project.clips, transition, target)
+    pushState({
+      ...project,
+      clips: updatedClips,
+    })
+  }
+
+  // Music Reactivity Handlers
+  const handleUpdateReactivity = (newConfig: MusicReactivityConfig) => {
+    setMusicReactivity(newConfig)
+    if (newConfig.scope === 'selected' && selectedClipId) {
+      handleUpdateClip(selectedClipId, { musicReactivity: newConfig })
+    } else if (newConfig.scope === 'all') {
+      const updatedClips = project.clips.map((c) =>
+        c.type === 'image' || c.type === 'video' ? { ...c, musicReactivity: newConfig } : c
+      )
+      pushState({
+        ...project,
+        clips: updatedClips,
+        settings: { ...project.settings, musicReactivity: newConfig },
+        musicReactivity: newConfig,
+      })
+    } else {
+      pushState({
+        ...project,
+        settings: { ...project.settings, musicReactivity: newConfig },
+        musicReactivity: newConfig,
+      })
+    }
+  }
+
+  const handleApplyReactivityPreset = (presetId: ReactivityPresetId) => {
+    const newConfig = createReactivityConfig(presetId)
+    handleUpdateReactivity(newConfig)
+  }
+
+  const handleResetReactivity = () => {
+    const resetConfig = createReactivityConfig()
+    resetConfig.enabled = false
+    handleUpdateReactivity(resetConfig)
+  }
+
   // Track Modifications
   const handleUpdateTrack = (trackId: string, updates: Partial<Track>) => {
     const updatedTracks = project.tracks.map((t) => (t.id === trackId ? { ...t, ...updates } : t))
@@ -662,6 +725,7 @@ export const HybridVideoStudioTool: React.FC = () => {
               {[
                 { id: 'media', icon: Video, label: 'Media' },
                 { id: 'music-ai', icon: Sparkles, label: 'Music Sync' },
+                { id: 'reactivity', icon: Zap, label: 'Beat VFX' },
                 { id: 'text', icon: Type, label: 'Text' },
                 { id: 'effects', icon: Sliders, label: 'Effects' },
                 { id: 'transitions', icon: ArrowLeftRight, label: 'Transition' },
@@ -735,6 +799,22 @@ export const HybridVideoStudioTool: React.FC = () => {
                     lastSummary={lastAutoEditSummary}
                   />
                 )}
+                {activeTab === 'reactivity' && (
+                  <MusicReactivityPanel
+                    config={
+                      musicReactivity.scope === 'selected' && selectedClip?.musicReactivity
+                        ? selectedClip.musicReactivity
+                        : musicReactivity
+                    }
+                    onChangeConfig={handleUpdateReactivity}
+                    onApplyPreset={handleApplyReactivityPreset}
+                    onResetReactivity={handleResetReactivity}
+                    musicAnalysis={musicAnalysis}
+                    playheadSec={playheadSec}
+                    hasSelectedClip={!!selectedClip}
+                    selectedClipName={selectedClip?.name}
+                  />
+                )}
                 {activeTab === 'text' && <TextLibraryPanel onAddTextClip={handleAddTextClip} />}
                 {activeTab === 'effects' && (
                   <EffectsLibraryPanel
@@ -751,6 +831,8 @@ export const HybridVideoStudioTool: React.FC = () => {
                   <TransitionsLibraryPanel
                     hasSelectedClip={!!selectedClip}
                     onApplyTransition={handleApplyTransition}
+                    onApplyToAllCuts={handleApplyTransitionToAllCuts}
+                    musicAnalysis={musicAnalysis}
                   />
                 )}
                 {activeTab === 'audio' && (
@@ -1090,6 +1172,8 @@ export const HybridVideoStudioTool: React.FC = () => {
         mediaAssets={mediaAssetsMapRef.current}
         videoElements={videoElementsMapRef.current}
         imageElements={imageElementsMapRef.current}
+        musicAnalysis={musicAnalysis}
+        musicReactivity={musicReactivity}
       />
 
       <ProjectStorageModal

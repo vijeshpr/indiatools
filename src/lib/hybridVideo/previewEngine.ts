@@ -1,6 +1,7 @@
 /**
  * IndiaTools — Multi-Layer Canvas 2D Preview & Composition Engine
  * Synchronously or asynchronously draws active clips, video frames, transforms, text, and effects
+ * Full parity with Export Engine + Deterministic Music Reactivity + 24 Transitions
  */
 
 import type {
@@ -9,11 +10,18 @@ import type {
   MediaAsset,
   ProjectSettings,
   FitMode,
+  MusicReactivityConfig,
 } from './types.ts'
 import { interpolateKeyframes } from './keyframeInterpolator.ts'
 import { buildCssFilterString, applyProceduralEffects } from './effectsEngine.ts'
-import { computeClipTransition } from './transitionsEngine.ts'
+import { computeClipTransition, type TransitionState } from './transitionsEngine.ts'
 import { renderTextOverlay } from './textOverlayEngine.ts'
+import type { MusicAnalysisResult } from './musicIntelligence.ts'
+import {
+  computeMusicReactivityFrame,
+  renderReactivityOverlays,
+  type MusicReactivityResult,
+} from './musicReactivityEngine.ts'
 
 export interface RenderContext {
   canvas: HTMLCanvasElement
@@ -24,6 +32,9 @@ export interface RenderContext {
   mediaAssets: Map<string, MediaAsset>
   videoElements: Map<string, HTMLVideoElement>
   imageElements: Map<string, HTMLImageElement>
+  musicAnalysis?: MusicAnalysisResult | null
+  musicReactivity?: MusicReactivityConfig | null
+  selectedClipId?: string | null
 }
 
 export function drawCompositionFrame(
@@ -67,6 +78,10 @@ export function drawCompositionFrame(
     return
   }
 
+  let activeReactivityResult: MusicReactivityResult | null = null
+  let activeTransitionFlash: { alpha: number; color: string } | null = null
+  let activeFilmBurnAlpha = 0
+
   // Render each active clip
   for (const clip of activeClips) {
     const relTimeSec = playheadSec - clip.startSec
@@ -80,15 +95,62 @@ export function drawCompositionFrame(
       clip.transitionOut,
       relTimeSec,
       clip.durationSec,
-      width
+      width,
+      height
     )
 
-    const finalOpacity = Math.max(0, Math.min(1, interpolatedTransform.opacity * transitionState.opacityMultiplier))
+    if (transitionState.flashAlpha > 0.02) {
+      activeTransitionFlash = {
+        alpha: transitionState.flashAlpha,
+        color: transitionState.flashColor || '#ffffff',
+      }
+    }
+    if (transitionState.filmBurnAlpha > 0.02) {
+      activeFilmBurnAlpha = Math.max(activeFilmBurnAlpha, transitionState.filmBurnAlpha)
+    }
+
+    // 3. Compute Music Reactivity
+    const globalReactivity = renderCtx.musicReactivity || settings.musicReactivity
+    let clipReactivityConfig: MusicReactivityConfig | null | undefined = clip.musicReactivity
+    if (!clipReactivityConfig || !clipReactivityConfig.enabled) {
+      if (globalReactivity && globalReactivity.enabled) {
+        if (globalReactivity.scope === 'selected') {
+          clipReactivityConfig = clip.id === renderCtx.selectedClipId ? globalReactivity : null
+        } else {
+          clipReactivityConfig = globalReactivity
+        }
+      }
+    }
+
+    const reactivityResult = computeMusicReactivityFrame(
+      clipReactivityConfig,
+      playheadSec,
+      relTimeSec,
+      renderCtx.musicAnalysis,
+      width,
+      height
+    )
+
+    if (reactivityResult.hasActiveReaction) {
+      activeReactivityResult = reactivityResult
+    }
+
+    const finalOpacity = Math.max(
+      0,
+      Math.min(1, interpolatedTransform.opacity * transitionState.opacityMultiplier)
+    )
     if (finalOpacity <= 0.001) continue
 
-    const finalScale = interpolatedTransform.scale * transitionState.scaleMultiplier
-    const finalPosX = interpolatedTransform.x + transitionState.offsetX
-    const finalPosY = interpolatedTransform.y + transitionState.offsetY
+    const finalScale =
+      interpolatedTransform.scale * transitionState.scaleMultiplier * reactivityResult.deltaScale
+    const finalPosX =
+      interpolatedTransform.x + transitionState.offsetX + reactivityResult.deltaX
+    const finalPosY =
+      interpolatedTransform.y + transitionState.offsetY + reactivityResult.deltaY
+    const finalRotation =
+      interpolatedTransform.rotationDeg +
+      transitionState.rotationDeg +
+      reactivityResult.deltaRotationDeg
 
     // Render based on clip type
     if (clip.type === 'text' && clip.textProps) {
@@ -102,7 +164,7 @@ export function drawCompositionFrame(
         finalPosX,
         finalPosY,
         finalScale,
-        interpolatedTransform.rotationDeg,
+        finalRotation,
         finalOpacity
       )
     } else if ((clip.type === 'image' || clip.type === 'video') && clip.assetId) {
@@ -146,13 +208,40 @@ export function drawCompositionFrame(
           finalPosX,
           finalPosY,
           finalScale,
-          interpolatedTransform.rotationDeg,
+          finalRotation,
           finalOpacity,
           clip.effects,
-          playheadSec
+          playheadSec,
+          transitionState,
+          reactivityResult
         )
       }
     }
+  }
+
+  // 4. Composition-level overlays: Film burn, Transition Flash, and Music Reactivity Overlays
+  if (activeFilmBurnAlpha > 0.02) {
+    ctx.save()
+    const gradient = ctx.createLinearGradient(0, 0, width, height)
+    gradient.addColorStop(0, `rgba(249, 115, 22, ${(activeFilmBurnAlpha * 0.4).toFixed(3)})`)
+    gradient.addColorStop(0.5, `rgba(234, 88, 12, ${(activeFilmBurnAlpha * 0.25).toFixed(3)})`)
+    gradient.addColorStop(1, `rgba(245, 158, 11, ${(activeFilmBurnAlpha * 0.5).toFixed(3)})`)
+    ctx.globalCompositeOperation = 'screen'
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, width, height)
+    ctx.restore()
+  }
+
+  if (activeTransitionFlash && activeTransitionFlash.alpha > 0.02) {
+    ctx.save()
+    ctx.fillStyle = activeTransitionFlash.color
+    ctx.globalAlpha = Math.min(1, activeTransitionFlash.alpha)
+    ctx.fillRect(0, 0, width, height)
+    ctx.restore()
+  }
+
+  if (activeReactivityResult) {
+    renderReactivityOverlays(ctx, width, height, activeReactivityResult)
   }
 }
 
@@ -170,12 +259,19 @@ function drawMediaLayer(
   rotationDeg: number,
   opacity: number,
   effects: import('./types.ts').ClipEffects,
-  playheadSec: number
+  playheadSec: number,
+  transitionState?: TransitionState,
+  reactivityResult?: MusicReactivityResult
 ): void {
   ctx.save()
 
   // Apply CSS filters (exposure, contrast, saturation, temperature, LUT, blur)
-  const filterStr = buildCssFilterString(effects)
+  let filterStr = buildCssFilterString(effects)
+  if (transitionState && transitionState.blurPx > 0.5) {
+    const blurAddition = `blur(${transitionState.blurPx.toFixed(1)}px)`
+    filterStr = filterStr === 'none' ? blurAddition : `${filterStr} ${blurAddition}`
+  }
+
   if (filterStr !== 'none') {
     ctx.filter = filterStr
   }
@@ -221,6 +317,24 @@ function drawMediaLayer(
       break
   }
 
+  // Linear Wipe Clipping if applicable
+  if (transitionState && transitionState.wipeType) {
+    ctx.save()
+    ctx.beginPath()
+    if (transitionState.wipeType === 'horizontal-left') {
+      const visibleW = canvasWidth * transitionState.wipeProgress
+      ctx.rect(canvasWidth - visibleW, 0, visibleW, canvasHeight)
+    } else if (transitionState.wipeType === 'horizontal-right') {
+      const visibleW = canvasWidth * transitionState.wipeProgress
+      ctx.rect(0, 0, visibleW, canvasHeight)
+    } else if (transitionState.wipeType === 'radial') {
+      const maxR = Math.max(canvasWidth, canvasHeight) * 0.75
+      const currentR = maxR * transitionState.wipeProgress
+      ctx.arc(canvasWidth / 2, canvasHeight / 2, currentR, 0, Math.PI * 2)
+    }
+    ctx.clip()
+  }
+
   // Translate to center + custom offset
   const centerX = canvasWidth / 2 + posX
   const centerY = canvasHeight / 2 + posY
@@ -233,8 +347,31 @@ function drawMediaLayer(
     ctx.scale(scale, scale)
   }
 
-  // Draw centered
+  // Check for Chromatic Aberration / RGB Split effect
+  const totalRgbSplit = Math.max(
+    reactivityResult?.chromaticOffsetPx || 0,
+    transitionState?.rgbSplitPx || 0
+  )
+
+  if (totalRgbSplit > 1.0) {
+    // Authentically draw cyan-red channel displacement
+    ctx.save()
+    ctx.globalAlpha = opacity * 0.8
+    ctx.drawImage(source, -drawW / 2 - totalRgbSplit, -drawH / 2, drawW, drawH)
+    ctx.restore()
+
+    ctx.save()
+    ctx.globalAlpha = opacity * 0.8
+    ctx.drawImage(source, -drawW / 2 + totalRgbSplit, -drawH / 2, drawW, drawH)
+    ctx.restore()
+  }
+
+  // Draw main image centered
   ctx.drawImage(source, -drawW / 2, -drawH / 2, drawW, drawH)
+
+  if (transitionState && transitionState.wipeType) {
+    ctx.restore() // restore wipe clip
+  }
 
   // Reset transform & filter before procedural overlays
   ctx.restore()

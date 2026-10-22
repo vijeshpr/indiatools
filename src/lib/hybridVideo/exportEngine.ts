@@ -55,7 +55,9 @@ export class HybridVideoExporter {
     mediaAssets: Map<string, MediaAsset>,
     videoElements: Map<string, HTMLVideoElement>,
     imageElements: Map<string, HTMLImageElement>,
-    onProgress: (p: ExportProgress) => void
+    onProgress: (p: ExportProgress) => void,
+    musicAnalysis?: import('./musicIntelligence.ts').MusicAnalysisResult | null,
+    musicReactivity?: import('./types.ts').MusicReactivityConfig | null
   ): Promise<ExportResult> {
     this.isCancelled = false
     const totalDurationSec = Math.max(1, project.settings.durationSec)
@@ -90,6 +92,8 @@ export class HybridVideoExporter {
       mediaAssets,
       videoElements,
       imageElements,
+      musicAnalysis: musicAnalysis ?? null,
+      musicReactivity: musicReactivity ?? project.musicReactivity ?? project.settings.musicReactivity ?? null,
     }
 
     // Determine supported MIME type honestly

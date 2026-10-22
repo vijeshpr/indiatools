@@ -70,20 +70,169 @@ export interface Keyframe {
 }
 
 export type TransitionType =
+  // Clean
   | 'none'
   | 'crossfade'
   | 'fade-black'
   | 'fade-white'
-  | 'fade-wipe-left'
-  | 'fade-wipe-right'
+  // Cinematic
+  | 'smooth-zoom'
+  | 'push-in'
+  | 'pull-out'
+  | 'pan-left'
+  | 'pan-right'
+  | 'tilt-up'
+  | 'tilt-down'
+  | 'blur-dissolve'
+  | 'light-leak'
+  // Dynamic
   | 'scale-punch'
   | 'whip-pan-left'
   | 'whip-pan-right'
+  | 'motion-blur-swipe'
+  | 'zoom-blur'
+  | 'fade-wipe-left'
+  | 'fade-wipe-right'
+  | 'radial-wipe'
   | 'glitch-split'
+  | 'rgb-split-trans'
+  | 'flash-cut'
+  // Stylized
+  | 'film-burn'
+  | 'prism-split'
+  | 'ripple-distort'
+  | 'digital-glitch'
+  | 'light-sweep'
+
+export type TransitionSyncMode =
+  | 'manual'
+  | 'on-beat'
+  | 'beat-to-beat'
+  | 'phrase-boundary'
+  | 'energy-peak'
+
+export type TransitionAlignment = 'start' | 'midpoint' | 'completion'
 
 export interface ClipTransition {
   type: TransitionType
   durationSec: number
+  syncMode?: TransitionSyncMode
+  alignment?: TransitionAlignment
+}
+
+export type ReactivityMode = 'beat-sync' | 'bass-pulse' | 'melody-flow' | 'balanced'
+export type ReactivityScope = 'global' | 'selected' | 'all'
+
+export interface MusicReactivityConfig {
+  enabled: boolean
+  mode: ReactivityMode
+  scope: ReactivityScope
+  beatShake: {
+    enabled: boolean
+    intensity: number // 0 to 100 (default 25)
+    durationSec: number // 0.05 to 0.4 (default 0.15)
+    decay: 'sharp' | 'medium' | 'smooth'
+    type: 'horizontal' | 'vertical' | 'rotational' | 'combined'
+    trigger: 'all-beats' | 'strong-beats-only'
+  }
+  zoomPunch: {
+    enabled: boolean
+    amount: number // 1.0 to 1.5 (default 1.15)
+    durationSec: number // 0.08 to 0.5 (default 0.2)
+    direction: 'in' | 'out'
+    recovery: 'fast' | 'normal' | 'slow'
+    trigger: 'all-beats' | 'strong-beats-only'
+  }
+  bassImpact: {
+    enabled: boolean
+    sensitivity: number // 0.5 to 2.0 (default 1.0)
+    intensity: number // 0 to 100 (default 30)
+    attackSec: number // 0.02 to 0.1
+    releaseSec: number // 0.05 to 0.3
+    threshold: number // 0.1 to 0.8
+  }
+  melodyMotion: {
+    enabled: boolean
+    amount: number // 0 to 100 (default 20)
+    smoothness: number // 0.2 to 2.0 (default 1.0)
+    direction: 'forward' | 'reverse' | 'alternating'
+    resetPerClip: boolean
+  }
+  beatFlash: {
+    enabled: boolean
+    intensity: number // 0 to 100 (default 30)
+    durationSec: number // 0.05 to 0.35 (default 0.15)
+    color: 'neutral-white' | 'warm-amber' | 'cool-cyan' | 'neon-pink'
+    trigger: 'all-beats' | 'strong-beats-only'
+  }
+  chromaticAberration: {
+    enabled: boolean
+    intensity: number // 0 to 100 (default 25)
+  }
+  radialGlow: {
+    enabled: boolean
+    intensity: number // 0 to 100 (default 20)
+  }
+  vignettePulse: {
+    enabled: boolean
+    intensity: number // 0 to 100 (default 30)
+  }
+}
+
+export const DEFAULT_MUSIC_REACTIVITY: MusicReactivityConfig = {
+  enabled: false,
+  mode: 'balanced',
+  scope: 'global',
+  beatShake: {
+    enabled: false,
+    intensity: 25,
+    durationSec: 0.15,
+    decay: 'medium',
+    type: 'combined',
+    trigger: 'strong-beats-only',
+  },
+  zoomPunch: {
+    enabled: false,
+    amount: 1.15,
+    durationSec: 0.2,
+    direction: 'in',
+    recovery: 'normal',
+    trigger: 'strong-beats-only',
+  },
+  bassImpact: {
+    enabled: false,
+    sensitivity: 1.0,
+    intensity: 30,
+    attackSec: 0.04,
+    releaseSec: 0.15,
+    threshold: 0.3,
+  },
+  melodyMotion: {
+    enabled: false,
+    amount: 20,
+    smoothness: 1.0,
+    direction: 'forward',
+    resetPerClip: true,
+  },
+  beatFlash: {
+    enabled: false,
+    intensity: 25,
+    durationSec: 0.12,
+    color: 'neutral-white',
+    trigger: 'strong-beats-only',
+  },
+  chromaticAberration: {
+    enabled: false,
+    intensity: 25,
+  },
+  radialGlow: {
+    enabled: false,
+    intensity: 20,
+  },
+  vignettePulse: {
+    enabled: false,
+    intensity: 30,
+  },
 }
 
 export interface ColorGrading {
@@ -170,6 +319,7 @@ export interface TimelineClip {
   transitionOut: ClipTransition
   textProps?: ClipTextProperties
   audioProps: ClipAudioProperties
+  musicReactivity?: MusicReactivityConfig // Clip-specific music reactive VFX stack
   cutReason?: string // Diagnostic explanation of why cut was placed at this timestamp
 }
 
@@ -181,6 +331,7 @@ export interface ProjectSettings {
   dimensions: CanvasDimensions
   durationSec: number
   backgroundColor: string
+  musicReactivity?: MusicReactivityConfig // Global composition reactivity
 }
 
 export interface HybridVideoProject {
@@ -188,6 +339,7 @@ export interface HybridVideoProject {
   tracks: Track[]
   clips: TimelineClip[]
   mediaAssets: MediaAsset[]
+  musicReactivity?: MusicReactivityConfig
 }
 
 export interface ExportConfig {

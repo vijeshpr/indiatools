@@ -18,6 +18,8 @@ interface ExportModalProps {
   mediaAssets: Map<string, MediaAsset>
   videoElements: Map<string, HTMLVideoElement>
   imageElements: Map<string, HTMLImageElement>
+  musicAnalysis?: import('../../lib/hybridVideo/musicIntelligence.ts').MusicAnalysisResult | null
+  musicReactivity?: import('../../lib/hybridVideo/types.ts').MusicReactivityConfig | null
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -27,6 +29,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   mediaAssets,
   videoElements,
   imageElements,
+  musicAnalysis,
+  musicReactivity,
 }) => {
   const [resolution, setResolution] = useState<'720p' | '1080p' | '4k'>('1080p')
   const [format, setFormat] = useState<'webm' | 'mp4'>('webm')
@@ -92,7 +96,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         mediaAssets,
         videoElements,
         imageElements,
-        (p) => setProgress(p)
+        (p) => setProgress(p),
+        musicAnalysis,
+        musicReactivity
       )
       setExportResult(result)
     } catch (err) {

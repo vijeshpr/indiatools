@@ -69,6 +69,7 @@ export interface MusicAnalysisResult {
   phraseBoundaries: number[] // timestamps of structural phrase transitions
   events: MusicEvent[] // comprehensive discrete musical events
   energyEnvelope: number[] // normalized 0-1 for visualization (20 samples per second)
+  bassEnvelope?: number[] // low-pass filtered sub-bass RMS envelope (20 samples per second)
   sections: MusicSection[]
   dominantMood: EmotionalMood
   overallMelodyScore: number // 0 (pure rhythm/bass) to 1 (pure melody)
@@ -238,6 +239,7 @@ export async function analyzeAudioBuffer(
     phraseBoundaries,
     events,
     energyEnvelope,
+    bassEnvelope,
     sections,
     dominantMood,
     overallMelodyScore,
