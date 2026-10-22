@@ -22,6 +22,12 @@ import {
   renderReactivityOverlays,
   type MusicReactivityResult,
 } from './musicReactivityEngine.ts'
+import {
+  drawCircularVideo,
+  calculatePipCenter,
+} from './circularPipEngine.ts'
+
+export { drawCircularVideo, calculatePipCenter } from './circularPipEngine.ts'
 
 export interface RenderContext {
   canvas: HTMLCanvasElement
@@ -66,7 +72,18 @@ export function drawCompositionFrame(
       return playheadSec >= c.startSec && playheadSec < c.startSec + c.durationSec
     })
     .sort((a, b) => {
-      // Draw in order of tracks array (bottom track first, top overlay last)
+      // 1. Text overlays always render on the very top
+      if (a.type === 'text' && b.type !== 'text') return 1
+      if (b.type === 'text' && a.type !== 'text') return -1
+
+      // 2. PiP reaction clips render on top of non-PiP background media
+      const aIsPip = !!(a.circularPip && a.circularPip.enabled)
+      const bIsPip = !!(b.circularPip && b.circularPip.enabled)
+      if (aIsPip !== bIsPip) {
+        return aIsPip ? 1 : -1
+      }
+
+      // 3. Track order (bottom track first, overlay track last)
       const aIndex = tracks.findIndex((t) => t.id === a.trackId)
       const bIndex = tracks.findIndex((t) => t.id === b.trackId)
       return aIndex - bIndex
@@ -197,24 +214,53 @@ export function drawCompositionFrame(
       }
 
       if (sourceDrawable) {
-        drawMediaLayer(
-          ctx,
-          sourceDrawable,
-          asset.naturalWidth,
-          asset.naturalHeight,
-          width,
-          height,
-          interpolatedTransform.fitMode,
-          finalPosX,
-          finalPosY,
-          finalScale,
-          finalRotation,
-          finalOpacity,
-          clip.effects,
-          playheadSec,
-          transitionState,
-          reactivityResult
-        )
+        if (clip.circularPip && clip.circularPip.enabled) {
+          const shorterSide = Math.min(width, height)
+          const pipSizePercent = clip.circularPip.sizePercent || 28
+          const baseDiameter = shorterSide * (pipSizePercent / 100)
+          const radius = Math.max(10, (baseDiameter / 2) * finalScale)
+
+          const pipCenter = calculatePipCenter(
+            width,
+            height,
+            radius,
+            clip.circularPip.positionPreset || 'bottom-right',
+            (clip.circularPip.offsetX || 0) + finalPosX,
+            (clip.circularPip.offsetY || 0) + finalPosY,
+            clip.circularPip.marginPx ?? 48
+          )
+
+          drawCircularVideo(ctx, sourceDrawable, pipCenter.x, pipCenter.y, radius, {
+            borderWidth: clip.circularPip.borderWidth ?? 3.5,
+            borderColor: clip.circularPip.borderColor || '#FFFFFF',
+            shadowIntensity: clip.circularPip.shadowIntensity ?? 0.45,
+            shadowBlur: clip.circularPip.shadowBlur ?? 16,
+            shadowOffsetX: clip.circularPip.shadowOffsetX ?? 0,
+            shadowOffsetY: clip.circularPip.shadowOffsetY ?? 8,
+            opacity: finalOpacity * (clip.circularPip.opacity ?? 1.0),
+            fitMode: clip.circularPip.fitMode || 'cover',
+            rotationDeg: finalRotation,
+          })
+        } else {
+          drawMediaLayer(
+            ctx,
+            sourceDrawable,
+            asset.naturalWidth,
+            asset.naturalHeight,
+            width,
+            height,
+            interpolatedTransform.fitMode,
+            finalPosX,
+            finalPosY,
+            finalScale,
+            finalRotation,
+            finalOpacity,
+            clip.effects,
+            playheadSec,
+            transitionState,
+            reactivityResult
+          )
+        }
       }
     }
   }

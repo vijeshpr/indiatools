@@ -573,6 +573,49 @@ export const HybridVideoStudioTool: React.FC = () => {
     setSelectedClipId(duplicated.id)
   }
 
+  // Move clip layer forward / backward
+  const handleMoveClipLayer = (clipId: string, direction: 'forward' | 'backward') => {
+    const clipIndex = project.clips.findIndex((c) => c.id === clipId)
+    if (clipIndex === -1) return
+    const clip = project.clips[clipIndex]
+
+    // If overlay track exists, toggle track assignment or move in clips array
+    const videoTracks = project.tracks.filter((t) => t.type === 'video' || t.type === 'image')
+    if (videoTracks.length >= 2) {
+      const currentTrackIdx = videoTracks.findIndex((t) => t.id === clip.trackId)
+      if (direction === 'forward' && currentTrackIdx !== -1) {
+        // Target overlay track (track-video-2)
+        const overlayTrack = project.tracks.find((t) => t.id === 'track-video-2') || videoTracks[0]
+        if (clip.trackId !== overlayTrack.id) {
+          handleUpdateClip(clipId, { trackId: overlayTrack.id })
+          return
+        }
+      } else if (direction === 'backward' && currentTrackIdx !== -1) {
+        // Target main track (track-video-1)
+        const mainTrack =
+          project.tracks.find((t) => t.id === 'track-video-1') || videoTracks[videoTracks.length - 1]
+        if (clip.trackId !== mainTrack.id) {
+          handleUpdateClip(clipId, { trackId: mainTrack.id })
+          return
+        }
+      }
+    }
+
+    // Also adjust position in clips array
+    const updatedClips = [...project.clips]
+    if (direction === 'forward' && clipIndex < updatedClips.length - 1) {
+      const temp = updatedClips[clipIndex]
+      updatedClips[clipIndex] = updatedClips[clipIndex + 1]
+      updatedClips[clipIndex + 1] = temp
+      pushState({ ...project, clips: updatedClips })
+    } else if (direction === 'backward' && clipIndex > 0) {
+      const temp = updatedClips[clipIndex]
+      updatedClips[clipIndex] = updatedClips[clipIndex - 1]
+      updatedClips[clipIndex - 1] = temp
+      pushState({ ...project, clips: updatedClips })
+    }
+  }
+
   const handleSplitClip = (clipId: string, splitTimeSec: number) => {
     const clip = project.clips.find((c) => c.id === clipId)
     if (!clip) return
@@ -882,6 +925,7 @@ export const HybridVideoStudioTool: React.FC = () => {
                   onDuplicateClip={handleDuplicateClip}
                   onAddKeyframe={handleAddKeyframe}
                   onRemoveKeyframe={handleRemoveKeyframe}
+                  onMoveClipLayer={handleMoveClipLayer}
                 />
               </div>
             </div>

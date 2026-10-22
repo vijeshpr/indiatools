@@ -184,7 +184,7 @@ cmd /c npm run build
 - **Current Git Branch:** `main`
 - **Latest Commit Hash:** `79f8704`
 - **Latest Commit Subject:** `feat(hybrid-video): add music-reactive VFX panel, beat-synced transitions, and 8 presets`
-- **Remote Origin:** Repository origin on GitHub (`https://github.com/vijeshpr/indiatools.git`).
+- **Remote Origin:** Repository origin on GitHub (run `git remote get-url origin` to verify).
 - **Working Tree:** Clean (all files committed and pushed to `origin/main`).
 - **Live Vercel Production URL:** `https://indiatools-rho.vercel.app/tools/hybrid-video-studio`
 - **Total Tools in Registry:** 70 Tools (all 34 test suites passing 100%, 60/60 SEO checks passing, 218 prerendered pages).

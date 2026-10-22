@@ -301,6 +301,51 @@ export interface ClipAudioProperties {
   muted: boolean
 }
 
+export type PipPresetPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'center'
+  | 'custom'
+
+export type PipFitMode = 'cover' | 'contain'
+
+export interface CircularPipConfig {
+  enabled: boolean
+  sizePercent: number // Diameter as percentage of canvas shorter side (10% to 60%, default 28%)
+  radiusPx?: number // Explicit custom radius in canvas pixels
+  positionPreset: PipPresetPosition
+  offsetX: number // Custom X position offset in pixels from preset anchor
+  offsetY: number // Custom Y position offset in pixels from preset anchor
+  borderWidth: number // 0 to 20px (default 3.5px)
+  borderColor: string // Hex or rgba (default '#FFFFFF')
+  shadowIntensity: number // 0 to 1 (default 0.45)
+  shadowBlur: number // 0 to 40px (default 16)
+  shadowOffsetX: number // -30 to +30 (default 0)
+  shadowOffsetY: number // -30 to +30 (default 8)
+  opacity: number // 0 to 1 (default 1.0)
+  fitMode: PipFitMode // 'cover' (default) | 'contain'
+  marginPx?: number // Distance from canvas edge for preset positions (default 48px)
+}
+
+export const DEFAULT_CIRCULAR_PIP: CircularPipConfig = {
+  enabled: false,
+  sizePercent: 28,
+  positionPreset: 'bottom-right',
+  offsetX: 0,
+  offsetY: 0,
+  borderWidth: 3.5,
+  borderColor: '#FFFFFF',
+  shadowIntensity: 0.45,
+  shadowBlur: 16,
+  shadowOffsetX: 0,
+  shadowOffsetY: 8,
+  opacity: 1.0,
+  fitMode: 'cover',
+  marginPx: 48,
+}
+
 export interface TimelineClip {
   id: string
   trackId: string
@@ -319,6 +364,7 @@ export interface TimelineClip {
   transitionOut: ClipTransition
   textProps?: ClipTextProperties
   audioProps: ClipAudioProperties
+  circularPip?: CircularPipConfig // Circular PiP / Reaction Video Mode
   musicReactivity?: MusicReactivityConfig // Clip-specific music reactive VFX stack
   cutReason?: string // Diagnostic explanation of why cut was placed at this timestamp
 }
