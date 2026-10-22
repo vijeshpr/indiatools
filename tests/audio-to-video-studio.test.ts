@@ -47,8 +47,8 @@ import {
 
 describe('IndiaTools Audio to Video Studio Suite', () => {
   it('should be correctly registered as Tool #69 in TOOLS registry', () => {
-    assert.strictEqual(TOOLS.length, 69, 'Total tool count should be exactly 69')
-    assert.strictEqual(CATEGORIES.create.toolCount, 28, 'Create category tool count should be 28')
+    assert.strictEqual(TOOLS.length, 70, 'Total tool count should be exactly 70')
+    assert.strictEqual(CATEGORIES.create.toolCount, 29, 'Create category tool count should be 29')
 
     const tool = getToolBySlug('audio-to-video-studio')
     assert.ok(tool, 'Tool must be found by slug audio-to-video-studio')

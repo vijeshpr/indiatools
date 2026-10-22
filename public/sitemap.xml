@@ -373,6 +373,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://indiatools-rho.vercel.app/tools/hybrid-video-studio</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://indiatools-rho.vercel.app/tools/dts-cinema-theater-reverb</loc>
     <lastmod>2026-10-13</lastmod>
     <changefreq>weekly</changefreq>

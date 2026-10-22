@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "آڈیو ٹو ویڈیو سٹوڈیو",
     description: "موسیقی تہٕ آڈیو سپیکٹرم ویوفارم، موشن فوٹو سلائڈ شو تہٕ پارٹیکلز سٟتؠ ویڈیو مَنٛز بدلیو۔"
   },
+
+  'hybrid-video-studio': {
+    name: "ہائبرڈ ویڈیو سٹوڈیو",
+    description: "براؤزر پؠٹھ ملٹی ٹریک ویڈیو ایڈیٹر، موشن ٹائٹل تہٕ بہترین ویڈیو ایکسپورٹ۔"
+  }
 }
 
 export default translations

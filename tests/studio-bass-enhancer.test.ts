@@ -13,8 +13,8 @@ import { encodeAudioBufferToMp3 } from '../src/lib/audio/encoders/mp3Encoder'
 
 describe('IndiaTools Studio Bass Enhancer & Sub-Harmonic Generator Test Suite', () => {
   it('should register Studio Bass Enhancer in tools registry with full SEO metadata', () => {
-    assert.strictEqual(TOOLS.length, 69, 'Tools count should be exactly 69')
-    assert.strictEqual(CATEGORIES.create.toolCount, 28, 'Create category count should be 28')
+    assert.strictEqual(TOOLS.length, 70, 'Tools count should be exactly 70')
+    assert.strictEqual(CATEGORIES.create.toolCount, 29, 'Create category count should be 29')
 
     const tool = getToolBySlug('studio-bass-enhancer')
     assert.ok(tool, 'Studio Bass Enhancer tool must be found by slug')

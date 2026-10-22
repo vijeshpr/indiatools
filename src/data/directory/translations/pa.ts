@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "ਆਡੀਓ ਟੂ ਵੀਡੀਓ ਸਟੂਡੀਓ",
     description: "ਸੰਗੀਤ ਅਤੇ ਆਡੀਓ ਨੂੰ ਸਪੈਕਟ੍ਰਮ ਵੇਵਫਾਰਮਾਂ, ਫੋਟੋ ਸਲਾਈਡਸ਼ੋਅ ਅਤੇ ਸਿਨੇਮੈਟਿਕ ਵੀਡੀਓਜ਼ ਵਿੱਚ ਬਦਲੋ।"
   },
+
+  'hybrid-video-studio': {
+    name: "ਹਾਈਬ੍ਰਿਡ ਵੀਡੀਓ ਸਟੂਡੀਓ",
+    description: "ਬ੍ਰਾਊਜ਼ਰ-ਅਧਾਰਤ ਮਲਟੀ-ਟਰੈਕ ਵੀਡੀਓ ਐਡੀਟਰ, ਮੋਸ਼ਨ ਟਾਈਟਲ, ਕਲਰ ਗ੍ਰੇਡਿੰਗ ਅਤੇ ਸੁਰੱਖਿਅਤ ਵੀਡੀਓ ਐਕਸਪੋਰਟ।"
+  }
 }
 
 export default translations

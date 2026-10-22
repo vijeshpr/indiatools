@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "অদিও তু भिदिঅ' स्तुदिय'",
     description: "रोजाबनाय आरो अदिঅ'खौ स्पेक्ट्रम वेवफर्म, फोटो स्लाइडशो आरो पार्टिकल्सजों भिदिঅ'आव सोलायहो।"
   },
+
+  'hybrid-video-studio': {
+    name: "हाइब्रिड भिदिअ' स्टुडिअ'",
+    description: "ब्राउजार-आधारित मल्टि-ट्रेक भिदिअ' एडिटार, मशन टाइथेल आरो गेरेमसा भिदिअ' एक्सपर्त।"
+  }
 }
 
 export default translations

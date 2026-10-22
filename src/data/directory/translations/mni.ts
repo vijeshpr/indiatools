@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "ওদিও তু ভিদিও স্তুদিও",
     description: "ঈশৈ অমসুং খোঞ্জেল স্পেক্ত্রম ৱেবফোর্ম, ফোতো স্লাইদশো অমসুং পার্তিকলসকা লোইননা ভিদিওদা ওন্থোকউ।"
   },
+
+  'hybrid-video-studio': {
+    name: "হাইব্রিদ ভিদিও স্তুদিও",
+    description: "ব্রাউজরদা য়াওবা মলতি-ত্রেক ভিদিও এদিতর, মোসন তাইতল অমসুং অপুনবা ভিদিও এক্সপোর্ত।"
+  }
 }
 
 export default translations

@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "Audio to Video Studio",
     description: "Convert music and audio into cinematic videos with spectrum waveforms, motion photo slideshows, and particles in your browser."
   },
+
+  'hybrid-video-studio': {
+    name: "Hybrid Video Studio",
+    description: "Pro-grade browser-based multi-track video editor with motion titles, color grading, and seekable video export."
+  }
 }
 
 export default translations

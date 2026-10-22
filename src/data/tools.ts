@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 28,
+    toolCount: 29,
   },
   audio: {
     id: 'audio',
@@ -4234,6 +4234,83 @@ export const TOOLS: ToolDefinition[] = [
         'free audio visualizer video maker'
       ],
       canonicalPath: '/tools/audio-to-video-studio'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'hybrid-video-studio',
+    slug: 'hybrid-video-studio',
+    title: 'Free Online Video Editor & Hybrid Studio',
+    shortTitle: 'Hybrid Video Studio',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Pro-grade browser-based multi-track video editor. Edit videos, photos, music, motion titles, cinematic effects, and export high-definition MP4/WebM with 100% client-side privacy.',
+    detailedDescription: 'Produce stunning Reels, Shorts, and landscape videos with IndiaTools Hybrid Video Studio. Featuring multi-track timeline editing, split, trim, keyframe motion, color grading, cinematic LUT presets, transitions, text overlays, audio waveform mixing, and seekable browser video export without any server uploads.',
+    iconName: 'Film',
+    badge: 'Flagship',
+    color: '#00F0FF',
+    tags: [
+      'Video Editor',
+      'Online Video Editor',
+      'Reels Maker',
+      'Shorts Editor',
+      'Multi-Track Timeline',
+      'Video Cutter'
+    ],
+    searchKeywords: [
+      'video editor',
+      'hybrid video studio',
+      'online video editor free',
+      'reels maker',
+      'shorts editor',
+      'cut video trim video'
+    ],
+    formulaExplanation: 'Multi-layer Canvas 2D composition composites video, image, and text layers with affine transform matrices, CSS filters, and keyframe interpolation, encoded via MediaRecorder with Web Audio mix destination.',
+    assumptions: [
+      '100% private in-browser client-side execution with zero cloud video uploads',
+      'Requires modern Web Audio and MediaRecorder browser support'
+    ],
+    relatedSlugs: ['audio-to-video-studio', 'audio-spectrum-waveform-video-generator', 'pixelcraft'],
+    exampleCalculation: {
+      title: '15-Second Multi-Track Reels Video Render',
+      inputs: {
+        'Video Track': '2 MP4 clips with color grading',
+        'Overlay Track': '1 Motion title with drop shadow',
+        'Audio Track': '1 Background music track'
+      },
+      outputs: {
+        'Output Duration': '15.0s',
+        'Resolution': '1080x1920 (9:16 Portrait)',
+        'Render Time': '~4.8s in-browser'
+      },
+      explanation: 'Composites video, titles, and audio tracks locally with zero cloud uploads into a seekable Full HD video.'
+    },
+    faqs: [
+      {
+        question: 'Is IndiaTools Hybrid Video Studio completely free and private?',
+        answer: 'Yes! All video rendering, audio mixing, text overlays, and encoding execute 100% locally on your computer inside your browser. No video, audio, or image files are ever uploaded to any cloud server.'
+      },
+      {
+        question: 'What video formats and resolutions can I export?',
+        answer: 'You can export in 1080p Full HD, 720p HD, and 4K Ultra HD in seekable WebM (VP9 + Opus) or MP4 containers across 16:9 Landscape, 9:16 Reels/Shorts, 1:1 Square, and 4:5 Feed aspect ratios.'
+      },
+      {
+        question: 'Can I split and trim clips on the timeline?',
+        answer: 'Yes, simply select any clip and press S or click the Split button to slice at the playhead. You can also drag the left and right trim handles of any clip to adjust its visible duration.'
+      }
+    ],
+    seo: {
+      title: 'Free Online Video Editor & Multi-Track Studio | IndiaTools',
+      metaDescription: 'Free browser-based multi-track video editor with timeline editing, motion titles, cinematic LUT filters, audio mixer, and high-definition video export.',
+      keywords: [
+        'free online video editor',
+        'browser video editor',
+        'reels video editor',
+        'shorts editor',
+        'timeline video editor',
+        'video cutter trimmer'
+      ],
+      canonicalPath: '/tools/hybrid-video-studio'
     },
     type: 'image-tool'
   }

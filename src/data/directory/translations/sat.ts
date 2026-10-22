@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "ᱚᱰᱤᱳ ᱴᱩ ᱵᱷᱤᱰᱤᱳ ᱥᱴᱩᱰᱤᱭᱳ",
     description: "ᱥᱮᱨᱮᱧ ᱟᱨ ᱟᱲᱟᱝ ᱥᱯᱮᱠᱴᱨᱚᱢ ᱣᱮᱵᱷᱯᱷᱚᱨᱢ, ᱯᱷᱚᱴᱳ ᱥᱞᱟᱭᱤᱰᱥᱳ ᱟᱨ ᱠᱟᱹᱴᱤᱡ ᱠᱟᱹᱴᱤᱡ ᱠᱚ ᱥᱟᱶ ᱵᱷᱤᱰᱤᱳ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ᱾"
   },
+
+  'hybrid-video-studio': {
+    name: "ᱦᱟᱭᱵᱨᱤᱰ ᱵᱷᱤᱰᱤᱭᱳ ᱥᱴᱩᱰᱤᱭᱳ",
+    description: "ᱵᱽᱨᱟᱣᱡᱟᱨ ᱟᱫᱷᱟᱨᱤᱛ ᱢᱟᱞᱴᱤ-ᱴᱨᱮᱠ ᱵᱷᱤᱰᱤᱭᱳ ᱮᱰᱤᱴᱟᱨ, ᱢᱳᱥᱚᱱ ᱴᱟᱭᱴᱮᱞ ᱟᱨ ᱵᱷᱤᱰᱤᱭᱳ ᱮᱠᱥᱯᱳᱨᱴ।"
+  }
 }
 
 export default translations

@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "ऑडियो टू वीडियो स्टूडियो",
     description: "अपने संगीत और ऑडियो को स्पेक्ट्रम वेवफॉर्म, मोशन फोटो स्लाइडशो और पार्टिकल्स के साथ शानदार वीडियो में बदलें।"
   },
+
+  'hybrid-video-studio': {
+    name: "हाइब्रिड वीडियो स्टूडियो",
+    description: "ब्राउज़र-आधारित मल्टी-ट्रैक वीडियो एडिटर, मोशन टाइटल्स, कलर ग्रेडिंग और उच्च-गुणवत्ता वीडियो एक्सपोर्ट।"
+  }
 }
 
 export default translations

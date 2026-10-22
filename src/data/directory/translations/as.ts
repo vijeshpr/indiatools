@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "অডিঅ' টু ভিডিঅ' ষ্টুডিঅ'",
     description: "সংগীত আৰু অডিঅ'ক স্পেক্ট্ৰাম ৱেভফৰ্ম, মোচন ফটো শ্লাইডশ্ব' আৰু চিনেমেটিক ভিডিঅ'লৈ ৰূপান্তৰ কৰক।"
   },
+
+  'hybrid-video-studio': {
+    name: "হাইব্ৰিড ভিডিঅ' ষ্টুডিঅ'",
+    description: "ব্ৰাউজাৰ-ভিত্তিক মাল্টি-ট্ৰেক ভিডিঅ' এডিটৰ, মোশন টাইটেল, ৰং গ্ৰেডিং আৰু স্পষ্ট ভিডিঅ' ৰপ্তানিৰ সৈতে।"
+  }
 }
 
 export default translations

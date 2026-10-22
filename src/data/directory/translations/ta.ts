@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "ஆடியோ டு வீடியோ ஸ்டுடியோ",
     description: "இசை மற்றும் ஆடியோவை அலைவடிவங்கள், புகைப்பட ஸ்லைடுஷோ மற்றும் சினிமா எஃபெக்ட்களுடன் கூடிய வீடியோவாக மாற்றவும்."
   },
+
+  'hybrid-video-studio': {
+    name: "ஹைப்ரிட் வீடியோ ஸ்டுடியோ",
+    description: "உலவி அடிப்படையிலான மல்டி-ட்ராக் வீடியோ எடிட்டர், மோஷன் தலைப்புகள் மற்றும் உயர் வீடியோ ஏற்றுமதி."
+  }
 }
 
 export default translations

@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "ध्वनि-दृश्य स्टूडियो",
     description: "सङ्गीतं ध्वनिं च तरङ्गदृश्यैः, चलचित्रैः, कणैः च सह चलचित्रे परिवर्तयतु।"
   },
+
+  'hybrid-video-studio': {
+    name: "सङ्कर दृश्यश्रव्य कार्यशाला",
+    description: "जालपुट-आधारितं बहु-मार्ग दृश्यचित्र सम्पादकं, गति-शीर्षकाणि, वर्ण-संस्कारः, चलच्चित्र-निर्यातश्च।"
+  }
 }
 
 export default translations

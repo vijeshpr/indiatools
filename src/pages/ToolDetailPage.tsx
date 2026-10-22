@@ -71,6 +71,7 @@ import { AudioConverterTool } from '../imageTools/AudioConverterTool'
 import { OrbitAudioStudioTool } from '../imageTools/OrbitAudioStudioTool'
 import { AudioSpectrumVideoTool } from '../imageTools/AudioSpectrumVideoTool'
 import { AudioToVideoStudioTool } from '../imageTools/AudioToVideoStudioTool'
+import { HybridVideoStudioTool } from '../imageTools/HybridVideoStudioTool'
 import { DtsCinemaReverbTool } from '../imageTools/DtsCinemaReverbTool'
 import { VirtualSurroundUpmixerTool } from '../imageTools/VirtualSurroundUpmixerTool'
 import { StudioMasterSpatialSuiteTool } from '../imageTools/StudioMasterSpatialSuiteTool'
@@ -152,6 +153,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'orbit-audio-studio': OrbitAudioStudioTool,
   'audio-spectrum-waveform-video-generator': AudioSpectrumVideoTool,
   'audio-to-video-studio': AudioToVideoStudioTool,
+  'hybrid-video-studio': HybridVideoStudioTool,
   'dts-cinema-theater-reverb': DtsCinemaReverbTool,
   'virtual-surround-upmixer': VirtualSurroundUpmixerTool,
   'studio-master-spatial-suite': StudioMasterSpatialSuiteTool,

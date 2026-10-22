@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "ఆడియో టు వీడియో స్టూడియో",
     description: "సంగీతం మరియు ఆడియోను స్పెక్ట్రమ్ వేవ్‌ఫారమ్‌లు, ఫోటో స్లైడ్‌షోలు మరియు సినిమాటిక్ ఎఫెక్ట్‌లతో వీడియోలుగా మార్చండి."
   },
+
+  'hybrid-video-studio': {
+    name: "హైబ్రిడ్ వీడియో స్టూడియో",
+    description: "బ్రౌజర్ ఆధారిత మల్టీ-ట్రాక్ వీడియో ఎడిటర్, మోషన్ టైటిల్స్, కలర్ గ్రేడింగ్ మరియు వీడియో ఎగుమతి."
+  }
 }
 
 export default translations

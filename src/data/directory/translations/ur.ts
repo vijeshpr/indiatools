@@ -278,6 +278,11 @@ export const translations: Record<string, DirectoryToolItem> = {
     name: "آڈیو ٹو ویڈیو اسٹوڈیو",
     description: "موسیقی اور آڈیو کو اسپیکٹرم ویوفارمز، موشن فوٹو سلائیڈ شوز اور سینما کے اثرات والی ویڈیوز میں تبدیل کریں۔"
   },
+
+  'hybrid-video-studio': {
+    name: "ہائبرڈ ویڈیو اسٹوڈیو",
+    description: "براؤزر پر مبنی ملٹی ٹریک ویڈیو ایڈیٹر، موشن ٹائٹلز، کلر گریڈنگ اور نجی ویڈیو ایکسپورٹ۔"
+  }
 }
 
 export default translations

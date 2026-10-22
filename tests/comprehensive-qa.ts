@@ -44,7 +44,7 @@ console.log('=== STARTING AUTOMATED QA TEST SUITE ===\n')
 // 1. TOOL REGISTRY & INTEGRITY TESTS
 // ==========================================
 console.log('1. Checking Tool Registry & Integrity...')
-assert(TOOLS.length === 69, 'Registry', 'Tool Count', `Expected 69 tools, found ${TOOLS.length}`)
+assert(TOOLS.length === 70, 'Registry', 'Tool Count', `Expected 70 tools, found ${TOOLS.length}`)
 
 const validCategories = new Set(Object.values(CATEGORIES).map(c => c.id))
 const slugSet = new Set<string>()
