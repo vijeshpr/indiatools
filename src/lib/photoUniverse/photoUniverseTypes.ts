@@ -1,5 +1,5 @@
 /**
- * IndiaTools — Floating Photo Universe
+ * IndiaTools — Floating Photo Universe 2.0
  * 3D Music-Driven Cinematic Floating Photo Experience
  * Type Definitions & Configuration Model
  */
@@ -20,17 +20,59 @@ export type CameraMovementStyle =
   | 'energetic-orbit'
   | 'slow-dream'
 
+export type GlobalMotionPreset =
+  | 'dream-cinema'
+  | 'balanced-music-video'
+  | 'energetic-flight'
+  | 'custom'
+
+export type MusicMovementProfile =
+  | 'melody-ambient'
+  | 'soft-vocal'
+  | 'steady-rhythm'
+  | 'bass-heavy'
+  | 'balanced-cinematic'
+
 export type DepthOfFieldMode = 'off' | 'subtle' | 'cinematic' | 'strong'
 
 export type DirectorMode = 'auto' | 'manual'
 
+export type PhotoMotionBehavior = 'static' | 'subtle-float' | 'music-micro'
+
+export type BassShakeLevel = 'off' | 'subtle' | 'balanced' | 'strong'
+
 export interface UniverseBassShakeConfig {
   enabled: boolean
+  level: BassShakeLevel // default: 'subtle'
   bassSensitivity: number // 0 to 100
   shakeIntensity: number // 0 to 100
-  durationSec: number // 0.08 to 0.35s
-  nearbyPhotoReaction: boolean // Nearby floating photos physically vibrate/tilt
-  maxDisplacementPx: number // 2 to 24px
+  durationSec: number // 0.08 to 0.25s
+  nearbyPhotoReaction: boolean // Nearby floating photos physically vibrate slightly
+  maxDisplacementPx: number // 2 to 16px (strictly bounded)
+}
+
+export type UniverseBackgroundType =
+  | 'deep-space'
+  | 'minimal-starfield'
+  | 'nebula-galaxy'
+  | 'custom-image'
+  | 'solid-dark'
+
+export interface UniverseCustomBackground {
+  url: string
+  name: string
+  fitMode: 'cover' | 'contain'
+  brightness: number // 0 to 150 (%)
+  blur: number // 0 to 30 (px)
+  parallaxEnabled: boolean
+}
+
+export interface UniverseBackgroundConfig {
+  type: UniverseBackgroundType
+  customImage: UniverseCustomBackground | null
+  starCount: number // 800 to 4000
+  galaxyTint: 'cosmic-blue' | 'mystic-violet' | 'amber-nebula' | 'emerald-deep'
+  nebulaGlow: number // 0 to 100
 }
 
 export interface UniverseVisualDetails {
@@ -46,21 +88,75 @@ export interface UniverseVisualDetails {
   spaceTheme: 'deep-cosmos' | 'warm-amber' | 'emerald-fog' | 'electric-neon' | 'midnight-abyss'
 }
 
+export interface TimelineEnergyPoint {
+  timestamp: number
+  energy: number // 0 to 1
+  isBeat: boolean
+  isPhraseStart: boolean
+}
+
+export interface UniverseAudioAnalysisResult {
+  durationSec: number
+  detectedProfile: MusicMovementProfile
+  confidence: number // 0 to 1
+  averageEnergy: number
+  dynamicRange: number
+  transientCount: number
+  phraseCount: number
+  timelinePoints: TimelineEnergyPoint[]
+  recommendedHoldDuration: number // seconds
+  recommendedBaseSpeed: number
+}
+
+export interface CameraScoreSegment {
+  segmentIndex: number
+  startTime: number
+  endTime: number
+  duration: number
+  photoIndex: number
+  photoId: string
+  approachDuration: number // ~2.0s to 3.5s
+  settleDuration: number // ~0.8s to 1.5s
+  holdDuration: number // ~2.5s to 5.0s
+  departureDuration: number // ~1.5s to 2.5s
+  transitionDuration: number // ~1.5s to 3.0s
+  framingOffset: { x: number; y: number } // rule of thirds off-center framing
+  targetEnergy: number
+  shakeAllowed: boolean // disabled during focus hold
+}
+
+export interface TimestampedCameraScore {
+  totalDuration: number
+  segments: CameraScoreSegment[]
+  profile: MusicMovementProfile
+  generatedAt: number
+}
+
 export interface PhotoUniverseStudioConfig {
   enabled: boolean
   photos: UniversePhoto[]
   
+  // Motion Preset & Profile
+  motionPreset: GlobalMotionPreset
+  autoProfileEnabled: boolean
+  profileOverride: MusicMovementProfile | 'auto'
+
+  // Photo Behavior
+  photoMotion: PhotoMotionBehavior // Default: 'static' (stop unnecessary photo rotation)
+  enableRotation: boolean // Default: false (stable, non-spinning)
+  
   // 3D Space Spread & Photo Distribution
   spaceSpread: number // 50 to 200 (scale factor for distance between photos)
   photoScale: number // 0.6 to 2.0
-  depthRange: number // 600 to 3000
+  depthRange: number // 800 to 3500
   
-  // Signature Camera Flight
+  // Signature Camera Flight & Pacing
   cameraStyle: CameraMovementStyle
   cameraSpeed: number // 0.5 to 2.5 (1.0 = standard)
-  photoFocusDuration: number // 1.5 to 7.0 seconds lingering at each photo
-  transitionSmoothness: number // 20 to 100
-  musicReactive: boolean // Music tempo & energy adjusts travel velocity
+  photoFocusDuration: number // 2.5 to 6.5 seconds lingering at each photo
+  transitionSmoothness: number // 40 to 100
+  musicReactive: boolean // Music tempo & energy adjusts travel velocity within clamped bounds
+  calmnessVsEnergy: number // 0 (ultra calm) to 100 (energetic)
   
   // Depth of Field
   depthOfField: DepthOfFieldMode
@@ -71,6 +167,9 @@ export interface PhotoUniverseStudioConfig {
   // Bass Shake
   bassShake: UniverseBassShakeConfig
   
+  // Background
+  background: UniverseBackgroundConfig
+
   // Director
   directorMode: DirectorMode
   manualOrder: string[] // Ordered array of photo IDs
@@ -84,22 +183,31 @@ export interface PhotoUniverseStudioConfig {
 
 export const DEFAULT_UNIVERSE_BASS_SHAKE: UniverseBassShakeConfig = {
   enabled: true,
-  bassSensitivity: 60,
-  shakeIntensity: 45,
-  durationSec: 0.18,
-  nearbyPhotoReaction: true,
-  maxDisplacementPx: 12,
+  level: 'subtle', // Subtle by default
+  bassSensitivity: 50,
+  shakeIntensity: 30, // Low, restrained amplitude
+  durationSec: 0.14,
+  nearbyPhotoReaction: false,
+  maxDisplacementPx: 8, // Strictly bounded
+}
+
+export const DEFAULT_UNIVERSE_BACKGROUND: UniverseBackgroundConfig = {
+  type: 'deep-space', // Default: Deep Space
+  customImage: null,
+  starCount: 2200,
+  galaxyTint: 'cosmic-blue',
+  nebulaGlow: 50,
 }
 
 export const DEFAULT_UNIVERSE_VISUAL_DETAILS: UniverseVisualDetails = {
   particlesEnabled: true,
-  particleIntensity: 50,
-  particleCount: 80,
-  lightStreaksEnabled: true,
+  particleIntensity: 35,
+  particleCount: 70,
+  lightStreaksEnabled: false,
   edgeLightingEnabled: true,
   edgeGlowColor: '#00F0FF',
   vignetteEnabled: true,
-  vignetteStrength: 45,
+  vignetteStrength: 40,
   environmentalGradientEnabled: true,
   spaceTheme: 'deep-cosmos',
 }
@@ -107,19 +215,26 @@ export const DEFAULT_UNIVERSE_VISUAL_DETAILS: UniverseVisualDetails = {
 export const DEFAULT_PHOTO_UNIVERSE_CONFIG: PhotoUniverseStudioConfig = {
   enabled: false,
   photos: [],
-  spaceSpread: 100,
+  motionPreset: 'dream-cinema', // Calm, controlled motion as default
+  autoProfileEnabled: true,
+  profileOverride: 'auto',
+  photoMotion: 'static', // Default: Static (no continuous rotation)
+  enableRotation: false, // Default: False
+  spaceSpread: 120, // Spacious
   photoScale: 1.0,
-  depthRange: 1600,
+  depthRange: 2200,
   cameraStyle: 'smooth-cinematic',
-  cameraSpeed: 1.0,
-  photoFocusDuration: 3.2,
-  transitionSmoothness: 80,
+  cameraSpeed: 0.85, // Slower, calmer default
+  photoFocusDuration: 4.0, // Substantial 4.0s focus hold
+  transitionSmoothness: 85,
   musicReactive: true,
+  calmnessVsEnergy: 35,
   depthOfField: 'cinematic',
-  focusTransitionSpeed: 1.2,
-  backgroundBlurIntensity: 55,
+  focusTransitionSpeed: 1.0,
+  backgroundBlurIntensity: 50,
   focusDepth: 50,
   bassShake: DEFAULT_UNIVERSE_BASS_SHAKE,
+  background: DEFAULT_UNIVERSE_BACKGROUND,
   directorMode: 'auto',
   manualOrder: [],
   visualDetails: DEFAULT_UNIVERSE_VISUAL_DETAILS,

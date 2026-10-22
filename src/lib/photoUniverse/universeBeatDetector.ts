@@ -1,17 +1,18 @@
 /**
- * IndiaTools — Floating Photo Universe
+ * IndiaTools — Floating Photo Universe 2.0
  * Web Audio Signal Processor & Music Reactive Impulse Engine
- * 100% Client-Side Sub-band Energy Transient & Envelope Follower
+ * Refined Damped Bass Impacts with Protected Focus Hold Windows
  */
 
 import { NormalizedAudioBands } from '../audioToVideo/types.ts'
+import { BassShakeLevel } from './photoUniverseTypes.ts'
 
 export interface UniverseAudioState {
   isBassImpact: boolean
   bassImpactStrength: number // 0 to 1
   smoothedEnergy: number // 0 to 1
-  speedMultiplier: number // Dynamic speed scale (e.g. 0.85 to 1.35)
-  particleSpeedScale: number // 0.8 to 2.2
+  speedMultiplier: number // Dynamic speed scale (clamped 0.85 to 1.22)
+  particleSpeedScale: number // 0.8 to 1.8
   streakIntensity: number // 0 to 1
   shakeOffset: { x: number; y: number; z: number; pitch: number; roll: number }
 }
@@ -40,14 +41,15 @@ export class UniverseBeatDetector {
   public process(
     bands: NormalizedAudioBands | undefined,
     currentTime: number,
-    sensitivity: number = 60, // 0 to 100
-    shakeIntensity: number = 45, // 0 to 100
-    shakeDurationSec: number = 0.18,
-    maxDisplacementPx: number = 12,
-    musicReactive: boolean = true
+    level: BassShakeLevel = 'subtle',
+    sensitivity: number = 50, // 0 to 100
+    shakeIntensity: number = 30, // 0 to 100
+    shakeDurationSec: number = 0.14,
+    maxDisplacementPx: number = 8,
+    musicReactive: boolean = true,
+    shakeAllowed: boolean = true
   ): UniverseAudioState {
-    // Default neutral state when audio is silent or uninitialized
-    if (!bands) {
+    if (!bands || level === 'off') {
       return {
         isBassImpact: false,
         bassImpactStrength: 0,
@@ -59,12 +61,11 @@ export class UniverseBeatDetector {
       }
     }
 
-    // Handle time jumps (seeking or restart)
     const dt = Math.max(0.001, Math.min(0.2, currentTime - this.lastTime))
     this.lastTime = currentTime
 
     // 1. Bass Energy Calculation (Combined subBass + bass)
-    const rawBass = (bands.subBass || 0) * 0.65 + (bands.bass || 0) * 0.35
+    const rawBass = (bands.subBass || 0) * 0.7 + (bands.bass || 0) * 0.3
 
     // 2. Adaptive Exponential Moving Average (EMA)
     const emaAlpha = 0.08
@@ -72,19 +73,18 @@ export class UniverseBeatDetector {
 
     // 3. Overall Energy Smoothing
     const rawOverall = bands.overall || 0
-    const energyAlpha = 0.12
+    const energyAlpha = 0.10
     this.overallEma = this.overallEma * (1 - energyAlpha) + rawOverall * energyAlpha
 
     // 4. Bass Transient / Impact Detection
-    // Sensitivity scale: 0 => high threshold 1.8x EMA, 100 => low threshold 1.15x EMA
     const sensNorm = Math.max(0, Math.min(100, sensitivity)) / 100
-    const thresholdMultiplier = 1.75 - sensNorm * 0.55 // range [1.20, 1.75]
-    const minThreshold = 0.18 - sensNorm * 0.08
+    const thresholdMultiplier = 1.70 - sensNorm * 0.50
+    const minThreshold = 0.20 - sensNorm * 0.08
 
     const isImpactCandidate =
       rawBass > this.bassEma * thresholdMultiplier &&
       rawBass > minThreshold &&
-      currentTime - this.lastImpactTime > 0.11 // 110ms debounce to avoid continuous jitter
+      currentTime - this.lastImpactTime > 0.14 // 140ms debounce to prevent continuous vibration
 
     let isBassImpact = false
     let impactStrength = 0
@@ -92,37 +92,42 @@ export class UniverseBeatDetector {
     if (isImpactCandidate) {
       isBassImpact = true
       this.lastImpactTime = currentTime
-      impactStrength = Math.min(1.0, (rawBass - this.bassEma * thresholdMultiplier) / 0.4 + 0.3)
+      impactStrength = Math.min(1.0, (rawBass - this.bassEma * thresholdMultiplier) / 0.45 + 0.25)
       this.currentShakeStrength = Math.max(this.currentShakeStrength, impactStrength)
     }
 
     // 5. Exponential Decay of Bass Shake Impulse
-    const decayRate = 1.0 / Math.max(0.05, shakeDurationSec)
+    const decayRate = 1.0 / Math.max(0.06, shakeDurationSec)
     this.currentShakeStrength = Math.max(0, this.currentShakeStrength - dt * decayRate)
 
-    // 6. Shake Offset Calculation (High frequency damped micro-displacement)
-    const shakeScale = (shakeIntensity / 100) * (this.currentShakeStrength)
-    const maxDisp = Math.max(2, Math.min(30, maxDisplacementPx))
+    // 6. Shake Level Multiplier
+    const levelMult =
+      level === 'strong' ? 1.2 : level === 'balanced' ? 0.8 : level === 'subtle' ? 0.45 : 0
 
-    const oscFreq = 28 // 28 Hz quick micro-oscillation
+    // Suppress or heavily dampen shake during protected focus hold
+    const holdDampening = shakeAllowed ? 1.0 : 0.15
+
+    const shakeScale = (shakeIntensity / 100) * this.currentShakeStrength * levelMult * holdDampening
+    const maxDisp = Math.max(2, Math.min(20, maxDisplacementPx))
+
+    const oscFreq = 26 // 26 Hz fast damped micro-oscillation
     const oscPhase = currentTime * oscFreq
-    const shakeX = Math.sin(oscPhase) * maxDisp * shakeScale * 0.8
-    const shakeY = Math.cos(oscPhase * 1.3) * maxDisp * shakeScale * 0.6
-    const shakeZ = Math.sin(oscPhase * 0.7) * (maxDisp * 0.5) * shakeScale
-    const shakePitch = Math.sin(oscPhase * 1.1) * 0.015 * shakeScale
-    const shakeRoll = Math.cos(oscPhase * 0.9) * 0.012 * shakeScale
+    const shakeX = Math.sin(oscPhase) * maxDisp * shakeScale * 0.75
+    const shakeY = Math.cos(oscPhase * 1.3) * maxDisp * shakeScale * 0.55
+    const shakeZ = Math.sin(oscPhase * 0.7) * (maxDisp * 0.4) * shakeScale
+    const shakePitch = Math.sin(oscPhase * 1.1) * 0.010 * shakeScale
+    const shakeRoll = Math.cos(oscPhase * 0.9) * 0.008 * shakeScale
 
-    // 7. Dynamic Musical Speed Scaling (Music Reactive)
+    // 7. Dynamic Musical Speed Scaling (Clamped strictly within 0.85 to 1.22)
     let speedMultiplier = 1.0
     if (musicReactive) {
-      // Scale from 0.82 (quiet moments) to 1.38 (energetic drops)
-      speedMultiplier = 0.85 + this.overallEma * 0.45
+      speedMultiplier = 0.88 + this.overallEma * 0.32
     }
 
     // 8. Particle & Light Streaks Reaction
     const midHigh = ((bands.mid || 0) + (bands.treble || 0)) / 2
-    const particleSpeedScale = 0.8 + midHigh * 1.2
-    const streakIntensity = Math.min(1.0, (bands.treble || 0) * 0.7 + impactStrength * 0.5)
+    const particleSpeedScale = 0.8 + midHigh * 0.8
+    const streakIntensity = Math.min(1.0, (bands.treble || 0) * 0.6 + impactStrength * 0.4)
 
     return {
       isBassImpact,

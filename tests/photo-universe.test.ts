@@ -2,6 +2,7 @@ import { describe, it } from 'node:test'
 import assert from 'node:assert'
 import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
+  DEFAULT_UNIVERSE_BACKGROUND,
   PhotoUniverseStudioConfig,
   UniversePhoto,
 } from '../src/lib/photoUniverse/photoUniverseTypes.ts'
@@ -21,6 +22,10 @@ import {
   UniverseBeatDetector,
   universeBeatDetector,
 } from '../src/lib/photoUniverse/universeBeatDetector.ts'
+import { universeAudioAnalyzer } from '../src/lib/photoUniverse/universeAudioAnalyzer.ts'
+import { universeCameraScoreGenerator } from '../src/lib/photoUniverse/universeCameraScore.ts'
+import { universeBackgroundRenderer } from '../src/lib/photoUniverse/universeBackground.ts'
+import { universeEngine } from '../src/lib/photoUniverse/universeEngine.ts'
 import {
   DEFAULT_STUDIO_COMPOSITION,
   NormalizedAudioBands,
@@ -263,6 +268,177 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
         energeticState.speedMultiplier > quietState.speedMultiplier,
         'High musical energy must increase camera flight speed relative to quiet passages'
       )
+    })
+  })
+
+  describe('6. Universe 2.0 Local Audio Analysis & Movement Profiles', () => {
+    it('generates deterministic fallback analysis with complete energy timeline', () => {
+      const fallback = universeAudioAnalyzer.generateFallbackAnalysis(30, 'steady-rhythm')
+      assert.strictEqual(fallback.detectedProfile, 'steady-rhythm')
+      assert.strictEqual(fallback.durationSec, 30)
+      assert.ok(fallback.timelinePoints.length > 50, 'Timeline points should be generated')
+      assert.ok(fallback.recommendedHoldDuration > 2.0)
+      assert.ok(fallback.recommendedBaseSpeed > 0.5)
+    })
+
+    it('classifies profiles and assigns appropriate hold durations', () => {
+      const ambient = universeAudioAnalyzer.generateFallbackAnalysis(40, 'melody-ambient')
+      const rhythm = universeAudioAnalyzer.generateFallbackAnalysis(40, 'steady-rhythm')
+
+      assert.ok(
+        ambient.recommendedHoldDuration >= rhythm.recommendedHoldDuration,
+        'Ambient profile should provide longer or equal hold durations than rhythm profile'
+      )
+    })
+  })
+
+  describe('7. Universe 2.0 Timestamped Camera Score Generator', () => {
+    it('builds deterministic camera score covering full duration without time gaps', () => {
+      const analysis = universeAudioAnalyzer.generateFallbackAnalysis(25, 'balanced-cinematic')
+      const score = universeCameraScoreGenerator.generateScore(
+        samplePhotos,
+        DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        analysis,
+        25
+      )
+
+      assert.ok(score.segments.length > 0)
+      assert.strictEqual(score.totalDuration, 25)
+
+      // Verify continuity across segments
+      for (let i = 0; i < score.segments.length - 1; i++) {
+        const curr = score.segments[i]
+        const next = score.segments[i + 1]
+        assert.ok(
+          Math.abs(curr.endTime - next.startTime) < 0.001,
+          'Segment timestamps must be contiguous'
+        )
+      }
+
+      // Verify sub-phase breakdowns sum to segment duration
+      score.segments.forEach((seg) => {
+        const subTotal =
+          seg.approachDuration +
+          seg.settleDuration +
+          seg.holdDuration +
+          seg.departureDuration +
+          seg.transitionDuration
+        assert.ok(
+          Math.abs(subTotal - seg.duration) < 0.01,
+          'Sub-phases must sum exactly to segment duration'
+        )
+      })
+    })
+
+    it('accurately resolves active segment and sub-phase at any given timestamp', () => {
+      const analysis = universeAudioAnalyzer.generateFallbackAnalysis(20, 'dream-cinema' as any)
+      const score = universeCameraScoreGenerator.generateScore(
+        samplePhotos,
+        DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        analysis,
+        20
+      )
+
+      const active = universeCameraScoreGenerator.getSegmentAtTime(score, 5.0)
+      assert.ok(active, 'Must find active segment at t=5.0s')
+      assert.ok(
+        ['approach', 'settle', 'hold', 'departure', 'transition'].includes(active.subPhase)
+      )
+      assert.ok(active.subProgress >= 0 && active.subProgress <= 1.0)
+    })
+  })
+
+  describe('8. Universe 2.0 Static Photo Orientation & Focus Protection', () => {
+    it('sets static orientation by default (no continuous spin)', () => {
+      assert.strictEqual(
+        DEFAULT_PHOTO_UNIVERSE_CONFIG.photoMotion,
+        'static',
+        'Photo motion must default to static'
+      )
+      assert.strictEqual(
+        DEFAULT_PHOTO_UNIVERSE_CONFIG.enableRotation,
+        false,
+        'Rotation must default to false'
+      )
+    })
+
+    it('suppresses bass shake during focus hold sub-phase for readability', () => {
+      const analysis = universeAudioAnalyzer.generateFallbackAnalysis(20, 'balanced-cinematic')
+      const score = universeCameraScoreGenerator.generateScore(
+        samplePhotos,
+        DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        analysis,
+        20
+      )
+
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const director = new UniverseCameraDirector()
+
+      // Find a timestamp that falls in the hold sub-phase
+      let holdTime = -1
+      for (let t = 0; t < 15; t += 0.2) {
+        const res = universeCameraScoreGenerator.getSegmentAtTime(score, t)
+        if (res && res.subPhase === 'hold') {
+          holdTime = t
+          break
+        }
+      }
+
+      assert.ok(holdTime > 0, 'Should find a hold sub-phase time window')
+      const stateDuringHold = director.evaluateCamera(nodes, holdTime, score)
+      assert.strictEqual(
+        stateDuringHold.shakeAllowed,
+        false,
+        'Camera shake must be strictly prohibited during focus hold'
+      )
+    })
+  })
+
+  describe('9. Universe 2.0 Background Renderer Models', () => {
+    it('configures default Deep Space with multi-layered starfield', () => {
+      assert.strictEqual(DEFAULT_UNIVERSE_BACKGROUND.type, 'deep-space')
+      assert.strictEqual(DEFAULT_UNIVERSE_BACKGROUND.starCount, 2200)
+      assert.strictEqual(DEFAULT_UNIVERSE_BACKGROUND.galaxyTint, 'cosmic-blue')
+    })
+
+    it('supports custom user-imported background configuration', () => {
+      const customConfig: PhotoUniverseStudioConfig = {
+        ...DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        background: {
+          type: 'custom-image',
+          customImage: {
+            url: 'blob:test-custom-bg',
+            name: 'my-nebula.png',
+            fitMode: 'cover',
+            brightness: 110,
+            blur: 4,
+            parallaxEnabled: true,
+          },
+          starCount: 1500,
+          galaxyTint: 'mystic-violet',
+          nebulaGlow: 40,
+        },
+      }
+
+      assert.strictEqual(customConfig.background.type, 'custom-image')
+      assert.ok(customConfig.background.customImage)
+      assert.strictEqual(customConfig.background.customImage.brightness, 110)
+    })
+  })
+
+  describe('10. Universe Engine Integration & Score Caching', () => {
+    it('regenerates score when requested and exposes planned segments', () => {
+      const score = universeEngine.regenerateScore(
+        {
+          ...DEFAULT_PHOTO_UNIVERSE_CONFIG,
+          photos: samplePhotos,
+        },
+        30
+      )
+
+      assert.ok(score)
+      assert.ok(score.segments.length > 0)
+      assert.strictEqual(universeEngine.getCurrentScore(), score)
     })
   })
 })

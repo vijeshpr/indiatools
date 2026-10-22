@@ -1,7 +1,7 @@
 /**
- * IndiaTools — Floating Photo Universe
+ * IndiaTools — Floating Photo Universe 2.0
  * 3D Spatial Layout Generator
- * Generates organic, non-overlapping 3D coordinates & orientations for floating photos
+ * Three spatial layers (Foreground, Midground, Background), stable orientations & collision-free line-of-sight
  */
 
 import { UniversePhoto } from './photoUniverseTypes.ts'
@@ -21,8 +21,9 @@ export interface Rotation3D {
 export interface PhotoSpatialNode {
   photo: UniversePhoto
   index: number
+  layer: 'foreground' | 'midground' | 'background'
   position: Position3D
-  rotation: Rotation3D
+  rotation: Rotation3D // Stable, initial orientation (no continuous spin)
   worldWidth: number
   worldHeight: number
   lookAtPoint: Position3D
@@ -41,8 +42,8 @@ function seededRandom(seed: number): number {
 
 export function generateUniverseSpatialNodes(
   photos: UniversePhoto[],
-  spaceSpread: number = 100,
-  depthRange: number = 1600,
+  spaceSpread: number = 120,
+  depthRange: number = 2200,
   photoScale: number = 1.0
 ): PhotoSpatialNode[] {
   if (!photos || photos.length === 0) return []
@@ -51,7 +52,7 @@ export function generateUniverseSpatialNodes(
   const nodes: PhotoSpatialNode[] = []
 
   // Spread multiplier (base 1.0 at spaceSpread=100)
-  const spreadFactor = Math.max(0.4, spaceSpread / 100)
+  const spreadFactor = Math.max(0.5, spaceSpread / 100)
   const zStep = (depthRange / Math.max(1, count)) * spreadFactor
 
   // Base dimension for 3D photo frames
@@ -61,75 +62,77 @@ export function generateUniverseSpatialNodes(
     const photo = photos[i]
     const seed = i + 1
 
-    // Aspect ratio calculation
-    const aspect = photo.aspectRatio && photo.aspectRatio > 0.1 ? photo.aspectRatio : 16 / 9
+    // Aspect ratio calculation with bounds check
+    const aspect =
+      photo.aspectRatio && photo.aspectRatio > 0.1 && photo.aspectRatio < 10
+        ? photo.aspectRatio
+        : 16 / 9
+
     let w = baseDim
     let h = baseDim / aspect
 
     // Constrain extreme aspect ratios so tall portrait or ultra-wide aren't disproportionate
     if (aspect < 0.8) {
-      // Portrait photo: constrain height
-      h = baseDim * 1.3
+      // Portrait photo (e.g. 9:16)
+      h = baseDim * 1.25
       w = h * aspect
     } else if (aspect > 2.2) {
       // Panoramic/ultrawide
-      w = baseDim * 1.4
+      w = baseDim * 1.35
       h = w / aspect
     }
 
-    // Galactic winding corridor pattern
-    // Ribbon angle progression
-    const angle = i * 0.85 + seededRandom(seed * 11) * 0.4
-    const horizontalSpread = (320 + seededRandom(seed * 17) * 220) * spreadFactor
-    const verticalSpread = (180 + seededRandom(seed * 23) * 160) * spreadFactor
+    // Midground Spatial Corridor:
+    // Flowing ribbon with wide horizontal clearance and gentle elevation
+    const ribbonAngle = i * 0.75 + seededRandom(seed * 11) * 0.3
+    const horizontalSpread = (380 + seededRandom(seed * 17) * 260) * spreadFactor
+    const verticalSpread = (160 + seededRandom(seed * 23) * 140) * spreadFactor
 
-    // Alternating left/right bias with natural drift
+    // Alternating left/right positioning to ensure clear sightlines
     const sideSign = i % 2 === 0 ? 1 : -1
-    const x = Math.sin(angle) * horizontalSpread * sideSign + (seededRandom(seed * 31) - 0.5) * 80
-    const y = Math.cos(angle * 0.7) * verticalSpread + (seededRandom(seed * 37) - 0.5) * 60
-    const z = -i * zStep - (seededRandom(seed * 41) * 80)
+    const x = Math.sin(ribbonAngle) * horizontalSpread * sideSign + (seededRandom(seed * 31) - 0.5) * 60
+    const y = Math.cos(ribbonAngle * 0.8) * verticalSpread + (seededRandom(seed * 37) - 0.5) * 50
+    const z = -i * zStep - 150 - (seededRandom(seed * 41) * 90)
 
-    // Subtle natural orientation: tilts slightly inward toward central camera flight path
-    const yaw = -Math.atan2(x * 0.6, Math.abs(z || 1)) + (seededRandom(seed * 43) - 0.5) * 0.2
-    const pitch = (seededRandom(seed * 47) - 0.5) * 0.15
-    const roll = (seededRandom(seed * 53) - 0.5) * 0.08
+    // STABLE Orientation (calculated once, fixed, no continuous spinning)
+    // Subtle inward tilt toward camera path
+    const yaw = -Math.atan2(x * 0.45, Math.abs(z || 1)) + (seededRandom(seed * 43) - 0.5) * 0.12
+    const pitch = (seededRandom(seed * 47) - 0.5) * 0.08
+    const roll = (seededRandom(seed * 53) - 0.5) * 0.04
 
-    // Precise camera keyframe positions relative to this photo
-    // Photo center is at (x, y, z)
-    // Photo normal vector
     const cosY = Math.cos(yaw)
     const sinY = Math.sin(yaw)
 
-    // Distance in front of photo to frame it crisply
-    // Stand-off distance based on photo size to achieve perfect framing
-    const framingDistance = Math.max(w, h) * 1.55
+    // Comfortable stand-off viewing distance
+    const framingDistance = Math.max(w, h) * 1.65
 
-    // Camera Focus Position (directly facing photo at framing distance)
+    // Camera Focus Position (facing photo at optimal stand-off distance)
     const cameraFocusPos: Position3D = {
       x: x + sinY * framingDistance,
-      y: y + 10,
+      y: y + 8,
       z: z + cosY * framingDistance,
     }
 
     // Camera Approach Position (further back, gliding in)
-    const approachDistance = framingDistance * 2.4
+    const approachDistance = framingDistance * 2.5
     const cameraApproachPos: Position3D = {
-      x: x + sinY * approachDistance + (sideSign * 80),
-      y: y + 50,
-      z: z + cosY * approachDistance,
+      x: x + sinY * approachDistance + sideSign * 110,
+      y: y + 40,
+      z: z + cosY * approachDistance + 80,
     }
 
-    // Camera Fly-By Position (moves slightly beside & past the photo to reveal 3D depth)
-    const flyByOffset = Math.max(w, h) * 0.95
+    // Camera Fly-By Position (smooth curved departure beside photo)
+    const flyByOffset = Math.max(w, h) * 1.1
     const cameraFlyByPos: Position3D = {
-      x: x - (sideSign * flyByOffset),
-      y: y - 20,
-      z: z - (cosY * 60), // Past the photo plane
+      x: x - sideSign * flyByOffset,
+      y: y - 15,
+      z: z - cosY * 90, // Passes slightly past the photo plane
     }
 
     nodes.push({
       photo,
       index: i,
+      layer: 'midground',
       position: { x, y, z },
       rotation: { x: pitch, y: yaw, z: roll },
       worldWidth: w,
@@ -141,22 +144,47 @@ export function generateUniverseSpatialNodes(
     })
   }
 
-  // Prevent excessive collision / overlapping between adjacent nodes
+  // Obstruction & Collision Prevention:
+  // Ensure no photograph blocks another photo's line of sight to the camera
   for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const n1 = nodes[i]
-      const n2 = nodes[j]
-      const dx = n2.position.x - n1.position.x
-      const dy = n2.position.y - n1.position.y
-      const dz = n2.position.z - n1.position.z
-      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
-      const minDist = Math.max(n1.worldWidth, n1.worldHeight) * 0.85
+    const targetNode = nodes[i]
+    for (let j = 0; j < nodes.length; j++) {
+      if (i === j) continue
+      const otherNode = nodes[j]
 
-      if (dist < minDist && dist > 0.001) {
-        // Push n2 slightly outward
-        const push = (minDist - dist) * 0.6
-        n2.position.x += (dx / dist) * push
-        n2.position.y += (dy / dist) * push
+      // Vector from cameraFocusPos to target position
+      const cam = targetNode.cameraFocusPos
+      const tgt = targetNode.position
+      const lineLen = Math.sqrt(
+        Math.pow(tgt.x - cam.x, 2) + Math.pow(tgt.y - cam.y, 2) + Math.pow(tgt.z - cam.z, 2)
+      )
+
+      if (lineLen < 0.1) continue
+
+      // Point-to-line segment distance from otherNode to the camera sightline
+      const u =
+        ((otherNode.position.x - cam.x) * (tgt.x - cam.x) +
+          (otherNode.position.y - cam.y) * (tgt.y - cam.y) +
+          (otherNode.position.z - cam.z) * (tgt.z - cam.z)) /
+        (lineLen * lineLen)
+
+      // If otherNode lies along the viewing cone in front of target
+      if (u > 0.05 && u < 0.95) {
+        const projX = cam.x + u * (tgt.x - cam.x)
+        const projY = cam.y + u * (tgt.y - cam.y)
+        const projZ = cam.z + u * (tgt.z - cam.z)
+        const distToSightline = Math.sqrt(
+          Math.pow(otherNode.position.x - projX, 2) +
+            Math.pow(otherNode.position.y - projY, 2) +
+            Math.pow(otherNode.position.z - projZ, 2)
+        )
+
+        const minClearance = Math.max(otherNode.worldWidth, otherNode.worldHeight) * 0.9
+        if (distToSightline < minClearance) {
+          // Push otherNode laterally away from sightline to eliminate obstruction
+          const pushDir = otherNode.position.x >= projX ? 1 : -1
+          otherNode.position.x += pushDir * (minClearance - distToSightline + 40)
+        }
       }
     }
   }
