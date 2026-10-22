@@ -57,6 +57,15 @@ export interface MemoryBurstFlashConfig {
   durationSec: number // 0.05 to 0.25s
 }
 
+export type MemoryBurstRhythmZoomStyle = 'rhythm-pulse' | 'slow-push' | 'beat-kick'
+
+export interface MemoryBurstRhythmZoomConfig {
+  enabled: boolean // Toggle On/Off (user option: "vendenkil off aakanulla optuinum")
+  style: MemoryBurstRhythmZoomStyle
+  intensity: number // 10 to 100 (%)
+  maxZoom: number // 1.02 to 1.15
+}
+
 export interface MemoryBurstClimaxConfig {
   enabled: boolean
   startSec: number
@@ -101,6 +110,7 @@ export interface MemoryBurstStudioConfig {
   scalePunch: MemoryBurstScalePunchConfig
   bassShake: MemoryBurstBassShakeConfig
   flash: MemoryBurstFlashConfig
+  rhythmZoom: MemoryBurstRhythmZoomConfig
   climax: MemoryBurstClimaxConfig
   randomShuffle: boolean
   fullImageInterludes: boolean
@@ -139,6 +149,12 @@ export const DEFAULT_MEMORY_BURST_CONFIG: MemoryBurstStudioConfig = {
     type: 'white',
     opacity: 0.25,
     durationSec: 0.12,
+  },
+  rhythmZoom: {
+    enabled: true, // Enabled so rhythm cinematic zoom is active when tool is used, but has toggle to turn OFF
+    style: 'rhythm-pulse',
+    intensity: 65,
+    maxZoom: 1.08,
   },
   climax: {
     enabled: false,

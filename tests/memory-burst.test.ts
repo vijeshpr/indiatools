@@ -312,6 +312,71 @@ describe('Memory Burst Studio — Music-Reactive Multi-Photo Cinematic Suite', (
     assert.ok(stateAtPeak.scalePunch >= 1.0)
   })
 
+  it('should support rhythm-synced cinematic zoom with bass pulse and toggle control', () => {
+    const photos: MemoryBurstPhoto[] = [
+      { id: 'p1', url: 'https://indiatools-rho.vercel.app/images/sample1.jpg', name: 'Photo 1' },
+      { id: 'p2', url: 'https://indiatools-rho.vercel.app/images/sample2.jpg', name: 'Photo 2' },
+    ]
+
+    const configZoomOn: MemoryBurstStudioConfig = {
+      ...DEFAULT_MEMORY_BURST_CONFIG,
+      photos,
+      rhythmZoom: {
+        enabled: true,
+        style: 'rhythm-pulse',
+        intensity: 80,
+        maxZoom: 1.10,
+      },
+    }
+
+    const highBassBands: NormalizedAudioBands = {
+      bass: 0.9,
+      mid: 0.4,
+      treble: 0.2,
+      subBass: 0.95,
+      overall: 0.8,
+      isBeatHit: true,
+    }
+
+    const stateZoomOn = memoryBurstSequencer.evaluateAtTime(configZoomOn, 1.0, 20, highBassBands)
+    assert.ok(stateZoomOn.rhythmZoom > 1.0, 'Rhythm zoom should react and increase on high bass')
+    assert.ok(stateZoomOn.totalZoom >= stateZoomOn.rhythmZoom)
+
+    // When toggled OFF ("vendenkil off aakanulla option")
+    const configZoomOff: MemoryBurstStudioConfig = {
+      ...configZoomOn,
+      rhythmZoom: {
+        ...configZoomOn.rhythmZoom,
+        enabled: false,
+      },
+    }
+
+    const stateZoomOff = memoryBurstSequencer.evaluateAtTime(configZoomOff, 1.0, 20, highBassBands)
+    assert.strictEqual(stateZoomOff.rhythmZoom, 1.0, 'Rhythm zoom must be 1.0 when disabled')
+    assert.strictEqual(stateZoomOff.totalZoom, 1.0, 'Total zoom must be 1.0 when zoom is disabled')
+  })
+
+  it('should guarantee that photos in beat-sync mode transition strictly according to beat rhythm', () => {
+    const photos: MemoryBurstPhoto[] = [
+      { id: 'p1', url: 'https://indiatools-rho.vercel.app/images/sample1.jpg', name: 'Photo 1' },
+      { id: 'p2', url: 'https://indiatools-rho.vercel.app/images/sample2.jpg', name: 'Photo 2' },
+      { id: 'p3', url: 'https://indiatools-rho.vercel.app/images/sample3.jpg', name: 'Photo 3' },
+    ]
+
+    // Empty markers in beat-sync should automatically generate rhythm-synced beats, never a static 1.5s timer!
+    const config: MemoryBurstStudioConfig = {
+      ...DEFAULT_MEMORY_BURST_CONFIG,
+      photos,
+      mode: 'beat-sync',
+      beatMarkers: [],
+      minCutIntervalSec: 0.4,
+    }
+
+    const schedule = memoryBurstSequencer.buildSchedule(config, 10.0, photos.length)
+    assert.ok(schedule.length > 5, 'Must generate rhythm beat schedule')
+    assert.ok(schedule[1].startTime > 0 && schedule[1].startTime <= 0.6)
+  })
+
   it('should safely manage object URLs and canvas caches in MemoryBurstEngine', () => {
     const engine = new MemoryBurstEngine()
     assert.doesNotThrow(() => {

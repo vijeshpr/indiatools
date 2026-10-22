@@ -76,8 +76,8 @@ export class MemoryBurstEngine {
       ctx.translate(frameState.bassShakeX, frameState.bassShakeY)
     }
 
-    // 4. Apply Cinematic Scale Punch (Centered)
-    const scale = frameState.scalePunch || 1.0
+    // 4. Apply Rhythm-Synced Cinematic Zoom & Scale Punch (Centered)
+    const scale = frameState.totalZoom || frameState.scalePunch || 1.0
     if (scale !== 1.0) {
       ctx.translate(width / 2, height / 2)
       ctx.scale(scale, scale)

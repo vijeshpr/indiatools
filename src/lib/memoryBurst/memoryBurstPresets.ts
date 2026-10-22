@@ -154,6 +154,10 @@ export function applyMemoryBurstPreset(
       ...currentConfig.flash,
       ...(preset.config.flash || {}),
     },
+    rhythmZoom: {
+      ...currentConfig.rhythmZoom,
+      ...(preset.config.rhythmZoom || {}),
+    },
     climax: {
       ...currentConfig.climax,
       ...(preset.config.climax || {}),

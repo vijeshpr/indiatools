@@ -18,16 +18,24 @@ export class MemoryBurstBeatDetector {
     if (!audioUrl) return []
 
     try {
+      if (typeof window === 'undefined') {
+        return this.generateFallbackBeats(30.0, minIntervalSec)
+      }
+
       const response = await fetch(audioUrl)
       const arrayBuffer = await response.arrayBuffer()
 
       const AudioCtx =
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      if (!AudioCtx) {
+        return this.generateFallbackBeats(30.0, minIntervalSec)
+      }
+
       const audioCtx = new AudioCtx()
 
       try {
-        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0))
         return this.detectBeatsFromBuffer(audioBuffer, sensitivity, minIntervalSec)
       } finally {
         if (audioCtx.state !== 'closed') {

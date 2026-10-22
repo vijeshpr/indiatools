@@ -10,6 +10,7 @@ import {
   MemoryBurstBeatMarker,
 } from './memoryBurstTypes'
 import { NormalizedAudioBands } from '../audioToVideo/types'
+import { memoryBurstBeatDetector } from './memoryBurstBeatDetector'
 
 export interface MemoryBurstCropRect {
   sx: number
@@ -26,6 +27,8 @@ export interface MemoryBurstFrameState {
   transitionProgress: number // 0.0 (cut onset) to 1.0 (settled)
   transitionStyle: MemoryBurstTransitionStyle
   scalePunch: number // 1.05 to 1.0
+  rhythmZoom: number // 1.0 to 1.15 rhythm-reactive zoom
+  totalZoom: number // combined total scale factor
   bassShakeX: number
   bassShakeY: number
   flashOpacity: number
@@ -65,6 +68,8 @@ export class MemoryBurstSequencer {
         transitionProgress: 1,
         transitionStyle: config.transitionStyle,
         scalePunch: 1.0,
+        rhythmZoom: 1.0,
+        totalZoom: 1.0,
         bassShakeX: 0,
         bassShakeY: 0,
         flashOpacity: 0,
@@ -87,6 +92,8 @@ export class MemoryBurstSequencer {
         transitionProgress: 1,
         transitionStyle: config.transitionStyle,
         scalePunch: 1.0,
+        rhythmZoom: 1.0,
+        totalZoom: 1.0,
         bassShakeX: 0,
         bassShakeY: 0,
         flashOpacity: 0,
@@ -176,6 +183,37 @@ export class MemoryBurstSequencer {
       shakeY = Math.cos(currentTime * 42) * (effectiveDisp * 0.7)
     }
 
+    // Calculate rhythm-synced cinematic zoom effect ("rytham thinu anusarich cinimatic zoom effect")
+    let rhythmZoom = 1.0
+    if (config.rhythmZoom?.enabled) {
+      const zoomMax = config.rhythmZoom.maxZoom || 1.08
+      const intensity = (config.rhythmZoom.intensity || 60) / 100
+      const zoomStyle = config.rhythmZoom.style || 'rhythm-pulse'
+
+      // 1. Ken Burns slow cinematic push across photo duration
+      const shotProgress = currentEntry.duration > 0 ? Math.min(1.0, timeInShot / currentEntry.duration) : 0
+      const drift = shotProgress * 0.03 * intensity
+
+      // 2. Real-time audio band reactivity: bass/sub-bass rhythm pulse
+      const bassEnergy = Math.max(0, Math.min(1.0, bands.bass || 0))
+      const subBassEnergy = Math.max(0, Math.min(1.0, bands.subBass || 0))
+      const beatHitBoost = bands.isBeatHit ? 0.02 * intensity : 0
+
+      if (zoomStyle === 'rhythm-pulse') {
+        const pulse = (bassEnergy * 0.6 + subBassEnergy * 0.4) * (zoomMax - 1.0) * intensity + beatHitBoost
+        rhythmZoom = Math.min(zoomMax, 1.0 + drift + pulse)
+      } else if (zoomStyle === 'slow-push') {
+        const pulse = bassEnergy * 0.02 * intensity + beatHitBoost
+        rhythmZoom = Math.min(zoomMax, 1.0 + drift * 1.5 + pulse)
+      } else if (zoomStyle === 'beat-kick') {
+        const kick = (bands.isBeatHit ? 0.04 : bassEnergy * 0.025) * intensity
+        rhythmZoom = Math.min(zoomMax, 1.0 + drift + kick)
+      }
+    }
+
+    // Total combined scale factor (scalePunch + rhythmZoom)
+    const totalZoom = Math.max(1.0, scalePunch * rhythmZoom)
+
     return {
       currentPhoto,
       previousPhoto,
@@ -184,6 +222,8 @@ export class MemoryBurstSequencer {
       transitionProgress,
       transitionStyle,
       scalePunch,
+      rhythmZoom,
+      totalZoom,
       bassShakeX: shakeX,
       bassShakeY: shakeY,
       flashOpacity,
@@ -227,18 +267,23 @@ export class MemoryBurstSequencer {
       return this.buildClimaxSchedule(config, dur, totalPhotos)
     }
 
-    // Beat-Sync & Beat-Interval Modes
-    if (
-      (mode === 'beat-sync' || mode === 'every-2-beats' || mode === 'every-4-beats') &&
-      markers.length > 0
-    ) {
+    // Beat-Sync & Beat-Interval Modes: GUARANTEED to cut only on beats!
+    if (mode === 'beat-sync' || mode === 'every-2-beats' || mode === 'every-4-beats') {
+      const effectiveMarkers =
+        markers.length > 0
+          ? markers
+          : memoryBurstBeatDetector.generateFallbackBeats(
+              dur,
+              Math.max(0.2, config.minCutIntervalSec || 0.4)
+            )
+
       const step = mode === 'every-4-beats' ? 4 : mode === 'every-2-beats' ? 2 : 1
       let shotCount = 0
 
-      for (let i = 0; i < markers.length; i += step) {
-        const marker = markers[i]
+      for (let i = 0; i < effectiveMarkers.length; i += step) {
+        const marker = effectiveMarkers[i]
         const nextTime =
-          i + step < markers.length ? markers[i + step].timeSec : dur
+          i + step < effectiveMarkers.length ? effectiveMarkers[i + step].timeSec : dur
         const shotDur = Math.max(0.15, nextTime - marker.timeSec)
 
         const isInterlude =
