@@ -17,11 +17,15 @@ import { TextLibraryPanel } from './hybridVideo/TextLibraryPanel.tsx'
 import { EffectsLibraryPanel } from './hybridVideo/EffectsLibraryPanel.tsx'
 import { TransitionsLibraryPanel } from './hybridVideo/TransitionsLibraryPanel.tsx'
 import { AudioLibraryPanel } from './hybridVideo/AudioLibraryPanel.tsx'
+import { MusicIntelligencePanel } from './hybridVideo/MusicIntelligencePanel.tsx'
 import { PreviewPlayer } from './hybridVideo/PreviewPlayer.tsx'
 import { PropertiesPanel } from './hybridVideo/PropertiesPanel.tsx'
 import { TimelineView } from './hybridVideo/TimelineView.tsx'
 import { ExportModal } from './hybridVideo/ExportModal.tsx'
 import { ProjectStorageModal } from './hybridVideo/ProjectStorageModal.tsx'
+import { BatchMediaModal } from './hybridVideo/BatchMediaModal.tsx'
+import { AutoEditModal } from './hybridVideo/AutoEditModal.tsx'
+import { RegenerationToolbar } from './hybridVideo/RegenerationToolbar.tsx'
 
 import type {
   HybridVideoProject,
@@ -48,6 +52,15 @@ import { calculateTotalProjectDuration, splitClipAtTime } from '../lib/hybridVid
 import { drawCompositionFrame, type RenderContext } from '../lib/hybridVideo/previewEngine.ts'
 import { hybridAudio } from '../lib/hybridVideo/audioTimelineEngine.ts'
 import { revokeAssetUrls } from '../lib/hybridVideo/mediaManager.ts'
+import type { MusicAnalysisResult } from '../lib/hybridVideo/musicIntelligence.ts'
+import {
+  generateAutoEditTimeline,
+  type AutoEditGeneratorOptions,
+} from '../lib/hybridVideo/autoEditGenerator.ts'
+import {
+  batchInsertMediaToTimeline,
+  type BatchInsertOptions,
+} from '../lib/hybridVideo/batchMediaOperations.ts'
 
 export const HybridVideoStudioTool: React.FC = () => {
   // Main Project State
@@ -61,16 +74,27 @@ export const HybridVideoStudioTool: React.FC = () => {
 
   // Selection & Navigation
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'media' | 'text' | 'effects' | 'transitions' | 'audio'>('media')
+  const [activeTab, setActiveTab] = useState<
+    'media' | 'text' | 'effects' | 'transitions' | 'audio' | 'music-ai'
+  >('media')
 
   // Playback state
   const [playheadSec, setPlayheadSec] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLooping, setIsLooping] = useState(false)
 
-  // Modals
+  // Modals & Auto-edit states
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false)
+  const [isAutoEditModalOpen, setIsAutoEditModalOpen] = useState(false)
+  const [musicAnalysis, setMusicAnalysis] = useState<MusicAnalysisResult | null>(null)
+  const [lastAutoEditOptions, setLastAutoEditOptions] = useState<AutoEditGeneratorOptions | null>(
+    null
+  )
+  const [lastAutoEditSummary, setLastAutoEditSummary] = useState<string | null>(null)
+  const [preAutoEditProjectSnapshot, setPreAutoEditProjectSnapshot] =
+    useState<HybridVideoProject | null>(null)
 
   // References
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -91,15 +115,18 @@ export const HybridVideoStudioTool: React.FC = () => {
   }, [project.mediaAssets])
 
   // Push new state to history (for undo/redo)
-  const pushState = useCallback((newProject: HybridVideoProject) => {
-    setHistory((prev) => {
-      const sliced = prev.slice(0, historyIndex + 1)
-      return [...sliced, newProject]
-    })
-    setHistoryIndex((prev) => prev + 1)
-    setProject(newProject)
-    saveProjectToLocalStorage(newProject)
-  }, [historyIndex])
+  const pushState = useCallback(
+    (newProject: HybridVideoProject) => {
+      setHistory((prev) => {
+        const sliced = prev.slice(0, historyIndex + 1)
+        return [...sliced, newProject]
+      })
+      setHistoryIndex((prev) => prev + 1)
+      setProject(newProject)
+      saveProjectToLocalStorage(newProject)
+    },
+    [historyIndex]
+  )
 
   const handleUndo = () => {
     if (historyIndex > 0) {
@@ -119,24 +146,85 @@ export const HybridVideoStudioTool: React.FC = () => {
 
   // Pre-load video elements when video clips appear on timeline
   useEffect(() => {
+    const videoMap = videoElementsMapRef.current
     for (const clip of project.clips) {
-      if (clip.type === 'video' && clip.assetId) {
+      if (clip.assetId) {
         const asset = mediaAssetsMapRef.current.get(clip.assetId)
-        if (asset && !videoElementsMapRef.current.has(clip.assetId)) {
-          const vid = document.createElement('video')
-          vid.crossOrigin = 'anonymous'
-          vid.preload = 'auto'
-          vid.muted = true
-          vid.playsInline = true
-          vid.src = asset.url
-          videoElementsMapRef.current.set(clip.assetId, vid)
+        if (asset && asset.type === 'video' && !videoMap.has(asset.id)) {
+          const video = document.createElement('video')
+          video.src = asset.url
+          video.crossOrigin = 'anonymous'
+          video.preload = 'auto'
+          video.muted = true
+          video.playsInline = true
+          videoMap.set(asset.id, video)
         }
       }
     }
   }, [project.clips])
 
-  // Single render function
-  const renderCurrentFrame = useCallback((timeSec: number) => {
+  // Pre-load image elements
+  useEffect(() => {
+    const imgMap = imageElementsMapRef.current
+    for (const clip of project.clips) {
+      if (clip.assetId) {
+        const asset = mediaAssetsMapRef.current.get(clip.assetId)
+        if (asset && asset.type === 'image' && !imgMap.has(asset.id)) {
+          const img = new Image()
+          img.src = asset.url
+          img.crossOrigin = 'anonymous'
+          imgMap.set(asset.id, img)
+        }
+      }
+    }
+  }, [project.clips])
+
+  // Playback Loop
+  useEffect(() => {
+    if (!isPlaying) {
+      hybridAudio.stopAll()
+      return
+    }
+
+    hybridAudio.playAt(playheadSec, project.clips, project.tracks, mediaAssetsMapRef.current)
+    lastPlayheadTimeRef.current = performance.now()
+
+    let running = true
+
+    const tick = (now: number) => {
+      if (!running) return
+
+      const deltaSec = (now - lastPlayheadTimeRef.current) / 1000
+      lastPlayheadTimeRef.current = now
+
+      setPlayheadSec((prev) => {
+        const next = prev + deltaSec
+        if (next >= project.settings.durationSec) {
+          if (isLooping) {
+            hybridAudio.playAt(0, project.clips, project.tracks, mediaAssetsMapRef.current)
+            return 0
+          } else {
+            setIsPlaying(false)
+            hybridAudio.stopAll()
+            return project.settings.durationSec
+          }
+        }
+        return next
+      })
+
+      animFrameRef.current = requestAnimationFrame(tick)
+    }
+
+    animFrameRef.current = requestAnimationFrame(tick)
+
+    return () => {
+      running = false
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
+    }
+  }, [isPlaying, isLooping, project.settings.durationSec, project.clips, project.tracks])
+
+  // Canvas Frame Rendering
+  useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -153,123 +241,27 @@ export const HybridVideoStudioTool: React.FC = () => {
       imageElements: imageElementsMapRef.current,
     }
 
-    drawCompositionFrame(renderCtx, timeSec)
-  }, [project.settings, project.tracks, project.clips])
+    drawCompositionFrame(renderCtx, playheadSec)
+  }, [playheadSec, project])
 
-  // Render immediately when playhead or composition updates
-  useEffect(() => {
-    renderCurrentFrame(playheadSec)
-  }, [renderCurrentFrame, playheadSec])
-
-  // Playback loop
-  useEffect(() => {
-    if (!isPlaying) {
-      hybridAudio.stopAll()
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current)
-      }
-      return
-    }
-
-    // Start audio sync
-    hybridAudio.playAt(playheadSec, project.clips, project.tracks, mediaAssetsMapRef.current)
-    lastPlayheadTimeRef.current = performance.now()
-
-    const loop = (now: number) => {
-      const deltaSec = (now - lastPlayheadTimeRef.current) / 1000
-      lastPlayheadTimeRef.current = now
-
-      setPlayheadSec((prev) => {
-        const next = prev + deltaSec
-        const maxDuration = project.settings.durationSec
-
-        if (next >= maxDuration) {
-          if (isLooping) {
-            hybridAudio.playAt(0, project.clips, project.tracks, mediaAssetsMapRef.current)
-            return 0
-          } else {
-            setIsPlaying(false)
-            return maxDuration
-          }
-        }
-        return next
-      })
-
-      animFrameRef.current = requestAnimationFrame(loop)
-    }
-
-    animFrameRef.current = requestAnimationFrame(loop)
-
-    return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current)
-      }
-      hybridAudio.stopAll()
-    }
-  }, [isPlaying, isLooping, project.settings.durationSec, project.clips, project.tracks])
-
-  // Toggle Play / Pause
   const togglePlay = () => {
-    setIsPlaying((prev) => {
-      const next = !prev
-      if (next && playheadSec >= project.settings.durationSec) {
-        setPlayheadSec(0)
-      }
-      return next
-    })
+    if (playheadSec >= project.settings.durationSec) {
+      setPlayheadSec(0)
+    }
+    setIsPlaying(!isPlaying)
   }
 
-  // Keyboard Shortcuts: Space, S, Delete/Backspace, Ctrl+Z, Ctrl+Y
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept if user is typing in input or textarea
-      const target = e.target as HTMLElement
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable) {
-        return
-      }
-
-      if (e.code === 'Space') {
-        e.preventDefault()
-        togglePlay()
-      } else if (e.code === 'KeyS' && !e.ctrlKey && !e.metaKey) {
-        if (selectedClipId) {
-          e.preventDefault()
-          handleSplitClip(selectedClipId, playheadSec)
-        }
-      } else if (e.code === 'Delete' || e.code === 'Backspace') {
-        if (selectedClipId) {
-          e.preventDefault()
-          handleDeleteClip(selectedClipId)
-        }
-      } else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') {
-        e.preventDefault()
-        if (e.shiftKey) {
-          handleRedo()
-        } else {
-          handleUndo()
-        }
-      } else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyY') {
-        e.preventDefault()
-        handleRedo()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedClipId, playheadSec, historyIndex, history.length])
-
-  // Media Library Operations
+  // Media Library Handlers
   const handleAddMedia = (assets: MediaAsset[]) => {
-    const updatedProject: HybridVideoProject = {
+    const updatedAssets = [...project.mediaAssets, ...assets]
+    pushState({
       ...project,
-      mediaAssets: [...project.mediaAssets, ...assets],
-    }
-    pushState(updatedProject)
+      mediaAssets: updatedAssets,
+    })
   }
 
   const handleRemoveMedia = (assetId: string) => {
     const updatedAssets = project.mediaAssets.filter((a) => a.id !== assetId)
-    // Also remove clips tied to this asset
     const updatedClips = project.clips.filter((c) => c.assetId !== assetId)
     pushState({
       ...project,
@@ -287,23 +279,28 @@ export const HybridVideoStudioTool: React.FC = () => {
     })
   }
 
-  // Add Asset to Timeline
+  // Add individual asset to timeline
   const handleAddAssetToTimeline = (asset: MediaAsset) => {
-    const targetTrackType = asset.type === 'audio' ? 'audio' : 'video'
-    const targetTrack = project.tracks.find((t) => t.type === targetTrackType) || project.tracks[2]
-
-    // Find end of last clip on this track
-    const trackClips = project.clips.filter((c) => c.trackId === targetTrack.id)
-    let startSec = 0
-    for (const c of trackClips) {
-      const end = c.startSec + c.durationSec
-      if (end > startSec) startSec = end
+    let targetTrack: Track | undefined
+    if (asset.type === 'video' || asset.type === 'image') {
+      targetTrack = project.tracks.find((t) => t.type === 'video')
+    } else {
+      targetTrack = project.tracks.find((t) => t.type === 'audio')
     }
 
-    const durationSec = Math.min(asset.durationSec, 15)
+    if (!targetTrack) return
+
+    // Find end of existing clips on that track to place sequentially
+    const trackClips = project.clips.filter((c) => c.trackId === targetTrack!.id)
+    const lastClipEnd = trackClips.reduce(
+      (max, c) => Math.max(max, c.startSec + c.durationSec),
+      0
+    )
+    const startSec = lastClipEnd
+    const durationSec = asset.type === 'image' ? 4 : asset.durationSec
 
     const newClip: TimelineClip = {
-      id: `clip-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: `clip-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       trackId: targetTrack.id,
       assetId: asset.id,
       name: asset.name,
@@ -315,71 +312,142 @@ export const HybridVideoStudioTool: React.FC = () => {
       speed: 1.0,
       transform: { ...DEFAULT_TRANSFORM },
       keyframes: [],
-      effects: {
-        ...DEFAULT_EFFECTS,
-        colorGrading: { ...DEFAULT_EFFECTS.colorGrading },
-        filters: { ...DEFAULT_EFFECTS.filters },
-      },
+      effects: { ...DEFAULT_EFFECTS },
       transitionIn: { type: 'none', durationSec: 0 },
       transitionOut: { type: 'none', durationSec: 0 },
       audioProps: { ...DEFAULT_AUDIO_PROPS },
     }
 
     const updatedClips = [...project.clips, newClip]
-    const newTotalDuration = calculateTotalProjectDuration(updatedClips, project.settings.durationSec)
+    const newTotalDuration = calculateTotalProjectDuration(
+      updatedClips,
+      project.settings.durationSec
+    )
 
     pushState({
       ...project,
       settings: { ...project.settings, durationSec: newTotalDuration },
       clips: updatedClips,
     })
-
     setSelectedClipId(newClip.id)
   }
 
-  // Add Text Clip to Timeline
-  const handleAddTextClip = (textProps: ClipTextProperties) => {
-    const textTrack = project.tracks.find((t) => t.type === 'text') || project.tracks[0]
+  // One-Click Auto-Edit Apply
+  const handleApplyAutoEdit = (
+    updatedProject: HybridVideoProject,
+    summary: string,
+    options: AutoEditGeneratorOptions
+  ) => {
+    setPreAutoEditProjectSnapshot({ ...project })
+    setLastAutoEditOptions(options)
+    setLastAutoEditSummary(summary)
+    pushState(updatedProject)
+    setPlayheadSec(0)
+  }
+
+  // Quick Regeneration Toolbar Handlers
+  const handleQuickRegenerate = (overrides?: Partial<AutoEditGeneratorOptions>) => {
+    if (!lastAutoEditOptions) return
+    const musicAsset =
+      project.mediaAssets.find((a) => a.id === musicAnalysis?.assetId) ||
+      project.mediaAssets.find((a) => a.type === 'audio')
+    if (!musicAsset) return
+
+    const activeAnalysis: MusicAnalysisResult = musicAnalysis || {
+      assetId: musicAsset.id,
+      assetName: musicAsset.name,
+      durationSec: musicAsset.durationSec || 30,
+      bpm: 120,
+      bpmConfidence: 0.5,
+      beats: [],
+      onsets: [],
+      energyEnvelope: [],
+      sections: [],
+      dominantMood: 'energetic',
+      overallMelodyScore: 0.5,
+      climaxStartSec: musicAsset.durationSec * 0.8,
+      climaxEndSec: musicAsset.durationSec,
+      suggestedCutPoints: [],
+    }
+
+    const updatedOptions: AutoEditGeneratorOptions = {
+      ...lastAutoEditOptions,
+      ...overrides,
+    }
+
+    try {
+      const baseProject = preAutoEditProjectSnapshot || project
+      const result = generateAutoEditTimeline(
+        baseProject,
+        musicAsset,
+        activeAnalysis,
+        project.mediaAssets,
+        updatedOptions
+      )
+      setLastAutoEditOptions(updatedOptions)
+      setLastAutoEditSummary(result.summary)
+      pushState(result.updatedProject)
+      setPlayheadSec(0)
+    } catch (err) {
+      console.error('Quick regenerate error:', err)
+    }
+  }
+
+  const handleRestorePrevious = () => {
+    if (preAutoEditProjectSnapshot) {
+      pushState(preAutoEditProjectSnapshot)
+      setLastAutoEditSummary(null)
+      setPreAutoEditProjectSnapshot(null)
+    }
+  }
+
+  // Text Clip
+  const handleAddTextClip = (presetText: ClipTextProperties) => {
+    const textTrack = project.tracks.find((t) => t.type === 'text')
+    if (!textTrack) return
 
     const newClip: TimelineClip = {
-      id: `clip-text-${Date.now()}`,
+      id: `text-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       trackId: textTrack.id,
-      name: textProps.titleStyle ? textProps.titleStyle.replace('-', ' ').toUpperCase() : 'TEXT TITLE',
+      name: presetText.text,
       type: 'text',
       startSec: playheadSec,
-      durationSec: 4.0,
+      durationSec: 3.5,
       trimStartSec: 0,
       trimEndSec: 0,
       speed: 1.0,
       transform: { ...DEFAULT_TRANSFORM },
       keyframes: [],
-      effects: {
-        ...DEFAULT_EFFECTS,
-        colorGrading: { ...DEFAULT_EFFECTS.colorGrading },
-        filters: { ...DEFAULT_EFFECTS.filters },
-      },
-      transitionIn: { type: 'crossfade', durationSec: 0.5 },
-      transitionOut: { type: 'crossfade', durationSec: 0.5 },
-      textProps: { ...textProps },
+      effects: { ...DEFAULT_EFFECTS },
+      transitionIn: { type: 'none', durationSec: 0 },
+      transitionOut: { type: 'none', durationSec: 0 },
+      textProps: { ...presetText },
       audioProps: { ...DEFAULT_AUDIO_PROPS },
     }
 
     const updatedClips = [...project.clips, newClip]
-    const newTotalDuration = calculateTotalProjectDuration(updatedClips, project.settings.durationSec)
+    const newTotalDuration = calculateTotalProjectDuration(
+      updatedClips,
+      project.settings.durationSec
+    )
 
     pushState({
       ...project,
       settings: { ...project.settings, durationSec: newTotalDuration },
       clips: updatedClips,
     })
-
     setSelectedClipId(newClip.id)
   }
 
   // Clip Modifications
   const handleUpdateClip = (clipId: string, updates: Partial<TimelineClip>) => {
-    const updatedClips = project.clips.map((c) => (c.id === clipId ? { ...c, ...updates } : c))
-    const newTotalDuration = calculateTotalProjectDuration(updatedClips, project.settings.durationSec)
+    const updatedClips = project.clips.map((c) =>
+      c.id === clipId ? { ...c, ...updates } : c
+    )
+    const newTotalDuration = calculateTotalProjectDuration(
+      updatedClips,
+      project.settings.durationSec
+    )
 
     pushState({
       ...project,
@@ -440,7 +508,9 @@ export const HybridVideoStudioTool: React.FC = () => {
       transform: { ...clip.transform },
     }
 
-    const updatedKeyframes = [...(clip.keyframes || []), newKeyframe].sort((a, b) => a.timeSec - b.timeSec)
+    const updatedKeyframes = [...(clip.keyframes || []), newKeyframe].sort(
+      (a, b) => a.timeSec - b.timeSec
+    )
     handleUpdateClip(clipId, { keyframes: updatedKeyframes })
   }
 
@@ -452,7 +522,10 @@ export const HybridVideoStudioTool: React.FC = () => {
   }
 
   // Apply Transition to Clip
-  const handleApplyTransition = (transition: ClipTransition, target: 'in' | 'out' | 'both') => {
+  const handleApplyTransition = (
+    transition: ClipTransition,
+    target: 'in' | 'out' | 'both'
+  ) => {
     if (!selectedClipId) return
     const clip = project.clips.find((c) => c.id === selectedClipId)
     if (!clip) return
@@ -503,6 +576,7 @@ export const HybridVideoStudioTool: React.FC = () => {
           <div className="w-14 border-r border-white/10 bg-[#080B12] flex flex-col items-center py-3 gap-2">
             {[
               { id: 'media', icon: Video, label: 'Media' },
+              { id: 'music-ai', icon: Sparkles, label: 'Music AI' },
               { id: 'text', icon: Type, label: 'Text' },
               { id: 'effects', icon: Sliders, label: 'Effects' },
               { id: 'transitions', icon: ArrowLeftRight, label: 'Transition' },
@@ -538,6 +612,18 @@ export const HybridVideoStudioTool: React.FC = () => {
                 onRemoveMedia={handleRemoveMedia}
                 onAddToTimeline={handleAddAssetToTimeline}
                 onClearMedia={handleClearMedia}
+                onOpenBatchModal={() => setIsBatchModalOpen(true)}
+                onOpenAutoEditModal={() => setIsAutoEditModalOpen(true)}
+              />
+            )}
+            {activeTab === 'music-ai' && (
+              <MusicIntelligencePanel
+                mediaAssets={project.mediaAssets}
+                musicAnalysis={musicAnalysis}
+                onAnalysisComplete={(res) => setMusicAnalysis(res)}
+                playheadSec={playheadSec}
+                onSeek={(t) => setPlayheadSec(t)}
+                onOpenAutoEditModal={() => setIsAutoEditModalOpen(true)}
               />
             )}
             {activeTab === 'text' && <TextLibraryPanel onAddTextClip={handleAddTextClip} />}
@@ -593,6 +679,46 @@ export const HybridVideoStudioTool: React.FC = () => {
         </div>
       </div>
 
+      {/* Regeneration Toolbar (Shown when auto-edit summary exists) */}
+      {lastAutoEditSummary && (
+        <RegenerationToolbar
+          lastSummary={lastAutoEditSummary}
+          onRegenerate={() => handleQuickRegenerate({ assetOrder: 'shuffle' })}
+          onSlowerCuts={() =>
+            handleQuickRegenerate({
+              pacingOffsetMultiplier: (lastAutoEditOptions?.pacingOffsetMultiplier || 1.0) * 1.25,
+            })
+          }
+          onFasterCuts={() =>
+            handleQuickRegenerate({
+              pacingOffsetMultiplier: (lastAutoEditOptions?.pacingOffsetMultiplier || 1.0) * 0.8,
+            })
+          }
+          onMoreCinematic={() =>
+            handleQuickRegenerate({
+              style: 'cinematic-story',
+            })
+          }
+          onSyncToBeats={() =>
+            handleQuickRegenerate({
+              style: 'beat-sync',
+            })
+          }
+          onKeepMelodyCalm={() =>
+            handleQuickRegenerate({
+              keepMelodyCalm: true,
+            })
+          }
+          onIncreaseClimax={() =>
+            handleQuickRegenerate({
+              style: 'climax-rewind',
+            })
+          }
+          onRestorePrevious={handleRestorePrevious}
+          onDismiss={() => setLastAutoEditSummary(null)}
+        />
+      )}
+
       {/* Bottom Area: Multi-Track Interactive Timeline */}
       <div className="h-56 bg-[#0A0D14] shrink-0 flex flex-col">
         <TimelineView
@@ -611,6 +737,27 @@ export const HybridVideoStudioTool: React.FC = () => {
       </div>
 
       {/* Modals */}
+      <BatchMediaModal
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
+        project={project}
+        playheadSec={playheadSec}
+        onApplyBatchInsert={(updatedProject, _summary) => {
+          setPreAutoEditProjectSnapshot({ ...project })
+          pushState(updatedProject)
+          setPlayheadSec(0)
+        }}
+      />
+
+      <AutoEditModal
+        isOpen={isAutoEditModalOpen}
+        onClose={() => setIsAutoEditModalOpen(false)}
+        project={project}
+        mediaAssets={project.mediaAssets}
+        musicAnalysis={musicAnalysis}
+        onApplyAutoEdit={handleApplyAutoEdit}
+      />
+
       <ExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
@@ -633,6 +780,7 @@ export const HybridVideoStudioTool: React.FC = () => {
           pushState(fresh)
           setPlayheadSec(0)
           setSelectedClipId(null)
+          setLastAutoEditSummary(null)
         }}
       />
     </div>

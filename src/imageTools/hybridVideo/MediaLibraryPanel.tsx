@@ -8,6 +8,8 @@ import {
   Trash2,
   AlertCircle,
   Clock,
+  Layers,
+  Sparkles,
 } from 'lucide-react'
 import type { MediaAsset } from '../../lib/hybridVideo/types.ts'
 import { probeMediaFile } from '../../lib/hybridVideo/mediaManager.ts'
@@ -18,6 +20,8 @@ interface MediaLibraryPanelProps {
   onRemoveMedia: (assetId: string) => void
   onAddToTimeline: (asset: MediaAsset) => void
   onClearMedia: () => void
+  onOpenBatchModal?: () => void
+  onOpenAutoEditModal?: () => void
 }
 
 export const MediaLibraryPanel: React.FC<MediaLibraryPanelProps> = ({
@@ -26,6 +30,8 @@ export const MediaLibraryPanel: React.FC<MediaLibraryPanelProps> = ({
   onRemoveMedia,
   onAddToTimeline,
   onClearMedia,
+  onOpenBatchModal,
+  onOpenAutoEditModal,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -129,6 +135,36 @@ export const MediaLibraryPanel: React.FC<MediaLibraryPanelProps> = ({
           <div className="mt-2.5 p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-start gap-1.5">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="truncate">{errorMessage}</span>
+          </div>
+        )}
+
+        {/* One-Click Batch Actions Bar */}
+        {mediaAssets.length > 0 && (
+          <div className="mt-3 flex flex-col gap-2">
+            <div className="flex gap-2">
+              {onOpenBatchModal && (
+                <button
+                  type="button"
+                  onClick={onOpenBatchModal}
+                  className="flex-1 py-2 px-2.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Add All Media to Timeline</span>
+                </button>
+              )}
+
+              {onOpenAutoEditModal && (
+                <button
+                  type="button"
+                  onClick={onOpenAutoEditModal}
+                  className="py-2 px-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/20 active:scale-[0.98]"
+                  title="Automatically pace photos to music"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                  <span className="hidden sm:inline">Auto Edit</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
