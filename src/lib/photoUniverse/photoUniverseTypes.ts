@@ -75,41 +75,6 @@ export interface UniverseBackgroundConfig {
   nebulaGlow: number // 0 to 100
 }
 
-export type TrailColorPalette =
-  | 'cosmic-blue'
-  | 'aurora-violet'
-  | 'sunset-nebula'
-  | 'ice-white'
-  | 'custom'
-
-export type TrailReactivityLevel = 'off' | 'subtle' | 'balanced' | 'strong'
-
-export interface UniverseLightTrailsConfig {
-  enabled: boolean
-  trailLength: number // 8 to 48 points (default: 28)
-  glowIntensity: number // 20 to 100% (default: 65%)
-  trebleSensitivity: number // 10 to 100% (default: 60%)
-  fadeDuration: number // 0.5 to 3.0s (default: 1.4s)
-  trailWidth: number // 4 to 32px (default: 14px)
-  colorPalette: TrailColorPalette // default: 'cosmic-blue'
-  customColor?: string // hex string, default: '#00F0FF'
-  particleAccents: boolean // default: true
-  musicReactivity: TrailReactivityLevel // default: 'balanced'
-}
-
-export const DEFAULT_UNIVERSE_LIGHT_TRAILS: UniverseLightTrailsConfig = {
-  enabled: true,
-  trailLength: 28,
-  glowIntensity: 65,
-  trebleSensitivity: 60,
-  fadeDuration: 1.4,
-  trailWidth: 14,
-  colorPalette: 'cosmic-blue',
-  customColor: '#00F0FF',
-  particleAccents: true,
-  musicReactivity: 'balanced',
-}
-
 export type SupernovaTriggerSensitivity = 'low' | 'balanced' | 'high'
 
 export type SupernovaPhase = 'idle' | 'attraction' | 'supernova' | 'expansion' | 'recovery'
@@ -265,9 +230,6 @@ export interface PhotoUniverseStudioConfig {
   // Background
   background: UniverseBackgroundConfig
 
-  // Audio-Reactive Cosmic Light Trails
-  lightTrails: UniverseLightTrailsConfig
-
   // Supernova Shockwave: Cinematic Music Climax
   supernova: UniverseSupernovaConfig
 
@@ -337,7 +299,6 @@ export const DEFAULT_PHOTO_UNIVERSE_CONFIG: PhotoUniverseStudioConfig = {
   focusDepth: 50,
   bassShake: DEFAULT_UNIVERSE_BASS_SHAKE,
   background: DEFAULT_UNIVERSE_BACKGROUND,
-  lightTrails: DEFAULT_UNIVERSE_LIGHT_TRAILS,
   supernova: DEFAULT_UNIVERSE_SUPERNOVA,
   directorMode: 'auto',
   manualOrder: [],

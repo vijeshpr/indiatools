@@ -21,7 +21,6 @@ import { universeCameraDirector, CameraFrameState } from './universeCameraDirect
 import { universeBackgroundRenderer } from './universeBackground.ts'
 import { universeCameraScoreGenerator } from './universeCameraScore.ts'
 import { universeAudioAnalyzer } from './universeAudioAnalyzer.ts'
-import { universeLightTrailsRenderer } from './universeLightTrails.ts'
 import { universeSupernovaManager } from './universeSupernova.ts'
 
 interface CachedPhotoAssets {
@@ -161,9 +160,6 @@ export class PhotoUniverseEngine {
 
       // Initialize ambient particles
       this.initParticles()
-
-      // Attach Audio-Reactive Cosmic Light Trails
-      universeLightTrailsRenderer.attachToScene(this.scene)
     } catch (e) {
       console.warn('WebGL initialization failed in PhotoUniverseEngine:', e)
     }
@@ -645,31 +641,7 @@ export class PhotoUniverseEngine {
       this.particlesMesh.visible = false
     }
 
-    // 10. Update Audio-Reactive Cosmic Light Trails
-    if (config.lightTrails && config.lightTrails.enabled && this.camera) {
-      // Climax Boost: When Supernova bursts, light trails widen and glow brighter
-      const activeTrailsConfig =
-        supernovaState.overallIntensity > 0
-          ? {
-              ...config.lightTrails,
-              glowIntensity: Math.min(100, config.lightTrails.glowIntensity + supernovaState.overallIntensity * 35),
-              trailWidth: Math.min(32, config.lightTrails.trailWidth + supernovaState.overallIntensity * 10),
-            }
-          : config.lightTrails
-
-      universeLightTrailsRenderer.update(
-        photoPositions,
-        this.camera,
-        activeTrailsConfig,
-        bands,
-        currentTime,
-        this.cachedAnalysisResult?.detectedProfile || 'balanced-cinematic'
-      )
-    } else {
-      universeLightTrailsRenderer.resetTrails()
-    }
-
-    // 11. Render Three.js Scene into WebGL Canvas with Transparent Background
+    // 10. Render Three.js Scene into WebGL Canvas with Transparent Background
     if (this.renderer && this.scene && this.camera && this.webglCanvas) {
       this.renderer.setClearColor(0x000000, 0)
       this.scene.background = null
@@ -747,7 +719,6 @@ export class PhotoUniverseEngine {
     }
 
     universeBackgroundRenderer.dispose()
-    universeLightTrailsRenderer.dispose()
     universeSupernovaManager.reset()
 
     this.renderer?.dispose()
