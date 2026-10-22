@@ -1238,13 +1238,13 @@ export const MemoryBurstStudioPanel: React.FC<MemoryBurstStudioPanelProps> = ({
         </div>
       </div>
 
-      {/* RHYTHM-SYNCED CINEMATIC ZOOM (റിഥം സിനിമാറ്റിക് സൂം) */}
+      {/* RHYTHM-SYNCED CINEMATIC ZOOM */}
       <div className="space-y-3.5 p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-violet-950/30 to-slate-900/60 border border-purple-500/30 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <label className="text-xs font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>Rhythm Cinematic Zoom (റിഥം സിനിമാറ്റിക് സൂം)</span>
+              <span>Rhythm Cinematic Zoom</span>
               <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
                 MUSIC REACTIVE
               </span>
