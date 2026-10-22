@@ -22,7 +22,11 @@ import { universeBackgroundRenderer } from './universeBackground.ts'
 import { universeCameraScoreGenerator } from './universeCameraScore.ts'
 import { universeAudioAnalyzer } from './universeAudioAnalyzer.ts'
 import { universeSupernovaManager } from './universeSupernova.ts'
-import { universeHolographicCards } from './universeHolographicCards.ts'
+import {
+  universeHolographicCards,
+  createCardPhotoGeometry,
+  getSharedShimmerTexture,
+} from './universeHolographicCards.ts'
 import { universeLiquidLight } from './universeLiquidLight.ts'
 
 interface CachedPhotoAssets {
@@ -30,6 +34,7 @@ interface CachedPhotoAssets {
   blurredTexture: THREE.Texture
   img: HTMLImageElement
   aspectRatio: number
+  loaded: boolean
 }
 
 export class PhotoUniverseEngine {
@@ -52,6 +57,7 @@ export class PhotoUniverseEngine {
   private currentScore: TimestampedCameraScore | null = null
   private lastScoreConfigKey: string = ''
   private cachedAnalysisResult: UniverseAudioAnalysisResult | null = null
+  private assetsNeedSync: boolean = false
 
   // Offscreen auxiliary canvas for Three.js WebGL context
   private webglCanvas: HTMLCanvasElement | null = null
@@ -232,7 +238,7 @@ export class PhotoUniverseEngine {
    */
   private generateTextures(
     img: HTMLImageElement,
-    url: string
+    _url: string
   ): { texture: THREE.Texture; blurredTexture: THREE.Texture; aspectRatio: number } {
     const aspect =
       img.naturalWidth > 0 && img.naturalHeight > 0
@@ -240,17 +246,18 @@ export class PhotoUniverseEngine {
         : 16 / 9
 
     const texture = new THREE.Texture(img)
-    texture.needsUpdate = true
     texture.colorSpace = THREE.SRGBColorSpace
     texture.generateMipmaps = true
     texture.minFilter = THREE.LinearMipmapLinearFilter
+    texture.magFilter = THREE.LinearFilter
+    texture.needsUpdate = true
 
     let blurredTexture: THREE.Texture = texture
     if (this.isClient && typeof document !== 'undefined') {
       try {
         const blurCanvas = document.createElement('canvas')
         const maxW = 512
-        const maxH = Math.round(maxW / aspect)
+        const maxH = Math.max(32, Math.round(maxW / aspect))
         blurCanvas.width = maxW
         blurCanvas.height = maxH
         const bCtx = blurCanvas.getContext('2d')
@@ -283,11 +290,36 @@ export class PhotoUniverseEngine {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.src = url
-      img.onload = () => {
-        const { texture, blurredTexture, aspectRatio } = this.generateTextures(img, url)
-        this.assetCache.set(url, { texture, blurredTexture, img, aspectRatio })
+
+      const shimmer = getSharedShimmerTexture()
+      const fallbackAsset: CachedPhotoAssets = {
+        texture: shimmer,
+        blurredTexture: shimmer,
+        img,
+        aspectRatio: 16 / 9,
+        loaded: false,
       }
-      return null
+      this.assetCache.set(url, fallbackAsset)
+
+      const onLoadHandler = () => {
+        const { texture, blurredTexture, aspectRatio } = this.generateTextures(img, url)
+        this.assetCache.set(url, {
+          texture,
+          blurredTexture,
+          img,
+          aspectRatio,
+          loaded: true,
+        })
+        this.assetsNeedSync = true
+      }
+
+      if (img.complete && img.naturalWidth > 0) {
+        onLoadHandler()
+        return this.assetCache.get(url)!
+      }
+
+      img.onload = onLoadHandler
+      return fallbackAsset
     } catch {
       return null
     }
@@ -379,11 +411,37 @@ export class PhotoUniverseEngine {
       group.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)
 
       const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh | undefined
-      if (photoMesh) {
+      if (photoMesh && asset) {
         const mat = photoMesh.material as THREE.MeshBasicMaterial
-        if (!mat.map && asset?.texture) {
+        if (asset.loaded && mat.map !== asset.texture && mat.map !== asset.blurredTexture) {
           mat.map = asset.texture
           mat.needsUpdate = true
+
+          // Rebuild photo surface geometry matching real image natural aspect ratio and normalized UVs
+          if (config.holographicCards?.enabled) {
+            const actualAspect = asset.aspectRatio || node.photo.aspectRatio || 16 / 9
+            const cornerRadius = config.holographicCards?.cornerRadius ?? 16
+            let photoW = node.worldWidth
+            let photoH = node.worldHeight
+            if (config.holographicCards.photoFit === 'contain') {
+              const apertureAspect = node.worldWidth / node.worldHeight
+              if (actualAspect > apertureAspect) {
+                photoW = node.worldWidth
+                photoH = node.worldWidth / actualAspect
+              } else {
+                photoH = node.worldHeight
+                photoW = node.worldHeight * actualAspect
+              }
+            }
+            photoMesh.geometry.dispose()
+            photoMesh.geometry = createCardPhotoGeometry(
+              photoW,
+              photoH,
+              Math.max(0, cornerRadius - 3),
+              config.holographicCards.photoFit,
+              actualAspect
+            )
+          }
         }
       }
 
@@ -578,16 +636,21 @@ export class PhotoUniverseEngine {
       const deltaFocus = Math.abs(distToCamera - focusPlane)
       const blurFactor = dofMode === 'off' ? 0 : Math.min(1.0, deltaFocus / dofSpread)
 
-      // 1. CAMERA-FACING CINEMATIC ORIENTATION:
-      // Photos smoothly face toward the active camera position, eliminating edge-on views,
-      // unnatural tumbling, or reverse-side black exposure!
+      // 1. BOUNDED CINEMATIC CAMERA-FACING ORIENTATION:
+      // Gracefully tilts toward camera during approach within a natural viewing cone ([-38°, +38°]).
+      // When camera flies past (dzToCam < 0), denominator Math.max(90, dzToCam) prevents
+      // 180° snap-turning or reverse-side exposure, maintaining cinematic stability!
       const dxToCam = this.camera.position.x - posX
       const dyToCam = this.camera.position.y - posY
       const dzToCam = this.camera.position.z - posZ
       const horizDist = Math.sqrt(dxToCam * dxToCam + dzToCam * dzToCam)
 
-      const facingYaw = Math.atan2(dxToCam, dzToCam)
-      const facingPitch = -Math.atan2(dyToCam * 0.45, Math.max(10, horizDist))
+      const rawYaw = Math.atan2(dxToCam, Math.max(90, dzToCam))
+      const facingYaw = Math.max(-0.66, Math.min(0.66, rawYaw))
+      const facingPitch = Math.max(
+        -0.35,
+        Math.min(0.35, -Math.atan2(dyToCam * 0.4, Math.max(90, horizDist)))
+      )
 
       let tiltRoll = 0
       if (config.photoMotion === 'subtle-float') {
@@ -615,7 +678,7 @@ export class PhotoUniverseEngine {
       const rimMesh = group.getObjectByName('rimMesh') as THREE.Mesh | undefined
       const asset = this.getOrLoadAsset(node.photo.url)
 
-      if (photoMesh && asset) {
+      if (photoMesh && asset && asset.loaded) {
         const mat = photoMesh.material as THREE.MeshBasicMaterial
         // Swap to blurred texture when substantially out of focus
         if (blurFactor > 0.45 && asset.blurredTexture) {

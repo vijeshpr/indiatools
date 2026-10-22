@@ -840,6 +840,7 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       )
 
       const glassChassis = group.getObjectByName('glassChassisMesh') as THREE.Mesh
+      const cardBackMesh = group.getObjectByName('cardBackMesh') as THREE.Mesh
       const outerBevel = group.getObjectByName('outerBevelLine') as THREE.LineLoop
       const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh
       const innerBevel = group.getObjectByName('innerBevelLine') as THREE.LineLoop
@@ -847,6 +848,7 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       const rimMesh = group.getObjectByName('rimMesh') as THREE.Mesh
 
       assert.ok(glassChassis, 'Must contain transparent glass chassis backing')
+      assert.ok(cardBackMesh, 'Must contain frosted glass back surface')
       assert.ok(outerBevel, 'Must contain outer holographic bevel line')
       assert.ok(photoMesh, 'Must contain central photo mesh')
       assert.ok(innerBevel, 'Must contain inner aperture bevel line')
@@ -859,9 +861,34 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       assert.strictEqual(chassisMat.side, THREE.DoubleSide)
       assert.strictEqual(chassisMat.depthWrite, false)
 
+      const backMat = cardBackMesh.material as THREE.MeshBasicMaterial
+      assert.strictEqual(backMat.transparent, true)
+      assert.strictEqual(backMat.side, THREE.BackSide)
+      assert.strictEqual(backMat.depthWrite, false)
+
       const photoMat = photoMesh.material as THREE.MeshBasicMaterial
       assert.strictEqual(photoMat.transparent, true)
       assert.strictEqual(photoMat.side, THREE.DoubleSide)
+
+      // Verify normalized UVs on photo geometry [0, 1]
+      const uvArr = photoMesh.geometry.getAttribute('uv').array as Float32Array
+      let minU = 1, maxU = 0, minV = 1, maxV = 0
+      for (let i = 0; i < uvArr.length; i += 2) {
+        minU = Math.min(minU, uvArr[i])
+        maxU = Math.max(maxU, uvArr[i])
+        minV = Math.min(minV, uvArr[i + 1])
+        maxV = Math.max(maxV, uvArr[i + 1])
+      }
+      assert.ok(minU >= -0.01 && maxU <= 1.01, `UV U [${minU}, ${maxU}] must be normalized within [0, 1]`)
+      assert.ok(minV >= -0.01 && maxV <= 1.01, `UV V [${minV}, ${maxV}] must be normalized within [0, 1]`)
+
+      // Verify layer ordering
+      assert.strictEqual(glassChassis.renderOrder, 1)
+      assert.strictEqual(cardBackMesh.renderOrder, 1)
+      assert.strictEqual(photoMesh.renderOrder, 2)
+      assert.strictEqual(innerBevel.renderOrder, 4)
+      assert.strictEqual(outerBevel.renderOrder, 4)
+      assert.strictEqual(glassSheen.renderOrder, 5)
     })
 
     it('respects photoFit contain mode by fitting within aperture without stretching', () => {
@@ -949,6 +976,96 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
 
       const minimalPreset = applyUniversePreset(initial, 'clean-minimalist-showcase')
       assert.strictEqual(minimalPreset.holographicCards.cardStyle, 'minimal-glass')
+    })
+
+    it('guarantees photoMesh front surface has normalized UVs [0, 1] avoiding grey sampling', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const group = new THREE.Group()
+
+      universeHolographicCards.buildCardHierarchy(
+        group,
+        nodes[0],
+        DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        null
+      )
+
+      const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh
+      assert.ok(photoMesh)
+      const uv = photoMesh.geometry.getAttribute('uv')
+      assert.ok(uv)
+
+      // Test that UV coordinates are bounded strictly between 0 and 1
+      const arr = uv.array as Float32Array
+      for (let i = 0; i < arr.length; i++) {
+        assert.ok(
+          arr[i] >= -0.01 && arr[i] <= 1.01,
+          `UV component index ${i} value ${arr[i]} must be strictly within normalized [0, 1]`
+        )
+      }
+    })
+
+    it('provides physical card thickness with frosted glass rear face to prevent black backsides', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const group = new THREE.Group()
+
+      universeHolographicCards.buildCardHierarchy(
+        group,
+        nodes[0],
+        DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        null
+      )
+
+      const chassis = group.getObjectByName('glassChassisMesh') as THREE.Mesh
+      const back = group.getObjectByName('cardBackMesh') as THREE.Mesh
+      const front = group.getObjectByName('photoMesh') as THREE.Mesh
+
+      assert.ok(chassis && back && front)
+      // Front is in front of origin (+Z), Back is behind origin (-Z)
+      assert.ok(front.position.z > 0, 'Front photo face must be at positive Z')
+      assert.ok(back.position.z < 0, 'Rear frosted face must be at negative Z')
+
+      const backMat = back.material as THREE.MeshBasicMaterial
+      assert.strictEqual(backMat.side, THREE.BackSide)
+      assert.strictEqual(backMat.transparent, true)
+      assert.strictEqual(backMat.depthWrite, false)
+      assert.notStrictEqual(backMat.color.getHex(), 0x000000, 'Back face must never be pure black')
+    })
+
+    it('supports cover and contain modes for both landscape and portrait without distortion', () => {
+      const portraitNode = generateUniverseSpatialNodes([samplePhotos[1]])[0] // 9:16 portrait
+      const groupContain = new THREE.Group()
+      const groupCover = new THREE.Group()
+
+      universeHolographicCards.buildCardHierarchy(
+        groupContain,
+        portraitNode,
+        { ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG, photoFit: 'contain' },
+        null
+      )
+
+      universeHolographicCards.buildCardHierarchy(
+        groupCover,
+        portraitNode,
+        { ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG, photoFit: 'cover' },
+        null
+      )
+
+      const meshContain = groupContain.getObjectByName('photoMesh') as THREE.Mesh
+      const meshCover = groupCover.getObjectByName('photoMesh') as THREE.Mesh
+
+      meshContain.geometry.computeBoundingBox()
+      meshCover.geometry.computeBoundingBox()
+
+      const boxContain = meshContain.geometry.boundingBox!
+      const boxCover = meshCover.geometry.boundingBox!
+
+      const containAspect = (boxContain.max.x - boxContain.min.x) / (boxContain.max.y - boxContain.min.y)
+      const coverAspect = (boxCover.max.x - boxCover.min.x) / (boxCover.max.y - boxCover.min.y)
+
+      // Contain matches portrait aspect ~0.56
+      assert.ok(Math.abs(containAspect - 9 / 16) < 0.05)
+      // Cover fills the aperture dimensions exactly
+      assert.ok(Math.abs(coverAspect - portraitNode.worldWidth / portraitNode.worldHeight) < 0.05)
     })
   })
 

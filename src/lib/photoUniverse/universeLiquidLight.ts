@@ -217,7 +217,7 @@ export function createLiquidRibbonGeometry(
   const uvs = new Float32Array(vertexCount * 2)
   const indices: number[] = []
 
-  const zOffset = 0.08 // Slightly above card chassis to prevent Z-fighting
+  const zOffset = 1.34 // Positioned on front perimeter of 3D glass card
 
   for (let i = 0; i <= samples; i++) {
     const s = i / samples // [0, 1] along perimeter
@@ -441,8 +441,10 @@ export class UniverseLiquidLightManager {
       const mat = this.createMaterial(config)
       ribbonMesh = new THREE.Mesh(geo, mat)
       ribbonMesh.name = 'liquidRibbonMesh'
+      ribbonMesh.renderOrder = 6
       group.add(ribbonMesh)
     } else {
+      ribbonMesh.renderOrder = 6
       if (ribbonMesh.geometry !== geo) {
         ribbonMesh.geometry = geo
       }

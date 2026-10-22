@@ -1,7 +1,8 @@
 /**
- * IndiaTools — Floating Photo Universe
+ * IndiaTools — Floating Photo Universe 2.0
  * Holographic Memory Cards: Premium 3D Crystal-Glass Display Cards
- * View-Angle-Responsive Rainbow Edge Reflections & Specular Glass Sheens
+ * Physical 3D Extruded Glass Chassis, Normalized Full-Bleed UV Image Mapping,
+ * Frosted Glass Back Surface & View-Angle-Responsive Rainbow Reflections
  */
 
 import * as THREE from 'three'
@@ -56,6 +57,68 @@ export function createRoundedRectShape(
 }
 
 /**
+ * Normalizes Three.js ShapeGeometry UV coordinates from world coordinates to [0, 1] range.
+ * Fully supports 'cover' and 'contain' fitting without stretching or distorting image pixels.
+ */
+export function normalizeGeometryUVs(
+  geometry: THREE.BufferGeometry,
+  width: number,
+  height: number,
+  fitMode: 'cover' | 'contain' = 'cover',
+  photoAspect?: number
+): THREE.BufferGeometry {
+  const uvAttr = geometry.getAttribute('uv')
+  if (!uvAttr) return geometry
+  const uvs = uvAttr.array as Float32Array
+
+  let uMin = 0.0
+  let uMax = 1.0
+  let vMin = 0.0
+  let vMax = 1.0
+
+  if (fitMode === 'cover' && photoAspect && photoAspect > 0.05 && photoAspect < 20) {
+    const frameAspect = width / height
+    if (photoAspect > frameAspect) {
+      // Photo is wider than frame: crop symmetrically on left and right in UV space
+      const scale = frameAspect / photoAspect
+      uMin = 0.5 - 0.5 * scale
+      uMax = 0.5 + 0.5 * scale
+    } else {
+      // Photo is taller than frame: crop symmetrically on top and bottom in UV space
+      const scale = photoAspect / frameAspect
+      vMin = 0.5 - 0.5 * scale
+      vMax = 0.5 + 0.5 * scale
+    }
+  }
+
+  for (let i = 0; i < uvs.length; i += 2) {
+    const normX = uvs[i] / width + 0.5 // [0, 1]
+    const normY = uvs[i + 1] / height + 0.5 // [0, 1]
+    uvs[i] = uMin + Math.max(0, Math.min(1, normX)) * (uMax - uMin)
+    uvs[i + 1] = vMin + Math.max(0, Math.min(1, normY)) * (vMax - vMin)
+  }
+  uvAttr.needsUpdate = true
+  return geometry
+}
+
+/**
+ * Generates an exact 2D quad geometry for the photo surface with properly normalized [0, 1] UVs.
+ */
+export function createCardPhotoGeometry(
+  width: number,
+  height: number,
+  cornerRadius: number,
+  fitMode: 'cover' | 'contain' = 'cover',
+  photoAspect?: number
+): THREE.BufferGeometry {
+  const r = Math.max(0, Math.min(cornerRadius, width / 2 - 1, height / 2 - 1))
+  const shape = createRoundedRectShape(width, height, r)
+  const geo = new THREE.ShapeGeometry(shape, 16)
+  normalizeGeometryUVs(geo, width, height, fitMode, photoAspect)
+  return geo
+}
+
+/**
  * Procedural Glass Sheen Specular Texture
  * Diagonal light falloff that glides across the crystal glass surface as angle changes
  */
@@ -89,6 +152,46 @@ export function getSharedSheenTexture(): THREE.CanvasTexture {
   sharedSheenTexture.wrapS = THREE.ClampToEdgeWrapping
   sharedSheenTexture.wrapT = THREE.ClampToEdgeWrapping
   return sharedSheenTexture
+}
+
+/**
+ * Procedural Loading Shimmer Texture
+ * Subtle cosmic violet-blue gradient shimmer displayed while an image loads (never an ugly grey box)
+ */
+let sharedShimmerTexture: THREE.CanvasTexture | null = null
+
+export function getSharedShimmerTexture(): THREE.CanvasTexture {
+  if (sharedShimmerTexture) return sharedShimmerTexture
+
+  if (typeof document === 'undefined') {
+    return new THREE.Texture() as THREE.CanvasTexture
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = 256
+  canvas.height = 256
+  const ctx = canvas.getContext('2d')
+  if (ctx) {
+    const grad = ctx.createLinearGradient(0, 0, 256, 256)
+    grad.addColorStop(0.0, '#091224')
+    grad.addColorStop(0.35, '#101d3a')
+    grad.addColorStop(0.5, '#1e3466')
+    grad.addColorStop(0.65, '#101d3a')
+    grad.addColorStop(1.0, '#091224')
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, 256, 256)
+
+    // Subtle inner border line
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)'
+    ctx.lineWidth = 2
+    ctx.strokeRect(6, 6, 244, 244)
+  }
+
+  sharedShimmerTexture = new THREE.CanvasTexture(canvas)
+  sharedShimmerTexture.colorSpace = THREE.SRGBColorSpace
+  sharedShimmerTexture.wrapS = THREE.ClampToEdgeWrapping
+  sharedShimmerTexture.wrapT = THREE.ClampToEdgeWrapping
+  return sharedShimmerTexture
 }
 
 /**
@@ -127,7 +230,6 @@ export function calculateHoloSpectralColor(
       bevel.copy(auroraViolet).lerp(auroraRose, (phase - 0.66) / 0.34)
     }
 
-    // Blend with default base aurora color based on spectrum intensity
     bevel.lerp(auroraViolet, 1.0 - intensity * 0.7)
 
     return {
@@ -225,106 +327,153 @@ export class UniverseHolographicCardsManager {
     const chassisWidth = node.worldWidth + margin * 2
     const chassisHeight = node.worldHeight + margin * 2
     const cornerRadius = Math.max(0, Math.min(config.cornerRadius, margin * 1.4, 32))
+    const cardThickness = 2.4
 
-    // 1. Transparent Crystal Glass Chassis (Outer Body)
+    const colors = calculateHoloSpectralColor(
+      config.cardStyle,
+      0,
+      0,
+      config.rainbowSpectrumIntensity
+    )
+
+    // 1. PHYSICAL 3D GLASS CHASSIS (Extruded Rounded Rectangle with Beveled Edges)
     const chassisShape = createRoundedRectShape(chassisWidth, chassisHeight, cornerRadius)
-    const chassisGeo = new THREE.ShapeGeometry(chassisShape, 16)
+    const chassisGeo = new THREE.ExtrudeGeometry(chassisShape, {
+      depth: cardThickness,
+      bevelEnabled: true,
+      bevelSegments: 3,
+      steps: 1,
+      bevelSize: 1.4,
+      bevelThickness: 1.4,
+    })
+    const baseGlassOpacity = ((100 - config.glassTransparency) / 100) * 0.32 + 0.10
     const chassisMat = new THREE.MeshBasicMaterial({
-      color: 0x061526,
+      color: colors.glassBaseColor,
       transparent: true,
-      opacity: (100 - config.glassTransparency) / 100 * 0.45 + 0.12,
+      opacity: baseGlassOpacity,
       side: THREE.DoubleSide,
       depthWrite: false,
     })
     const glassChassisMesh = new THREE.Mesh(chassisGeo, chassisMat)
     glassChassisMesh.name = 'glassChassisMesh'
-    glassChassisMesh.position.z = -0.06
+    glassChassisMesh.position.z = -cardThickness / 2
+    glassChassisMesh.renderOrder = 1
     group.add(glassChassisMesh)
 
-    // 2. Outer Luminous Holographic Bevel Rim (Perimeter Line Loop)
+    // 2. BACK FACE: FROSTED GLASS SURFACE (Never Black!)
+    const backGeo = new THREE.ShapeGeometry(chassisShape, 16)
+    normalizeGeometryUVs(backGeo, chassisWidth, chassisHeight)
+    const backMat = new THREE.MeshBasicMaterial({
+      color: colors.glassBaseColor,
+      transparent: true,
+      opacity: Math.max(0.35, baseGlassOpacity * 1.6),
+      side: THREE.BackSide,
+      depthWrite: false,
+    })
+    const cardBackMesh = new THREE.Mesh(backGeo, backMat)
+    cardBackMesh.name = 'cardBackMesh'
+    cardBackMesh.position.z = -cardThickness / 2 - 0.05
+    cardBackMesh.renderOrder = 1
+    group.add(cardBackMesh)
+
+    // 3. FRONT FACE: CENTRAL PHOTO QUAD (HERO ELEMENT, Crisp, Sharp & Fully Normalized UVs)
+    let photoW = node.worldWidth
+    let photoH = node.worldHeight
+    const actualAspect = asset?.aspectRatio || node.photo.aspectRatio || 16 / 9
+
+    if (config.photoFit === 'contain') {
+      const apertureAspect = node.worldWidth / node.worldHeight
+      if (actualAspect > apertureAspect) {
+        photoW = node.worldWidth
+        photoH = node.worldWidth / actualAspect
+      } else {
+        photoH = node.worldHeight
+        photoW = node.worldHeight * actualAspect
+      }
+    }
+
+    const photoRadius = Math.max(0, Math.min(cornerRadius - 3, photoW / 2 - 1, photoH / 2 - 1))
+    const photoGeo = createCardPhotoGeometry(
+      photoW,
+      photoH,
+      photoRadius,
+      config.photoFit,
+      actualAspect
+    )
+    const shimmerTexture = getSharedShimmerTexture()
+    const photoMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      map: asset?.texture || shimmerTexture,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 1.0,
+      depthWrite: true,
+      depthTest: true,
+    })
+    const photoMesh = new THREE.Mesh(photoGeo, photoMat)
+    photoMesh.name = 'photoMesh'
+    photoMesh.position.z = cardThickness / 2 + 0.06
+    photoMesh.renderOrder = 2
+    group.add(photoMesh)
+
+    // 4. INNER BEVEL FRAME (Luminous Seam outlining the photo aperture)
+    const photoShape = createRoundedRectShape(photoW, photoH, photoRadius)
+    const innerPoints = photoShape.getPoints(24)
+    const innerBevelGeo = new THREE.BufferGeometry().setFromPoints(innerPoints)
+    const innerBevelMat = new THREE.LineBasicMaterial({
+      color: colors.innerBevelColor,
+      transparent: true,
+      opacity: 0.5,
+      linewidth: 1,
+    })
+    const innerBevelLine = new THREE.LineLoop(innerBevelGeo, innerBevelMat)
+    innerBevelLine.name = 'innerBevelLine'
+    innerBevelLine.position.z = cardThickness / 2 + 0.10
+    innerBevelLine.renderOrder = 4
+    group.add(innerBevelLine)
+
+    // 5. OUTER LUMINOUS HOLOGRAPHIC BEVEL RIM
     const outerPoints = chassisShape.getPoints(28)
     const outerBevelGeo = new THREE.BufferGeometry().setFromPoints(outerPoints)
     const outerBevelMat = new THREE.LineBasicMaterial({
-      color: 0x00f0ff,
+      color: colors.outerBevelColor,
       transparent: true,
       opacity: (config.edgeReflectionIntensity / 100) * 0.75 + 0.2,
       linewidth: 1,
     })
     const outerBevelLine = new THREE.LineLoop(outerBevelGeo, outerBevelMat)
     outerBevelLine.name = 'outerBevelLine'
-    outerBevelLine.position.z = -0.02
+    outerBevelLine.position.z = cardThickness / 2 + 0.10
+    outerBevelLine.renderOrder = 4
     group.add(outerBevelLine)
 
-    // 3. Central Photo Quad (Contain or Cover)
-    let photoW = node.worldWidth
-    let photoH = node.worldHeight
-
-    if (config.photoFit === 'contain' && node.photo.aspectRatio) {
-      const targetAspect = node.photo.aspectRatio
-      const apertureAspect = node.worldWidth / node.worldHeight
-      if (targetAspect > apertureAspect) {
-        photoW = node.worldWidth
-        photoH = node.worldWidth / targetAspect
-      } else {
-        photoH = node.worldHeight
-        photoW = node.worldHeight * targetAspect
-      }
-    }
-
-    const photoRadius = Math.max(0, cornerRadius - 4)
-    const photoShape = createRoundedRectShape(photoW, photoH, photoRadius)
-    const photoGeo = new THREE.ShapeGeometry(photoShape, 16)
-    const photoMat = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      map: asset?.texture || null,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 1.0,
-      depthWrite: true,
-    })
-    const photoMesh = new THREE.Mesh(photoGeo, photoMat)
-    photoMesh.name = 'photoMesh'
-    photoMesh.position.z = 0.0
-    group.add(photoMesh)
-
-    // 4. Inner Glass Bevel Frame (Seam around the photo aperture)
-    const innerPoints = photoShape.getPoints(24)
-    const innerBevelGeo = new THREE.BufferGeometry().setFromPoints(innerPoints)
-    const innerBevelMat = new THREE.LineLoop(
-      innerBevelGeo,
-      new THREE.LineBasicMaterial({
-        color: 0x38bdf8,
-        transparent: true,
-        opacity: 0.45,
-      })
-    )
-    innerBevelMat.name = 'innerBevelLine'
-    innerBevelMat.position.z = 0.02
-    group.add(innerBevelMat)
-
-    // 5. Specular Glass Sheen Overlay (Angle-Responsive Highlight)
+    // 6. SPECULAR GLASS SHEEN OVERLAY (Additive Reflections, Never Covers Photo with Opaque Pixels)
     const sheenTexture = getSharedSheenTexture()
+    const sheenGeo = new THREE.ShapeGeometry(chassisShape, 16)
+    normalizeGeometryUVs(sheenGeo, chassisWidth, chassisHeight)
     const sheenMat = new THREE.MeshBasicMaterial({
       map: sheenTexture,
-      color: 0xffffff,
+      color: colors.sheenTint,
       transparent: true,
-      opacity: (config.edgeReflectionIntensity / 100) * 0.18 + 0.05,
+      opacity: (config.edgeReflectionIntensity / 100) * 0.14 + 0.03,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
       depthWrite: false,
     })
-    const glassSheenMesh = new THREE.Mesh(chassisGeo, sheenMat)
+    const glassSheenMesh = new THREE.Mesh(sheenGeo, sheenMat)
     glassSheenMesh.name = 'glassSheenMesh'
-    glassSheenMesh.position.z = 0.04
+    glassSheenMesh.position.z = cardThickness / 2 + 0.12
+    glassSheenMesh.renderOrder = 5
     group.add(glassSheenMesh)
 
-    // 6. Glowing Focus Rim Mesh (Highlights smoothly only when photo is active subject)
+    // 7. FOCUS HERO RIM MESH
     const focusRimGeo = new THREE.ShapeGeometry(
       createRoundedRectShape(chassisWidth + 6, chassisHeight + 6, cornerRadius + 3),
       16
     )
+    normalizeGeometryUVs(focusRimGeo, chassisWidth + 6, chassisHeight + 6)
     const focusRimMat = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
+      color: colors.outerBevelColor,
       side: THREE.DoubleSide,
       transparent: true,
       opacity: 0,
@@ -333,7 +482,8 @@ export class UniverseHolographicCardsManager {
     })
     const rimMesh = new THREE.Mesh(focusRimGeo, focusRimMat)
     rimMesh.name = 'rimMesh'
-    rimMesh.position.z = -0.07
+    rimMesh.position.z = -cardThickness / 2 - 0.08
+    rimMesh.renderOrder = 1
     group.add(rimMesh)
   }
 
@@ -351,20 +501,22 @@ export class UniverseHolographicCardsManager {
     focusWeight: number
   ): void {
     const glassChassisMesh = group.getObjectByName('glassChassisMesh') as THREE.Mesh | undefined
+    const cardBackMesh = group.getObjectByName('cardBackMesh') as THREE.Mesh | undefined
     const outerBevelLine = group.getObjectByName('outerBevelLine') as THREE.LineLoop | undefined
     const innerBevelLine = group.getObjectByName('innerBevelLine') as THREE.LineLoop | undefined
     const glassSheenMesh = group.getObjectByName('glassSheenMesh') as THREE.Mesh | undefined
     const rimMesh = group.getObjectByName('rimMesh') as THREE.Mesh | undefined
 
     if (!config.enabled) {
-      // If holographic cards disabled, hide glass chassis, sheen & inner bevels
       if (glassChassisMesh) glassChassisMesh.visible = false
+      if (cardBackMesh) cardBackMesh.visible = false
       if (glassSheenMesh) glassSheenMesh.visible = false
       if (innerBevelLine) innerBevelLine.visible = false
       return
     }
 
     if (glassChassisMesh) glassChassisMesh.visible = true
+    if (cardBackMesh) cardBackMesh.visible = true
     if (glassSheenMesh) glassSheenMesh.visible = true
     if (innerBevelLine) innerBevelLine.visible = true
 
@@ -393,13 +545,19 @@ export class UniverseHolographicCardsManager {
       config.rainbowSpectrumIntensity
     )
 
-    // 4. Update Glass Chassis Material
+    // 4. Update Glass Chassis & Frosted Back Materials
     if (glassChassisMesh) {
       const chassisMat = glassChassisMesh.material as THREE.MeshBasicMaterial
       chassisMat.color.setHex(colors.glassBaseColor)
-      const baseGlassOpacity =
-        (100 - config.glassTransparency) / 100 * 0.45 + 0.10
-      chassisMat.opacity = Math.max(0.06, Math.min(0.70, baseGlassOpacity + audioBoost * 0.1))
+      const baseGlassOpacity = ((100 - config.glassTransparency) / 100) * 0.32 + 0.10
+      chassisMat.opacity = Math.max(0.06, Math.min(0.65, baseGlassOpacity + audioBoost * 0.1))
+    }
+
+    if (cardBackMesh) {
+      const backMat = cardBackMesh.material as THREE.MeshBasicMaterial
+      backMat.color.setHex(colors.glassBaseColor)
+      const baseBackOpacity = ((100 - config.glassTransparency) / 100) * 0.45 + 0.20
+      backMat.opacity = Math.max(0.25, Math.min(0.75, baseBackOpacity + audioBoost * 0.1))
     }
 
     // 5. Update Outer Bevel Rainbow Line
@@ -422,21 +580,20 @@ export class UniverseHolographicCardsManager {
       const sheenMat = glassSheenMesh.material as THREE.MeshBasicMaterial
       sheenMat.color.copy(colors.sheenTint)
 
-      // Horizontal and vertical shift according to viewing angle
       const margin = Math.round(Math.max(14, Math.min(26, node.worldWidth * 0.055)))
       const chassisWidth = node.worldWidth + margin * 2
       const chassisHeight = node.worldHeight + margin * 2
 
       if (config.angleResponsive) {
-        glassSheenMesh.position.x = Math.sin(viewAngleYaw * 1.6) * (chassisWidth * 0.14)
-        glassSheenMesh.position.y = -Math.sin(viewAnglePitch * 1.6) * (chassisHeight * 0.12)
+        glassSheenMesh.position.x = Math.sin(viewAngleYaw * 1.6) * (chassisWidth * 0.12)
+        glassSheenMesh.position.y = -Math.sin(viewAnglePitch * 1.6) * (chassisHeight * 0.10)
       } else {
         glassSheenMesh.position.x = 0
         glassSheenMesh.position.y = 0
       }
 
-      const baseSheen = (config.edgeReflectionIntensity / 100) * 0.18 + 0.04
-      sheenMat.opacity = Math.max(0.03, Math.min(0.40, baseSheen + audioBoost * 0.2))
+      const baseSheen = (config.edgeReflectionIntensity / 100) * 0.14 + 0.03
+      sheenMat.opacity = Math.max(0.02, Math.min(0.35, baseSheen + audioBoost * 0.18))
     }
 
     // 8. Focus Hero Rim Highlight (Pulsates smoothly on the focused subject)
@@ -455,6 +612,10 @@ export class UniverseHolographicCardsManager {
     if (sharedSheenTexture) {
       sharedSheenTexture.dispose()
       sharedSheenTexture = null
+    }
+    if (sharedShimmerTexture) {
+      sharedShimmerTexture.dispose()
+      sharedShimmerTexture = null
     }
   }
 }
