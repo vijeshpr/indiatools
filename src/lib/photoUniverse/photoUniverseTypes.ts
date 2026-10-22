@@ -75,6 +75,40 @@ export interface UniverseBackgroundConfig {
   nebulaGlow: number // 0 to 100
 }
 
+export type HolographicCardStyle =
+  | 'crystal-glass'
+  | 'aurora-glass'
+  | 'silver-prism'
+  | 'minimal-glass'
+
+export type HoloMusicReactivity = 'off' | 'subtle' | 'balanced'
+
+export type HoloPhotoFit = 'contain' | 'cover'
+
+export interface UniverseHolographicCardConfig {
+  enabled: boolean // default: true
+  cardStyle: HolographicCardStyle // default: 'crystal-glass'
+  edgeReflectionIntensity: number // 0 to 100, default: 65
+  rainbowSpectrumIntensity: number // 0 to 100, default: 50
+  glassTransparency: number // 10 to 100, default: 75
+  cornerRadius: number // 0 to 32, default: 16
+  angleResponsive: boolean // default: true
+  musicReactivity: HoloMusicReactivity // default: 'subtle'
+  photoFit: HoloPhotoFit // default: 'cover'
+}
+
+export const DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG: UniverseHolographicCardConfig = {
+  enabled: true,
+  cardStyle: 'crystal-glass',
+  edgeReflectionIntensity: 65,
+  rainbowSpectrumIntensity: 50,
+  glassTransparency: 75,
+  cornerRadius: 16,
+  angleResponsive: true,
+  musicReactivity: 'subtle',
+  photoFit: 'cover',
+}
+
 export type SupernovaTriggerSensitivity = 'low' | 'balanced' | 'high'
 
 export type SupernovaPhase = 'idle' | 'attraction' | 'supernova' | 'expansion' | 'recovery'
@@ -230,6 +264,9 @@ export interface PhotoUniverseStudioConfig {
   // Background
   background: UniverseBackgroundConfig
 
+  // Holographic Memory Cards: 3D Crystal-Glass Display Cards
+  holographicCards: UniverseHolographicCardConfig
+
   // Supernova Shockwave: Cinematic Music Climax
   supernova: UniverseSupernovaConfig
 
@@ -299,6 +336,7 @@ export const DEFAULT_PHOTO_UNIVERSE_CONFIG: PhotoUniverseStudioConfig = {
   focusDepth: 50,
   bassShake: DEFAULT_UNIVERSE_BASS_SHAKE,
   background: DEFAULT_UNIVERSE_BACKGROUND,
+  holographicCards: DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
   supernova: DEFAULT_UNIVERSE_SUPERNOVA,
   directorMode: 'auto',
   manualOrder: [],

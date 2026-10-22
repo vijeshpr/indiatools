@@ -51,6 +51,10 @@ import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_BASS_SHAKE,
+  DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+  HolographicCardStyle,
+  HoloMusicReactivity,
+  HoloPhotoFit,
   DEFAULT_UNIVERSE_SUPERNOVA,
   SupernovaTriggerSensitivity,
 } from '../../lib/photoUniverse/photoUniverseTypes.ts'
@@ -82,7 +86,7 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const bgFileInputRef = useRef<HTMLInputElement | null>(null)
   const [activeSection, setActiveSection] = useState<
-    'all' | 'analysis' | 'motion' | 'photos' | 'background' | 'camera' | 'dof' | 'shake' | 'supernova'
+    'all' | 'analysis' | 'motion' | 'photos' | 'cards' | 'background' | 'camera' | 'dof' | 'shake' | 'supernova'
   >('all')
 
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
@@ -660,6 +664,16 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
           }`}
         >
           Bass Shake
+        </button>
+        <button
+          onClick={() => setActiveSection('cards')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            activeSection === 'cards'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Holo Cards
         </button>
         <button
           onClick={() => setActiveSection('supernova')}
@@ -1445,7 +1459,321 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
         </div>
       )}
 
-      {/* 11. Supernova Shockwave: Cinematic Music Climax */}
+      {/* 11. Holographic Memory Cards: Premium 3D Crystal-Glass Display Cards */}
+      {(activeSection === 'all' || activeSection === 'cards') && (
+        <div className="p-4 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <div>
+                <h4 className="text-sm font-bold text-white">Holographic Memory Cards</h4>
+                <p className="text-[10px] text-gray-400">
+                  Precious photographs preserved inside crystal-glass frames with view-angle-responsive rainbow bevels
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() =>
+                updateConfig((prev) => ({
+                  ...prev,
+                  holographicCards: {
+                    ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                    enabled: !(prev.holographicCards?.enabled ?? true),
+                  },
+                }))
+              }
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                (config.holographicCards?.enabled ?? true)
+                  ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
+                  : 'bg-gray-800 text-gray-400 hover:text-white'
+              }`}
+            >
+              {(config.holographicCards?.enabled ?? true) ? (
+                <Eye className="w-3.5 h-3.5" />
+              ) : (
+                <EyeOff className="w-3.5 h-3.5" />
+              )}
+              <span>
+                {(config.holographicCards?.enabled ?? true) ? 'HOLO CARDS ACTIVE' : 'ENABLE HOLO CARDS'}
+              </span>
+            </button>
+          </div>
+
+          {(config.holographicCards?.enabled ?? true) && (
+            <div className="space-y-4 pt-1">
+              {/* Card Style Selector */}
+              <div>
+                <label className="text-xs font-semibold text-gray-300 block mb-2">
+                  Glass Card Style
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    {
+                      id: 'crystal-glass',
+                      label: 'Crystal Glass',
+                      desc: 'Cosmic diamond cyan prism',
+                      grad: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/40 text-cyan-300',
+                    },
+                    {
+                      id: 'aurora-glass',
+                      label: 'Aurora Glass',
+                      desc: 'Emerald & violet refraction',
+                      grad: 'from-purple-500/20 to-emerald-500/20 border-purple-500/40 text-purple-300',
+                    },
+                    {
+                      id: 'silver-prism',
+                      label: 'Silver Prism',
+                      desc: 'Platinum silver & gold bevels',
+                      grad: 'from-slate-400/20 to-amber-400/20 border-slate-400/40 text-amber-200',
+                    },
+                    {
+                      id: 'minimal-glass',
+                      label: 'Minimal Glass',
+                      desc: 'Ultra-clear clean gallery frame',
+                      grad: 'from-gray-700/20 to-gray-500/20 border-gray-600/40 text-gray-300',
+                    },
+                  ].map((style) => {
+                    const isSelected =
+                      (config.holographicCards?.cardStyle || 'crystal-glass') === style.id
+                    return (
+                      <button
+                        key={style.id}
+                        onClick={() =>
+                          updateConfig((prev) => ({
+                            ...prev,
+                            holographicCards: {
+                              ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                              cardStyle: style.id as HolographicCardStyle,
+                            },
+                          }))
+                        }
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          isSelected
+                            ? `bg-gradient-to-br ${style.grad} shadow-sm shadow-cyan-500/10`
+                            : 'bg-gray-950/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                        }`}
+                      >
+                        <div className="text-xs font-bold text-white mb-0.5">{style.label}</div>
+                        <div className="text-[10px] text-gray-400 leading-tight">{style.desc}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Angle-Responsive & Photo Fit & Music Reactivity Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Angle-Responsive Reflection */}
+                <div className="p-2.5 rounded-xl bg-gray-950 border border-gray-800 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-bold text-gray-200">Angle Reflections</div>
+                    <div className="text-[10px] text-gray-400">View-angle specular sheen</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        holographicCards: {
+                          ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                          angleResponsive: !(prev.holographicCards?.angleResponsive ?? true),
+                        },
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      (config.holographicCards?.angleResponsive ?? true)
+                        ? 'bg-cyan-500 text-black'
+                        : 'bg-gray-800 text-gray-400'
+                    }`}
+                  >
+                    {(config.holographicCards?.angleResponsive ?? true) ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+
+                {/* Photo Fit Mode */}
+                <div className="p-2.5 rounded-xl bg-gray-950 border border-gray-800 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-bold text-gray-200">Photo Fit</div>
+                    <div className="text-[10px] text-gray-400">Aspect ratio framing</div>
+                  </div>
+                  <div className="flex space-x-1">
+                    {(['cover', 'contain'] as HoloPhotoFit[]).map((fit) => {
+                      const isSel = (config.holographicCards?.photoFit || 'cover') === fit
+                      return (
+                        <button
+                          key={fit}
+                          type="button"
+                          onClick={() =>
+                            updateConfig((prev) => ({
+                              ...prev,
+                              holographicCards: {
+                                ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                                photoFit: fit,
+                              },
+                            }))
+                          }
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-all ${
+                            isSel
+                              ? 'bg-cyan-500 text-black'
+                              : 'bg-gray-800 text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          {fit}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Music Reactivity */}
+                <div className="p-2.5 rounded-xl bg-gray-950 border border-gray-800 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-bold text-gray-200">Music Reactivity</div>
+                    <div className="text-[10px] text-gray-400">Treble edge shimmer</div>
+                  </div>
+                  <div className="flex space-x-1">
+                    {(['off', 'subtle', 'balanced'] as HoloMusicReactivity[]).map((mode) => {
+                      const isSel = (config.holographicCards?.musicReactivity || 'subtle') === mode
+                      return (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() =>
+                            updateConfig((prev) => ({
+                              ...prev,
+                              holographicCards: {
+                                ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                                musicReactivity: mode,
+                              },
+                            }))
+                          }
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize transition-all ${
+                            isSel
+                              ? 'bg-cyan-500 text-black'
+                              : 'bg-gray-800 text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          {mode}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Sliders Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                {/* Edge Reflection Intensity */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Edge Reflection</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.holographicCards?.edgeReflectionIntensity ?? 65}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.holographicCards?.edgeReflectionIntensity ?? 65}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        holographicCards: {
+                          ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                          edgeReflectionIntensity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Rainbow Spectrum Intensity */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Rainbow Spectrum</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.holographicCards?.rainbowSpectrumIntensity ?? 50}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={config.holographicCards?.rainbowSpectrumIntensity ?? 50}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        holographicCards: {
+                          ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                          rainbowSpectrumIntensity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Glass Transparency */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Glass Clarity</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.holographicCards?.glassTransparency ?? 75}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="95"
+                    value={config.holographicCards?.glassTransparency ?? 75}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        holographicCards: {
+                          ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                          glassTransparency: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+
+                {/* Corner Radius */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-400">Corner Radius</span>
+                    <span className="font-mono text-cyan-300">
+                      {config.holographicCards?.cornerRadius ?? 16}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="32"
+                    value={config.holographicCards?.cornerRadius ?? 16}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        holographicCards: {
+                          ...(prev.holographicCards || DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG),
+                          cornerRadius: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-cyan-400"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 12. Supernova Shockwave: Cinematic Music Climax */}
       {(activeSection === 'all' || activeSection === 'supernova') && (
         <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/30 via-gray-900 to-black border border-purple-500/30 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

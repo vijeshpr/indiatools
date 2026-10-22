@@ -22,6 +22,7 @@ import { universeBackgroundRenderer } from './universeBackground.ts'
 import { universeCameraScoreGenerator } from './universeCameraScore.ts'
 import { universeAudioAnalyzer } from './universeAudioAnalyzer.ts'
 import { universeSupernovaManager } from './universeSupernova.ts'
+import { universeHolographicCards } from './universeHolographicCards.ts'
 
 interface CachedPhotoAssets {
   texture: THREE.Texture
@@ -43,6 +44,7 @@ export class PhotoUniverseEngine {
   private currentNodes: PhotoSpatialNode[] = []
   private lastPhotoConfigKey: string = ''
   private lastBackgroundKey: string = ''
+  private lastHoloConfigKey: string = ''
 
   // Camera Score Cache
   private currentScore: TimestampedCameraScore | null = null
@@ -299,60 +301,74 @@ export class PhotoUniverseEngine {
     if (!this.scene) return
 
     const activeIds = new Set<string>()
+    const holoKey = `${config.holographicCards?.enabled}_${config.holographicCards?.cardStyle}_${config.holographicCards?.cornerRadius}_${config.holographicCards?.photoFit}`
+    const needsHoloRebuild = holoKey !== this.lastHoloConfigKey
 
     for (const node of nodes) {
       const photo = node.photo
       activeIds.add(photo.id)
 
       let group = this.photoMeshMap.get(photo.id)
+      const asset = this.getOrLoadAsset(photo.url)
 
-      if (!group) {
-        group = new THREE.Group()
+      if (!group || needsHoloRebuild) {
+        if (!group) {
+          group = new THREE.Group()
+          this.scene.add(group)
+          this.photoMeshMap.set(photo.id, group)
+        }
 
-        // 1. Double-Sided Photo Surface Quad (Both front and back render photo, NEVER a black rectangle)
-        const photoGeo = new THREE.PlaneGeometry(node.worldWidth, node.worldHeight)
-        const asset = this.getOrLoadAsset(photo.url)
-        const photoMat = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          map: asset?.texture || null,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 1.0,
-          depthWrite: true,
-        })
-        const photoMesh = new THREE.Mesh(photoGeo, photoMat)
-        photoMesh.name = 'photoMesh'
-        group.add(photoMesh)
+        if (config.holographicCards?.enabled) {
+          universeHolographicCards.buildCardHierarchy(group, node, config.holographicCards, asset)
+        } else {
+          // Fallback clean photo quad without glass card chassis
+          while (group.children.length > 0) {
+            const child = group.children[0]
+            group.remove(child)
+            if ('geometry' in child) (child as THREE.Mesh).geometry.dispose()
+          }
 
-        // 2. Luminous Edge Outline (Clean thin border, 100% transparent center, zero black backplane)
-        const borderGeo = new THREE.EdgesGeometry(photoGeo)
-        const borderMat = new THREE.LineBasicMaterial({
-          color: new THREE.Color(config.visualDetails.edgeGlowColor || '#00F0FF'),
-          transparent: true,
-          opacity: 0.5,
-          linewidth: 1,
-        })
-        const borderLine = new THREE.LineSegments(borderGeo, borderMat)
-        borderLine.name = 'borderLine'
-        group.add(borderLine)
+          // 1. Double-Sided Photo Surface Quad
+          const photoGeo = new THREE.PlaneGeometry(node.worldWidth, node.worldHeight)
+          const photoMat = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            map: asset?.texture || null,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 1.0,
+            depthWrite: true,
+          })
+          const photoMesh = new THREE.Mesh(photoGeo, photoMat)
+          photoMesh.name = 'photoMesh'
+          group.add(photoMesh)
 
-        // 3. Glowing focus rim border (lights up smoothly only on active hero photo)
-        const rimGeo = new THREE.PlaneGeometry(node.worldWidth + 8, node.worldHeight + 8)
-        const rimMat = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(config.visualDetails.edgeGlowColor || '#00F0FF'),
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-        })
-        const rimMesh = new THREE.Mesh(rimGeo, rimMat)
-        rimMesh.name = 'rimMesh'
-        rimMesh.position.z = -0.05
-        group.add(rimMesh)
+          // 2. Luminous Edge Outline
+          const borderGeo = new THREE.EdgesGeometry(photoGeo)
+          const borderMat = new THREE.LineBasicMaterial({
+            color: new THREE.Color(config.visualDetails.edgeGlowColor || '#00F0FF'),
+            transparent: true,
+            opacity: 0.5,
+            linewidth: 1,
+          })
+          const borderLine = new THREE.LineSegments(borderGeo, borderMat)
+          borderLine.name = 'borderLine'
+          group.add(borderLine)
 
-        this.scene.add(group)
-        this.photoMeshMap.set(photo.id, group)
+          // 3. Glowing focus rim border
+          const rimGeo = new THREE.PlaneGeometry(node.worldWidth + 8, node.worldHeight + 8)
+          const rimMat = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(config.visualDetails.edgeGlowColor || '#00F0FF'),
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          })
+          const rimMesh = new THREE.Mesh(rimGeo, rimMat)
+          rimMesh.name = 'rimMesh'
+          rimMesh.position.z = -0.05
+          group.add(rimMesh)
+        }
       }
 
       // Set base position & initial stable orientation (STOP continuous rotation)
@@ -362,15 +378,14 @@ export class PhotoUniverseEngine {
       const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh | undefined
       if (photoMesh) {
         const mat = photoMesh.material as THREE.MeshBasicMaterial
-        if (!mat.map) {
-          const asset = this.getOrLoadAsset(photo.url)
-          if (asset?.texture) {
-            mat.map = asset.texture
-            mat.needsUpdate = true
-          }
+        if (!mat.map && asset?.texture) {
+          mat.map = asset.texture
+          mat.needsUpdate = true
         }
       }
     }
+
+    this.lastHoloConfigKey = holoKey
 
     // Remove meshes for photos no longer in collection
     for (const [id, group] of this.photoMeshMap.entries()) {
@@ -621,6 +636,20 @@ export class PhotoUniverseEngine {
             : 0
         rimMat.opacity += (targetOpacity - rimMat.opacity) * 0.18
       }
+
+      // 4. Update Holographic Memory Card: View-Angle Rainbow Bevel & Glass Sheen
+      if (config.holographicCards?.enabled && this.camera) {
+        universeHolographicCards.updateCard(
+          group,
+          node,
+          config.holographicCards,
+          this.camera,
+          bands,
+          currentTime,
+          isCurrentTarget,
+          cameraState.focusWeight
+        )
+      }
     }
 
     // 9. Ambient Stardust Particle Movement
@@ -719,6 +748,7 @@ export class PhotoUniverseEngine {
     }
 
     universeBackgroundRenderer.dispose()
+    universeHolographicCards.dispose()
     universeSupernovaManager.reset()
 
     this.renderer?.dispose()

@@ -1,9 +1,11 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
+import * as THREE from 'three'
 import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_SUPERNOVA,
+  DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
   PhotoUniverseStudioConfig,
   UniversePhoto,
 } from '../src/lib/photoUniverse/photoUniverseTypes.ts'
@@ -28,6 +30,11 @@ import { universeCameraScoreGenerator } from '../src/lib/photoUniverse/universeC
 import { universeBackgroundRenderer } from '../src/lib/photoUniverse/universeBackground.ts'
 import { universeEngine } from '../src/lib/photoUniverse/universeEngine.ts'
 import { universeSupernovaManager } from '../src/lib/photoUniverse/universeSupernova.ts'
+import {
+  universeHolographicCards,
+  createRoundedRectShape,
+  calculateHoloSpectralColor,
+} from '../src/lib/photoUniverse/universeHolographicCards.ts'
 import {
   DEFAULT_STUDIO_COMPOSITION,
   NormalizedAudioBands,
@@ -763,6 +770,178 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
           'Multiple visits to the same photo should utilize distinct shot types'
         )
       }
+    })
+  })
+
+  describe('14. Holographic Memory Cards: 3D Crystal-Glass Photo Frames', () => {
+    it('initializes with default crystal glass holographic configuration', () => {
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.enabled, true)
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.cardStyle, 'crystal-glass')
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.edgeReflectionIntensity, 65)
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.rainbowSpectrumIntensity, 50)
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.glassTransparency, 75)
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.cornerRadius, 16)
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.angleResponsive, true)
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.musicReactivity, 'subtle')
+      assert.strictEqual(DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG.photoFit, 'cover')
+    })
+
+    it('creates smooth rounded rectangular geometry without degenerating when radius is 0 or positive', () => {
+      const roundedShape = createRoundedRectShape(200, 150, 16)
+      assert.ok(roundedShape)
+      const points = roundedShape.getPoints(12)
+      assert.ok(points.length > 10, 'Rounded shape must have multiple contour points')
+
+      const squareShape = createRoundedRectShape(200, 150, 0)
+      assert.ok(squareShape)
+      const sqPoints = squareShape.getPoints(4)
+      assert.ok(sqPoints.length >= 4, 'Zero radius shape must form valid polygon')
+    })
+
+    it('calculates spectral rainbow edge reflections responding to camera viewing angle', () => {
+      const headOn = calculateHoloSpectralColor('crystal-glass', 0, 0, 50)
+      const obliqueAngle = calculateHoloSpectralColor('crystal-glass', Math.PI * 0.45, 0, 50)
+
+      assert.ok(headOn.outerBevelColor)
+      assert.ok(obliqueAngle.outerBevelColor)
+      // Different viewing angles must produce distinct spectral refraction colors
+      assert.notDeepStrictEqual(headOn.outerBevelColor.getHex(), obliqueAngle.outerBevelColor.getHex())
+
+      // Aurora glass style check
+      const aurora = calculateHoloSpectralColor('aurora-glass', 0, 0, 60)
+      assert.strictEqual(aurora.glassBaseColor, 0x120822)
+      assert.ok(aurora.sheenTint)
+
+      // Silver prism style check
+      const silver = calculateHoloSpectralColor('silver-prism', 0, 0, 60)
+      assert.strictEqual(silver.glassBaseColor, 0x0f172a)
+
+      // Minimal glass style check
+      const minimal = calculateHoloSpectralColor('minimal-glass', 0, 0, 20)
+      assert.strictEqual(minimal.glassBaseColor, 0x090d16)
+    })
+
+    it('builds complete 3D card assembly with transparent chassis, photo, bevels & specular sheen', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const group = new THREE.Group()
+
+      universeHolographicCards.buildCardHierarchy(
+        group,
+        nodes[0],
+        DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        null
+      )
+
+      const glassChassis = group.getObjectByName('glassChassisMesh') as THREE.Mesh
+      const outerBevel = group.getObjectByName('outerBevelLine') as THREE.LineLoop
+      const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh
+      const innerBevel = group.getObjectByName('innerBevelLine') as THREE.LineLoop
+      const glassSheen = group.getObjectByName('glassSheenMesh') as THREE.Mesh
+      const rimMesh = group.getObjectByName('rimMesh') as THREE.Mesh
+
+      assert.ok(glassChassis, 'Must contain transparent glass chassis backing')
+      assert.ok(outerBevel, 'Must contain outer holographic bevel line')
+      assert.ok(photoMesh, 'Must contain central photo mesh')
+      assert.ok(innerBevel, 'Must contain inner aperture bevel line')
+      assert.ok(glassSheen, 'Must contain view-angle specular sheen overlay')
+      assert.ok(rimMesh, 'Must contain hero focus rim mesh')
+
+      // Check double-sided transparency to guarantee no black reverse side
+      const chassisMat = glassChassis.material as THREE.MeshBasicMaterial
+      assert.strictEqual(chassisMat.transparent, true)
+      assert.strictEqual(chassisMat.side, THREE.DoubleSide)
+      assert.strictEqual(chassisMat.depthWrite, false)
+
+      const photoMat = photoMesh.material as THREE.MeshBasicMaterial
+      assert.strictEqual(photoMat.transparent, true)
+      assert.strictEqual(photoMat.side, THREE.DoubleSide)
+    })
+
+    it('respects photoFit contain mode by fitting within aperture without stretching', () => {
+      const nodes = generateUniverseSpatialNodes([samplePhotos[1]]) // Portrait 9:16
+      const group = new THREE.Group()
+
+      universeHolographicCards.buildCardHierarchy(
+        group,
+        nodes[0],
+        { ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG, photoFit: 'contain' },
+        null
+      )
+
+      const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh
+      assert.ok(photoMesh)
+      // Geometry bounding box should match portrait aspect ratio
+      photoMesh.geometry.computeBoundingBox()
+      const box = photoMesh.geometry.boundingBox!
+      const width = box.max.x - box.min.x
+      const height = box.max.y - box.min.y
+      const measuredAspect = width / height
+
+      assert.ok(
+        Math.abs(measuredAspect - 9 / 16) < 0.05,
+        `Contained portrait photo aspect (${measuredAspect.toFixed(2)}) must preserve 9:16 (~0.56)`
+      )
+    })
+
+    it('updates card reflections, view-angle specular sheen, and subtle music reactivity per frame', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      const group = new THREE.Group()
+
+      universeHolographicCards.buildCardHierarchy(
+        group,
+        nodes[0],
+        DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        null
+      )
+
+      const camera = new THREE.PerspectiveCamera(50, 16 / 9, 10, 5000)
+      camera.position.set(300, 50, 500) // Positioned to the right of the card
+
+      const bands: NormalizedAudioBands = {
+        bass: 0.8,
+        mid: 0.5,
+        treble: 0.9,
+        subBass: 0.7,
+        overall: 0.75,
+        isBeatHit: true,
+      }
+
+      universeHolographicCards.updateCard(
+        group,
+        nodes[0],
+        DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        camera,
+        bands,
+        2.5,
+        true,
+        1.0
+      )
+
+      const glassSheen = group.getObjectByName('glassSheenMesh') as THREE.Mesh
+      assert.ok(glassSheen)
+      // Angle-responsive sheen should be physically shifted along X
+      assert.notStrictEqual(glassSheen.position.x, 0)
+
+      const outerBevel = group.getObjectByName('outerBevelLine') as THREE.LineLoop
+      const bevelMat = outerBevel.material as THREE.LineBasicMaterial
+      assert.ok(bevelMat.opacity > 0.5, 'Audio treble boost should elevate bevel opacity')
+    })
+
+    it('applies curated holographic card styles across universe presets', () => {
+      const initial: PhotoUniverseStudioConfig = {
+        ...DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        enabled: true,
+        photos: samplePhotos,
+      }
+
+      const auroraPreset = applyUniversePreset(initial, 'dreamy-memory-drift')
+      assert.strictEqual(auroraPreset.holographicCards.cardStyle, 'aurora-glass')
+
+      const silverPreset = applyUniversePreset(initial, 'rhythmic-beat-odyssey')
+      assert.strictEqual(silverPreset.holographicCards.cardStyle, 'silver-prism')
+
+      const minimalPreset = applyUniversePreset(initial, 'clean-minimalist-showcase')
+      assert.strictEqual(minimalPreset.holographicCards.cardStyle, 'minimal-glass')
     })
   })
 })

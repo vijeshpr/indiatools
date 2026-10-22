@@ -8,6 +8,7 @@ import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_BASS_SHAKE,
+  DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
 } from './photoUniverseTypes.ts'
 
 export interface UniversePreset {
@@ -59,6 +60,11 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         shakeIntensity: 25,
         bassSensitivity: 45,
       },
+      holographicCards: {
+        ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        cardStyle: 'crystal-glass',
+        edgeReflectionIntensity: 65,
+      },
     },
   },
   {
@@ -100,6 +106,12 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         shakeIntensity: 50,
         bassSensitivity: 60,
       },
+      holographicCards: {
+        ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        cardStyle: 'silver-prism',
+        edgeReflectionIntensity: 75,
+        rainbowSpectrumIntensity: 60,
+      },
     },
   },
   {
@@ -139,6 +151,12 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         level: 'off',
         shakeIntensity: 0,
       },
+      holographicCards: {
+        ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        cardStyle: 'aurora-glass',
+        edgeReflectionIntensity: 55,
+        glassTransparency: 80,
+      },
     },
   },
   {
@@ -176,6 +194,11 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         enabled: true,
         level: 'subtle',
         shakeIntensity: 30,
+      },
+      holographicCards: {
+        ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        cardStyle: 'crystal-glass',
+        edgeReflectionIntensity: 70,
       },
     },
   },
@@ -216,6 +239,12 @@ export const UNIVERSE_PRESETS: UniversePreset[] = [
         level: 'off',
         shakeIntensity: 0,
       },
+      holographicCards: {
+        ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        cardStyle: 'minimal-glass',
+        edgeReflectionIntensity: 45,
+        rainbowSpectrumIntensity: 25,
+      },
     },
   },
 ]
@@ -247,6 +276,10 @@ export function applyUniversePreset(
     bassShake: {
       ...current.bassShake,
       ...(found.config.bassShake || {}),
+    },
+    holographicCards: {
+      ...current.holographicCards,
+      ...(found.config.holographicCards || {}),
     },
     supernova: {
       ...current.supernova,
