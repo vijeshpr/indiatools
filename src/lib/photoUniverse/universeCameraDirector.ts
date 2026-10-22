@@ -111,8 +111,10 @@ export class UniverseCameraDirector {
     speedMultiplier: number = 1.0
   ): CameraFrameState {
     if (!nodes || nodes.length === 0) {
+      const idleFloatX = Math.sin(currentTime * 0.15) * 35
+      const idleFloatY = Math.cos(currentTime * 0.12) * 20
       return {
-        position: { x: 0, y: 15, z: 500 },
+        position: { x: idleFloatX, y: 15 + idleFloatY, z: 500 },
         lookAt: { x: 0, y: 0, z: 0 },
         targetNodeIndex: -1,
         focusDistance: 500,

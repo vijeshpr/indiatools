@@ -109,7 +109,9 @@ export class PhotoUniverseEngine {
       this.webglCanvas.height = 720
 
       this.scene = new THREE.Scene()
-      this.scene.fog = new THREE.FogExp2(0x02040a, 0.00035)
+      // Soft cosmic navy atmospheric depth (never pure pitch black)
+      this.scene.fog = new THREE.FogExp2(0x0a1033, 0.00012)
+      this.scene.background = null
 
       // Cinematic camera with standard 50° vertical FOV
       this.camera = new THREE.PerspectiveCamera(50, 16 / 9, 1, 9000)
@@ -138,6 +140,7 @@ export class PhotoUniverseEngine {
         preserveDrawingBuffer: true,
       })
       this.renderer.setSize(1280, 720, false)
+      this.renderer.setClearColor(0x000000, 0) // Explicit 100% transparent clear
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
       this.renderer.outputColorSpace = THREE.SRGBColorSpace
 
@@ -148,6 +151,29 @@ export class PhotoUniverseEngine {
       this.initParticles()
     } catch (e) {
       console.warn('WebGL initialization failed in PhotoUniverseEngine:', e)
+    }
+  }
+
+  /**
+   * Ensure Three.js renderer and dimensions are initialized
+   */
+  private ensureInitialized(width: number, height: number): void {
+    if (!this.isClient) return
+    if (!this.renderer || !this.scene || !this.camera || !this.webglCanvas) {
+      this.initThree()
+    }
+    if (
+      this.renderer &&
+      this.webglCanvas &&
+      (this.webglCanvas.width !== width || this.webglCanvas.height !== height)
+    ) {
+      this.webglCanvas.width = width
+      this.webglCanvas.height = height
+      this.renderer.setSize(width, height, false)
+      if (this.camera) {
+        this.camera.aspect = width / height
+        this.camera.updateProjectionMatrix()
+      }
     }
   }
 
@@ -174,10 +200,12 @@ export class PhotoUniverseEngine {
 
     const material = new THREE.PointsMaterial({
       color: 0x93c5fd,
-      size: 3.5,
+      size: 4.0,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.65,
       blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false, // Never let fog darken stardust particles
     })
 
     this.particlesMesh = new THREE.Points(geometry, material)
@@ -352,28 +380,9 @@ export class PhotoUniverseEngine {
     if (!this.isClient || !ctx) return
 
     // 1. Ensure WebGL Renderer matches output canvas dimensions
-    if (
-      this.renderer &&
-      this.webglCanvas &&
-      (this.webglCanvas.width !== width || this.webglCanvas.height !== height)
-    ) {
-      this.webglCanvas.width = width
-      this.webglCanvas.height = height
-      this.renderer.setSize(width, height, false)
-      if (this.camera) {
-        this.camera.aspect = width / height
-        this.camera.updateProjectionMatrix()
-      }
-    }
+    this.ensureInitialized(width, height)
 
-    // 2. Background Synchronization
-    const bgKey = `${config.background.type}_${config.background.customImage?.url}_${config.background.galaxyTint}_${config.background.starCount}`
-    if (bgKey !== this.lastBackgroundKey && this.scene) {
-      universeBackgroundRenderer.attachToScene(this.scene, config.background)
-      this.lastBackgroundKey = bgKey
-    }
-
-    // 3. Spatial Node Generation
+    // 2. Spatial Node Generation
     const configKey = `${config.photos.length}_${config.spaceSpread}_${config.depthRange}_${config.photoScale}`
     if (configKey !== this.lastPhotoConfigKey || this.currentNodes.length !== config.photos.length) {
       this.currentNodes = generateUniverseSpatialNodes(
@@ -388,14 +397,14 @@ export class PhotoUniverseEngine {
 
     this.syncPhotoMeshes(this.currentNodes, config)
 
-    // 4. Ensure Camera Score is Planned
+    // 3. Ensure Camera Score is Planned
     const scoreKey = `${config.photos.length}_${config.photoFocusDuration}_${config.directorMode}_${config.motionPreset}_${config.profileOverride}`
     if (!this.currentScore || scoreKey !== this.lastScoreConfigKey) {
       this.currentScore = this.regenerateScore(config, duration)
       this.lastScoreConfigKey = scoreKey
     }
 
-    // 5. Cinematic Camera Director Evaluation (Deterministic Route)
+    // 4. Cinematic Camera Director Evaluation (Deterministic Route or Idle Cosmic Drift)
     const cameraState: CameraFrameState = universeCameraDirector.evaluateCamera(
       this.currentNodes,
       currentTime,
@@ -405,7 +414,7 @@ export class PhotoUniverseEngine {
       1.0
     )
 
-    // 6. Refined Audio Signal Processing & Transient Impulses
+    // 5. Refined Audio Signal Processing & Transient Impulses
     const audioState = universeBeatDetector.process(
       bands,
       currentTime,
@@ -418,30 +427,50 @@ export class PhotoUniverseEngine {
       cameraState.shakeAllowed // Suppressed during focus hold
     )
 
-    // 7. Apply Camera Position + LookAt + Additive Damped Shake
+    const shake = config.bassShake.enabled
+      ? audioState.shakeOffset
+      : { x: 0, y: 0, z: 0, pitch: 0, roll: 0 }
+
+    const effectiveCamX = cameraState.position.x + shake.x
+    const effectiveCamY = cameraState.position.y + shake.y
+    const effectiveCamZ = cameraState.position.z + shake.z
+
+    // 6. RENDER VISUALLY RICH SPACE & GALAXY ENVIRONMENT DIRECTLY ONTO CANVAS
+    // Guaranteed visible on every frame even before uploading photos or audio
+    universeBackgroundRenderer.renderToCanvas(
+      ctx,
+      width,
+      height,
+      config.background,
+      effectiveCamX,
+      effectiveCamY,
+      currentTime,
+      bands
+    )
+
+    // 7. Background Three.js Synchronization
+    const bgKey = `${config.background.type}_${config.background.customImage?.url}_${config.background.galaxyTint}_${config.background.starCount}`
+    if (bgKey !== this.lastBackgroundKey && this.scene) {
+      universeBackgroundRenderer.attachToScene(this.scene, config.background)
+      this.lastBackgroundKey = bgKey
+    }
+
+    // 8. Apply Camera Position + LookAt + Additive Damped Shake to Three.js
     if (this.camera) {
-      const shake = config.bassShake.enabled ? audioState.shakeOffset : { x: 0, y: 0, z: 0, pitch: 0, roll: 0 }
-
-      this.camera.position.set(
-        cameraState.position.x + shake.x,
-        cameraState.position.y + shake.y,
-        cameraState.position.z + shake.z
-      )
-
+      this.camera.position.set(effectiveCamX, effectiveCamY, effectiveCamZ)
       this.camera.lookAt(
         cameraState.lookAt.x + shake.x * 0.2,
         cameraState.lookAt.y + shake.y * 0.2,
         cameraState.lookAt.z
       )
-
       this.camera.rotation.z += shake.roll
       this.camera.rotation.x += shake.pitch
 
-      // Update background parallax
-      universeBackgroundRenderer.update(this.camera.position.x, this.camera.position.y, currentTime)
+      // Update background parallax in Three.js
+      universeBackgroundRenderer.update(effectiveCamX, effectiveCamY, currentTime)
     }
 
-    // 8. Single-Subject Focus Hierarchy & Realistic Depth-of-Field Blur
+    // 9. Single-Subject Focus Hierarchy & Realistic Depth-of-Field Blur
     const focusPlane = cameraState.focusDistance
     const dofMode = config.depthOfField
     const dofSpread =
@@ -530,8 +559,10 @@ export class PhotoUniverseEngine {
       this.particlesMesh.visible = false
     }
 
-    // 10. Render Three.js Scene into WebGL Canvas
+    // 10. Render Three.js Scene into WebGL Canvas with Transparent Background
     if (this.renderer && this.scene && this.camera && this.webglCanvas) {
+      this.renderer.setClearColor(0x000000, 0)
+      this.scene.background = null
       this.renderer.render(this.scene, this.camera)
 
       // 11. Composite WebGL scene onto 2D Studio Canvas

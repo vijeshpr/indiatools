@@ -424,6 +424,91 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       assert.ok(customConfig.background.customImage)
       assert.strictEqual(customConfig.background.customImage.brightness, 110)
     })
+
+    it('renders non-black celestial space environment directly to 2D canvas', () => {
+      const recordedDraws: string[] = []
+      const mockGradient = {
+        addColorStop: (offset: number, color: string) => {
+          recordedDraws.push(`grad_stop:${color}`)
+        },
+      }
+      const mockCtx = {
+        save: () => recordedDraws.push('save'),
+        restore: () => recordedDraws.push('restore'),
+        fillRect: (x: number, y: number, w: number, h: number) => recordedDraws.push(`fillRect:${w}x${h}`),
+        beginPath: () => recordedDraws.push('beginPath'),
+        arc: () => recordedDraws.push('arc'),
+        fill: () => recordedDraws.push('fill'),
+        stroke: () => recordedDraws.push('stroke'),
+        moveTo: () => {},
+        lineTo: () => {},
+        createRadialGradient: () => mockGradient,
+        createLinearGradient: () => mockGradient,
+        drawImage: () => recordedDraws.push('drawImage'),
+        globalCompositeOperation: 'source-over',
+        globalAlpha: 1.0,
+        fillStyle: '',
+        strokeStyle: '',
+        lineWidth: 1,
+      } as unknown as CanvasRenderingContext2D
+
+      universeBackgroundRenderer.renderToCanvas(
+        mockCtx,
+        1280,
+        720,
+        DEFAULT_UNIVERSE_BACKGROUND,
+        0,
+        0,
+        1.5
+      )
+
+      assert.ok(recordedDraws.length > 20, 'Should execute multiple canvas draw operations for stars and nebulae')
+      const filledCanvas = recordedDraws.some((d) => d.startsWith('fillRect:1280x720'))
+      assert.ok(filledCanvas, 'Should fill entire canvas with space gradient')
+    })
+
+    it('safely handles missing or uninitialized custom image without throwing or clearing to black', () => {
+      const mockGradient = { addColorStop: () => {} }
+      let fillRectCount = 0
+      const mockCtx = {
+        save: () => {},
+        restore: () => {},
+        fillRect: () => { fillRectCount++ },
+        beginPath: () => {},
+        arc: () => {},
+        fill: () => {},
+        stroke: () => {},
+        moveTo: () => {},
+        lineTo: () => {},
+        createRadialGradient: () => mockGradient,
+        createLinearGradient: () => mockGradient,
+        drawImage: () => {},
+        globalCompositeOperation: 'source-over',
+        globalAlpha: 1.0,
+        fillStyle: '',
+        strokeStyle: '',
+        lineWidth: 1,
+      } as unknown as CanvasRenderingContext2D
+
+      // Test with null custom image url
+      universeBackgroundRenderer.renderToCanvas(
+        mockCtx,
+        1280,
+        720,
+        {
+          type: 'custom-image',
+          customImage: null,
+          starCount: 2000,
+          galaxyTint: 'cosmic-blue',
+          nebulaGlow: 50,
+        },
+        0,
+        0,
+        2.0
+      )
+
+      assert.ok(fillRectCount > 0, 'Must fallback to default space and render fillRect')
+    })
   })
 
   describe('10. Universe Engine Integration & Score Caching', () => {

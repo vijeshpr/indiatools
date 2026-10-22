@@ -205,24 +205,40 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
     const file = e.target.files?.[0]
     if (!file) return
 
-    const url = URL.createObjectURL(file)
-    updateConfig((prev) => ({
-      ...prev,
-      background: {
-        ...prev.background,
-        type: 'custom-image',
-        customImage: {
-          url,
-          name: file.name,
-          fitMode: 'cover',
-          brightness: 100,
-          blur: 0,
-          parallaxEnabled: true,
-        },
-      },
-    }))
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload a valid image file (PNG, JPG, WebP).', 'error')
+      if (bgFileInputRef.current) bgFileInputRef.current.value = ''
+      return
+    }
 
-    showToast('Custom space background loaded successfully!', 'success')
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+
+    img.onload = () => {
+      updateConfig((prev) => ({
+        ...prev,
+        background: {
+          ...prev.background,
+          type: 'custom-image',
+          customImage: {
+            url,
+            name: file.name,
+            fitMode: 'cover',
+            brightness: 100,
+            blur: 0,
+            parallaxEnabled: true,
+          },
+        },
+      }))
+      showToast(`Custom space backdrop "${file.name}" loaded successfully!`, 'success')
+    }
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      showToast('Failed to decode image file. Retaining previous background.', 'error')
+    }
+
+    img.src = url
     if (bgFileInputRef.current) bgFileInputRef.current.value = ''
   }
 
@@ -862,11 +878,31 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
           {/* Background Type Selection */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             {[
-              { id: 'deep-space' as UniverseBackgroundType, name: 'Deep Space', desc: 'Starfield & subtle nebulas' },
-              { id: 'minimal-starfield' as UniverseBackgroundType, name: 'Minimal Stars', desc: 'Crisp & distraction-free' },
-              { id: 'nebula-galaxy' as UniverseBackgroundType, name: 'Nebula Galaxy', desc: 'Luminous cosmic clouds' },
-              { id: 'custom-image' as UniverseBackgroundType, name: 'Custom Image', desc: 'Upload background image' },
-              { id: 'solid-dark' as UniverseBackgroundType, name: 'Solid Void', desc: 'Pure dark minimal studio' },
+              {
+                id: 'deep-space' as UniverseBackgroundType,
+                name: 'Default Space & Galaxy',
+                desc: 'Deep cosmic gradient, stars & luminous nebulae',
+              },
+              {
+                id: 'nebula-galaxy' as UniverseBackgroundType,
+                name: 'Deep Nebula',
+                desc: 'Vibrant galactic dust & cosmic color clouds',
+              },
+              {
+                id: 'minimal-starfield' as UniverseBackgroundType,
+                name: 'Starfield',
+                desc: 'Crisp sparkling stars & celestial field',
+              },
+              {
+                id: 'custom-image' as UniverseBackgroundType,
+                name: 'Custom Background Image',
+                desc: 'Upload your own backdrop image',
+              },
+              {
+                id: 'solid-dark' as UniverseBackgroundType,
+                name: 'Solid Dark',
+                desc: 'Clean minimal dark studio',
+              },
             ].map((bg) => {
               const isActive = config.background.type === bg.id
               return (
@@ -902,12 +938,25 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
                 <span className="text-gray-300 font-semibold truncate max-w-[200px]">
                   Custom: {config.background.customImage.name}
                 </span>
-                <button
-                  onClick={() => bgFileInputRef.current?.click()}
-                  className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded text-[10px]"
-                >
-                  Change
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        background: { ...prev.background, type: 'deep-space' },
+                      }))
+                    }
+                    className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded text-[10px] font-semibold"
+                  >
+                    Switch to Default Space
+                  </button>
+                  <button
+                    onClick={() => bgFileInputRef.current?.click()}
+                    className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded text-[10px]"
+                  >
+                    Replace
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
