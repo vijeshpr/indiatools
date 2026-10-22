@@ -182,7 +182,25 @@ export class UniverseCameraDirector {
 
         if (subPhase === 'approach') {
           const smoothT = easeInOutSine(subP)
-          basePos = lerp3D(currentNode.cameraApproachPos, currentNode.cameraFocusPos, smoothT)
+          if (seg.shotType === 'hero-reveal') {
+            // Hero Reveal: Expansive push-in from distant space with gentle crane settling
+            const elevatedApproach: Position3D = {
+              x: currentNode.cameraApproachPos.x,
+              y: currentNode.cameraApproachPos.y + 25 * (1.0 - smoothT),
+              z: currentNode.cameraApproachPos.z + 60 * (1.0 - smoothT),
+            }
+            basePos = lerp3D(elevatedApproach, currentNode.cameraFocusPos, smoothT)
+          } else if (seg.shotType === 'orbital-drift') {
+            // Orbital approach curving in laterally
+            const curvedApproach: Position3D = {
+              x: currentNode.cameraApproachPos.x + Math.sin(subP * Math.PI) * 45,
+              y: currentNode.cameraApproachPos.y,
+              z: currentNode.cameraApproachPos.z,
+            }
+            basePos = lerp3D(curvedApproach, currentNode.cameraFocusPos, smoothT)
+          } else {
+            basePos = lerp3D(currentNode.cameraApproachPos, currentNode.cameraFocusPos, smoothT)
+          }
           focusWeight = smoothstep(0.4, 1.0, subP)
           shakeAllowed = true
         } else if (subPhase === 'settle') {
@@ -197,13 +215,34 @@ export class UniverseCameraDirector {
           focusWeight = 1.0
           shakeAllowed = false // strictly no shake while settling
         } else if (subPhase === 'hold') {
-          // Central Focus Hold: Photograph stays prominently visible and sharp for 2.5–5.0 seconds
-          // Gentle, elegant breathing drift (controlled, non-distracting)
+          // Central Focus Hold: Photograph stays prominently visible and sharp for 2.5–5.5 seconds
           let driftX = 0
           let driftY = 0
           let driftZ = 0
 
-          if (cameraStyle === 'smooth-cinematic' || cameraStyle === 'slow-dream') {
+          const framingDist = Math.max(currentNode.worldWidth, currentNode.worldHeight) * 1.65
+
+          if (seg.shotType === 'orbital-drift') {
+            // Orbital Drift: Graceful frontal curved arc around the photo (photo stays facing camera!)
+            const arcAngle = (subP - 0.5) * 0.38
+            driftX = Math.sin(arcAngle) * framingDist * 0.35
+            driftZ = (Math.cos(arcAngle) - 1.0) * framingDist * 0.18
+            driftY = Math.sin(subP * Math.PI) * 4
+          } else if (seg.shotType === 'hero-reveal') {
+            // Hero Reveal: Slow continuous micro push-in
+            driftZ = -subP * 14
+            driftY = Math.sin(subP * Math.PI) * 3
+          } else if (seg.shotType === 'emotional-hold') {
+            // Emotional Hold: Ultra-gentle subtle breathing drift (2-4px) for calm, undisturbed appreciation
+            driftX = Math.sin(subP * Math.PI) * 3
+            driftY = Math.cos(subP * Math.PI) * 2
+            driftZ = -subP * 4
+          } else if (seg.shotType === 'climax-reveal') {
+            // Climax Reveal: Dramatic hold with dynamic cadence
+            driftX = Math.sin(subP * Math.PI * 2) * 8
+            driftY = Math.cos(subP * Math.PI) * 5
+            driftZ = -subP * 16
+          } else if (cameraStyle === 'smooth-cinematic' || cameraStyle === 'slow-dream') {
             driftX = Math.sin(subP * Math.PI) * 10
             driftY = Math.cos(subP * Math.PI) * 5
             driftZ = -subP * 8
@@ -226,13 +265,13 @@ export class UniverseCameraDirector {
           focusWeight = 1.0
           shakeAllowed = false // Protected hold: photo remains readable and stable
         } else if (subPhase === 'departure') {
-          // Smooth curved departure away from photo
+          // Smooth curved departure staying strictly in front of the photo corridor
           const smoothT = easeInOutSine(subP)
           basePos = lerp3D(currentNode.cameraFocusPos, currentNode.cameraFlyByPos, smoothT)
           focusWeight = 1.0 - smoothstep(0.4, 1.0, subP) * 0.5
           shakeAllowed = true
         } else {
-          // Transition toward next photo
+          // Focus Handoff: Smooth Catmull-Rom transition toward next photo's approach corridor
           const smoothT = easeInOutSine(subP)
           basePos = catmullRom(
             currentNode.cameraFocusPos,

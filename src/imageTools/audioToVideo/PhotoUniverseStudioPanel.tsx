@@ -1223,6 +1223,37 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
                 className="w-full accent-cyan-400"
               />
             </div>
+
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-400">Transition Pacing / Phrasing</span>
+                <span className="font-mono text-cyan-300 capitalize">
+                  {config.transitionFrequency || 'balanced'}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1 bg-gray-950 p-1 rounded-xl border border-gray-800">
+                {(['relaxed', 'balanced', 'dynamic'] as const).map((freq) => (
+                  <button
+                    key={freq}
+                    type="button"
+                    onClick={() => {
+                      updateConfig((prev) => {
+                        const updated = { ...prev, transitionFrequency: freq }
+                        universeEngine.regenerateScore(updated, duration)
+                        return updated
+                      })
+                    }}
+                    className={`py-1 text-[11px] font-semibold rounded-lg capitalize transition-all cursor-pointer ${
+                      (config.transitionFrequency || 'balanced') === freq
+                        ? 'bg-cyan-500 text-black shadow'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {freq}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Director Mode: Auto vs Manual */}

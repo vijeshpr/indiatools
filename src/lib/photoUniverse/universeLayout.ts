@@ -121,12 +121,12 @@ export function generateUniverseSpatialNodes(
       z: z + cosY * approachDistance + 80,
     }
 
-    // Camera Fly-By Position (smooth curved departure beside photo)
-    const flyByOffset = Math.max(w, h) * 1.1
+    // Camera Fly-By / Departure Position (smooth curved departure staying in front of photo corridor)
+    const flyByOffset = Math.max(w, h) * 1.05
     const cameraFlyByPos: Position3D = {
       x: x - sideSign * flyByOffset,
-      y: y - 15,
-      z: z - cosY * 90, // Passes slightly past the photo plane
+      y: y + 10,
+      z: z + cosY * (framingDistance * 0.75), // Strictly stays in front of photo plane, never behind!
     }
 
     nodes.push({

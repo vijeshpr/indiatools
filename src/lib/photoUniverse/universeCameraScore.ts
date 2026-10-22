@@ -11,6 +11,8 @@ import {
   CameraScoreSegment,
   TimestampedCameraScore,
   MusicMovementProfile,
+  CinematicShotType,
+  MusicalMotivation,
 } from './photoUniverseTypes.ts'
 
 export class UniverseCameraScoreGenerator {
@@ -66,19 +68,21 @@ export class UniverseCameraScoreGenerator {
       baseHold = Math.min(baseHold, 3.2)
     }
 
-    // Segment pacing breakdown
-    const approachDur = 2.4
+    // Segment pacing breakdown modulated by transition frequency
+    const isRelaxed = config.transitionFrequency === 'relaxed'
+    const isDynamic = config.transitionFrequency === 'dynamic'
+
+    const approachDur = isRelaxed ? 2.8 : isDynamic ? 1.8 : 2.4
     const settleDur = 1.0
     const holdDur = baseHold
-    const departureDur = 1.8
-    const transitionDur = 2.0
-    const nominalSegmentDuration = approachDur + settleDur + holdDur + departureDur + transitionDur
+    const departureDur = isRelaxed ? 2.0 : isDynamic ? 1.4 : 1.8
+    const transitionDur = isRelaxed ? 2.4 : isDynamic ? 1.4 : 2.0
 
     const segments: CameraScoreSegment[] = []
     let currentTime = 0
     let step = 0
 
-    while (currentTime < duration + nominalSegmentDuration) {
+    while (currentTime < duration) {
       const photoIdx = order[step % order.length]
       const photo = photos[photoIdx]
 
@@ -95,8 +99,65 @@ export class UniverseCameraScoreGenerator {
         y: ((step % 4) - 1.5) * 0.02,
       }
 
-      // Slightly extend holds during calm/quiet moments
-      const dynamicHold = localEnergy < 0.3 ? holdDur * 1.2 : holdDur
+      // Musical Motivation & Shot Type Selection
+      let motivation: MusicalMotivation = 'phrase-boundary'
+      let shotType: CinematicShotType = 'cinematic-approach'
+
+      const isIntro = currentTime < 4.5 && localEnergy < 0.48
+      const isOutro = currentTime > duration - 6.0
+      const isNearClimax = analysis.climaxTimestamps?.some(
+        (ct) => ct >= currentTime + 1.2 && ct <= currentTime + 6.0
+      )
+
+      if (isIntro) {
+        shotType = 'hero-reveal'
+        motivation = 'intro-emergence'
+      } else if (isOutro) {
+        shotType = 'emotional-hold'
+        motivation = 'outro-linger'
+      } else if (isNearClimax) {
+        shotType = 'climax-reveal'
+        motivation = 'drop-climax'
+      } else if (profile === 'melody-ambient' || profile === 'soft-vocal') {
+        const cycle = step % 3
+        shotType = cycle === 0 ? 'orbital-drift' : cycle === 1 ? 'emotional-hold' : 'cinematic-approach'
+        motivation = 'melody-swell'
+      } else if (profile === 'steady-rhythm' || profile === 'bass-heavy') {
+        const cycle = step % 3
+        shotType = cycle === 0 ? 'focus-handoff' : cycle === 1 ? 'cinematic-approach' : 'orbital-drift'
+        motivation = 'rhythm-cadence'
+      } else {
+        const cycle = step % 4
+        shotType =
+          cycle === 0
+            ? 'cinematic-approach'
+            : cycle === 1
+            ? 'orbital-drift'
+            : cycle === 2
+            ? 'hero-reveal'
+            : 'focus-handoff'
+        motivation = 'phrase-boundary'
+      }
+
+      // Dynamic Hold Modulation based on musical phrasing
+      let dynamicHold = holdDur
+      if (motivation === 'intro-emergence') {
+        dynamicHold = Math.max(holdDur, 4.8)
+      } else if (motivation === 'outro-linger') {
+        dynamicHold = Math.max(holdDur, 5.0)
+      } else if (motivation === 'melody-swell') {
+        dynamicHold = holdDur * 1.15
+      } else if (motivation === 'rhythm-cadence') {
+        dynamicHold = Math.max(2.4, holdDur * 0.88)
+      }
+
+      // Transition Frequency modifier
+      if (isRelaxed) {
+        dynamicHold *= 1.3
+      } else if (isDynamic) {
+        dynamicHold *= 0.72
+      }
+
       const segDuration = approachDur + settleDur + dynamicHold + departureDur + transitionDur
 
       segments.push({
@@ -106,6 +167,8 @@ export class UniverseCameraScoreGenerator {
         duration: segDuration,
         photoIndex: photoIdx,
         photoId: photo.id,
+        shotType,
+        motivation,
         approachDuration: approachDur,
         settleDuration: settleDur,
         holdDuration: dynamicHold,
@@ -114,6 +177,12 @@ export class UniverseCameraScoreGenerator {
         framingOffset,
         targetEnergy: localEnergy,
         shakeAllowed: true, // evaluated by sub-phase during camera evaluation
+        visualEntrance: {
+          startOpacity: shotType === 'hero-reveal' ? 0.25 : 0.45,
+          startScale: shotType === 'hero-reveal' ? 0.88 : 0.94,
+          targetOpacity: 1.0,
+          targetScale: 1.0,
+        },
       })
 
       currentTime += segDuration

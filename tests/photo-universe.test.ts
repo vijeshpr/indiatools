@@ -727,4 +727,126 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       assert.strictEqual(presetApplied.supernova.triggerSensitivity, 'high')
     })
   })
+
+  describe('13. Cinematic Music Experience Choreography & Reverse Side Integrity', () => {
+    it('defaults transitionFrequency to balanced and rotation to disabled', () => {
+      assert.strictEqual(DEFAULT_PHOTO_UNIVERSE_CONFIG.transitionFrequency, 'balanced')
+      assert.strictEqual(DEFAULT_PHOTO_UNIVERSE_CONFIG.enableRotation, false)
+      assert.strictEqual(DEFAULT_PHOTO_UNIVERSE_CONFIG.photoMotion, 'static')
+    })
+
+    it('assigns deliberate cinematic shot types and musical motivations to score segments', () => {
+      const analysis = universeAudioAnalyzer.generateFallbackAnalysis(32, 'balanced-cinematic')
+      const score = universeCameraScoreGenerator.generateScore(
+        samplePhotos,
+        DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        analysis,
+        32
+      )
+
+      const validShotTypes = [
+        'cinematic-approach',
+        'hero-reveal',
+        'emotional-hold',
+        'focus-handoff',
+        'orbital-drift',
+        'deep-space-journey',
+        'climax-reveal',
+        'outro-linger',
+      ]
+      const validMotivations = [
+        'intro-emergence',
+        'phrase-boundary',
+        'melody-swell',
+        'rhythm-cadence',
+        'drop-climax',
+        'energy-transition',
+        'outro-linger',
+      ]
+
+      assert.ok(score.segments.length > 0)
+      score.segments.forEach((seg, idx) => {
+        assert.ok(
+          validShotTypes.includes(seg.shotType),
+          `Segment ${idx} shotType "${seg.shotType}" must be valid`
+        )
+        assert.ok(
+          validMotivations.includes(seg.motivation),
+          `Segment ${idx} motivation "${seg.motivation}" must be valid`
+        )
+        assert.ok(seg.visualEntrance, `Segment ${idx} must have visualEntrance configuration`)
+        assert.ok(seg.visualEntrance.targetOpacity === 1.0)
+        assert.ok(seg.approachDuration > 0)
+      })
+
+      // The first segment should be intro-emergence or hero-reveal
+      assert.ok(
+        score.segments[0].shotType === 'hero-reveal' ||
+          score.segments[0].motivation === 'intro-emergence'
+      )
+    })
+
+    it('ensures camera fly-by stay strictly in front of the photo corridor (never behind into blackness)', () => {
+      const nodes = generateUniverseSpatialNodes(samplePhotos)
+      nodes.forEach((node, idx) => {
+        assert.ok(
+          node.cameraFlyByPos.z > node.position.z,
+          `Node ${idx}: camera fly-by z (${node.cameraFlyByPos.z}) must stay in front of photo z (${node.position.z})`
+        )
+      })
+    })
+
+    it('modulates shot duration based on transitionFrequency setting', () => {
+      const analysis = universeAudioAnalyzer.generateFallbackAnalysis(40, 'balanced-cinematic')
+
+      const relaxedScore = universeCameraScoreGenerator.generateScore(
+        samplePhotos,
+        { ...DEFAULT_PHOTO_UNIVERSE_CONFIG, transitionFrequency: 'relaxed' },
+        analysis,
+        40
+      )
+
+      const dynamicScore = universeCameraScoreGenerator.generateScore(
+        samplePhotos,
+        { ...DEFAULT_PHOTO_UNIVERSE_CONFIG, transitionFrequency: 'dynamic' },
+        analysis,
+        40
+      )
+
+      const avgRelaxed =
+        relaxedScore.segments.reduce((acc, s) => acc + s.duration, 0) /
+        relaxedScore.segments.length
+      const avgDynamic =
+        dynamicScore.segments.reduce((acc, s) => acc + s.duration, 0) /
+        dynamicScore.segments.length
+
+      assert.ok(
+        avgRelaxed > avgDynamic,
+        `Relaxed pacing (avg ${avgRelaxed.toFixed(2)}s) must provide longer shot durations than dynamic pacing (avg ${avgDynamic.toFixed(2)}s)`
+      )
+    })
+
+    it('cycles shot types for small collections so repeated visits feel fresh and intentional', () => {
+      const twoPhotos = [samplePhotos[0], samplePhotos[1]]
+      const analysis = universeAudioAnalyzer.generateFallbackAnalysis(30, 'steady-rhythm')
+
+      const score = universeCameraScoreGenerator.generateScore(
+        twoPhotos,
+        DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        analysis,
+        30
+      )
+
+      // Get all segments for photo 0
+      const p0Segments = score.segments.filter((s) => s.targetPhotoId === 'p1')
+      if (p0Segments.length >= 2) {
+        // Repeated visits to the same photo should cycle shot types
+        const shotTypes = new Set(p0Segments.map((s) => s.shotType))
+        assert.ok(
+          shotTypes.size >= 2,
+          'Multiple visits to the same photo should utilize distinct shot types'
+        )
+      }
+    })
+  })
 })

@@ -174,6 +174,26 @@ export interface UniverseAudioAnalysisResult {
   climaxTimestamps?: number[]
 }
 
+export type CinematicShotType =
+  | 'cinematic-approach'
+  | 'hero-reveal'
+  | 'emotional-hold'
+  | 'focus-handoff'
+  | 'orbital-drift'
+  | 'deep-space-journey'
+  | 'climax-reveal'
+
+export type MusicalMotivation =
+  | 'intro-emergence'
+  | 'phrase-boundary'
+  | 'melody-swell'
+  | 'rhythm-cadence'
+  | 'drop-climax'
+  | 'energy-transition'
+  | 'outro-linger'
+
+export type TransitionFrequency = 'relaxed' | 'balanced' | 'dynamic'
+
 export interface CameraScoreSegment {
   segmentIndex: number
   startTime: number
@@ -181,6 +201,8 @@ export interface CameraScoreSegment {
   duration: number
   photoIndex: number
   photoId: string
+  shotType: CinematicShotType
+  motivation: MusicalMotivation
   approachDuration: number // ~2.0s to 3.5s
   settleDuration: number // ~0.8s to 1.5s
   holdDuration: number // ~2.5s to 5.0s
@@ -189,6 +211,12 @@ export interface CameraScoreSegment {
   framingOffset: { x: number; y: number } // rule of thirds off-center framing
   targetEnergy: number
   shakeAllowed: boolean // disabled during focus hold
+  visualEntrance?: {
+    startOpacity: number
+    startScale: number
+    targetOpacity: number
+    targetScale: number
+  }
 }
 
 export interface TimestampedCameraScore {
@@ -221,6 +249,7 @@ export interface PhotoUniverseStudioConfig {
   cameraSpeed: number // 0.5 to 2.5 (1.0 = standard)
   photoFocusDuration: number // 2.5 to 6.5 seconds lingering at each photo
   transitionSmoothness: number // 40 to 100
+  transitionFrequency: TransitionFrequency // 'relaxed' | 'balanced' | 'dynamic'
   musicReactive: boolean // Music tempo & energy adjusts travel velocity within clamped bounds
   calmnessVsEnergy: number // 0 (ultra calm) to 100 (energetic)
   
@@ -299,6 +328,7 @@ export const DEFAULT_PHOTO_UNIVERSE_CONFIG: PhotoUniverseStudioConfig = {
   cameraSpeed: 0.85, // Slower, calmer default
   photoFocusDuration: 4.0, // Substantial 4.0s focus hold
   transitionSmoothness: 85,
+  transitionFrequency: 'balanced',
   musicReactive: true,
   calmnessVsEnergy: 35,
   depthOfField: 'cinematic',

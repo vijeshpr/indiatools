@@ -313,17 +313,7 @@ export class PhotoUniverseEngine {
       if (!group) {
         group = new THREE.Group()
 
-        // 1. Backplane frame (matte dark border simulating physical floating frame)
-        const frameGeo = new THREE.PlaneGeometry(node.worldWidth + 12, node.worldHeight + 12)
-        const frameMat = new THREE.MeshBasicMaterial({
-          color: 0x070b14,
-          side: THREE.DoubleSide,
-        })
-        const frameMesh = new THREE.Mesh(frameGeo, frameMat)
-        frameMesh.position.z = -0.5
-        group.add(frameMesh)
-
-        // 2. Photo Surface Quad
+        // 1. Double-Sided Photo Surface Quad (Both front and back render photo, NEVER a black rectangle)
         const photoGeo = new THREE.PlaneGeometry(node.worldWidth, node.worldHeight)
         const asset = this.getOrLoadAsset(photo.url)
         const photoMat = new THREE.MeshBasicMaterial({
@@ -332,22 +322,37 @@ export class PhotoUniverseEngine {
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 1.0,
+          depthWrite: true,
         })
         const photoMesh = new THREE.Mesh(photoGeo, photoMat)
         photoMesh.name = 'photoMesh'
         group.add(photoMesh)
 
-        // 3. Glowing focus rim border
+        // 2. Luminous Edge Outline (Clean thin border, 100% transparent center, zero black backplane)
+        const borderGeo = new THREE.EdgesGeometry(photoGeo)
+        const borderMat = new THREE.LineBasicMaterial({
+          color: new THREE.Color(config.visualDetails.edgeGlowColor || '#00F0FF'),
+          transparent: true,
+          opacity: 0.5,
+          linewidth: 1,
+        })
+        const borderLine = new THREE.LineSegments(borderGeo, borderMat)
+        borderLine.name = 'borderLine'
+        group.add(borderLine)
+
+        // 3. Glowing focus rim border (lights up smoothly only on active hero photo)
         const rimGeo = new THREE.PlaneGeometry(node.worldWidth + 8, node.worldHeight + 8)
         const rimMat = new THREE.MeshBasicMaterial({
           color: new THREE.Color(config.visualDetails.edgeGlowColor || '#00F0FF'),
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
         })
         const rimMesh = new THREE.Mesh(rimGeo, rimMat)
         rimMesh.name = 'rimMesh'
-        rimMesh.position.z = -0.2
+        rimMesh.position.z = -0.05
         group.add(rimMesh)
 
         this.scene.add(group)
@@ -548,23 +553,39 @@ export class PhotoUniverseEngine {
       const deltaFocus = Math.abs(distToCamera - focusPlane)
       const blurFactor = dofMode === 'off' ? 0 : Math.min(1.0, deltaFocus / dofSpread)
 
-      // STOP continuous rotation: Stable orientation by default
+      // 1. CAMERA-FACING CINEMATIC ORIENTATION:
+      // Photos smoothly face toward the active camera position, eliminating edge-on views,
+      // unnatural tumbling, or reverse-side black exposure!
+      const dxToCam = this.camera.position.x - posX
+      const dyToCam = this.camera.position.y - posY
+      const dzToCam = this.camera.position.z - posZ
+      const horizDist = Math.sqrt(dxToCam * dxToCam + dzToCam * dzToCam)
+
+      const facingYaw = Math.atan2(dxToCam, dzToCam)
+      const facingPitch = -Math.atan2(dyToCam * 0.45, Math.max(10, horizDist))
+
+      let tiltRoll = 0
       if (config.photoMotion === 'subtle-float') {
-        const floatTilt = Math.sin(currentTime * 0.8 + i) * 0.02
-        group.rotation.x = node.rotation.x + floatTilt
-        group.rotation.y = node.rotation.y + floatTilt * 0.5
+        tiltRoll = Math.sin(currentTime * 0.6 + i * 1.2) * 0.015
       } else if (config.photoMotion === 'music-micro' && audioState.isBassImpact && cameraState.shakeAllowed) {
-        const proximity = Math.max(0, 1.0 - distToCamera / 900)
-        const microTilt = audioState.bassImpactStrength * proximity * 0.03
-        group.rotation.x = node.rotation.x + Math.sin(currentTime * 24) * microTilt
-        group.rotation.y = node.rotation.y + Math.cos(currentTime * 24) * microTilt
-      } else {
-        // Firmly static
-        group.rotation.x = node.rotation.x
-        group.rotation.y = node.rotation.y
+        tiltRoll = Math.sin(currentTime * 20) * 0.02
+      } else if (config.enableRotation) {
+        tiltRoll = Math.sin(currentTime * 0.4 + i) * 0.035
       }
 
-      // Material Depth-of-Field texture swapping & focus rim highlight
+      group.rotation.y = facingYaw
+      group.rotation.x = facingPitch
+      group.rotation.z = tiltRoll
+
+      // 2. HERO REVEAL & FOCUS SCALE
+      const isCurrentTarget = i === cameraState.targetNodeIndex
+      let currentScale = isCurrentTarget ? 1.0 : 0.92
+      if (isCurrentTarget && cameraState.travelPhase === 'approach') {
+        currentScale = 0.90 + cameraState.phaseProgress * 0.10
+      }
+      group.scale.set(currentScale, currentScale, currentScale)
+
+      // 3. Material Depth-of-Field texture swapping & focus rim highlight
       const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh | undefined
       const rimMesh = group.getObjectByName('rimMesh') as THREE.Mesh | undefined
       const asset = this.getOrLoadAsset(node.photo.url)
@@ -584,14 +605,20 @@ export class PhotoUniverseEngine {
           }
         }
 
-        // Slight atmospheric opacity drop for deep background photos
-        mat.opacity = 1.0 - Math.min(0.4, blurFactor * 0.45)
+        // Active hero photo is 100% luminous; background corridor photos have gentle atmospheric depth opacity
+        if (isCurrentTarget) {
+          mat.opacity =
+            cameraState.travelPhase === 'approach'
+              ? 0.35 + cameraState.phaseProgress * 0.65
+              : 1.0
+        } else {
+          mat.opacity = Math.max(0.25, 0.85 - blurFactor * 0.55)
+        }
       }
 
       // Focus rim light: only active subject lights up!
       if (rimMesh) {
         const rimMat = rimMesh.material as THREE.MeshBasicMaterial
-        const isCurrentTarget = i === cameraState.targetNodeIndex
         const targetOpacity =
           isCurrentTarget && config.visualDetails.edgeLightingEnabled
             ? cameraState.focusWeight * 0.85
