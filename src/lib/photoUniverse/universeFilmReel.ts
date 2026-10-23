@@ -62,11 +62,14 @@ export class UniverseFilmReelManager {
   public getOrCreateCelluloidTexture(
     warmth: number = 70,
     translucency: number = 85,
-    sprocketDetail: 'classic-35mm' | 'wide-cinema' = 'classic-35mm'
+    sprocketDetail: 'classic-35mm' | 'wide-cinema' = 'classic-35mm',
+    colorGrade: string = 'warm-amber',
+    sprocketGlow: number = 50,
+    frameDividersEnabled: boolean = true
   ): THREE.CanvasTexture | null {
     if (!this.isClient || typeof document === 'undefined') return null
 
-    const key = `${warmth}_${translucency}_${sprocketDetail}`
+    const key = `${warmth}_${translucency}_${sprocketDetail}_${colorGrade}_${sprocketGlow}_${frameDividersEnabled}`
     if (this.celluloidTexture && this.lastTextureKey === key) {
       return this.celluloidTexture
     }
@@ -84,11 +87,25 @@ export class UniverseFilmReelManager {
       ctx.clearRect(0, 0, W, H)
 
       // 1. Vintage Translucent Celluloid Body
-      // Warm amber/sepia tint based on warmth parameter
       const warmthNorm = warmth / 100
-      const r = Math.round(18 + warmthNorm * 22)
-      const g = Math.round(14 + warmthNorm * 12)
-      const b = Math.round(10 + warmthNorm * 4)
+      let r = Math.round(18 + warmthNorm * 22)
+      let g = Math.round(14 + warmthNorm * 12)
+      let b = Math.round(10 + warmthNorm * 4)
+
+      if (colorGrade === 'noir-monochrome') {
+        r = 18
+        g = 18
+        b = 20
+      } else if (colorGrade === 'vintage-sepia') {
+        r = Math.round(26 + warmthNorm * 18)
+        g = Math.round(17 + warmthNorm * 10)
+        b = 10
+      } else if (colorGrade === 'classic-technicolor') {
+        r = Math.round(24 + warmthNorm * 20)
+        g = Math.round(12 + warmthNorm * 14)
+        b = Math.round(14 + warmthNorm * 6)
+      }
+
       const alpha = Math.min(0.96, Math.max(0.65, translucency / 100))
 
       ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`
@@ -96,11 +113,12 @@ export class UniverseFilmReelManager {
 
       // Celluloid subtle horizontal sheen
       const sheenGrad = ctx.createLinearGradient(0, 0, 0, H)
-      sheenGrad.addColorStop(0, 'rgba(255, 230, 180, 0.12)')
+      const sheenHighlight = colorGrade === 'noir-monochrome' ? 'rgba(220, 230, 245, 0.12)' : 'rgba(255, 230, 180, 0.12)'
+      sheenGrad.addColorStop(0, sheenHighlight)
       sheenGrad.addColorStop(0.12, 'rgba(0, 0, 0, 0.15)')
-      sheenGrad.addColorStop(0.5, 'rgba(255, 215, 120, 0.04)')
+      sheenGrad.addColorStop(0.5, colorGrade === 'noir-monochrome' ? 'rgba(200, 210, 230, 0.04)' : 'rgba(255, 215, 120, 0.04)')
       sheenGrad.addColorStop(0.88, 'rgba(0, 0, 0, 0.15)')
-      sheenGrad.addColorStop(1, 'rgba(255, 230, 180, 0.12)')
+      sheenGrad.addColorStop(1, sheenHighlight)
       ctx.fillStyle = sheenGrad
       ctx.fillRect(0, 0, W, H)
 
@@ -128,15 +146,16 @@ export class UniverseFilmReelManager {
       }
 
       // Draw sprocket holes on Top & Bottom Margins
+      const glowFactor = (sprocketGlow / 100)
+      const glowColor = colorGrade === 'noir-monochrome'
+        ? `rgba(200, 215, 240, ${0.3 + glowFactor * 0.4})`
+        : `rgba(245, 180, 80, ${0.35 + warmthNorm * 0.25 * glowFactor})`
+
       for (let i = 0; i < numHoles; i++) {
         const x = i * holePitch + 8
-
-        // Top perforation
         const yTop = (marginH - holeH) / 2
-        // Bottom perforation
         const yBottom = H - marginH + (marginH - holeH) / 2
 
-        // Cut out hole by clearing with very slight inner shadow
         ctx.save()
         ctx.globalCompositeOperation = 'destination-out'
         drawRoundedPerforation(x, yTop)
@@ -145,55 +164,60 @@ export class UniverseFilmReelManager {
         ctx.fill()
         ctx.restore()
 
-        // Subtle warm glow / highlight around hole edges
-        ctx.save()
-        ctx.strokeStyle = `rgba(245, 180, 80, ${0.35 + warmthNorm * 0.25})`
-        ctx.lineWidth = 1.2
-        drawRoundedPerforation(x, yTop)
-        ctx.stroke()
-        drawRoundedPerforation(x, yBottom)
-        ctx.stroke()
-        ctx.restore()
+        if (sprocketGlow > 5) {
+          ctx.save()
+          ctx.strokeStyle = glowColor
+          ctx.lineWidth = 1.2
+          drawRoundedPerforation(x, yTop)
+          ctx.stroke()
+          drawRoundedPerforation(x, yBottom)
+          ctx.stroke()
+          ctx.restore()
+        }
       }
 
       // 3. Margin Dividing Guideline Tracks
-      ctx.strokeStyle = `rgba(217, 119, 6, 0.45)`
+      ctx.strokeStyle = colorGrade === 'noir-monochrome'
+        ? 'rgba(160, 175, 200, 0.4)'
+        : 'rgba(217, 119, 6, 0.45)'
       ctx.lineWidth = 1.5
-      // Top margin line
       ctx.beginPath()
       ctx.moveTo(0, marginH)
       ctx.lineTo(W, marginH)
       ctx.stroke()
-      // Bottom margin line
       ctx.beginPath()
       ctx.moveTo(0, H - marginH)
       ctx.lineTo(W, H - marginH)
       ctx.stroke()
 
-      // 4. Vintage 35mm Edge Markings (EASTMAN KODAK 35MM, Frame Numbers, Barcode)
-      ctx.save()
-      ctx.font = 'bold 9px monospace'
-      ctx.fillStyle = `rgba(251, 191, 36, ${0.55 + warmthNorm * 0.3})`
-      ctx.textAlign = 'left'
-      ctx.textBaseline = 'middle'
+      // 4. Vintage 35mm Edge Markings
+      if (frameDividersEnabled) {
+        ctx.save()
+        ctx.font = 'bold 9px monospace'
+        ctx.fillStyle = colorGrade === 'noir-monochrome'
+          ? 'rgba(220, 230, 245, 0.65)'
+          : `rgba(251, 191, 36, ${0.55 + warmthNorm * 0.3})`
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'middle'
 
-      const frameCycle = 256
-      for (let x = 0; x < W; x += frameCycle) {
-        const frameNum = 18 + Math.floor(x / frameCycle)
-        ctx.fillText(`EASTMAN 35MM • SAFETY FILM`, x + 12, marginH / 2)
-        ctx.fillText(`▶ ${frameNum}A • ◄`, x + 16, H - marginH / 2)
+        const frameCycle = 256
+        for (let x = 0; x < W; x += frameCycle) {
+          const frameNum = 18 + Math.floor(x / frameCycle)
+          ctx.fillText(`EASTMAN 35MM • SAFETY FILM`, x + 12, marginH / 2)
+          ctx.fillText(`▶ ${frameNum}A • ◄`, x + 16, H - marginH / 2)
 
-        // Subtle frame separator notch along the track
-        ctx.strokeStyle = `rgba(251, 191, 36, 0.35)`
-        ctx.lineWidth = 2
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, H)
-        ctx.stroke()
+          ctx.strokeStyle = colorGrade === 'noir-monochrome'
+            ? 'rgba(200, 215, 240, 0.35)'
+            : 'rgba(251, 191, 36, 0.35)'
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, H)
+          ctx.stroke()
+        }
+        ctx.restore()
       }
-      ctx.restore()
 
-      // Create Three.js Texture
       const texture = new THREE.CanvasTexture(canvas)
       texture.wrapS = THREE.RepeatWrapping
       texture.wrapT = THREE.ClampToEdgeWrapping
@@ -356,7 +380,7 @@ export class UniverseFilmReelManager {
     photoCount: number
   ): THREE.Mesh {
     const numSegments = Math.max(160, photoCount * 60)
-    const ribbonWidth = 240 // Physical height/width of 35mm strip in 3D scene units
+    const ribbonWidth = 240 * (config.ribbonWidthScale ?? 1.0) // Physical height/width of 35mm strip in 3D scene units
 
     const points = curve.getSpacedPoints(numSegments)
     const vertexCount = (numSegments + 1) * 2
@@ -435,7 +459,10 @@ export class UniverseFilmReelManager {
     const texture = this.getOrCreateCelluloidTexture(
       config.warmth,
       config.celluloidTranslucency,
-      config.sprocketHoleDetail
+      config.sprocketHoleDetail,
+      config.colorGrade ?? 'warm-amber',
+      config.sprocketGlow ?? 50,
+      config.frameDividersEnabled ?? true
     )
 
     const material = new THREE.MeshBasicMaterial({
@@ -470,6 +497,14 @@ export class UniverseFilmReelManager {
   public ensureProjectorBeam(scene: THREE.Scene, config: UniverseFilmReelConfig): void {
     if (!this.isClient || !scene) return
 
+    const beamHex = config.projectorBeamColor === 'tungsten-warm'
+      ? 0xffb74d
+      : config.projectorBeamColor === 'soft-white'
+      ? 0xf8fafc
+      : config.projectorBeamColor === 'sepia-glow'
+      ? 0xd97706
+      : 0xf59e0b
+
     if (!this.projectorConeMesh) {
       // Open-ended cylinder cone geometry representing the volumetric beam
       const coneGeo = new THREE.CylinderGeometry(18, 220, 750, 24, 1, true)
@@ -478,7 +513,7 @@ export class UniverseFilmReelManager {
 
       // Projector beam warm golden glow material
       const coneMat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(0xf59e0b),
+        color: new THREE.Color(beamHex),
         transparent: true,
         opacity: (config.projectorLightIntensity / 100) * 0.32,
         blending: THREE.AdditiveBlending,
@@ -490,17 +525,22 @@ export class UniverseFilmReelManager {
       this.projectorConeMesh.name = 'projectorVolumetricBeam'
       this.projectorConeMesh.renderOrder = 8
       scene.add(this.projectorConeMesh)
+    } else {
+      const mat = this.projectorConeMesh.material as THREE.MeshBasicMaterial
+      mat.color.setHex(beamHex)
     }
 
     if (!this.projectorLight) {
-      this.projectorLight = new THREE.PointLight(0xffb74d, 2.5, 1200)
+      this.projectorLight = new THREE.PointLight(beamHex, 2.5, 1200)
       this.projectorLight.name = 'projectorPointLight'
       scene.add(this.projectorLight)
+    } else {
+      this.projectorLight.color.setHex(beamHex)
     }
 
     // Atmospheric dust motes within the projector cone
+    const dustCount = config.dustCount ?? 80
     if (!this.dustPointsMesh && config.dustMotesEnabled) {
-      const dustCount = 80
       const dustGeo = new THREE.BufferGeometry()
       const posArray = new Float32Array(dustCount * 3)
 
@@ -512,7 +552,7 @@ export class UniverseFilmReelManager {
 
       dustGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3))
       const dustMat = new THREE.PointsMaterial({
-        color: 0xffe082,
+        color: beamHex,
         size: 3.5,
         transparent: true,
         opacity: 0.65,
@@ -551,9 +591,11 @@ export class UniverseFilmReelManager {
     const overall = bands?.overall ?? 0.25
     const audioBoost = config.musicReactive ? 1.0 + bass * 0.45 : 1.0
 
+    // Analog shutter lamp flicker
+    const flicker = ((config.flickerIntensity ?? 15) / 100) * 0.10 * Math.sin(currentTime * 48.0) * Math.cos(currentTime * 32.0)
     const baseOpacity = (config.projectorLightIntensity / 100) * 0.30
     const mat = this.projectorConeMesh.material as THREE.MeshBasicMaterial
-    mat.opacity = THREE.MathUtils.clamp(baseOpacity * audioBoost, 0.08, 0.65)
+    mat.opacity = THREE.MathUtils.clamp((baseOpacity + flicker) * audioBoost, 0.06, 0.75)
 
     this.projectorLight.intensity = (config.projectorLightIntensity / 100) * 2.8 * audioBoost
 
@@ -782,6 +824,15 @@ export class UniverseFilmReelManager {
       focusWeight = 1.0 - smoothT * 0.6
     }
 
+    // Analog projector gate weave (subtle frame jitter)
+    if ((config.gateWeaveIntensity ?? 20) > 0) {
+      const gateWeave = ((config.gateWeaveIntensity ?? 20) / 100) * 1.5
+      const weaveX = Math.sin(currentTime * 32.0) * gateWeave
+      const weaveY = Math.cos(currentTime * 24.0) * gateWeave * 0.75
+      lookTarget.x += weaveX
+      lookTarget.y += weaveY
+    }
+
     return {
       position: { x: camPos.x, y: camPos.y, z: camPos.z },
       lookAt: { x: lookTarget.x, y: lookTarget.y, z: lookTarget.z },
@@ -808,7 +859,7 @@ export class UniverseFilmReelManager {
 
     ctx.save()
 
-    // 1. Warm Amber Projector Vignette
+    // 1. Warm Amber / Sepia / Monochrome Projector Vignette
     const warmthNorm = config.warmth / 100
     const grad = ctx.createRadialGradient(
       width * 0.5,
@@ -818,9 +869,16 @@ export class UniverseFilmReelManager {
       height * 0.5,
       Math.max(width, height) * 0.75
     )
-    grad.addColorStop(0, 'rgba(0, 0, 0, 0)')
-    grad.addColorStop(0.7, `rgba(${Math.round(20 + warmthNorm * 20)}, 10, 4, 0.25)`)
-    grad.addColorStop(1, 'rgba(6, 4, 2, 0.72)')
+
+    if (config.colorGrade === 'noir-monochrome') {
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0)')
+      grad.addColorStop(0.7, 'rgba(20, 24, 30, 0.28)')
+      grad.addColorStop(1, 'rgba(4, 5, 8, 0.82)')
+    } else {
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0)')
+      grad.addColorStop(0.7, `rgba(${Math.round(20 + warmthNorm * 20)}, 10, 4, 0.25)`)
+      grad.addColorStop(1, 'rgba(6, 4, 2, 0.72)')
+    }
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, width, height)
 
@@ -856,6 +914,19 @@ export class UniverseFilmReelManager {
           ctx.fillRect(0, 0, width, height)
         }
       }
+    }
+
+    // 3. Subtle Anamorphic Projector Lens Streak
+    if (config.lensStreakEnabled) {
+      const beamY = height * 0.48
+      const streakGrad = ctx.createLinearGradient(0, beamY, width, beamY)
+      streakGrad.addColorStop(0, 'rgba(0,0,0,0)')
+      streakGrad.addColorStop(0.35, 'rgba(245, 158, 11, 0.03)')
+      streakGrad.addColorStop(0.5, 'rgba(255, 230, 160, 0.16)')
+      streakGrad.addColorStop(0.65, 'rgba(245, 158, 11, 0.03)')
+      streakGrad.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = streakGrad
+      ctx.fillRect(0, beamY - 10, width, 20)
     }
 
     ctx.restore()

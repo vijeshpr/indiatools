@@ -133,34 +133,66 @@ export const DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG: UniverseLiquidLightConfig = {
 
 export type FilmStripPathStyle = 's-curve' | 'spiral' | 'infinite-tunnel'
 
+export type FilmReelColorGrade =
+  | 'warm-amber'
+  | 'vintage-sepia'
+  | 'noir-monochrome'
+  | 'classic-technicolor'
+
+export type ProjectorBeamColor =
+  | 'amber-gold'
+  | 'tungsten-warm'
+  | 'soft-white'
+  | 'sepia-glow'
+
 export interface UniverseFilmReelConfig {
   enabled: boolean // default: false (Safety first: disabled by default)
   pathStyle: FilmStripPathStyle // default: 's-curve'
+  colorGrade: FilmReelColorGrade // default: 'warm-amber'
+  projectorBeamColor: ProjectorBeamColor // default: 'amber-gold'
   warmth: number // 0 to 100, default: 70
   filmGrainIntensity: number // 0 to 100, default: 35
   projectorLightIntensity: number // 0 to 100, default: 75
   cameraSpeed: number // 0.5 to 2.5, default: 0.9
+  focusHoldDuration: number // 2.0 to 8.0s, default: 4.2s
   musicReactive: boolean // default: true
   cinematicEnding: boolean // default: true
   sprocketHoleDetail: 'classic-35mm' | 'wide-cinema' // default: 'classic-35mm'
+  sprocketGlow: number // 0 to 100, default: 50
   celluloidTranslucency: number // 10 to 100, default: 85
   dustMotesEnabled: boolean // default: true
+  dustCount: number // 20 to 150, default: 80
   volumetricRaysEnabled: boolean // default: true
+  gateWeaveIntensity: number // 0 to 100, default: 20
+  flickerIntensity: number // 0 to 100, default: 15
+  frameDividersEnabled: boolean // default: true
+  lensStreakEnabled: boolean // default: true
+  ribbonWidthScale: number // 0.7 to 1.5, default: 1.0
 }
 
 export const DEFAULT_UNIVERSE_FILM_REEL_CONFIG: UniverseFilmReelConfig = {
   enabled: false,
   pathStyle: 's-curve',
+  colorGrade: 'warm-amber',
+  projectorBeamColor: 'amber-gold',
   warmth: 70,
   filmGrainIntensity: 35,
   projectorLightIntensity: 75,
   cameraSpeed: 0.9,
+  focusHoldDuration: 4.2,
   musicReactive: true,
   cinematicEnding: true,
   sprocketHoleDetail: 'classic-35mm',
+  sprocketGlow: 50,
   celluloidTranslucency: 85,
   dustMotesEnabled: true,
+  dustCount: 80,
   volumetricRaysEnabled: true,
+  gateWeaveIntensity: 20,
+  flickerIntensity: 15,
+  frameDividersEnabled: true,
+  lensStreakEnabled: true,
+  ribbonWidthScale: 1.0,
 }
 
 export type SupernovaTriggerSensitivity = 'low' | 'balanced' | 'high'
