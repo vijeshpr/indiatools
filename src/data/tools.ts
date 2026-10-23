@@ -76,7 +76,7 @@ export const CATEGORIES: Record<ToolCategory, CategoryInfo> = {
     accentColor: '#EC4899',
     gradient: 'from-pink-500/20 via-rose-500/10 to-transparent',
     icon: 'FileImage',
-    toolCount: 29,
+    toolCount: 30,
   },
   audio: {
     id: 'audio',
@@ -4311,6 +4311,85 @@ export const TOOLS: ToolDefinition[] = [
         'video cutter trimmer'
       ],
       canonicalPath: '/tools/hybrid-video-studio'
+    },
+    type: 'image-tool'
+  },
+  {
+    id: 'animated-emoji-studio',
+    slug: 'animated-emoji-studio',
+    title: 'Animated Emoji Studio - Free GIF & WhatsApp Sticker Downloader',
+    shortTitle: 'Animated Emoji Studio',
+    category: 'create',
+    categoryLabel: 'Create',
+    description: 'Browse, preview, and download 100% transparent animated emojis, high-resolution GIFs, and WhatsApp-compatible animated stickers. Free and private.',
+    detailedDescription: 'IndiaTools Animated Emoji Studio offers an authentic collection of 3D animated emojis across Emotions, Hearts, Gestures, Animals, Nature, Celebration, and Food. Download individual transparent GIFs, animated WebP files, or verified 512x512 WhatsApp stickers directly to your device without bulk ZIP requirements or server uploads.',
+    iconName: 'Sparkles',
+    badge: 'New',
+    color: '#F59E0B',
+    tags: [
+      'Animated Emoji',
+      'Emoji GIF Downloader',
+      'WhatsApp Animated Stickers',
+      'Transparent Animated Emoji',
+      'Emoji Stickers',
+      'Discord Animated Emoji'
+    ],
+    searchKeywords: [
+      'animated emoji',
+      'animated emoji studio',
+      'download animated emoji',
+      'emoji gif download',
+      'whatsapp animated sticker download',
+      'transparent animated emoji webp',
+      'heart eyes animated emoji',
+      'laughing crying animated emoji'
+    ],
+    formulaExplanation: 'Sourced from Google Noto Color Emoji under Apache License 2.0 with client-side transparent canvas alpha layer preview and instant individual WebP/GIF asset streaming.',
+    assumptions: [
+      '100% private in-browser client-side download with zero cloud tracking',
+      'WhatsApp animated stickers adhere to 512x512 pixel transparent WebP standards under 500 KB'
+    ],
+    relatedSlugs: ['pixelcraft', 'name-slip-maker', 'clearcut-ai', 'audio-to-video-studio'],
+    exampleCalculation: {
+      title: 'Individual Animated Emoji Download',
+      inputs: {
+        'Emoji Selection': 'Heart Eyes Smiling Face',
+        'Output Format': 'WhatsApp Sticker (512x512 WebP)',
+        'Transparency': '32-bit RGBA Alpha Channel'
+      },
+      outputs: {
+        'File Format': 'Animated WebP (.webp)',
+        'Dimensions': '512 x 512 px',
+        'File Size': '433.4 KB (WhatsApp Verified)'
+      },
+      explanation: 'Streams the verified animated sticker directly to user device with authentic transparency.'
+    },
+    faqs: [
+      {
+        question: 'Are all animated emojis completely free for commercial and personal use?',
+        answer: 'Yes! All animated emojis in this collection are distributed under the open-source Apache License 2.0 (Google Noto Color Emoji Animation), allowing free personal and commercial utilization.'
+      },
+      {
+        question: 'How do I download a single animated emoji without a bulk ZIP file?',
+        answer: 'Simply click on any emoji card or open its preview modal and click Download GIF, Download WebP, or WhatsApp Sticker to instantly save that single individual file to your device.'
+      },
+      {
+        question: 'What are the technical requirements for WhatsApp animated stickers?',
+        answer: 'WhatsApp mandates animated stickers to be exactly 512 x 512 pixels in animated WebP format with transparent background and file size strictly under 500 KB.'
+      }
+    ],
+    seo: {
+      title: 'Animated Emoji Studio - Free GIF & Sticker Downloader | IndiaTools',
+      metaDescription: 'Download free transparent animated emoji GIFs, animated WebP files, and WhatsApp animated stickers. Browse 32+ 3D emojis with individual downloads and live preview.',
+      keywords: [
+        'animated emoji studio',
+        'animated emoji gif download',
+        'whatsapp animated stickers free download',
+        'transparent animated emoji webp',
+        '3d animated emojis free',
+        'download animated emoji single'
+      ],
+      canonicalPath: '/tools/animated-emoji-studio'
     },
     type: 'image-tool'
   }

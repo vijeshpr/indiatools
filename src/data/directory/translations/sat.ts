@@ -282,6 +282,11 @@ export const translations: Record<string, DirectoryToolItem> = {
   'hybrid-video-studio': {
     name: "ᱦᱟᱭᱵᱨᱤᱰ ᱵᱷᱤᱰᱤᱭᱳ ᱥᱴᱩᱰᱤᱭᱳ",
     description: "ᱵᱽᱨᱟᱣᱡᱟᱨ ᱟᱫᱷᱟᱨᱤᱛ ᱢᱟᱞᱴᱤ-ᱴᱨᱮᱠ ᱵᱷᱤᱰᱤᱭᱳ ᱮᱰᱤᱴᱟᱨ, ᱢᱳᱥᱚᱱ ᱴᱟᱭᱴᱮᱞ ᱟᱨ ᱵᱷᱤᱰᱤᱭᱳ ᱮᱠᱥᱯᱳᱨᱴ।"
+  },
+
+  'animated-emoji-studio': {
+    name: "ᱮᱱᱤᱢᱮᱴᱮᱰ ᱤᱢᱳᱡᱤ ᱥᱴᱩᱰᱤᱭᱳ",
+    description: "ᱯᱟᱨᱫᱚᱨᱥᱤ ᱮᱱᱤᱢᱮᱴᱮᱰ ᱤᱢᱳᱡᱤ, GIF ᱟᱨ ᱣᱟᱴᱥᱮᱯ ᱤᱥᱴᱤᱠᱟᱨ ᱰᱟᱣᱩᱱᱞᱳᱰ ᱢᱮ᱾"
   }
 }
 

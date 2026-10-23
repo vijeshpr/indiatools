@@ -282,6 +282,11 @@ export const translations: Record<string, DirectoryToolItem> = {
   'hybrid-video-studio': {
     name: "Hybrid Video Studio",
     description: "Pro-grade browser-based multi-track video editor with motion titles, color grading, and seekable video export."
+  },
+
+  'animated-emoji-studio': {
+    name: "Animated Emoji Studio",
+    description: "Browse, preview, and download transparent animated emojis, GIFs, and WhatsApp stickers."
   }
 }
 

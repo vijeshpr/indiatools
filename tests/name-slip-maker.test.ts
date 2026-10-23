@@ -258,7 +258,7 @@ describe('Name Slip Maker for Kids Test Suite', () => {
   // 5. REGISTRY & ROUTING INTEGRATION
   describe('IndiaTools Registry Integration', () => {
     it('registers name-slip-maker as Tool #68 in TOOLS registry', () => {
-      assert.strictEqual(TOOLS.length, 70)
+      assert.strictEqual(TOOLS.length, 71)
       const tool = getToolBySlug('name-slip-maker')
       assert.ok(tool, 'Tool name-slip-maker must be registered')
       assert.strictEqual(tool.slug, 'name-slip-maker')
@@ -268,14 +268,14 @@ describe('Name Slip Maker for Kids Test Suite', () => {
       assert.ok(tool.seo.title.endsWith('| IndiaTools'))
     })
 
-    it('updates create category toolCount to 29', () => {
-      assert.strictEqual(CATEGORIES.create.toolCount, 29)
+    it('updates create category toolCount to 30', () => {
+      assert.strictEqual(CATEGORIES.create.toolCount, 30)
     })
 
-    it('sitemap.xml contains 224 production URLs including all 23 localized name-slip-maker entries', () => {
+    it('sitemap.xml contains 225 production URLs including all 23 localized name-slip-maker entries', () => {
       const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
       const matches = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-      assert.strictEqual(matches.length, 224)
+      assert.strictEqual(matches.length, 225)
 
       assert.ok(sitemap.includes('https://indiatools-rho.vercel.app/tools/name-slip-maker'))
       for (const code of ALL_NAME_SLIP_LANG_CODES) {

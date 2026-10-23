@@ -84,6 +84,7 @@ import { BatchImageWatermarkerTool } from '../imageTools/BatchImageWatermarkerTo
 import { FastInpaintingWatermarkRemoverTool } from '../imageTools/FastInpaintingWatermarkRemoverTool'
 import { ScanToPrintTool } from '../imageTools/ScanToPrintTool'
 import { NameSlipMakerTool } from '../imageTools/NameSlipMakerTool'
+import { AnimatedEmojiStudioTool } from '../imageTools/AnimatedEmojiStudioTool'
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   // Vehicle
@@ -167,6 +168,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'scan-to-print': ScanToPrintTool,
   'lucky-draw-team-splitter': LuckyDrawTeamSplitterTool,
   'name-slip-maker': NameSlipMakerTool,
+  'animated-emoji-studio': AnimatedEmojiStudioTool,
 }
 
 import { useI18n } from '../i18n/I18nContext'

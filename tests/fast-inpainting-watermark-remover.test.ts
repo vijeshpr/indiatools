@@ -49,8 +49,8 @@ describe('Fast Inpainting Watermark Remover & Object Eraser Test Suite', () => {
     assert.ok(tool.seo.metaDescription.length > 50, 'Description should be descriptive')
     assert.ok(tool.searchKeywords.length >= 10, 'Search keywords should include regional phrases')
     assert.ok(tool.faqs.length >= 5, 'Must provide at least 5 FAQs')
-    assert.strictEqual(CATEGORIES.create.toolCount, 29, 'Category create tool count must be 29')
-    assert.strictEqual(TOOLS.length, 70, 'Total tools in registry must be 70')
+    assert.strictEqual(CATEGORIES.create.toolCount, 30, 'Category create tool count must be 30')
+    assert.strictEqual(TOOLS.length, 71, 'Total tools in registry must be 71')
   })
 
   describe('Alexandru Telea Fast Marching Inpainting Algorithm', () => {
@@ -201,10 +201,10 @@ describe('Fast Inpainting Watermark Remover & Object Eraser Test Suite', () => {
   })
 
   describe('Sitemap, Prerender & Multilingual SEO Compliance Suite', () => {
-    it('sitemap.xml contains English and all 6 localized inpainting URLs with 224 total URLs', () => {
+    it('sitemap.xml contains English and all 6 localized inpainting URLs with 225 total URLs', () => {
       const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
       const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-      assert.strictEqual(locs.length, 224, 'Sitemap should contain exactly 224 production URLs')
+      assert.strictEqual(locs.length, 225, 'Sitemap should contain exactly 225 production URLs')
 
       // Main English URL
       assert.ok(locs.includes('https://indiatools-rho.vercel.app/tools/fast-inpainting-watermark-remover'))

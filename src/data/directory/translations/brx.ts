@@ -282,6 +282,11 @@ export const translations: Record<string, DirectoryToolItem> = {
   'hybrid-video-studio': {
     name: "हाइब्रिड भिदिअ' स्टुडिअ'",
     description: "ब्राउजार-आधारित मल्टि-ट्रेक भिदिअ' एडिटार, मशन टाइथेल आरो गेरेमसा भिदिअ' एक्सपर्त।"
+  },
+
+  'animated-emoji-studio': {
+    name: "एनिमेटेड इमोजी स्टुडियो",
+    description: "पारदर्शी एनिमेटेड इमोजी, GIF आरो ह्वाट्सएप स्टिकार डाउनलोड खालाम।"
   }
 }
 

@@ -282,6 +282,11 @@ export const translations: Record<string, DirectoryToolItem> = {
   'hybrid-video-studio': {
     name: "सङ्कर दृश्यश्रव्य कार्यशाला",
     description: "जालपुट-आधारितं बहु-मार्ग दृश्यचित्र सम्पादकं, गति-शीर्षकाणि, वर्ण-संस्कारः, चलच्चित्र-निर्यातश्च।"
+  },
+
+  'animated-emoji-studio': {
+    name: "सजीव-इमोजी-स्टुडियो",
+    description: "पारदर्शकानि सजीव-इमोजी-चित्राणि, GIF-रूपाणि तथा व्हाट्सएप-स्टिकराणि अवतरणम् कुर्वन्तु।"
   }
 }
 

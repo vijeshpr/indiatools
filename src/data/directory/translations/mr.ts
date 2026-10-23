@@ -282,6 +282,11 @@ export const translations: Record<string, DirectoryToolItem> = {
   'hybrid-video-studio': {
     name: "हायब्रिड व्हिडिओ स्टुडिओ",
     description: "ब्राउझर-आधारित मल्टी-ट्रॅक व्हिडिओ संपादक, मोशन टायटल्स, रंग ग्रेडिंग आणि हाय-डेफिनिशन व्हिडिओ निर्यात."
+  },
+
+  'animated-emoji-studio': {
+    name: "ॲनिमेटेड इमोजी स्टुडिओ",
+    description: "पारदर्शक ॲनिमेटेड इमोजी, जीआयएफ आणि व्हॉट्सॲप स्टिकर्स डाउनलोड करा."
   }
 }
 

@@ -257,7 +257,7 @@ async function runAudit() {
   // 4. Tools Data Runtime Audit
   const toolsModule = await import('../src/data/tools.ts');
   const tools = toolsModule.TOOLS;
-  check('Tools Registry: Exactly 70 unique tools', tools.length === 70, `Found ${tools.length}`);
+  check('Tools Registry: Exactly 71 unique tools', tools.length === 71, `Found ${tools.length}`);
 
   let allToolsInSitemap = true;
   let allTitlesEndWithBrand = true;
@@ -324,7 +324,7 @@ async function runAudit() {
   // 6b. Sitemap Quality & Production Host Integrity
   const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   const dupes = locs.filter((item, index) => locs.indexOf(item) !== index);
-  check('sitemap.xml: Exactly 224 production URLs with zero duplicates', locs.length === 224 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
+  check('sitemap.xml: Exactly 225 production URLs with zero duplicates', locs.length === 225 && dupes.length === 0, `Found ${locs.length} URLs, ${dupes.length} duplicates`);
   const nonProd = locs.filter(u => !u.startsWith('https://indiatools-rho.vercel.app/'));
   check('sitemap.xml: 100% of URLs use canonical production domain https://indiatools-rho.vercel.app', nonProd.length === 0, `${nonProd.length} non-production URLs`);
   const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);

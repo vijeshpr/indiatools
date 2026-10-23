@@ -29,7 +29,7 @@ import { TITLE_STYLE_PRESETS } from '../src/lib/hybridVideo/textOverlayEngine.ts
 
 describe('Hybrid Video Studio — Core Architecture & Suite Tests', () => {
   it('should be correctly registered as Tool #70 in TOOLS registry', () => {
-    assert.strictEqual(TOOLS.length, 70, 'Total tool count should be exactly 70')
+    assert.strictEqual(TOOLS.length, 71, 'Total tool count should be exactly 71')
     const tool = TOOLS.find((t) => t.slug === 'hybrid-video-studio')
     assert.ok(tool, 'Tool hybrid-video-studio must be registered')
     assert.strictEqual(tool.category, 'create')

@@ -52,12 +52,12 @@ describe('All IndiaTools Multilingual SEO Directory', () => {
     }
   })
 
-  it('contains authentic translations for all 70 tools in all 23 languages without dummy text', () => {
+  it('contains authentic translations for all 71 tools in all 23 languages without dummy text', () => {
     for (const code of DIRECTORY_LANG_CODES) {
       const dict = DIRECTORY_TRANSLATIONS[code]
       assert.ok(dict, `Missing translations dictionary for ${code}`)
       const toolKeys = Object.keys(dict)
-      assert.strictEqual(toolKeys.length, 70, `Language ${code} has ${toolKeys.length} tools, expected 70`)
+      assert.strictEqual(toolKeys.length, 71, `Language ${code} has ${toolKeys.length} tools, expected 71`)
 
       for (const tool of TOOLS) {
         const item = dict[tool.slug]
@@ -122,9 +122,9 @@ describe('All IndiaTools Multilingual SEO Directory', () => {
     assert.strictEqual(getDirectoryPagePath('ml'), '/all-tools/ml')
   })
 
-  it('getDirectoryToolsForLocale returns all 70 tools with localized name, description, and valid destinationUrl', () => {
+  it('getDirectoryToolsForLocale returns all 71 tools with localized name, description, and valid destinationUrl', () => {
     const mlTools = getDirectoryToolsForLocale('ml')
-    assert.strictEqual(mlTools.length, 70)
+    assert.strictEqual(mlTools.length, 71)
     const mileage = mlTools.find(t => t.tool.slug === 'vehicle-mileage')!
     assert.ok(mileage.localizedName.includes('വാഹന മൈലേജ്'))
     assert.ok(mileage.localizedDescription.length > 10)
@@ -144,10 +144,10 @@ describe('All IndiaTools Multilingual SEO Directory', () => {
     assert.ok(footerCode.includes('All Tools in 22 Languages'))
   })
 
-  it('sitemap.xml contains 224 total URLs including all 23 directory URLs with reciprocal hreflangs', () => {
+  it('sitemap.xml contains 225 total URLs including all 23 directory URLs with reciprocal hreflangs', () => {
     const sitemap = fs.readFileSync('public/sitemap.xml', 'utf8')
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-    assert.strictEqual(locs.length, 224)
+    assert.strictEqual(locs.length, 225)
 
     assert.ok(locs.includes('https://indiatools-rho.vercel.app/all-tools'))
     for (const code of DIRECTORY_LANG_CODES) {

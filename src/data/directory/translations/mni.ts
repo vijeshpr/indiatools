@@ -282,6 +282,11 @@ export const translations: Record<string, DirectoryToolItem> = {
   'hybrid-video-studio': {
     name: "হাইব্রিদ ভিদিও স্তুদিও",
     description: "ব্রাউজরদা য়াওবা মলতি-ত্রেক ভিদিও এদিতর, মোসন তাইতল অমসুং অপুনবা ভিদিও এক্সপোর্ত।"
+  },
+
+  'animated-emoji-studio': {
+    name: "ꯑꯦꯅꯤꯃꯦꯇꯦꯗ ꯏꯃꯣꯖꯤ ꯁ꯭ꯇꯨꯗꯤꯑꯣ",
+    description: "ꯇ꯭ꯔꯥꯟꯁꯄꯦꯔꯦꯟꯇ ꯑꯦꯅꯤꯃꯦꯇꯦꯗ ꯏꯃꯣꯖꯤ, GIF ꯑꯃꯁꯨꯡ ꯋꯥꯠꯁꯑꯦꯞ ꯁ꯭ꯇꯤꯀꯔ ꯗꯥꯎꯅꯂꯣꯗ ꯇꯧꯕꯤꯌꯨ꯫"
   }
 }
 

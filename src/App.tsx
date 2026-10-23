@@ -100,6 +100,8 @@ export function App() {
                 <Route path="/calculators/scan-to-print" element={<Navigate to="/tools/scan-to-print" replace />} />
                 <Route path="/name-slip-maker" element={<Navigate to="/tools/name-slip-maker" replace />} />
                 <Route path="/calculators/name-slip-maker" element={<Navigate to="/tools/name-slip-maker" replace />} />
+                <Route path="/animated-emoji-studio" element={<Navigate to="/tools/animated-emoji-studio" replace />} />
+                <Route path="/calculators/animated-emoji-studio" element={<Navigate to="/tools/animated-emoji-studio" replace />} />
                 <Route path="/calculators/:slug" element={<ToolDetailPage />} />
                 <Route path="/tools/:slug" element={<ToolDetailPage />} />
                 <Route path="/all-tools" element={<AllToolsDirectoryPage />} />
