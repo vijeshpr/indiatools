@@ -7,6 +7,7 @@ import {
   DEFAULT_UNIVERSE_SUPERNOVA,
   DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
   DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+  DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
   UniverseLiquidLightConfig,
   LiquidLightMaterial,
   PhotoUniverseStudioConfig,
@@ -43,6 +44,10 @@ import {
   createLiquidRibbonGeometry,
 } from '../src/lib/photoUniverse/universeLiquidLight.ts'
 import {
+  universeFilmReel,
+  UniverseFilmReelManager,
+} from '../src/lib/photoUniverse/universeFilmReel.ts'
+import {
   DEFAULT_STUDIO_COMPOSITION,
   NormalizedAudioBands,
 } from '../src/lib/audioToVideo/types.ts'
@@ -76,9 +81,10 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
   })
 
   describe('2. Curated Presets Integrity', () => {
-    it('defines all 5 signature presets with complete visual configs', () => {
-      assert.strictEqual(UNIVERSE_PRESETS.length, 5)
+    it('defines all 6 signature presets with complete visual configs', () => {
+      assert.strictEqual(UNIVERSE_PRESETS.length, 6)
       const ids = UNIVERSE_PRESETS.map((p) => p.id)
+      assert.ok(ids.includes('film-reel-journey'))
       assert.ok(ids.includes('cosmic-gallery'))
       assert.ok(ids.includes('rhythmic-beat-odyssey'))
       assert.ok(ids.includes('dreamy-memory-drift'))
@@ -1363,6 +1369,144 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       // Calling dispose again should execute without throwing
       assert.doesNotThrow(() => {
         universeLiquidLight.dispose()
+      })
+    })
+  })
+
+  describe('17. Film Reel Journey — Continuous 35mm Celluloid Studio', () => {
+    const nodes = generateUniverseSpatialNodes(samplePhotos, 115, 2200, 1.0)
+
+    it('has safe default configuration starting disabled (Safety First)', () => {
+      assert.strictEqual(DEFAULT_UNIVERSE_FILM_REEL_CONFIG.enabled, false)
+      assert.strictEqual(DEFAULT_UNIVERSE_FILM_REEL_CONFIG.pathStyle, 's-curve')
+      assert.strictEqual(DEFAULT_UNIVERSE_FILM_REEL_CONFIG.warmth, 70)
+      assert.strictEqual(DEFAULT_UNIVERSE_FILM_REEL_CONFIG.cameraSpeed, 0.9)
+      assert.strictEqual(DEFAULT_UNIVERSE_FILM_REEL_CONFIG.cinematicEnding, true)
+      assert.strictEqual(DEFAULT_UNIVERSE_FILM_REEL_CONFIG.musicReactive, true)
+    })
+
+    it('applies film-reel-journey preset activating vintage 35mm studio with warm amber styling', () => {
+      const initial: PhotoUniverseStudioConfig = {
+        ...DEFAULT_PHOTO_UNIVERSE_CONFIG,
+        enabled: true,
+        photos: samplePhotos,
+      }
+      const updated = applyUniversePreset(initial, 'film-reel-journey')
+      assert.strictEqual(updated.filmReel?.enabled, true)
+      assert.strictEqual(updated.filmReel?.pathStyle, 's-curve')
+      assert.strictEqual(updated.visualDetails.spaceTheme, 'warm-amber')
+      assert.strictEqual(updated.visualDetails.edgeGlowColor, '#F59E0B')
+      // Original photos are preserved
+      assert.strictEqual(updated.photos.length, 4)
+    })
+
+    it('generates smooth 3D spline curves for all 3 path styles', () => {
+      const sCurve = universeFilmReel.generateSplinePath(nodes, 's-curve', 115)
+      assert.ok(sCurve)
+      const p1 = sCurve.getPointAt(0.5)
+      assert.ok(typeof p1.x === 'number' && typeof p1.y === 'number' && typeof p1.z === 'number')
+
+      const spiral = universeFilmReel.generateSplinePath(nodes, 'spiral', 115)
+      assert.ok(spiral)
+      const p2 = spiral.getPointAt(0.5)
+      assert.ok(typeof p2.x === 'number' && typeof p2.y === 'number')
+
+      const tunnel = universeFilmReel.generateSplinePath(nodes, 'infinite-tunnel', 115)
+      assert.ok(tunnel)
+      const p3 = tunnel.getPointAt(0.5)
+      assert.ok(typeof p3.z === 'number')
+    })
+
+    it('computes exact film station positions, orientations and Frenet frames for all photos', () => {
+      const curve = universeFilmReel.generateSplinePath(nodes, 's-curve', 115)
+      const stations = universeFilmReel.computeStations(nodes, curve)
+
+      assert.strictEqual(stations.length, nodes.length)
+      for (let i = 0; i < stations.length; i++) {
+        const s = stations[i]
+        assert.strictEqual(s.photoIndex, i)
+        assert.strictEqual(s.photoId, nodes[i].photo.id)
+        assert.ok(s.t >= 0 && s.t <= 1)
+        assert.ok(s.tangent.length() > 0.99)
+        assert.ok(s.binormal.length() > 0.99)
+        assert.ok(s.normal.length() > 0.99)
+      }
+    })
+
+    it('builds continuous 3D ribbon geometry with valid quad vertex attributes', () => {
+      const curve = universeFilmReel.generateSplinePath(nodes, 's-curve', 115)
+      const mesh = universeFilmReel.buildRibbonMesh(curve, DEFAULT_UNIVERSE_FILM_REEL_CONFIG, nodes.length)
+
+      assert.ok(mesh)
+      assert.strictEqual(mesh.name, 'filmStripRibbon')
+      const geo = mesh.geometry
+      assert.ok(geo.getAttribute('position'))
+      assert.ok(geo.getAttribute('normal'))
+      assert.ok(geo.getAttribute('uv'))
+      assert.ok(geo.getIndex())
+      assert.ok(geo.getAttribute('position').count > 100)
+    })
+
+    it('mounts photo to film station with photoMesh seated above ribbon and celluloid back face', () => {
+      const curve = universeFilmReel.generateSplinePath(nodes, 's-curve', 115)
+      const stations = universeFilmReel.computeStations(nodes, curve)
+      const group = new THREE.Group()
+
+      universeFilmReel.mountPhotoToStation(
+        group,
+        nodes[0],
+        stations[0],
+        null,
+        DEFAULT_UNIVERSE_FILM_REEL_CONFIG
+      )
+
+      const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh | undefined
+      const cardBackMesh = group.getObjectByName('cardBackMesh') as THREE.Mesh | undefined
+      const borderLine = group.getObjectByName('borderLine') as THREE.LineSegments | undefined
+
+      assert.ok(photoMesh, 'Must have photoMesh')
+      assert.ok(cardBackMesh, 'Must have cardBackMesh celluloid backing (never black)')
+      assert.ok(borderLine, 'Must have amber borderLine outline')
+
+      // Position matches station coordinates
+      assert.strictEqual(group.position.x, stations[0].position.x)
+      assert.strictEqual(group.position.y, stations[0].position.y)
+      assert.strictEqual(group.position.z, stations[0].position.z)
+    })
+
+    it('orchestrates continuous camera journey across approach, hold, departure, and grand finale', () => {
+      const curve = universeFilmReel.generateSplinePath(nodes, 's-curve', 115)
+      universeFilmReel.computeStations(nodes, curve)
+
+      const totalDuration = 30
+      const activeConfig = {
+        ...DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
+        enabled: true,
+        cinematicEnding: true,
+      }
+
+      // Early progress (approach phase)
+      const earlyCam = universeFilmReel.evaluateFilmReelCamera(1.0, totalDuration, activeConfig)
+      assert.ok(earlyCam)
+      assert.strictEqual(earlyCam.targetNodeIndex, 0)
+      assert.ok(earlyCam.focusDistance > 0)
+
+      // Hold phase
+      const holdCam = universeFilmReel.evaluateFilmReelCamera(3.5, totalDuration, activeConfig)
+      assert.ok(holdCam)
+      assert.strictEqual(holdCam.travelPhase, 'hold')
+      assert.strictEqual(holdCam.focusWeight, 1.0)
+
+      // Grand Finale phase (last 12% of duration)
+      const finaleCam = universeFilmReel.evaluateFilmReelCamera(28.0, totalDuration, activeConfig)
+      assert.ok(finaleCam)
+      assert.strictEqual(finaleCam.travelPhase, 'fly-by')
+      assert.ok(finaleCam.focusDistance > 500, 'Grand finale camera pulls back for wide panoramic view')
+    })
+
+    it('disposes film reel meshes and textures cleanly', () => {
+      assert.doesNotThrow(() => {
+        universeFilmReel.dispose()
       })
     })
   })

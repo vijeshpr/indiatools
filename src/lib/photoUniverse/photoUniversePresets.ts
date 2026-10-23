@@ -10,6 +10,7 @@ import {
   DEFAULT_UNIVERSE_BASS_SHAKE,
   DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
   DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+  DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
 } from './photoUniverseTypes.ts'
 
 export interface UniversePreset {
@@ -23,6 +24,66 @@ export interface UniversePreset {
 }
 
 export const UNIVERSE_PRESETS: UniversePreset[] = [
+  {
+    id: 'film-reel-journey',
+    name: 'Film Reel Journey',
+    subtitle: 'Vintage 35mm Celluloid Odyssey',
+    description: 'Continuous 35mm vintage film strip flowing through deep 3D space with authentic sprocket holes, warm projector light beams, and cinematic camera flight.',
+    accentColor: '#EAB308',
+    iconName: 'Film',
+    config: {
+      motionPreset: 'dream-cinema',
+      cameraStyle: 'smooth-cinematic',
+      cameraSpeed: 0.9,
+      photoFocusDuration: 4.2,
+      photoMotion: 'static',
+      enableRotation: false,
+      transitionSmoothness: 90,
+      depthOfField: 'cinematic',
+      spaceSpread: 115,
+      background: {
+        ...DEFAULT_UNIVERSE_BACKGROUND,
+        type: 'deep-space',
+        galaxyTint: 'amber-nebula',
+        starCount: 1800,
+        nebulaGlow: 45,
+      },
+      visualDetails: {
+        ...DEFAULT_PHOTO_UNIVERSE_CONFIG.visualDetails,
+        spaceTheme: 'warm-amber',
+        edgeGlowColor: '#F59E0B',
+        particlesEnabled: true,
+        particleIntensity: 40,
+        vignetteEnabled: true,
+        vignetteStrength: 50,
+      },
+      bassShake: {
+        ...DEFAULT_UNIVERSE_BASS_SHAKE,
+        enabled: true,
+        level: 'subtle',
+        shakeIntensity: 25,
+      },
+      holographicCards: {
+        ...DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
+        enabled: false, // Clean film frame aperture
+      },
+      liquidLight: {
+        ...DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+        enabled: false,
+      },
+      filmReel: {
+        ...DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
+        enabled: true,
+        pathStyle: 's-curve',
+        warmth: 75,
+        filmGrainIntensity: 40,
+        projectorLightIntensity: 80,
+        cameraSpeed: 0.9,
+        musicReactive: true,
+        cinematicEnding: true,
+      },
+    },
+  },
   {
     id: 'cosmic-gallery',
     name: 'Cosmic Gallery',
@@ -321,6 +382,13 @@ export function applyUniversePreset(
       ...current.liquidLight,
       ...(found.config.liquidLight || {}),
       enabled: current.liquidLight?.enabled ?? DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG.enabled,
+    },
+    filmReel: {
+      ...(current.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+      ...(found.config.filmReel || {}),
+      enabled: found.id === 'film-reel-journey'
+        ? true
+        : (current.filmReel?.enabled ?? DEFAULT_UNIVERSE_FILM_REEL_CONFIG.enabled),
     },
     supernova: {
       ...current.supernova,

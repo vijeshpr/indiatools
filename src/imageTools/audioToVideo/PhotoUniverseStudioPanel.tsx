@@ -32,6 +32,7 @@ import {
   Sliders,
   ShieldCheck,
   Disc3,
+  Film,
 } from 'lucide-react'
 import {
   StudioCompositionConfig,
@@ -58,6 +59,8 @@ import {
   HoloPhotoFit,
   DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
   LiquidLightMaterial,
+  DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
+  FilmStripPathStyle,
   DEFAULT_UNIVERSE_SUPERNOVA,
   SupernovaTriggerSensitivity,
 } from '../../lib/photoUniverse/photoUniverseTypes.ts'
@@ -89,7 +92,7 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const bgFileInputRef = useRef<HTMLInputElement | null>(null)
   const [activeSection, setActiveSection] = useState<
-    'all' | 'analysis' | 'motion' | 'photos' | 'cards' | 'liquid' | 'background' | 'camera' | 'dof' | 'shake' | 'supernova'
+    'all' | 'analysis' | 'motion' | 'photos' | 'cards' | 'liquid' | 'filmreel' | 'background' | 'camera' | 'dof' | 'shake' | 'supernova'
   >('all')
 
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
@@ -690,6 +693,20 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
           <span>Liquid Light</span>
           {config.liquidLight?.enabled && (
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          )}
+        </button>
+        <button
+          onClick={() => setActiveSection('filmreel')}
+          className={`px-3 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
+            activeSection === 'filmreel'
+              ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          <Film className="w-3.5 h-3.5 text-yellow-400" />
+          <span>Film Reel</span>
+          {config.filmReel?.enabled && (
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
           )}
         </button>
         <button
@@ -2071,7 +2088,427 @@ export const PhotoUniverseStudioPanel: React.FC<PhotoUniverseStudioPanelProps> =
         </div>
       )}
 
-      {/* 12. Supernova Shockwave: Cinematic Music Climax */}
+      {/* 13. Film Reel Journey: Continuous 35mm Celluloid Film Strip & Projector Light */}
+      {(activeSection === 'all' || activeSection === 'filmreel') && (
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-950/25 via-gray-900 to-black border border-amber-500/30 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                <Film className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h4 className="text-sm font-bold text-white">Film Reel Journey</h4>
+                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    35mm Vintage Studio
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400">
+                  Continuous 35mm celluloid ribbon, sprocket perforations, volumetric projector light & film grain
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() =>
+                  updateConfig((prev) => ({
+                    ...prev,
+                    filmReel: {
+                      ...DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
+                      enabled: prev.filmReel?.enabled ?? false,
+                    },
+                  }))
+                }
+                className="p-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                title="Reset Film Reel to defaults"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  updateConfig((prev) => ({
+                    ...prev,
+                    filmReel: {
+                      ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                      enabled: !(prev.filmReel?.enabled ?? false),
+                    },
+                  }))
+                }
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all ${
+                  config.filmReel?.enabled
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30 font-bold'
+                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                {config.filmReel?.enabled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span>{config.filmReel?.enabled ? 'ACTIVE' : 'DISABLED'}</span>
+              </button>
+            </div>
+          </div>
+
+          {config.filmReel?.enabled && (
+            <div className="space-y-4 pt-2 border-t border-gray-800/80 animate-in fade-in duration-200">
+              {/* Path Style Selector */}
+              <div className="space-y-2">
+                <span className="text-xs font-medium text-gray-300">
+                  Film Strip 3D Path Style
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    {
+                      id: 's-curve' as FilmStripPathStyle,
+                      name: 'S-Curve Ribbon',
+                      desc: 'Serpentine curve winding through 3D space with cinematic glide',
+                    },
+                    {
+                      id: 'spiral' as FilmStripPathStyle,
+                      name: 'Helical Spiral',
+                      desc: 'Ascending cinema spiral around central projector beam',
+                    },
+                    {
+                      id: 'infinite-tunnel' as FilmStripPathStyle,
+                      name: 'Infinite Tunnel',
+                      desc: 'Forward perspective corridor with vintage waves',
+                    },
+                  ].map((style) => {
+                    const isSelected = (config.filmReel?.pathStyle ?? 's-curve') === style.id
+                    return (
+                      <button
+                        key={style.id}
+                        type="button"
+                        onClick={() =>
+                          updateConfig((prev) => ({
+                            ...prev,
+                            filmReel: {
+                              ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                              pathStyle: style.id,
+                            },
+                          }))
+                        }
+                        className={`p-3 rounded-xl border text-left transition-all ${
+                          isSelected
+                            ? 'bg-amber-950/40 border-amber-500 text-amber-200 shadow-md shadow-amber-950/50'
+                            : 'bg-gray-950/40 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-white'
+                        }`}
+                      >
+                        <div className="text-xs font-bold text-white flex items-center justify-between">
+                          <span>{style.name}</span>
+                          {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                        </div>
+                        <div className="text-[10px] text-gray-400 mt-1 line-clamp-2 leading-tight">
+                          {style.desc}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Toggles Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {/* Music Reactivity */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-950/40 border border-gray-800">
+                  <div>
+                    <span className="text-xs text-gray-300 font-medium block">Music Pulse</span>
+                    <span className="text-[10px] text-gray-500 block">Projector beam reacts to rhythm</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          musicReactive: !(prev.filmReel?.musicReactive ?? true),
+                        },
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      config.filmReel?.musicReactive ?? true
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                        : 'bg-gray-800 text-gray-500'
+                    }`}
+                  >
+                    {config.filmReel?.musicReactive ?? true ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+
+                {/* Cinematic Grand Finale */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-950/40 border border-gray-800">
+                  <div>
+                    <span className="text-xs text-gray-300 font-medium block">Grand Finale</span>
+                    <span className="text-[10px] text-gray-500 block">Panoramic wide ending shot</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          cinematicEnding: !(prev.filmReel?.cinematicEnding ?? true),
+                        },
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      config.filmReel?.cinematicEnding ?? true
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                        : 'bg-gray-800 text-gray-500'
+                    }`}
+                  >
+                    {config.filmReel?.cinematicEnding ?? true ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+
+                {/* Dust Motes */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-950/40 border border-gray-800">
+                  <div>
+                    <span className="text-xs text-gray-300 font-medium block">Dust Particles</span>
+                    <span className="text-[10px] text-gray-500 block">Atmospheric projector motes</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          dustMotesEnabled: !(prev.filmReel?.dustMotesEnabled ?? true),
+                        },
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      config.filmReel?.dustMotesEnabled ?? true
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                        : 'bg-gray-800 text-gray-500'
+                    }`}
+                  >
+                    {config.filmReel?.dustMotesEnabled ?? true ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Sliders Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Warmth & Amber Tint */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Warmth & Tint</span>
+                    <span className="text-amber-300 font-mono">
+                      {config.filmReel?.warmth ?? 70}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.filmReel?.warmth ?? 70}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          warmth: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                {/* Camera Speed */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Camera Speed</span>
+                    <span className="text-amber-300 font-mono">
+                      {(config.filmReel?.cameraSpeed ?? 0.9).toFixed(2)}x
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.0"
+                    step="0.05"
+                    value={config.filmReel?.cameraSpeed ?? 0.9}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          cameraSpeed: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                {/* Projector Light Intensity */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Projector Beam</span>
+                    <span className="text-amber-300 font-mono">
+                      {config.filmReel?.projectorLightIntensity ?? 75}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.filmReel?.projectorLightIntensity ?? 75}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          projectorLightIntensity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                {/* Film Grain */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Vintage Film Grain</span>
+                    <span className="text-amber-300 font-mono">
+                      {config.filmReel?.filmGrainIntensity ?? 35}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="80"
+                    value={config.filmReel?.filmGrainIntensity ?? 35}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          filmGrainIntensity: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                {/* Celluloid Translucency */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Celluloid Translucency</span>
+                    <span className="text-amber-300 font-mono">
+                      {config.filmReel?.celluloidTranslucency ?? 85}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="30"
+                    max="100"
+                    value={config.filmReel?.celluloidTranslucency ?? 85}
+                    onChange={(e) =>
+                      updateConfig((prev) => ({
+                        ...prev,
+                        filmReel: {
+                          ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                          celluloidTranslucency: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                {/* Sprocket Perforations */}
+                <div className="space-y-1 bg-gray-950/40 p-2.5 rounded-xl border border-gray-800/60">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-gray-400">Sprocket Detail</span>
+                    <span className="text-amber-300 font-mono text-[10px]">
+                      {config.filmReel?.sprocketHoleDetail === 'wide-cinema' ? 'Wide Cinema' : 'Classic 35mm'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 pt-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateConfig((prev) => ({
+                          ...prev,
+                          filmReel: {
+                            ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                            sprocketHoleDetail: 'classic-35mm',
+                          },
+                        }))
+                      }
+                      className={`py-1 text-[10px] rounded-lg font-medium ${
+                        (config.filmReel?.sprocketHoleDetail ?? 'classic-35mm') === 'classic-35mm'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                          : 'bg-gray-800 text-gray-400'
+                      }`}
+                    >
+                      Classic 35mm
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateConfig((prev) => ({
+                          ...prev,
+                          filmReel: {
+                            ...(prev.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+                            sprocketHoleDetail: 'wide-cinema',
+                          },
+                        }))
+                      }
+                      className={`py-1 text-[10px] rounded-lg font-medium ${
+                        config.filmReel?.sprocketHoleDetail === 'wide-cinema'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                          : 'bg-gray-800 text-gray-400'
+                      }`}
+                    >
+                      Wide Cinema
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visual Reference Assets Showcase */}
+              <div className="pt-2 border-t border-gray-800/80">
+                <span className="text-[11px] font-semibold text-gray-400 block mb-2">
+                  Cinematic Visual Reference Gallery (Assets A–E)
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {[
+                    { name: 'Asset A: Hero Strip', src: '/images/filmReel/hero-film-strip.jpg' },
+                    { name: 'Asset B: Vintage Reel', src: '/images/filmReel/vintage-film-reel.jpg' },
+                    { name: 'Asset C: Projector Beam', src: '/images/filmReel/projector-light-atmosphere.jpg' },
+                    { name: 'Asset D: Frame Transition', src: '/images/filmReel/film-frame-transition.jpg' },
+                    { name: 'Asset E: Grand Finale', src: '/images/filmReel/grand-finale-composition.jpg' },
+                  ].map((asset, idx) => (
+                    <div key={idx} className="group relative rounded-lg overflow-hidden border border-gray-800 bg-gray-950/80">
+                      <img
+                        src={asset.src}
+                        alt={asset.name}
+                        className="w-full h-16 object-cover transition-transform group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="p-1 text-[9px] font-mono text-gray-300 truncate bg-gray-900/90 text-center">
+                        {asset.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 14. Supernova Shockwave: Cinematic Music Climax */}
       {(activeSection === 'all' || activeSection === 'supernova') && (
         <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/30 via-gray-900 to-black border border-purple-500/30 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

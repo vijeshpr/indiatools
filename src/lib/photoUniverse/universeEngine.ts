@@ -28,6 +28,7 @@ import {
   getSharedShimmerTexture,
 } from './universeHolographicCards.ts'
 import { universeLiquidLight } from './universeLiquidLight.ts'
+import { universeFilmReel } from './universeFilmReel.ts'
 
 interface CachedPhotoAssets {
   texture: THREE.Texture
@@ -52,6 +53,7 @@ export class PhotoUniverseEngine {
   private lastBackgroundKey: string = ''
   private lastHoloConfigKey: string = ''
   private lastLiquidConfigKey: string = ''
+  private lastFilmReelKey: string = ''
 
   // Camera Score Cache
   private currentScore: TimestampedCameraScore | null = null
@@ -337,9 +339,32 @@ export class PhotoUniverseEngine {
     const activeIds = new Set<string>()
     const holoKey = `${config.holographicCards?.enabled}_${config.holographicCards?.cardStyle}_${config.holographicCards?.cornerRadius}_${config.holographicCards?.photoFit}`
     const liquidKey = `${config.liquidLight?.enabled}_${config.liquidLight?.material}_${config.liquidLight?.edgeWidth}_${config.liquidLight?.intensity}`
-    const needsHoloRebuild = holoKey !== this.lastHoloConfigKey
+    const filmKey = `${config.filmReel?.enabled}_${config.filmReel?.pathStyle}_${config.filmReel?.warmth}_${config.filmReel?.celluloidTranslucency}_${config.filmReel?.sprocketHoleDetail}`
+    const needsHoloRebuild = holoKey !== this.lastHoloConfigKey || filmKey !== this.lastFilmReelKey
 
-    for (const node of nodes) {
+    // Manage continuous 3D film strip ribbon & projector beam
+    let filmStations: any[] = []
+    if (config.filmReel?.enabled && nodes.length > 0) {
+      const curve = universeFilmReel.generateSplinePath(nodes, config.filmReel.pathStyle, config.spaceSpread)
+      filmStations = universeFilmReel.computeStations(nodes, curve)
+      const ribbonMesh = universeFilmReel.buildRibbonMesh(curve, config.filmReel, nodes.length)
+      if (ribbonMesh.parent !== this.scene) {
+        this.scene.add(ribbonMesh)
+      }
+      universeFilmReel.ensureProjectorBeam(this.scene, config.filmReel)
+    } else {
+      const existingRibbon = this.scene.getObjectByName('filmStripRibbon')
+      if (existingRibbon) this.scene.remove(existingRibbon)
+      const existingBeam = this.scene.getObjectByName('projectorVolumetricBeam')
+      if (existingBeam) this.scene.remove(existingBeam)
+      const existingLight = this.scene.getObjectByName('projectorPointLight')
+      if (existingLight) this.scene.remove(existingLight)
+      const existingDust = this.scene.getObjectByName('filmDustMotes')
+      if (existingDust) this.scene.remove(existingDust)
+    }
+
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i]
       const photo = node.photo
       activeIds.add(photo.id)
 
@@ -353,7 +378,10 @@ export class PhotoUniverseEngine {
           this.photoMeshMap.set(photo.id, group)
         }
 
-        if (config.holographicCards?.enabled) {
+        if (config.filmReel?.enabled && filmStations[i]) {
+          // Mount photo directly into the 35mm film frame aperture on the continuous ribbon
+          universeFilmReel.mountPhotoToStation(group, node, filmStations[i], asset, config.filmReel)
+        } else if (config.holographicCards?.enabled) {
           universeHolographicCards.buildCardHierarchy(group, node, config.holographicCards, asset)
         } else {
           // Fallback clean photo quad without glass card chassis
@@ -406,9 +434,11 @@ export class PhotoUniverseEngine {
         }
       }
 
-      // Set base position & initial stable orientation (STOP continuous rotation)
-      group.position.set(node.position.x, node.position.y, node.position.z)
-      group.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)
+      // Set base position & initial orientation if not mounted to film station
+      if (!config.filmReel?.enabled) {
+        group.position.set(node.position.x, node.position.y, node.position.z)
+        group.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)
+      }
 
       const photoMesh = group.getObjectByName('photoMesh') as THREE.Mesh | undefined
       if (photoMesh && asset) {
@@ -458,6 +488,7 @@ export class PhotoUniverseEngine {
 
     this.lastHoloConfigKey = holoKey
     this.lastLiquidConfigKey = liquidKey
+    this.lastFilmReelKey = filmKey
 
     // Remove meshes for photos no longer in collection
     for (const [id, group] of this.photoMeshMap.entries()) {
@@ -507,15 +538,32 @@ export class PhotoUniverseEngine {
       this.lastScoreConfigKey = scoreKey
     }
 
-    // 4. Cinematic Camera Director Evaluation (Deterministic Route or Idle Cosmic Drift)
-    const cameraState: CameraFrameState = universeCameraDirector.evaluateCamera(
-      this.currentNodes,
-      currentTime,
-      this.currentScore,
-      config.cameraStyle,
-      config.cameraSpeed,
-      1.0
-    )
+    // 4. Cinematic Camera Director Evaluation (Deterministic Route, Film Reel Journey, or Idle Cosmic Drift)
+    let cameraState: CameraFrameState
+    if (config.filmReel?.enabled) {
+      const filmCam = universeFilmReel.evaluateFilmReelCamera(currentTime, duration, config.filmReel, bands)
+      if (filmCam) {
+        cameraState = filmCam
+      } else {
+        cameraState = universeCameraDirector.evaluateCamera(
+          this.currentNodes,
+          currentTime,
+          this.currentScore,
+          config.cameraStyle,
+          config.cameraSpeed,
+          1.0
+        )
+      }
+    } else {
+      cameraState = universeCameraDirector.evaluateCamera(
+        this.currentNodes,
+        currentTime,
+        this.currentScore,
+        config.cameraStyle,
+        config.cameraSpeed,
+        1.0
+      )
+    }
 
     // 5. Evaluate Supernova Shockwave Cinematic Climax State Machine
     const supernovaState = universeSupernovaManager.evaluate(
@@ -581,6 +629,17 @@ export class PhotoUniverseEngine {
 
       // Update background parallax in Three.js
       universeBackgroundRenderer.update(effectiveCamX, effectiveCamY, currentTime)
+
+      // Update projector beam and dust motes in Film Reel mode
+      if (config.filmReel?.enabled) {
+        universeFilmReel.updateProjector(
+          new THREE.Vector3(cameraState.lookAt.x, cameraState.lookAt.y, cameraState.lookAt.z),
+          new THREE.Vector3(effectiveCamX, effectiveCamY, effectiveCamZ),
+          bands,
+          currentTime,
+          config.filmReel
+        )
+      }
     }
 
     // 9. Single-Subject Focus Hierarchy & Realistic Depth-of-Field Blur
@@ -596,36 +655,41 @@ export class PhotoUniverseEngine {
       const group = this.photoMeshMap.get(node.photo.id)
       if (!group || !this.camera) continue
 
-      // Compute smooth celestial drift so moving photos stream dynamic light trails
       let posX = node.position.x
       let posY = node.position.y
       let posZ = node.position.z
 
-      const phase = i * 1.618
-      if (config.photoMotion === 'subtle-float') {
-        posX += Math.sin(currentTime * 0.42 + phase) * 45
-        posY += Math.cos(currentTime * 0.35 + phase * 1.3) * 30
-        posZ += Math.sin(currentTime * 0.28 + phase * 0.7) * 38
-      } else if (config.photoMotion === 'music-micro') {
-        posX += Math.sin(currentTime * 0.48 + phase) * 38
-        posY += Math.cos(currentTime * 0.40 + phase * 1.2) * 26
-        posZ += Math.sin(currentTime * 0.32 + phase * 0.8) * 32
+      if (config.filmReel?.enabled) {
+        posX = group.position.x
+        posY = group.position.y
+        posZ = group.position.z
       } else {
-        // Gentle celestial float in static mode
-        posX += Math.sin(currentTime * 0.32 + phase) * 28
-        posY += Math.cos(currentTime * 0.26 + phase * 1.2) * 20
-        posZ += Math.sin(currentTime * 0.22 + phase * 0.8) * 24
-      }
+        const phase = i * 1.618
+        if (config.photoMotion === 'subtle-float') {
+          posX += Math.sin(currentTime * 0.42 + phase) * 45
+          posY += Math.cos(currentTime * 0.35 + phase * 1.3) * 30
+          posZ += Math.sin(currentTime * 0.28 + phase * 0.7) * 38
+        } else if (config.photoMotion === 'music-micro') {
+          posX += Math.sin(currentTime * 0.48 + phase) * 38
+          posY += Math.cos(currentTime * 0.40 + phase * 1.2) * 26
+          posZ += Math.sin(currentTime * 0.32 + phase * 0.8) * 32
+        } else {
+          // Gentle celestial float in static mode
+          posX += Math.sin(currentTime * 0.32 + phase) * 28
+          posY += Math.cos(currentTime * 0.26 + phase * 1.2) * 20
+          posZ += Math.sin(currentTime * 0.22 + phase * 0.8) * 24
+        }
 
-      // Add Supernova Gravitational / Explosive Displacement
-      const sDisp = supernovaState.photoDisplacements.get(node.photo.id)
-      if (sDisp) {
-        posX += sDisp.x
-        posY += sDisp.y
-        posZ += sDisp.z
-      }
+        // Add Supernova Gravitational / Explosive Displacement
+        const sDisp = supernovaState.photoDisplacements.get(node.photo.id)
+        if (sDisp) {
+          posX += sDisp.x
+          posY += sDisp.y
+          posZ += sDisp.z
+        }
 
-      group.position.set(posX, posY, posZ)
+        group.position.set(posX, posY, posZ)
+      }
       photoPositions.push({ id: node.photo.id, x: posX, y: posY, z: posZ })
 
       const dx = posX - this.camera.position.x
@@ -636,34 +700,33 @@ export class PhotoUniverseEngine {
       const deltaFocus = Math.abs(distToCamera - focusPlane)
       const blurFactor = dofMode === 'off' ? 0 : Math.min(1.0, deltaFocus / dofSpread)
 
-      // 1. BOUNDED CINEMATIC CAMERA-FACING ORIENTATION:
-      // Gracefully tilts toward camera during approach within a natural viewing cone ([-38°, +38°]).
-      // When camera flies past (dzToCam < 0), denominator Math.max(90, dzToCam) prevents
-      // 180° snap-turning or reverse-side exposure, maintaining cinematic stability!
-      const dxToCam = this.camera.position.x - posX
-      const dyToCam = this.camera.position.y - posY
-      const dzToCam = this.camera.position.z - posZ
-      const horizDist = Math.sqrt(dxToCam * dxToCam + dzToCam * dzToCam)
+      // 1. BOUNDED CINEMATIC CAMERA-FACING ORIENTATION (Only when not mounted to film strip ribbon)
+      if (!config.filmReel?.enabled) {
+        const dxToCam = this.camera.position.x - posX
+        const dyToCam = this.camera.position.y - posY
+        const dzToCam = this.camera.position.z - posZ
+        const horizDist = Math.sqrt(dxToCam * dxToCam + dzToCam * dzToCam)
 
-      const rawYaw = Math.atan2(dxToCam, Math.max(90, dzToCam))
-      const facingYaw = Math.max(-0.66, Math.min(0.66, rawYaw))
-      const facingPitch = Math.max(
-        -0.35,
-        Math.min(0.35, -Math.atan2(dyToCam * 0.4, Math.max(90, horizDist)))
-      )
+        const rawYaw = Math.atan2(dxToCam, Math.max(90, dzToCam))
+        const facingYaw = Math.max(-0.66, Math.min(0.66, rawYaw))
+        const facingPitch = Math.max(
+          -0.35,
+          Math.min(0.35, -Math.atan2(dyToCam * 0.4, Math.max(90, horizDist)))
+        )
 
-      let tiltRoll = 0
-      if (config.photoMotion === 'subtle-float') {
-        tiltRoll = Math.sin(currentTime * 0.6 + i * 1.2) * 0.015
-      } else if (config.photoMotion === 'music-micro' && audioState.isBassImpact && cameraState.shakeAllowed) {
-        tiltRoll = Math.sin(currentTime * 20) * 0.02
-      } else if (config.enableRotation) {
-        tiltRoll = Math.sin(currentTime * 0.4 + i) * 0.035
+        let tiltRoll = 0
+        if (config.photoMotion === 'subtle-float') {
+          tiltRoll = Math.sin(currentTime * 0.6 + i * 1.2) * 0.015
+        } else if (config.photoMotion === 'music-micro' && audioState.isBassImpact && cameraState.shakeAllowed) {
+          tiltRoll = Math.sin(currentTime * 20) * 0.02
+        } else if (config.enableRotation) {
+          tiltRoll = Math.sin(currentTime * 0.4 + i) * 0.035
+        }
+
+        group.rotation.y = facingYaw
+        group.rotation.x = facingPitch
+        group.rotation.z = tiltRoll
       }
-
-      group.rotation.y = facingYaw
-      group.rotation.x = facingPitch
-      group.rotation.z = tiltRoll
 
       // 2. HERO REVEAL & FOCUS SCALE
       const isCurrentTarget = i === cameraState.targetNodeIndex
@@ -783,7 +846,12 @@ export class PhotoUniverseEngine {
         config.supernova
       )
 
-      // 14. Optional Cinematic Vignette Overlay
+      // 14. Film Reel Vintage Projector Vignette & Film Grain Overlay
+      if (config.filmReel?.enabled) {
+        universeFilmReel.renderCanvasOverlay(ctx, width, height, config.filmReel, bands)
+      }
+
+      // 15. Optional Cinematic Vignette Overlay
       if (config.visualDetails.vignetteEnabled) {
         const strength = (config.visualDetails.vignetteStrength || 40) / 100
         const radius = Math.max(width, height) * 0.72
@@ -844,6 +912,7 @@ export class PhotoUniverseEngine {
     universeBackgroundRenderer.dispose()
     universeHolographicCards.dispose()
     universeLiquidLight.dispose()
+    universeFilmReel.dispose()
     universeSupernovaManager.reset()
 
     this.renderer?.dispose()

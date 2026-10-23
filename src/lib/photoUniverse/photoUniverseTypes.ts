@@ -131,6 +131,38 @@ export const DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG: UniverseLiquidLightConfig = {
   cinematicTransition: true,
 }
 
+export type FilmStripPathStyle = 's-curve' | 'spiral' | 'infinite-tunnel'
+
+export interface UniverseFilmReelConfig {
+  enabled: boolean // default: false (Safety first: disabled by default)
+  pathStyle: FilmStripPathStyle // default: 's-curve'
+  warmth: number // 0 to 100, default: 70
+  filmGrainIntensity: number // 0 to 100, default: 35
+  projectorLightIntensity: number // 0 to 100, default: 75
+  cameraSpeed: number // 0.5 to 2.5, default: 0.9
+  musicReactive: boolean // default: true
+  cinematicEnding: boolean // default: true
+  sprocketHoleDetail: 'classic-35mm' | 'wide-cinema' // default: 'classic-35mm'
+  celluloidTranslucency: number // 10 to 100, default: 85
+  dustMotesEnabled: boolean // default: true
+  volumetricRaysEnabled: boolean // default: true
+}
+
+export const DEFAULT_UNIVERSE_FILM_REEL_CONFIG: UniverseFilmReelConfig = {
+  enabled: false,
+  pathStyle: 's-curve',
+  warmth: 70,
+  filmGrainIntensity: 35,
+  projectorLightIntensity: 75,
+  cameraSpeed: 0.9,
+  musicReactive: true,
+  cinematicEnding: true,
+  sprocketHoleDetail: 'classic-35mm',
+  celluloidTranslucency: 85,
+  dustMotesEnabled: true,
+  volumetricRaysEnabled: true,
+}
+
 export type SupernovaTriggerSensitivity = 'low' | 'balanced' | 'high'
 
 export type SupernovaPhase = 'idle' | 'attraction' | 'supernova' | 'expansion' | 'recovery'
@@ -292,6 +324,9 @@ export interface PhotoUniverseStudioConfig {
   // Liquid Light Transformation: Luminous Molten Edge Ribbon & Camera-Responsive Sweep
   liquidLight: UniverseLiquidLightConfig
 
+  // Film Reel Journey: Continuous 35mm Celluloid Film Strip & Projector Light
+  filmReel?: UniverseFilmReelConfig
+
   // Supernova Shockwave: Cinematic Music Climax
   supernova: UniverseSupernovaConfig
 
@@ -363,6 +398,7 @@ export const DEFAULT_PHOTO_UNIVERSE_CONFIG: PhotoUniverseStudioConfig = {
   background: DEFAULT_UNIVERSE_BACKGROUND,
   holographicCards: DEFAULT_UNIVERSE_HOLOGRAPHIC_CONFIG,
   liquidLight: DEFAULT_UNIVERSE_LIQUID_LIGHT_CONFIG,
+  filmReel: DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
   supernova: DEFAULT_UNIVERSE_SUPERNOVA,
   directorMode: 'auto',
   manualOrder: [],
