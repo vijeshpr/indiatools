@@ -42,6 +42,7 @@ export class VintageCassetteEngine {
 
   // Pre-computed grain pattern for deterministic 60fps performance
   private grainCanvas: HTMLCanvasElement | null = null
+  private grainCanvases: HTMLCanvasElement[] = []
 
   constructor() {
     this.initGrainPattern()
@@ -49,24 +50,33 @@ export class VintageCassetteEngine {
 
   private initGrainPattern() {
     if (typeof document === 'undefined') return
-    const size = 256
-    const canvas = document.createElement('canvas')
-    canvas.width = size
-    canvas.height = size
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const imgData = ctx.createImageData(size, size)
-    const data = imgData.data
-    for (let i = 0; i < data.length; i += 4) {
-      const v = Math.random() * 255
-      data[i] = v
-      data[i + 1] = v
-      data[i + 2] = v
-      data[i + 3] = 40
+    const size = 128
+    this.grainCanvases = []
+    for (let c = 0; c < 3; c++) {
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+      if (!ctx) continue
+      const imgData = ctx.createImageData(size, size)
+      const data = imgData.data
+      for (let i = 0; i < data.length; i += 4) {
+        if (Math.random() > 0.42) {
+          const v = Math.floor(Math.random() * 200 + 55)
+          data[i] = v
+          data[i + 1] = v
+          data[i + 2] = v
+          data[i + 3] = Math.floor(Math.random() * 190 + 65)
+        } else {
+          data[i + 3] = 0
+        }
+      }
+      ctx.putImageData(imgData, 0, 0)
+      this.grainCanvases.push(canvas)
     }
-    ctx.putImageData(imgData, 0, 0)
-    this.grainCanvas = canvas
+    if (this.grainCanvases.length > 0) {
+      this.grainCanvas = this.grainCanvases[0]
+    }
   }
 
   public getCachedImage(url?: string): HTMLImageElement | null {
@@ -109,7 +119,7 @@ export class VintageCassetteEngine {
   ) {
     if (!config.enabled) return
 
-    // 1. Advance Physics Integration
+    // 1. Advance Physics Integration (stops when audio is paused/ended)
     this.updatePhysics(currentTime, duration, bands, config)
 
     // 2. Glitch State Evaluation
@@ -123,33 +133,36 @@ export class VintageCassetteEngine {
     }
 
     // 3. Render Order:
-    // (1) Background and subtle atmosphere
+    // (1) Background and subtle atmosphere preset
     this.renderBackground(ctx, width, height, config, bands, currentTime)
 
-    // Calculate Cassette Geometry (Standard 16:10 / 1.56 aspect ratio)
-    const cassetteW = Math.min(width * 0.72, height * 1.15)
+    // Calculate Cassette Geometry (Standard 16:10 / 1.56 aspect ratio with user scale option)
+    const scale = (config.cassetteScale ?? 100) / 100
+    const baseW = Math.min(width * 0.70, height * 1.08)
+    const cassetteW = baseW * scale
     const cassetteH = cassetteW * 0.63
     const cassetteX = (width - cassetteW) / 2
-    const cassetteY = (height - cassetteH) / 2 - height * 0.02 // slightly raised for tape ribbon below
+    // Position cassette comfortably high to allow generous room for magnetic tape ribbon below
+    const cassetteY = (height - cassetteH) * 0.40
 
-    // (2) Magnetic tape ribbon extending beneath or around the cassette (Background part)
-    if (config.tapeRibbonEnabled) {
-      this.renderMagneticRibbon(ctx, width, height, cassetteX, cassetteY, cassetteW, cassetteH, config, timeData, currentTime)
-    }
-
-    // (3) Cassette Body Chassis
+    // (2) Cassette Body Chassis
     this.renderCassetteBody(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
 
-    // (4) User photo mapped into central label area
+    // (3) User photo mapped into central label area
     this.renderCassetteLabel(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
 
-    // (5) Independently rotating left and right reel hubs & tape spools
+    // (4) Independently rotating left and right reel hubs & tape spools
     this.renderReelHubs(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
 
-    // (6) Front Faceplate Overlay, Screws, and Glass Sheen
+    // (5) Front Faceplate Overlay, Screws, and Glass Sheen
     this.renderFaceplateAndGlass(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
 
-    // (7) Finishing Overlays: Analog Grain, VHS Scanlines & Climax Glitch
+    // (6) Audio-Reactive Magnetic Tape Ribbon (Rendered in front of chassis for 100% visibility)
+    if (config.tapeRibbonEnabled) {
+      this.renderMagneticRibbon(ctx, width, height, cassetteX, cassetteY, cassetteW, cassetteH, config, timeData, currentTime, bands)
+    }
+
+    // (7) Finishing Overlays: Analog Film Grain, VHS Scanlines & Climax Glitch
     this.renderAnalogOverlays(ctx, width, height, config, currentTime)
 
     ctx.restore()
@@ -165,16 +178,22 @@ export class VintageCassetteEngine {
     config: VintageCassetteStudioConfig
   ) {
     const rawDt = currentTime - this.lastTime
-    // Clamp delta time to avoid large rotation bursts during playhead seeks or tab focus changes
-    const dt = Math.max(0, Math.min(0.08, rawDt > 0 ? rawDt : 0.016))
+    const isPlaying = rawDt > 0.0001
+    const dt = isPlaying ? Math.min(0.08, rawDt) : 0
     this.lastTime = currentTime
 
+    if (!isPlaying) {
+      // Audio paused or stopped: reels immediately freeze!
+      this.smoothedBass *= 0.85
+      return
+    }
+
     // Smooth bass energy using exponential decay filter
-    const bass = bands?.bass ?? 0.25
+    const bass = bands?.bass ?? 0
     this.smoothedBass += (bass - this.smoothedBass) * 0.22
 
     // Angular velocity with bass transient boost
-    const baseSpeed = 2.2 * Math.max(0.2, config.reelSpeed)
+    const baseSpeed = 2.4 * Math.max(0.2, config.reelSpeed)
     const bassFactor = 1.0 + (config.bassReactivity / 100) * this.smoothedBass * 2.8
 
     // Spool progression (tape moves from left spool to right spool)
@@ -247,67 +266,159 @@ export class VintageCassetteEngine {
     bands: NormalizedAudioBands | undefined,
     currentTime: number
   ) {
-    // Check if user has custom background or generated retro background
-    const bgImg = this.getCachedImage(config.customBackgroundUrl) ||
-                  this.getCachedImage('/images/cassette/retro-background.jpg')
-
-    if (bgImg) {
-      ctx.drawImage(bgImg, 0, 0, width, height)
-    } else {
-      // Procedural Studio Background Preset
-      const grad = ctx.createRadialGradient(
-        width * 0.5,
-        height * 0.45,
-        Math.min(width, height) * 0.1,
-        width * 0.5,
-        height * 0.5,
-        Math.max(width, height) * 0.75
+    // Check if user uploaded a custom background image
+    const customBg = this.getCachedImage(config.customBackgroundUrl)
+    if (customBg) {
+      ctx.drawImage(customBg, 0, 0, width, height)
+      // Subtle dark vignette over custom image for cassette focus
+      const vignette = ctx.createRadialGradient(
+        width * 0.5, height * 0.5, Math.min(width, height) * 0.25,
+        width * 0.5, height * 0.5, Math.max(width, height) * 0.8
       )
-
-      const bassPulse = (bands?.bass ?? 0.2) * 0.15
-
-      switch (config.backgroundPreset) {
-        case 'warm-nostalgia':
-          grad.addColorStop(0, `rgba(${Math.round(48 + bassPulse * 30)}, 24, 12, 1)`)
-          grad.addColorStop(0.55, 'rgba(18, 10, 6, 1)')
-          grad.addColorStop(1, 'rgba(6, 4, 3, 1)')
-          break
-        case 'neon-cyberpunk':
-          grad.addColorStop(0, `rgba(${Math.round(40 + bassPulse * 35)}, 12, 55, 1)`)
-          grad.addColorStop(0.55, 'rgba(10, 8, 28, 1)')
-          grad.addColorStop(1, 'rgba(3, 4, 12, 1)')
-          break
-        case 'deep-charcoal':
-          grad.addColorStop(0, `rgba(${Math.round(28 + bassPulse * 20)}, 30, 34, 1)`)
-          grad.addColorStop(0.6, 'rgba(14, 16, 18, 1)')
-          grad.addColorStop(1, 'rgba(5, 6, 8, 1)')
-          break
-        case 'midnight-studio':
-        default:
-          grad.addColorStop(0, `rgba(${Math.round(18 + bassPulse * 25)}, 24, 45, 1)`)
-          grad.addColorStop(0.55, 'rgba(8, 10, 22, 1)')
-          grad.addColorStop(1, 'rgba(3, 4, 8, 1)')
-          break
-      }
-
-      ctx.fillStyle = grad
+      vignette.addColorStop(0, 'rgba(0, 0, 0, 0.12)')
+      vignette.addColorStop(1, 'rgba(0, 0, 0, 0.75)')
+      ctx.fillStyle = vignette
       ctx.fillRect(0, 0, width, height)
+      return
     }
 
-    // Soft warm studio spotlight cone behind cassette
-    const spotlightGrad = ctx.createRadialGradient(
-      width * 0.5,
-      height * 0.45,
-      10,
-      width * 0.5,
-      height * 0.45,
-      width * 0.42
-    )
-    spotlightGrad.addColorStop(0, 'rgba(255, 180, 100, 0.08)')
-    spotlightGrad.addColorStop(0.6, 'rgba(255, 140, 60, 0.02)')
-    spotlightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
-    ctx.fillStyle = spotlightGrad
-    ctx.fillRect(0, 0, width, height)
+    const bassPulse = (bands?.bass ?? 0) * 0.2
+    const preset = config.backgroundPreset || 'midnight-studio'
+
+    switch (preset) {
+      case 'warm-nostalgia': {
+        // Warm Nostalgia — Golden Hour Sunset
+        const bgGrad = ctx.createRadialGradient(
+          width * 0.55, height * 0.35, Math.min(width, height) * 0.08,
+          width * 0.5, height * 0.5, Math.max(width, height) * 0.85
+        )
+        bgGrad.addColorStop(0, `rgba(${Math.round(75 + bassPulse * 40)}, 36, 16, 1)`)
+        bgGrad.addColorStop(0.35, 'rgba(42, 18, 8, 1)')
+        bgGrad.addColorStop(0.7, 'rgba(20, 8, 4, 1)')
+        bgGrad.addColorStop(1, 'rgba(7, 3, 2, 1)')
+        ctx.fillStyle = bgGrad
+        ctx.fillRect(0, 0, width, height)
+
+        // Warm golden directional sunset beam from top-right
+        const beam = ctx.createLinearGradient(width * 0.85, 0, width * 0.2, height)
+        beam.addColorStop(0, 'rgba(255, 170, 70, 0.16)')
+        beam.addColorStop(0.5, 'rgba(230, 110, 30, 0.06)')
+        beam.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = beam
+        ctx.fillRect(0, 0, width, height)
+
+        // Warm central spotlight
+        const spot = ctx.createRadialGradient(
+          width * 0.5, height * 0.40, 15,
+          width * 0.5, height * 0.40, width * 0.45
+        )
+        spot.addColorStop(0, `rgba(255, 195, 120, ${0.15 + bassPulse * 0.08})`)
+        spot.addColorStop(0.55, 'rgba(210, 120, 40, 0.04)')
+        spot.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = spot
+        ctx.fillRect(0, 0, width, height)
+        break
+      }
+
+      case 'neon-cyberpunk': {
+        // Neon Synthwave — Magenta & Cyan Dark
+        const bgGrad = ctx.createRadialGradient(
+          width * 0.5, height * 0.42, Math.min(width, height) * 0.1,
+          width * 0.5, height * 0.5, Math.max(width, height) * 0.85
+        )
+        bgGrad.addColorStop(0, `rgba(${Math.round(32 + bassPulse * 25)}, 12, 44, 1)`)
+        bgGrad.addColorStop(0.4, 'rgba(14, 8, 26, 1)')
+        bgGrad.addColorStop(0.75, 'rgba(7, 5, 15, 1)')
+        bgGrad.addColorStop(1, 'rgba(2, 2, 6, 1)')
+        ctx.fillStyle = bgGrad
+        ctx.fillRect(0, 0, width, height)
+
+        // Left electric magenta spotlight
+        const magentaSpot = ctx.createRadialGradient(
+          width * 0.22, height * 0.35, 10,
+          width * 0.22, height * 0.35, width * 0.45
+        )
+        magentaSpot.addColorStop(0, `rgba(236, 72, 153, ${0.18 + bassPulse * 0.1})`)
+        magentaSpot.addColorStop(0.6, 'rgba(219, 39, 119, 0.03)')
+        magentaSpot.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = magentaSpot
+        ctx.fillRect(0, 0, width, height)
+
+        // Right electric cyan spotlight
+        const cyanSpot = ctx.createRadialGradient(
+          width * 0.78, height * 0.35, 10,
+          width * 0.78, height * 0.35, width * 0.45
+        )
+        cyanSpot.addColorStop(0, `rgba(6, 182, 212, ${0.18 + bassPulse * 0.1})`)
+        cyanSpot.addColorStop(0.6, 'rgba(8, 145, 178, 0.03)')
+        cyanSpot.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = cyanSpot
+        ctx.fillRect(0, 0, width, height)
+
+        // Subtle synthwave horizon glow line across lower third
+        const horizonY = height * 0.82
+        const horizonGrad = ctx.createLinearGradient(0, horizonY, 0, height)
+        horizonGrad.addColorStop(0, 'rgba(168, 85, 247, 0.12)')
+        horizonGrad.addColorStop(0.5, 'rgba(236, 72, 153, 0.04)')
+        horizonGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = horizonGrad
+        ctx.fillRect(0, horizonY, width, height - horizonY)
+        break
+      }
+
+      case 'deep-charcoal': {
+        // Deep Charcoal — Vinyl Studio Slate
+        const bgGrad = ctx.createRadialGradient(
+          width * 0.5, height * 0.40, Math.min(width, height) * 0.1,
+          width * 0.5, height * 0.5, Math.max(width, height) * 0.85
+        )
+        bgGrad.addColorStop(0, `rgba(${Math.round(26 + bassPulse * 15)}, 28, 33, 1)`)
+        bgGrad.addColorStop(0.45, 'rgba(16, 18, 22, 1)')
+        bgGrad.addColorStop(0.8, 'rgba(9, 10, 13, 1)')
+        bgGrad.addColorStop(1, 'rgba(4, 5, 7, 1)')
+        ctx.fillStyle = bgGrad
+        ctx.fillRect(0, 0, width, height)
+
+        // Precision cool-silver overhead key spotlight
+        const silverSpot = ctx.createRadialGradient(
+          width * 0.5, height * 0.38, 20,
+          width * 0.5, height * 0.38, width * 0.42
+        )
+        silverSpot.addColorStop(0, `rgba(220, 230, 245, ${0.12 + bassPulse * 0.06})`)
+        silverSpot.addColorStop(0.6, 'rgba(148, 163, 184, 0.02)')
+        silverSpot.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = silverSpot
+        ctx.fillRect(0, 0, width, height)
+        break
+      }
+
+      case 'midnight-studio':
+      default: {
+        // Midnight Studio — Navy & Amber Spotlight
+        const bgGrad = ctx.createRadialGradient(
+          width * 0.5, height * 0.40, Math.min(width, height) * 0.08,
+          width * 0.5, height * 0.5, Math.max(width, height) * 0.85
+        )
+        bgGrad.addColorStop(0, `rgba(${Math.round(22 + bassPulse * 20)}, 30, 56, 1)`)
+        bgGrad.addColorStop(0.4, 'rgba(10, 14, 30, 1)')
+        bgGrad.addColorStop(0.75, 'rgba(5, 7, 18, 1)')
+        bgGrad.addColorStop(1, 'rgba(2, 3, 8, 1)')
+        ctx.fillStyle = bgGrad
+        ctx.fillRect(0, 0, width, height)
+
+        // Focused warm amber studio spotlight over cassette center
+        const amberSpot = ctx.createRadialGradient(
+          width * 0.5, height * 0.40, 10,
+          width * 0.5, height * 0.40, width * 0.46
+        )
+        amberSpot.addColorStop(0, `rgba(255, 185, 95, ${0.16 + bassPulse * 0.08})`)
+        amberSpot.addColorStop(0.5, 'rgba(245, 158, 11, 0.04)')
+        amberSpot.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = amberSpot
+        ctx.fillRect(0, 0, width, height)
+        break
+      }
+    }
   }
 
   /**
@@ -323,93 +434,154 @@ export class VintageCassetteEngine {
     cH: number,
     config: VintageCassetteStudioConfig,
     timeData: Uint8Array | undefined,
-    currentTime: number
+    currentTime: number,
+    bands?: NormalizedAudioBands
   ) {
     ctx.save()
 
-    // Tape guide roller exits on cassette bottom edge
-    const leftGuideX = cX + cW * 0.28
-    const rightGuideX = cX + cW * 0.72
-    const exitY = cY + cH * 0.96
+    // Tape guide rollers on bottom trapezoid of the cassette
+    const leftGuideX = cX + cW * 0.285
+    const rightGuideX = cX + cW * 0.715
+    const exitY = cY + cH * 0.94
+    const bottomRoom = Math.max(70, height - exitY - 20)
 
-    const amp = (config.waveformIntensity / 100) * 45
-    const thickness = config.ribbonThickness
+    const sensitivity = (config.waveformIntensity / 100)
+    const thickness = Math.max(3, config.ribbonThickness)
     const style = config.tapeRibbonStyle
 
-    // Time domain waveform sample extraction
+    const bass = bands?.bass ?? 0
+    const mid = bands?.mid ?? 0
+    const treble = bands?.treble ?? 0
+    const hasAudio = (bands && (bands.overall > 0.015 || bass > 0.04))
+
+    // Waveform modulation amplitude
+    const amp = sensitivity * Math.min(bottomRoom * 0.45, 55)
+    const bassDrape = bass * bottomRoom * 0.22 * sensitivity
+
+    // Sample time domain data (64 samples)
     const sampleCount = 64
     const waveOffsets: number[] = []
-    if (timeData && timeData.length > 0) {
+    if (timeData && timeData.length > 0 && hasAudio) {
       const step = Math.floor(timeData.length / sampleCount)
       for (let i = 0; i < sampleCount; i++) {
         const val = (timeData[i * step] - 128) / 128
         waveOffsets.push(val * amp)
       }
     } else {
-      // Gentle synthetic breathing sway when paused
+      // Gentle calm resting physics when audio is paused or silent
       for (let i = 0; i < sampleCount; i++) {
-        waveOffsets.push(Math.sin(currentTime * 2.0 + i * 0.2) * 6)
+        waveOffsets.push(Math.sin(currentTime * 0.8 + i * 0.12) * 2)
       }
     }
 
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
 
+    const ribbonColor = config.ribbonColor || '#3A281E'
+
     if (style === 'loose-flowing') {
       // Natural loose S-curves looping organically below the cassette
-      const p1X = leftGuideX - cW * 0.12 + (waveOffsets[8] || 0)
-      const p1Y = exitY + cH * 0.35 + (waveOffsets[12] || 0) * 0.5
+      const cp1X = leftGuideX - cW * 0.10 + (waveOffsets[8] || 0)
+      const cp1Y = exitY + bottomRoom * 0.55 + bassDrape + (waveOffsets[12] || 0) * 0.6
 
-      const p2X = cX + cW * 0.5 + Math.sin(currentTime * 1.5) * 40 + (waveOffsets[24] || 0)
-      const p2Y = exitY + cH * 0.55 + (waveOffsets[32] || 0)
+      const cp2X = cX + cW * 0.48 + Math.sin(currentTime * 1.2) * 35 * (hasAudio ? 1 : 0.2) + (waveOffsets[28] || 0)
+      const cp2Y = exitY + bottomRoom * 0.82 + bassDrape + (waveOffsets[32] || 0)
 
-      const p3X = rightGuideX + cW * 0.14 + (waveOffsets[44] || 0)
-      const p3Y = exitY + cH * 0.32 + (waveOffsets[48] || 0) * 0.5
+      const cp3X = rightGuideX + cW * 0.10 + (waveOffsets[48] || 0)
+      const cp3Y = exitY + bottomRoom * 0.52 + bassDrape + (waveOffsets[52] || 0) * 0.6
 
-      // Outer glow
+      // 1. Soft Ambient Drop Shadow onto backdrop
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)'
+      ctx.lineWidth = thickness + 4
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX, exitY + 4)
+      ctx.bezierCurveTo(cp1X, cp1Y + 8, cp2X, cp2Y + 8, rightGuideX, exitY + 4)
+      ctx.stroke()
+
+      // 2. Atmospheric Audio Glow
       if (config.ribbonGlow > 0) {
-        ctx.strokeStyle = config.ribbonColor === '#3A281E' ? 'rgba(217, 119, 6, 0.25)' : config.ribbonColor
+        ctx.strokeStyle = ribbonColor === '#3A281E' ? 'rgba(217, 119, 6, 0.35)' : ribbonColor
         ctx.lineWidth = thickness + 8
-        ctx.shadowColor = config.ribbonColor
-        ctx.shadowBlur = config.ribbonGlow * 0.2
+        ctx.shadowColor = ribbonColor
+        ctx.shadowBlur = config.ribbonGlow * 0.3
         ctx.beginPath()
         ctx.moveTo(leftGuideX, exitY)
-        ctx.bezierCurveTo(p1X, p1Y, p2X, p2Y, rightGuideX, exitY)
+        ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, rightGuideX, exitY)
         ctx.stroke()
         ctx.shadowBlur = 0
       }
 
-      // Base magnetic tape ribbon (dark oxide brown)
-      ctx.strokeStyle = config.ribbonColor
+      // 3. Main Magnetic Oxide Ribbon Core
+      const ribbonGrad = ctx.createLinearGradient(leftGuideX, exitY, rightGuideX, exitY + bottomRoom)
+      ribbonGrad.addColorStop(0, '#1E120B')
+      ribbonGrad.addColorStop(0.5, ribbonColor)
+      ribbonGrad.addColorStop(1, '#24140D')
+      ctx.strokeStyle = ribbonGrad
       ctx.lineWidth = thickness
       ctx.beginPath()
       ctx.moveTo(leftGuideX, exitY)
-      ctx.bezierCurveTo(p1X, p1Y, p2X, p2Y, rightGuideX, exitY)
+      ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, rightGuideX, exitY)
       ctx.stroke()
 
-      // Subtle specular line along ribbon edge
-      ctx.strokeStyle = 'rgba(255, 230, 200, 0.45)'
+      // 4. Glossy Specular Ridge along upper edge
+      ctx.strokeStyle = 'rgba(255, 235, 205, 0.70)'
       ctx.lineWidth = Math.max(1.2, thickness * 0.18)
       ctx.beginPath()
       ctx.moveTo(leftGuideX, exitY)
-      ctx.bezierCurveTo(p1X - 2, p1Y - 2, p2X - 2, p2Y - 2, rightGuideX, exitY)
+      ctx.bezierCurveTo(cp1X - 2, cp1Y - 2, cp2X - 2, cp2Y - 2, rightGuideX, exitY)
       ctx.stroke()
+
+      // 5. Secondary inner dangling tape loop (classic loose mixtape loop)
+      const innerCp1X = leftGuideX + cW * 0.08 + (waveOffsets[16] || 0) * 0.4
+      const innerCp1Y = exitY + bottomRoom * 0.28 + bassDrape * 0.5 + (waveOffsets[20] || 0) * 0.4
+      const innerCp2X = rightGuideX - cW * 0.08 + (waveOffsets[40] || 0) * 0.4
+      const innerCp2Y = exitY + bottomRoom * 0.30 + bassDrape * 0.5 + (waveOffsets[44] || 0) * 0.4
+
+      ctx.strokeStyle = 'rgba(38, 22, 14, 0.85)'
+      ctx.lineWidth = Math.max(2, thickness * 0.65)
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX + cW * 0.06, exitY)
+      ctx.bezierCurveTo(innerCp1X, innerCp1Y, innerCp2X, innerCp2Y, rightGuideX - cW * 0.06, exitY)
+      ctx.stroke()
+
+      ctx.strokeStyle = 'rgba(255, 215, 175, 0.45)'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX + cW * 0.06, exitY)
+      ctx.bezierCurveTo(innerCp1X - 1, innerCp1Y - 1, innerCp2X - 1, innerCp2Y - 1, rightGuideX - cW * 0.06, exitY)
+      ctx.stroke()
+
     } else if (style === 'symmetrical-ribbon') {
       // Twin looping ribbons branching left and right
-      const midY = exitY + cH * 0.42
+      const midY = exitY + bottomRoom * 0.45 + bassDrape
 
       // Left branch loop
-      ctx.strokeStyle = config.ribbonColor
+      ctx.strokeStyle = ribbonColor
       ctx.lineWidth = thickness
       ctx.beginPath()
       ctx.moveTo(leftGuideX, exitY)
       ctx.bezierCurveTo(
-        leftGuideX - cW * 0.22 + (waveOffsets[10] || 0),
+        leftGuideX - cW * 0.20 + (waveOffsets[10] || 0),
         midY + (waveOffsets[14] || 0),
         cX + cW * 0.35 + (waveOffsets[20] || 0),
-        midY + cH * 0.25,
+        midY + bottomRoom * 0.35,
         cX + cW * 0.5,
-        exitY + cH * 0.35
+        exitY + bottomRoom * 0.5
+      )
+      ctx.stroke()
+
+      // Left specular
+      ctx.strokeStyle = 'rgba(255, 235, 205, 0.65)'
+      ctx.lineWidth = Math.max(1, thickness * 0.16)
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX, exitY)
+      ctx.bezierCurveTo(
+        leftGuideX - cW * 0.20 + (waveOffsets[10] || 0) - 2,
+        midY + (waveOffsets[14] || 0) - 2,
+        cX + cW * 0.35 + (waveOffsets[20] || 0) - 2,
+        midY + bottomRoom * 0.35 - 2,
+        cX + cW * 0.5,
+        exitY + bottomRoom * 0.5
       )
       ctx.stroke()
 
@@ -417,23 +589,39 @@ export class VintageCassetteEngine {
       ctx.beginPath()
       ctx.moveTo(rightGuideX, exitY)
       ctx.bezierCurveTo(
-        rightGuideX + cW * 0.22 - (waveOffsets[30] || 0),
+        rightGuideX + cW * 0.20 - (waveOffsets[30] || 0),
         midY + (waveOffsets[34] || 0),
         cX + cW * 0.65 - (waveOffsets[40] || 0),
-        midY + cH * 0.25,
+        midY + bottomRoom * 0.35,
         cX + cW * 0.5,
-        exitY + cH * 0.35
+        exitY + bottomRoom * 0.5
       )
       ctx.stroke()
+
+      // Right specular
+      ctx.strokeStyle = 'rgba(255, 235, 205, 0.65)'
+      ctx.lineWidth = Math.max(1, thickness * 0.16)
+      ctx.beginPath()
+      ctx.moveTo(rightGuideX, exitY)
+      ctx.bezierCurveTo(
+        rightGuideX + cW * 0.20 - (waveOffsets[30] || 0) - 2,
+        midY + (waveOffsets[34] || 0) - 2,
+        cX + cW * 0.65 - (waveOffsets[40] || 0) - 2,
+        midY + bottomRoom * 0.35 - 2,
+        cX + cW * 0.5,
+        exitY + bottomRoom * 0.5
+      )
+      ctx.stroke()
+
     } else {
       // Cinematic Trail: Continuous wave undulating across bottom frame
-      ctx.strokeStyle = config.ribbonColor
+      const startX = width * 0.06
+      const endX = width * 0.94
+      const baseWaveY = exitY + bottomRoom * 0.45 + bassDrape * 0.4
+
+      ctx.strokeStyle = ribbonColor
       ctx.lineWidth = thickness
       ctx.beginPath()
-      const startX = width * 0.1
-      const endX = width * 0.9
-      const baseWaveY = exitY + cH * 0.28
-
       ctx.moveTo(startX, baseWaveY + (waveOffsets[0] || 0))
       for (let i = 1; i < sampleCount; i++) {
         const x = startX + (i / (sampleCount - 1)) * (endX - startX)
@@ -442,8 +630,21 @@ export class VintageCassetteEngine {
       }
       ctx.stroke()
 
+      // Specular highlight line along trail
+      ctx.strokeStyle = 'rgba(255, 235, 205, 0.70)'
+      ctx.lineWidth = Math.max(1.2, thickness * 0.18)
+      ctx.beginPath()
+      ctx.moveTo(startX, baseWaveY + (waveOffsets[0] || 0) - 1.5)
+      for (let i = 1; i < sampleCount; i++) {
+        const x = startX + (i / (sampleCount - 1)) * (endX - startX)
+        const y = baseWaveY + (waveOffsets[i] || 0) - 1.5
+        ctx.lineTo(x, y)
+      }
+      ctx.stroke()
+
       // Feed lines from cassette guide holes to waveform trail
-      ctx.lineWidth = thickness * 0.75
+      ctx.strokeStyle = ribbonColor
+      ctx.lineWidth = thickness * 0.8
       ctx.beginPath()
       ctx.moveTo(leftGuideX, exitY)
       ctx.lineTo(startX + (endX - startX) * 0.25, baseWaveY + (waveOffsets[16] || 0))
@@ -452,6 +653,22 @@ export class VintageCassetteEngine {
       ctx.stroke()
     }
 
+    // 6. Draw Brass Capstan Guide Pins at Tape Exit Points
+    this.drawTapeGuidePin(ctx, leftGuideX, exitY)
+    this.drawTapeGuidePin(ctx, rightGuideX, exitY)
+
+    ctx.restore()
+  }
+
+  private drawTapeGuidePin(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    ctx.save()
+    ctx.beginPath()
+    ctx.arc(x, y - 2, 4.5, 0, Math.PI * 2)
+    ctx.fillStyle = '#B45309'
+    ctx.fill()
+    ctx.strokeStyle = '#FDE68A'
+    ctx.lineWidth = 1
+    ctx.stroke()
     ctx.restore()
   }
 
@@ -980,45 +1197,81 @@ export class VintageCassetteEngine {
 
     // A. VHS Scanlines Overlay
     if (config.vhsScanlines) {
-      const scanOpacity = (config.scanlineIntensity / 100) * 0.28
-      ctx.fillStyle = `rgba(0, 0, 0, ${scanOpacity})`
-      const step = 4
-      const crawl = Math.floor((currentTime * 32) % step)
-      for (let y = crawl; y < height; y += step) {
-        ctx.fillRect(0, y, width, 1.5)
+      const intensity = (config.scanlineIntensity || 18) / 100
+      const scanStep = 4
+      const crawl = Math.floor((currentTime * 24) % scanStep)
+      const shadowAlpha = intensity * 0.45
+      const phosphorAlpha = intensity * 0.08
+
+      // 1. Alternating CRT shadow lines
+      ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha})`
+      for (let y = crawl; y < height; y += scanStep) {
+        ctx.fillRect(0, y, width, 1.8)
       }
+
+      // 2. Faint CRT phosphor glow lines between shadows
+      ctx.fillStyle = `rgba(255, 255, 255, ${phosphorAlpha})`
+      for (let y = crawl + 2; y < height; y += scanStep * 2) {
+        ctx.fillRect(0, y, width, 0.8)
+      }
+
+      // 3. Subtle slow-moving VHS tracking beam bar
+      const beamY = ((currentTime * 50) % (height + 250)) - 100
+      const beamH = Math.min(60, height * 0.08)
+      const beamGrad = ctx.createLinearGradient(0, beamY, 0, beamY + beamH)
+      beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0)')
+      beamGrad.addColorStop(0.5, `rgba(255, 255, 255, ${0.05 * intensity})`)
+      beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)')
+      ctx.fillStyle = beamGrad
+      ctx.fillRect(0, beamY, width, beamH)
     }
 
-    // B. Analog Film Grain
-    if (config.analogGrain && this.grainCanvas) {
-      ctx.globalAlpha = (config.grainIntensity / 100) * 0.35
-      ctx.globalCompositeOperation = 'overlay'
-      const pattern = ctx.createPattern(this.grainCanvas, 'repeat')
-      if (pattern) {
-        ctx.fillStyle = pattern
-        ctx.fillRect(0, 0, width, height)
-      }
-      ctx.globalCompositeOperation = 'source-over'
-      ctx.globalAlpha = 1.0
+    // B. Living Analog Film Grain (Dynamically animated frame-to-frame noise)
+    if (config.analogGrain) {
+      const grainIntensity = (config.grainIntensity || 22) / 100
+      this.renderDynamicGrain(ctx, width, height, grainIntensity, currentTime)
     }
 
     // C. Climax Glitch RGB Chromatic Aberration & Scan Tracking Line
     if (this.glitch.active && config.climaxGlitchEnabled) {
       const intensity = this.glitch.intensity
-      // Tracking distortion band across random vertical segment
       const bandY = ((currentTime * 180) % height)
       const bandH = Math.min(120, height * 0.15)
 
       ctx.fillStyle = `rgba(255, 255, 255, ${0.12 * intensity})`
       ctx.fillRect(0, bandY, width, bandH)
 
-      // Color split bar
-      ctx.fillStyle = `rgba(0, 240, 255, ${0.15 * intensity})`
-      ctx.fillRect(0, bandY + 4, width, 2)
-      ctx.fillStyle = `rgba(255, 0, 128, ${0.15 * intensity})`
-      ctx.fillRect(0, bandY + bandH - 4, width, 2)
+      ctx.fillStyle = `rgba(0, 240, 255, ${0.18 * intensity})`
+      ctx.fillRect(0, bandY + 4, width, 3)
+      ctx.fillStyle = `rgba(255, 0, 128, ${0.18 * intensity})`
+      ctx.fillRect(0, bandY + bandH - 4, width, 3)
     }
 
+    ctx.restore()
+  }
+
+  private renderDynamicGrain(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    intensity: number,
+    currentTime: number
+  ) {
+    if (!this.grainCanvases || this.grainCanvases.length === 0) return
+    ctx.save()
+    const frameIdx = Math.floor(currentTime * 24) % this.grainCanvases.length
+    const canvas = this.grainCanvases[frameIdx]
+    const offsetX = Math.floor((Math.sin(currentTime * 91) * 300) % 128)
+    const offsetY = Math.floor((Math.cos(currentTime * 73) * 300) % 128)
+
+    ctx.translate(offsetX, offsetY)
+    ctx.globalAlpha = intensity * 0.28
+    ctx.globalCompositeOperation = 'screen'
+    const pattern = ctx.createPattern(canvas, 'repeat')
+    if (pattern) {
+      ctx.fillStyle = pattern
+      ctx.fillRect(-offsetX, -offsetY, width, height)
+    }
     ctx.restore()
   }
 

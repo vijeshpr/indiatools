@@ -23,6 +23,7 @@ import {
   Tv,
   CheckCircle2,
   RefreshCw,
+  Maximize2,
 } from 'lucide-react'
 import {
   StudioCompositionConfig,
@@ -312,6 +313,49 @@ export const VintageCassetteStudioPanel: React.FC<VintageCassetteStudioPanelProp
             onChange={(e) => updateConfig({ shellOpacity: Number(e.target.value) })}
             className="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
           />
+        </div>
+
+        {/* Cassette Size / Scale Slider */}
+        <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
+          <div className="flex justify-between items-center text-xs text-gray-300">
+            <span className="flex items-center gap-1.5 font-medium">
+              <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
+              <span>Cassette Size / Zoom</span>
+            </span>
+            <span className="font-mono text-amber-400 font-bold">{cassette.cassetteScale ?? 100}%</span>
+          </div>
+          <input
+            type="range"
+            min={50}
+            max={150}
+            step={2}
+            value={cassette.cassetteScale ?? 100}
+            onChange={(e) => updateConfig({ cassetteScale: Number(e.target.value) })}
+            className="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+          />
+          <div className="flex justify-between text-[10px] text-gray-500 pt-0.5">
+            <button
+              type="button"
+              onClick={() => updateConfig({ cassetteScale: 75 })}
+              className={`hover:text-amber-300 transition-colors ${(cassette.cassetteScale ?? 100) === 75 ? 'text-amber-400 font-bold' : ''}`}
+            >
+              Compact (75%)
+            </button>
+            <button
+              type="button"
+              onClick={() => updateConfig({ cassetteScale: 100 })}
+              className={`hover:text-amber-300 transition-colors ${(cassette.cassetteScale ?? 100) === 100 ? 'text-amber-400 font-bold' : ''}`}
+            >
+              Default (100%)
+            </button>
+            <button
+              type="button"
+              onClick={() => updateConfig({ cassetteScale: 125 })}
+              className={`hover:text-amber-300 transition-colors ${(cassette.cassetteScale ?? 100) === 125 ? 'text-amber-400 font-bold' : ''}`}
+            >
+              Large (125%)
+            </button>
+          </div>
         </div>
       </div>
 

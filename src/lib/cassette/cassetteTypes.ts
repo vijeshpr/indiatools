@@ -31,6 +31,7 @@ export interface VintageCassetteStudioConfig {
 
   // 1. Shell & Visual Style
   cassetteStyle: CassetteStyle
+  cassetteScale: number // 50 to 150 (%) — zoom / scale option
   shellOpacity: number // 30 to 100 (%)
   metallicAccent: number // 0 to 100 (%)
 
@@ -79,6 +80,7 @@ export const DEFAULT_VINTAGE_CASSETTE_CONFIG: VintageCassetteStudioConfig = {
 
   // 1. Shell & Visual Style
   cassetteStyle: 'smoked-black',
+  cassetteScale: 100,
   shellOpacity: 88,
   metallicAccent: 45,
 

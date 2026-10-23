@@ -48,6 +48,8 @@ import {
   Flower2,
   Sprout,
   Leaf,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -211,6 +213,16 @@ export const AudioToVideoStudioTool: React.FC = () => {
   const audioInputRef = useRef<HTMLInputElement | null>(null)
   const singleImageInputRef = useRef<HTMLInputElement | null>(null)
   const slideshowInputRef = useRef<HTMLInputElement | null>(null)
+  const tabScrollRef = useRef<HTMLDivElement | null>(null)
+
+  const scrollTabs = useCallback((direction: 'left' | 'right') => {
+    if (tabScrollRef.current) {
+      tabScrollRef.current.scrollBy({
+        left: direction === 'left' ? -200 : 200,
+        behavior: 'smooth',
+      })
+    }
+  }, [])
 
   // Initialize Web Audio & Render Engines once on mount
   useEffect(() => {
@@ -1621,61 +1633,80 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
           {/* RIGHT 5/12: MODULAR EDITING SUITE & STUDIO DOCK */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            {/* Dock Navigation Tabs */}
-            <div className="grid grid-cols-4 sm:grid-cols-7 lg:grid-cols-13 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
-              {[
-                { id: 'cassette', label: 'Cassette', icon: Disc },
-                { id: 'filmreel', label: 'Film Reel', icon: Film },
-                { id: 'photouniverse', label: 'Universe', icon: Compass },
-                { id: 'memoryburst', label: 'Burst', icon: Zap },
-                { id: 'soniccam', label: 'SonicCam', icon: Camera },
-                { id: 'portal', label: 'Portal VFX', icon: Orbit },
-                { id: 'photomotion', label: '2.5D Motion', icon: Film },
-                { id: 'garden', label: 'Garden', icon: Flower2 },
-                { id: 'background', label: 'Scene', icon: ImageIcon },
-                { id: 'visualizer', label: 'Spectrum', icon: Activity },
-                { id: 'cinematic', label: 'Effects', icon: Sparkles },
-                { id: 'typography', label: 'Titles', icon: Type },
-                { id: 'audio', label: 'Audio', icon: Music },
-              ].map((tab) => {
-                const Icon = tab.icon
-                const isActive = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as StudioTab)}
-                    className={`flex flex-col items-center justify-center py-2 rounded-xl text-[11px] font-bold transition-all relative ${
-                      isActive
-                        ? tab.id === 'cassette'
-                          ? 'bg-gradient-to-tr from-orange-600/40 via-amber-600/30 to-yellow-500/20 text-amber-300 border border-amber-400 shadow-md shadow-amber-500/20'
+            {/* Dock Navigation Tabs with Left/Right Arrows & Audio Option First */}
+            <div className="relative flex items-center bg-[#090A0F] p-1.5 rounded-2xl border border-white/10 group shadow-xl">
+              {/* Left Scroll Arrow */}
+              <button
+                type="button"
+                onClick={() => scrollTabs('left')}
+                className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all shrink-0 z-10 cursor-pointer"
+                title="Scroll tabs left"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {/* Horizontally Scrollable Tab List */}
+              <div
+                ref={tabScrollRef}
+                className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-1 px-1 flex-1"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {[
+                  { id: 'audio', label: 'Audio', icon: Music },
+                  { id: 'cassette', label: 'Cassette', icon: Disc },
+                  { id: 'filmreel', label: 'Film Reel', icon: Film },
+                  { id: 'photouniverse', label: 'Universe', icon: Compass },
+                  { id: 'memoryburst', label: 'Burst', icon: Zap },
+                  { id: 'soniccam', label: 'SonicCam', icon: Camera },
+                  { id: 'portal', label: 'Portal VFX', icon: Orbit },
+                  { id: 'photomotion', label: '2.5D Motion', icon: Film },
+                  { id: 'garden', label: 'Garden', icon: Flower2 },
+                  { id: 'background', label: 'Scene', icon: ImageIcon },
+                  { id: 'visualizer', label: 'Spectrum', icon: Activity },
+                  { id: 'cinematic', label: 'Effects', icon: Sparkles },
+                  { id: 'typography', label: 'Titles', icon: Type },
+                ].map((tab) => {
+                  const Icon = tab.icon
+                  const isActive = activeTab === tab.id
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as StudioTab)}
+                      className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                        isActive
+                          ? tab.id === 'audio'
+                            ? 'bg-gradient-to-tr from-cyan-600/40 via-blue-600/30 to-indigo-500/20 text-cyan-300 border border-cyan-400 shadow-md shadow-cyan-500/20'
+                            : tab.id === 'cassette'
+                            ? 'bg-gradient-to-tr from-orange-600/40 via-amber-600/30 to-yellow-500/20 text-amber-300 border border-amber-400 shadow-md shadow-amber-500/20'
+                            : tab.id === 'filmreel'
+                            ? 'bg-gradient-to-tr from-amber-600/40 via-yellow-600/30 to-amber-500/20 text-amber-300 border border-amber-400 shadow-md shadow-amber-500/20'
+                            : tab.id === 'photouniverse'
+                            ? 'bg-gradient-to-tr from-cyan-600/30 via-blue-600/30 to-indigo-500/20 text-cyan-300 border border-cyan-400 shadow-md'
+                            : tab.id === 'memoryburst'
+                            ? 'bg-gradient-to-tr from-amber-600/30 via-rose-600/30 to-pink-500/20 text-rose-300 border border-rose-400 shadow-md'
+                            : tab.id === 'soniccam'
+                            ? 'bg-gradient-to-tr from-sky-600/30 via-cyan-600/30 to-blue-500/20 text-sky-300 border border-sky-400 shadow-md'
+                            : tab.id === 'garden'
+                            ? 'bg-gradient-to-tr from-emerald-600/30 via-teal-600/30 to-cyan-500/20 text-emerald-300 border border-emerald-400 shadow-md'
+                            : 'bg-gradient-to-tr from-violet-600/30 via-purple-600/30 to-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-md'
+                          : tab.id === 'audio'
+                          ? 'text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 hover:bg-cyan-900/50 hover:text-white'
+                          : tab.id === 'cassette'
+                          ? 'text-amber-300 bg-orange-950/40 border border-amber-500/40 hover:bg-orange-900/50 hover:text-white'
                           : tab.id === 'filmreel'
-                          ? 'bg-gradient-to-tr from-amber-600/40 via-yellow-600/30 to-amber-500/20 text-amber-300 border border-amber-400 shadow-md shadow-amber-500/20'
+                          ? 'text-amber-300 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/50 hover:text-white'
                           : tab.id === 'photouniverse'
-                          ? 'bg-gradient-to-tr from-cyan-600/30 via-blue-600/30 to-indigo-500/20 text-cyan-300 border border-cyan-400 shadow-md'
+                          ? 'text-cyan-300 bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/50 hover:text-white'
                           : tab.id === 'memoryburst'
-                          ? 'bg-gradient-to-tr from-amber-600/30 via-rose-600/30 to-pink-500/20 text-rose-300 border border-rose-400 shadow-md'
+                          ? 'text-rose-300 bg-rose-950/40 border border-rose-500/40 hover:bg-rose-900/50 hover:text-white'
                           : tab.id === 'soniccam'
-                          ? 'bg-gradient-to-tr from-sky-600/30 via-cyan-600/30 to-blue-500/20 text-sky-300 border border-sky-400 shadow-md'
+                          ? 'text-sky-300 bg-sky-950/40 border border-sky-500/40 hover:bg-sky-900/50 hover:text-white'
                           : tab.id === 'garden'
-                          ? 'bg-gradient-to-tr from-emerald-600/30 via-teal-600/30 to-cyan-500/20 text-emerald-300 border border-emerald-400 shadow-md'
-                          : 'bg-gradient-to-tr from-violet-600/30 via-purple-600/30 to-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-md'
-                        : tab.id === 'cassette'
-                        ? 'text-amber-300 bg-orange-950/40 border border-amber-500/40 hover:bg-orange-900/50 hover:text-white'
-                        : tab.id === 'filmreel'
-                        ? 'text-amber-300 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/50 hover:text-white'
-                        : tab.id === 'photouniverse'
-                        ? 'text-cyan-300 bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/50 hover:text-white'
-                        : tab.id === 'memoryburst'
-                        ? 'text-rose-300 bg-rose-950/40 border border-rose-500/40 hover:bg-rose-900/50 hover:text-white'
-                        : tab.id === 'soniccam'
-                        ? 'text-sky-300 bg-sky-950/40 border border-sky-500/40 hover:bg-sky-900/50 hover:text-white'
-                        : tab.id === 'garden'
-                        ? 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/40 hover:bg-emerald-900/50 hover:text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 mb-1 ${tab.id === 'cassette' && !isActive ? 'text-amber-400' : tab.id === 'filmreel' && !isActive ? 'text-amber-400' : tab.id === 'photouniverse' && !isActive ? 'text-cyan-400' : tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
-                    <div className="flex items-center gap-1">
+                          ? 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/40 hover:bg-emerald-900/50 hover:text-white'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
+                      }`}
+                    >
+                      <Icon className={`w-3.5 h-3.5 shrink-0 ${tab.id === 'audio' && !isActive ? 'text-cyan-400' : tab.id === 'cassette' && !isActive ? 'text-amber-400' : tab.id === 'filmreel' && !isActive ? 'text-amber-400' : tab.id === 'photouniverse' && !isActive ? 'text-cyan-400' : tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
                       <span>{tab.label}</span>
                       {tab.id === 'cassette' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
@@ -1695,10 +1726,20 @@ export const AudioToVideoStudioTool: React.FC = () => {
                       {tab.id === 'garden' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                       )}
-                    </div>
-                  </button>
-                )
-              })}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Right Scroll Arrow */}
+              <button
+                type="button"
+                onClick={() => scrollTabs('right')}
+                className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all shrink-0 z-10 cursor-pointer"
+                title="Scroll tabs right"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
 
             {/* TAB CONTENT PANELS */}

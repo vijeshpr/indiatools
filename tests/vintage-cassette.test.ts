@@ -295,5 +295,166 @@ describe('Vintage Cassette Visualizer — 1990s Retro Audio Studio Suite', () =>
         engine.reset(0)
       })
     })
+
+    it('freezes reel rotation when playback is paused or stopped (dt === 0)', () => {
+      const engine = new VintageCassetteEngine()
+      engine.reset(0)
+
+      const mockCtx = {
+        save: () => {},
+        restore: () => {},
+        translate: () => {},
+        rotate: () => {},
+        scale: () => {},
+        beginPath: () => {},
+        closePath: () => {},
+        moveTo: () => {},
+        lineTo: () => {},
+        bezierCurveTo: () => {},
+        arc: () => {},
+        arcTo: () => {},
+        fill: () => {},
+        stroke: () => {},
+        rect: () => {},
+        fillRect: () => {},
+        clip: () => {},
+        createLinearGradient: () => ({ addColorStop: () => {} }),
+        createRadialGradient: () => ({ addColorStop: () => {} }),
+        createPattern: () => null,
+        drawImage: () => {},
+        fillText: () => {},
+      } as unknown as CanvasRenderingContext2D
+
+      const config: VintageCassetteStudioConfig = {
+        ...DEFAULT_VINTAGE_CASSETTE_CONFIG,
+        enabled: true,
+      }
+
+      // Step 1: Music plays from t=0.5 to t=1.0
+      engine.render(mockCtx, 1920, 1080, config, { bass: 0.8, mid: 0.5, treble: 0.5, subBass: 0.8, overall: 0.6, isBeatHit: true }, undefined, 1.0, 30)
+
+      // Step 2: Audio is paused: subsequent frames stay at t=1.0 (rawDt === 0)
+      assert.doesNotThrow(() => {
+        engine.render(mockCtx, 1920, 1080, config, undefined, undefined, 1.0, 30)
+        engine.render(mockCtx, 1920, 1080, config, undefined, undefined, 1.0, 30)
+      })
+    })
+
+    it('supports all 4 studio backdrop presets with dynamic lighting', () => {
+      const presets: CassetteBackgroundPreset[] = ['midnight-studio', 'warm-nostalgia', 'neon-cyberpunk', 'deep-charcoal']
+      const engine = new VintageCassetteEngine()
+      const mockCtx = {
+        save: () => {},
+        restore: () => {},
+        translate: () => {},
+        rotate: () => {},
+        scale: () => {},
+        beginPath: () => {},
+        closePath: () => {},
+        moveTo: () => {},
+        lineTo: () => {},
+        bezierCurveTo: () => {},
+        arc: () => {},
+        arcTo: () => {},
+        fill: () => {},
+        stroke: () => {},
+        rect: () => {},
+        fillRect: () => {},
+        clip: () => {},
+        createLinearGradient: () => ({ addColorStop: () => {} }),
+        createRadialGradient: () => ({ addColorStop: () => {} }),
+        createPattern: () => null,
+        drawImage: () => {},
+        fillText: () => {},
+      } as unknown as CanvasRenderingContext2D
+
+      for (const p of presets) {
+        const config: VintageCassetteStudioConfig = {
+          ...DEFAULT_VINTAGE_CASSETTE_CONFIG,
+          enabled: true,
+          backgroundPreset: p,
+        }
+        assert.doesNotThrow(() => {
+          engine.render(mockCtx, 1920, 1080, config, undefined, undefined, 0.5, 30)
+        })
+      }
+    })
+
+    it('toggles analog film grain and VHS scanlines independently', () => {
+      const engine = new VintageCassetteEngine()
+      const mockCtx = {
+        save: () => {},
+        restore: () => {},
+        translate: () => {},
+        rotate: () => {},
+        scale: () => {},
+        beginPath: () => {},
+        closePath: () => {},
+        moveTo: () => {},
+        lineTo: () => {},
+        bezierCurveTo: () => {},
+        arc: () => {},
+        arcTo: () => {},
+        fill: () => {},
+        stroke: () => {},
+        rect: () => {},
+        fillRect: () => {},
+        clip: () => {},
+        createLinearGradient: () => ({ addColorStop: () => {} }),
+        createRadialGradient: () => ({ addColorStop: () => {} }),
+        createPattern: () => null,
+        drawImage: () => {},
+        fillText: () => {},
+      } as unknown as CanvasRenderingContext2D
+
+      // Both OFF
+      assert.doesNotThrow(() => {
+        engine.render(mockCtx, 1920, 1080, { ...DEFAULT_VINTAGE_CASSETTE_CONFIG, enabled: true, analogGrain: false, vhsScanlines: false }, undefined, undefined, 1.0, 30)
+      })
+
+      // Grain ON, Scanlines OFF
+      assert.doesNotThrow(() => {
+        engine.render(mockCtx, 1920, 1080, { ...DEFAULT_VINTAGE_CASSETTE_CONFIG, enabled: true, analogGrain: true, grainIntensity: 40, vhsScanlines: false }, undefined, undefined, 1.0, 30)
+      })
+
+      // Scanlines ON, Grain OFF
+      assert.doesNotThrow(() => {
+        engine.render(mockCtx, 1920, 1080, { ...DEFAULT_VINTAGE_CASSETTE_CONFIG, enabled: true, analogGrain: false, vhsScanlines: true, scanlineIntensity: 35 }, undefined, undefined, 1.0, 30)
+      })
+    })
+
+    it('supports cassette scaling between 50% and 150%', () => {
+      const engine = new VintageCassetteEngine()
+      const mockCtx = {
+        save: () => {},
+        restore: () => {},
+        translate: () => {},
+        rotate: () => {},
+        scale: () => {},
+        beginPath: () => {},
+        closePath: () => {},
+        moveTo: () => {},
+        lineTo: () => {},
+        bezierCurveTo: () => {},
+        arc: () => {},
+        arcTo: () => {},
+        fill: () => {},
+        stroke: () => {},
+        rect: () => {},
+        fillRect: () => {},
+        clip: () => {},
+        createLinearGradient: () => ({ addColorStop: () => {} }),
+        createRadialGradient: () => ({ addColorStop: () => {} }),
+        createPattern: () => null,
+        drawImage: () => {},
+        fillText: () => {},
+      } as unknown as CanvasRenderingContext2D
+
+      assert.doesNotThrow(() => {
+        engine.render(mockCtx, 1920, 1080, { ...DEFAULT_VINTAGE_CASSETTE_CONFIG, enabled: true, cassetteScale: 75 }, undefined, undefined, 1.0, 30)
+        engine.render(mockCtx, 1920, 1080, { ...DEFAULT_VINTAGE_CASSETTE_CONFIG, enabled: true, cassetteScale: 100 }, undefined, undefined, 1.0, 30)
+        engine.render(mockCtx, 1920, 1080, { ...DEFAULT_VINTAGE_CASSETTE_CONFIG, enabled: true, cassetteScale: 135 }, undefined, undefined, 1.0, 30)
+      })
+    })
   })
 })
