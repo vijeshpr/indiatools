@@ -50,6 +50,7 @@ import {
   Leaf,
   ChevronLeft,
   ChevronRight,
+  Minimize2,
 } from 'lucide-react'
 import { ToolPageLayout } from '../components/tools/ToolPageLayout'
 import { getToolBySlug } from '../data/tools'
@@ -214,6 +215,29 @@ export const AudioToVideoStudioTool: React.FC = () => {
   const singleImageInputRef = useRef<HTMLInputElement | null>(null)
   const slideshowInputRef = useRef<HTMLInputElement | null>(null)
   const tabScrollRef = useRef<HTMLDivElement | null>(null)
+  const playerContainerRef = useRef<HTMLDivElement | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  const toggleFullscreen = useCallback(() => {
+    if (!playerContainerRef.current) return
+    if (!document.fullscreenElement) {
+      playerContainerRef.current.requestFullscreen().catch((err) => {
+        console.error('Fullscreen request error:', err)
+      })
+    } else {
+      document.exitFullscreen().catch((err) => {
+        console.error('Exit fullscreen error:', err)
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', handleFsChange)
+    return () => document.removeEventListener('fullscreenchange', handleFsChange)
+  }, [])
 
   const scrollTabs = useCallback((direction: 'left' | 'right') => {
     if (tabScrollRef.current) {
@@ -1277,356 +1301,214 @@ export const AudioToVideoStudioTool: React.FC = () => {
         {/* MAIN STUDIO WORKSPACE: PREVIEW + TIMELINE + DOCK EDITORS  */}
         {/* ========================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT 7/12: LIVE PREVIEW SCREEN & AUDIO SCRUBBER */}
+          {/* LEFT 7/12: STYLISH CINEMATIC STUDIO VIDEO PLAYER & TIMELINE */}
           <div className="lg:col-span-7 flex flex-col gap-4">
-            {/* Viewport Action Controls Bar */}
-            <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-2.5 px-4 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xl">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1">
-                  <Aperture className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Viewport:</span>
-                </span>
-                {(['fit', 'fill', 'original'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() =>
-                      setComposition((prev) => ({
-                        ...prev,
-                        portalVfx: {
-                          ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
-                          imageFit: mode,
-                        },
-                      }))
-                    }
-                    className={`px-2.5 py-1 rounded-lg font-bold capitalize transition-all ${
-                      (composition.portalVfx?.imageFit || 'fit') === mode
-                        ? 'bg-slate-800 text-cyan-300 border border-cyan-500/40'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* 1-Click Vintage Cassette Visualizer Mode Switch */}
-                <button
-                  onClick={() => {
-                    setActiveTab('cassette')
-                    setComposition((prev) => ({
-                      ...prev,
-                      vintageCassette: {
-                        ...(prev.vintageCassette || DEFAULT_VINTAGE_CASSETTE_CONFIG),
-                        enabled: true,
-                      },
-                      photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : undefined,
-                      memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : undefined,
-                      sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : undefined,
-                      gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : undefined,
-                    }))
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeTab === 'cassette'
-                      ? 'bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400 text-black shadow-lg shadow-orange-500/30 border border-amber-300 font-extrabold'
-                      : 'bg-orange-950/40 border border-orange-500/30 text-amber-300 hover:text-white hover:bg-orange-900/60'
-                  }`}
-                  title="Switch directly to Vintage Cassette Visualizer"
-                >
-                  <Disc className="w-3.5 h-3.5 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
-                  <span>📼 Cassette</span>
-                </button>
-
-                {/* 1-Click Film Reel Journey (35mm Vintage Studio) Mode Switch */}
-                <button
-                  onClick={() => {
-                    setActiveTab('filmreel')
-                    setComposition((prev) => ({
-                      ...prev,
-                      photoUniverse: {
-                        ...(prev.photoUniverse || DEFAULT_PHOTO_UNIVERSE_CONFIG),
-                        enabled: true,
-                        filmReel: {
-                          ...(prev.photoUniverse?.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
-                          enabled: true,
-                        },
-                      },
-                    }))
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeTab === 'filmreel'
-                      ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 text-black shadow-lg shadow-amber-500/30 border border-amber-300 font-extrabold'
-                      : 'bg-amber-950/40 border border-amber-500/30 text-amber-300 hover:text-white hover:bg-amber-900/60'
-                  }`}
-                  title="Switch directly to Film Reel Journey (35mm Vintage Studio)"
-                >
-                  <Film className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                  <span>🎞️ Film Reel</span>
-                </button>
-
-                {/* 1-Click 3D Photo Universe Mode Switch */}
-                <button
-                  onClick={() => {
-                    setActiveTab('photouniverse')
-                    setComposition((prev) => ({
-                      ...prev,
-                      photoUniverse: {
-                        ...(prev.photoUniverse || DEFAULT_PHOTO_UNIVERSE_CONFIG),
-                        enabled: true,
-                      },
-                    }))
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeTab === 'photouniverse'
-                      ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-cyan-500/30 border border-cyan-400'
-                      : 'bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-cyan-900/60'
-                  }`}
-                  title="Switch directly to 3D Floating Photo Universe"
-                >
-                  <Compass className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                  <span>🌌 Photo Universe</span>
-                </button>
-
-                {/* 1-Click Memory Burst Studio Mode Switch */}
-                <button
-                  onClick={() => {
-                    setActiveTab('memoryburst')
-                    setComposition((prev) => ({
-                      ...prev,
-                      memoryBurst: {
-                        ...(prev.memoryBurst || DEFAULT_MEMORY_BURST_CONFIG),
-                        enabled: true,
-                      },
-                    }))
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeTab === 'memoryburst'
-                      ? 'bg-gradient-to-r from-amber-600 via-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/30 border border-rose-400'
-                      : 'bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:text-white hover:bg-rose-900/60'
-                  }`}
-                  title="Switch directly to Memory Burst Studio"
-                >
-                  <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                  <span>⚡ Memory Burst</span>
-                </button>
-
-                {/* 1-Click SonicCam 3D Mode Switch */}
-                <button
-                  onClick={() => {
-                    setActiveTab('soniccam')
-                    setComposition((prev) => ({
-                      ...prev,
-                      sonicCam3d: {
-                        ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
-                        sourceImageUrl: prev.sonicCam3d?.sourceImageUrl || prev.background.singleImageUrl || null,
-                      },
-                    }))
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeTab === 'soniccam'
-                      ? 'bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-lg shadow-sky-500/30 border border-sky-400'
-                      : 'bg-sky-950/40 border border-sky-500/30 text-sky-300 hover:text-white hover:bg-sky-900/60'
-                  }`}
-                  title="Switch directly to SonicCam 3D Cinematic Camera Studio"
-                >
-                  <Camera className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
-                  <span>🎥 SonicCam 3D</span>
-                </button>
-
-                {/* 1-Click Garden Studio Mode Switch */}
-                <button
-                  onClick={() => setActiveTab('garden')}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeTab === 'garden'
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400'
-                      : 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 hover:text-white hover:bg-emerald-900/60'
-                  }`}
-                  title="Switch directly to Music-Grown Garden Studio"
-                >
-                  <Flower2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                  <span>🌸 Garden Studio</span>
-                </button>
-
-                {/* Master All Effects Bypass/Enable */}
-                <button
-                  onClick={toggleMasterAllEffects}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-                    composition.portalVfx?.masterAllEffectsEnabled
-                      ? 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shadow'
-                      : 'bg-amber-500/15 border border-amber-500/40 text-amber-300'
-                  }`}
-                  title="Toggle master bypass for all visual effects without deleting settings"
-                >
-                  <Zap className="w-3.5 h-3.5" />
-                  <span>{composition.portalVfx?.masterAllEffectsEnabled ? 'All Effects: ON' : 'All Effects: BYPASS'}</span>
-                </button>
-
-                {/* Before / After Preview Switch */}
-                <button
-                  onClick={toggleBeforeAfter}
-                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
-                    composition.portalVfx?.isBeforePreviewActive
-                      ? 'bg-violet-600 text-white shadow-md'
-                      : 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white'
-                  }`}
-                  title="Toggle Before (100% clean photo) vs After (with active VFX)"
-                >
-                  {composition.portalVfx?.isBeforePreviewActive ? (
-                    <>
-                      <EyeOff className="w-3.5 h-3.5" />
-                      <span>Viewing: Clean Before</span>
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Before / After</span>
-                    </>
-                  )}
-                </button>
-
-                {/* Reset All Effects Button */}
-                <button
-                  onClick={handleResetAllPortalEffects}
-                  className="px-2.5 py-1.5 rounded-xl font-bold bg-slate-900 hover:bg-red-950/40 border border-white/10 text-slate-400 hover:text-red-300 flex items-center gap-1"
-                  title="Turn off every effect and restore the clean original photo"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Reset Effects</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Visualizer Canvas Container */}
             <div
-              className="relative w-full aspect-video bg-[#05060A] rounded-2xl border border-white/10 overflow-hidden shadow-2xl flex items-center justify-center group select-none"
-              onMouseMove={(e) => {
-                if (!isDraggingPortal || !composition.portalVfx?.ring.enabled) return
-                const rect = e.currentTarget.getBoundingClientRect()
-                const newX = Math.max(5, Math.min(95, ((e.clientX - rect.left) / rect.width) * 100))
-                const newY = Math.max(5, Math.min(95, ((e.clientY - rect.top) / rect.height) * 100))
-                setComposition((prev) => ({
-                  ...prev,
-                  portalVfx: {
-                    ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
-                    ring: {
-                      ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
-                      posX: Math.round(newX),
-                      posY: Math.round(newY),
-                    },
-                  },
-                }))
-              }}
-              onMouseUp={() => setIsDraggingPortal(false)}
-              onMouseLeave={() => setIsDraggingPortal(false)}
+              ref={playerContainerRef}
+              className={`w-full bg-[#07080D] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col transition-all group select-none ${
+                isFullscreen ? 'fixed inset-0 z-50 rounded-none border-none bg-black justify-between' : ''
+              }`}
             >
-              <canvas
-                ref={canvasRef}
-                className="w-full h-full object-contain pointer-events-none"
-              />
-
-              {/* On-Canvas Interactive Drag Handle (When Portal Ring is Enabled) */}
-              {activeTab === 'portal' &&
-                composition.portalVfx?.sourceImageUrl &&
-                composition.portalVfx?.ring.enabled && (
-                  <div
-                    style={{
-                      left: `${composition.portalVfx.ring.posX}%`,
-                      top: `${composition.portalVfx.ring.posY}%`,
-                    }}
-                    onMouseDown={() => setIsDraggingPortal(true)}
-                    className="absolute z-10 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-cyan-400 bg-black/60 backdrop-blur-md cursor-move flex items-center justify-center hover:scale-125 transition-transform shadow-lg shadow-cyan-500/40 group/handle"
-                    title="Click and drag to position portal"
-                  >
-                    <CircleDot className="w-4 h-4 text-cyan-300 animate-pulse" />
-                    <span className="absolute -top-6 px-1.5 py-0.5 rounded text-[9px] font-mono bg-black/80 text-cyan-300 border border-cyan-500/30 opacity-0 group-hover/handle:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
-                      Drag Portal ({composition.portalVfx.ring.posX}%, {composition.portalVfx.ring.posY}%)
-                    </span>
-                  </div>
-                )}
-
-              {/* Central Play/Pause Hover Trigger */}
-              <button
-                onClick={togglePlayPause}
-                className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 active:scale-95 shadow-2xl"
+              {/* Canvas Viewport */}
+              <div
+                className={`relative w-full ${
+                  isFullscreen ? 'flex-1' : 'aspect-video'
+                } bg-[#030408] flex items-center justify-center overflow-hidden`}
+                onMouseMove={(e) => {
+                  if (!isDraggingPortal || !composition.portalVfx?.ring.enabled) return
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  const newX = Math.max(5, Math.min(95, ((e.clientX - rect.left) / rect.width) * 100))
+                  const newY = Math.max(5, Math.min(95, ((e.clientY - rect.top) / rect.height) * 100))
+                  setComposition((prev) => ({
+                    ...prev,
+                    portalVfx: {
+                      ...(prev.portalVfx || DEFAULT_PORTAL_VFX_CONFIG),
+                      ring: {
+                        ...(prev.portalVfx?.ring || DEFAULT_PORTAL_VFX_CONFIG.ring),
+                        posX: Math.round(newX),
+                        posY: Math.round(newY),
+                      },
+                    },
+                  }))
+                }}
+                onMouseUp={() => setIsDraggingPortal(false)}
+                onMouseLeave={() => setIsDraggingPortal(false)}
               >
-                {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1 text-cyan-400" />}
-              </button>
+                <canvas
+                  ref={canvasRef}
+                  className="w-full h-full object-contain pointer-events-none"
+                />
 
-              {/* Top overlay badges */}
-              <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
-                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-black/60 backdrop-blur-md text-white border border-white/10">
-                  {composition.aspectRatio}
-                </span>
-                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-black/60 backdrop-blur-md text-cyan-300 border border-white/10">
-                  {composition.resolution}
-                </span>
-              </div>
-            </div>
+                {/* On-Canvas Interactive Drag Handle (When Portal Ring is Enabled) */}
+                {activeTab === 'portal' &&
+                  composition.portalVfx?.sourceImageUrl &&
+                  composition.portalVfx?.ring.enabled && (
+                    <div
+                      style={{
+                        left: `${composition.portalVfx.ring.posX}%`,
+                        top: `${composition.portalVfx.ring.posY}%`,
+                      }}
+                      onMouseDown={() => setIsDraggingPortal(true)}
+                      className="absolute z-10 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-cyan-400 bg-black/60 backdrop-blur-md cursor-move flex items-center justify-center hover:scale-125 transition-transform shadow-lg shadow-cyan-500/40 group/handle"
+                      title="Click and drag to position portal"
+                    >
+                      <CircleDot className="w-4 h-4 text-cyan-300 animate-pulse" />
+                      <span className="absolute -top-6 px-1.5 py-0.5 rounded text-[9px] font-mono bg-black/80 text-cyan-300 border border-cyan-500/30 opacity-0 group-hover/handle:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
+                        Drag Portal ({composition.portalVfx.ring.posX}%, {composition.portalVfx.ring.posY}%)
+                      </span>
+                    </div>
+                  )}
 
-            {/* Audio Timeline & Scrubber Panel */}
-            <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={togglePlayPause}
-                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform"
-                  >
-                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (audioEngineRef.current) {
-                        audioEngineRef.current.seek(0)
-                        setCurrentTime(0)
-                      }
-                    }}
-                    className="p-2.5 rounded-xl bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-colors"
-                    title="Restart"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                  <div className="text-xs font-mono text-slate-300">
-                    <span className="text-cyan-400 font-bold">{formatSec(currentTime)}</span>
-                    <span className="text-slate-500 mx-1">/</span>
-                    <span>{formatSec(audioTrack.duration || 0)}</span>
+                {/* Top Floating Glass Header (Aspect, Resolution, Active Effect Badge & Fullscreen Icon) */}
+                <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none z-20">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-black/60 backdrop-blur-md text-white border border-white/10 shadow-sm">
+                      {composition.aspectRatio}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-black/60 backdrop-blur-md text-cyan-300 border border-cyan-500/20 shadow-sm">
+                      {composition.resolution}
+                    </span>
+                    {composition.vintageCassette?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                        <span>📼 Cassette Visualizer</span>
+                      </span>
+                    )}
+                    {composition.photoUniverse?.enabled && composition.photoUniverse.filmReel?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                        <span>🎞️ Film Reel Journey</span>
+                      </span>
+                    )}
+                    {composition.photoUniverse?.enabled && !composition.photoUniverse.filmReel?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                        <span>🌌 Photo Universe</span>
+                      </span>
+                    )}
+                    {composition.memoryBurst?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse shrink-0" />
+                        <span>⚡ Memory Burst</span>
+                      </span>
+                    )}
+                    {composition.sonicCam3d?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-sky-500/15 border border-sky-500/30 text-sky-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse shrink-0" />
+                        <span>🎥 SonicCam 3D</span>
+                      </span>
+                    )}
+                    {composition.gardenStudio?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                        <span>🌸 Garden Studio</span>
+                      </span>
+                    )}
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2 max-w-xs truncate">
-                  <Music className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span className="text-xs text-slate-300 truncate font-medium">
-                    {audioTrack.name}
-                  </span>
-                </div>
-
-                {/* Volume slider */}
-                <div className="flex items-center gap-2">
-                  <button onClick={toggleMute} className="text-slate-400 hover:text-white">
-                    {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
+                  <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    className="pointer-events-auto p-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/15 text-slate-300 hover:text-white transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer"
+                    title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                  >
+                    {isFullscreen ? <Minimize2 className="w-4 h-4 text-cyan-400" /> : <Maximize2 className="w-4 h-4" />}
                   </button>
+                </div>
+
+                {/* Big Central Play/Pause Hover Trigger */}
+                <button
+                  onClick={togglePlayPause}
+                  className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-xl border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer z-20"
+                  title={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1 text-cyan-400" />}
+                </button>
+              </div>
+
+              {/* Integrated Bottom Cinematic Control Deck */}
+              <div className="p-4 bg-gradient-to-t from-black via-[#08090E] to-[#0D0F17] border-t border-white/10 flex flex-col gap-3">
+                {/* Timeline Seek Bar */}
+                <div className="relative flex items-center group/scrubber cursor-pointer">
                   <input
                     type="range"
                     min="0"
-                    max="1"
-                    step="0.05"
-                    value={isMuted ? 0 : volume}
-                    onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                    className="w-20 accent-cyan-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                    max={audioTrack.duration || 30}
+                    step="0.1"
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="w-full h-2 rounded-lg bg-slate-800 accent-gradient cursor-pointer accent-cyan-400"
                   />
                 </div>
-              </div>
 
-              {/* Timeline Seek Bar */}
-              <div className="relative flex items-center">
-                <input
-                  type="range"
-                  min="0"
-                  max={audioTrack.duration || 30}
-                  step="0.1"
-                  value={currentTime}
-                  onChange={handleSeek}
-                  className="w-full h-2 rounded-lg bg-slate-800 accent-gradient cursor-pointer accent-cyan-400"
-                />
+                {/* Player Controls Row */}
+                <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+                  {/* Left Controls: Play/Pause, Restart, Time readout */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={togglePlayPause}
+                      className="w-10 h-10 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-cyan-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (audioEngineRef.current) {
+                          audioEngineRef.current.seek(0)
+                          setCurrentTime(0)
+                        }
+                      }}
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                      title="Restart from beginning"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+
+                    <div className="text-xs font-mono text-slate-300 flex items-center gap-1">
+                      <span className="text-cyan-400 font-bold">{formatSec(currentTime)}</span>
+                      <span className="text-slate-600">/</span>
+                      <span className="text-slate-400">{formatSec(audioTrack.duration || 0)}</span>
+                    </div>
+                  </div>
+
+                  {/* Center: Track title pill */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 max-w-[200px] sm:max-w-[320px] truncate shadow-inner">
+                    <Music className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-xs text-slate-200 truncate font-semibold" title={audioTrack.name}>
+                      {audioTrack.name}
+                    </span>
+                  </div>
+
+                  {/* Right: Volume & Fullscreen Toggle */}
+                  <div className="flex items-center gap-3">
+                    {/* Volume slider */}
+                    <div className="hidden sm:flex items-center gap-2">
+                      <button onClick={toggleMute} className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+                        {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
+                      </button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={isMuted ? 0 : volume}
+                        onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                        className="w-16 md:w-20 accent-cyan-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                      />
+                    </div>
+
+                    {/* Fullscreen Button */}
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-cyan-300 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                      title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen'}
+                    >
+                      {isFullscreen ? <Minimize2 className="w-4 h-4 text-cyan-400" /> : <Maximize2 className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
