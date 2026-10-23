@@ -1,0 +1,1094 @@
+/**
+ * IndiaTools — Vintage Cassette Visualizer
+ * Deterministic Canvas 2D Rendering Engine
+ */
+
+import {
+  VintageCassetteStudioConfig,
+  DEFAULT_VINTAGE_CASSETTE_CONFIG,
+} from './cassetteTypes.ts'
+import { NormalizedAudioBands } from '../audioToVideo/types.ts'
+
+interface GlitchState {
+  active: boolean
+  triggerTime: number
+  duration: number
+  intensity: number
+  lastTriggerTime: number
+  jitterX: number
+  jitterY: number
+}
+
+export class VintageCassetteEngine {
+  private imageCache: Map<string, HTMLImageElement> = new Map()
+
+  // Deterministic rotation physics
+  private lastTime: number = 0
+  private leftAngle: number = 0
+  private rightAngle: number = 0
+  private smoothedBass: number = 0
+  private currentSpoolRatio: number = 0.35
+
+  // Climax tape glitch state machine
+  private glitch: GlitchState = {
+    active: false,
+    triggerTime: -999,
+    duration: 0.38,
+    intensity: 0,
+    lastTriggerTime: -999,
+    jitterX: 0,
+    jitterY: 0,
+  }
+
+  // Pre-computed grain pattern for deterministic 60fps performance
+  private grainCanvas: HTMLCanvasElement | null = null
+
+  constructor() {
+    this.initGrainPattern()
+  }
+
+  private initGrainPattern() {
+    if (typeof document === 'undefined') return
+    const size = 256
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const imgData = ctx.createImageData(size, size)
+    const data = imgData.data
+    for (let i = 0; i < data.length; i += 4) {
+      const v = Math.random() * 255
+      data[i] = v
+      data[i + 1] = v
+      data[i + 2] = v
+      data[i + 3] = 40
+    }
+    ctx.putImageData(imgData, 0, 0)
+    this.grainCanvas = canvas
+  }
+
+  public getCachedImage(url?: string): HTMLImageElement | null {
+    if (!url || typeof Image === 'undefined') return null
+    let img = this.imageCache.get(url)
+    if (!img) {
+      img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.src = url
+      this.imageCache.set(url, img)
+    }
+    return img.complete && img.naturalWidth > 0 ? img : null
+  }
+
+  /**
+   * Resets simulation state (e.g. on seek or new track)
+   */
+  public reset(currentTime: number = 0) {
+    this.lastTime = currentTime
+    this.leftAngle = 0
+    this.rightAngle = 0
+    this.smoothedBass = 0
+    this.currentSpoolRatio = 0.35
+    this.glitch.active = false
+    this.glitch.lastTriggerTime = -999
+  }
+
+  /**
+   * Master Render Function
+   */
+  public render(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    config: VintageCassetteStudioConfig = DEFAULT_VINTAGE_CASSETTE_CONFIG,
+    bands?: NormalizedAudioBands,
+    timeData?: Uint8Array,
+    currentTime: number = 0,
+    duration: number = 30
+  ) {
+    if (!config.enabled) return
+
+    // 1. Advance Physics Integration
+    this.updatePhysics(currentTime, duration, bands, config)
+
+    // 2. Glitch State Evaluation
+    this.updateGlitch(currentTime, bands, config)
+
+    ctx.save()
+
+    // Apply glitch camera displacement if active
+    if (this.glitch.active && config.climaxGlitchEnabled) {
+      ctx.translate(this.glitch.jitterX, this.glitch.jitterY)
+    }
+
+    // 3. Render Order:
+    // (1) Background and subtle atmosphere
+    this.renderBackground(ctx, width, height, config, bands, currentTime)
+
+    // Calculate Cassette Geometry (Standard 16:10 / 1.56 aspect ratio)
+    const cassetteW = Math.min(width * 0.72, height * 1.15)
+    const cassetteH = cassetteW * 0.63
+    const cassetteX = (width - cassetteW) / 2
+    const cassetteY = (height - cassetteH) / 2 - height * 0.02 // slightly raised for tape ribbon below
+
+    // (2) Magnetic tape ribbon extending beneath or around the cassette (Background part)
+    if (config.tapeRibbonEnabled) {
+      this.renderMagneticRibbon(ctx, width, height, cassetteX, cassetteY, cassetteW, cassetteH, config, timeData, currentTime)
+    }
+
+    // (3) Cassette Body Chassis
+    this.renderCassetteBody(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
+
+    // (4) User photo mapped into central label area
+    this.renderCassetteLabel(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
+
+    // (5) Independently rotating left and right reel hubs & tape spools
+    this.renderReelHubs(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
+
+    // (6) Front Faceplate Overlay, Screws, and Glass Sheen
+    this.renderFaceplateAndGlass(ctx, cassetteX, cassetteY, cassetteW, cassetteH, config)
+
+    // (7) Finishing Overlays: Analog Grain, VHS Scanlines & Climax Glitch
+    this.renderAnalogOverlays(ctx, width, height, config, currentTime)
+
+    ctx.restore()
+  }
+
+  /**
+   * Deterministic Time-Based Physics Integration
+   */
+  private updatePhysics(
+    currentTime: number,
+    duration: number,
+    bands: NormalizedAudioBands | undefined,
+    config: VintageCassetteStudioConfig
+  ) {
+    const rawDt = currentTime - this.lastTime
+    // Clamp delta time to avoid large rotation bursts during playhead seeks or tab focus changes
+    const dt = Math.max(0, Math.min(0.08, rawDt > 0 ? rawDt : 0.016))
+    this.lastTime = currentTime
+
+    // Smooth bass energy using exponential decay filter
+    const bass = bands?.bass ?? 0.25
+    this.smoothedBass += (bass - this.smoothedBass) * 0.22
+
+    // Angular velocity with bass transient boost
+    const baseSpeed = 2.2 * Math.max(0.2, config.reelSpeed)
+    const bassFactor = 1.0 + (config.bassReactivity / 100) * this.smoothedBass * 2.8
+
+    // Spool progression (tape moves from left spool to right spool)
+    if (config.autoSpoolProgress && duration > 0) {
+      this.currentSpoolRatio = Math.max(0.05, Math.min(0.95, currentTime / duration))
+    } else {
+      this.currentSpoolRatio = config.reelSpoolProgress / 100
+    }
+
+    // Left spool unwinds (smaller radius -> faster angular velocity)
+    // Right spool winds (larger radius -> slower angular velocity)
+    const leftRadiusNorm = Math.max(0.4, 1.0 - this.currentSpoolRatio * 0.6)
+    const rightRadiusNorm = Math.max(0.4, 0.4 + this.currentSpoolRatio * 0.6)
+
+    const leftVel = (baseSpeed * bassFactor) / leftRadiusNorm
+    const rightVel = (baseSpeed * bassFactor) / rightRadiusNorm
+
+    this.leftAngle = (this.leftAngle + leftVel * dt) % (Math.PI * 2)
+    this.rightAngle = (this.rightAngle + rightVel * dt) % (Math.PI * 2)
+  }
+
+  /**
+   * Climax Tape Glitch Detector
+   */
+  private updateGlitch(
+    currentTime: number,
+    bands: NormalizedAudioBands | undefined,
+    config: VintageCassetteStudioConfig
+  ) {
+    if (!config.climaxGlitchEnabled || !bands) {
+      this.glitch.active = false
+      return
+    }
+
+    const energy = bands.overall || (bands.bass * 0.6 + (bands.mid || 0) * 0.4)
+    const isClimaxHit = energy >= config.glitchThreshold && bands.isBeatHit
+
+    // Trigger condition: energy above threshold and cooldown elapsed
+    if (isClimaxHit && currentTime - this.glitch.lastTriggerTime >= config.glitchCooldownSec) {
+      this.glitch.active = true
+      this.glitch.triggerTime = currentTime
+      this.glitch.lastTriggerTime = currentTime
+      this.glitch.intensity = config.glitchIntensity / 100
+    }
+
+    // Check if active glitch expired
+    if (this.glitch.active) {
+      const elapsed = currentTime - this.glitch.triggerTime
+      if (elapsed > this.glitch.duration) {
+        this.glitch.active = false
+        this.glitch.jitterX = 0
+        this.glitch.jitterY = 0
+      } else {
+        const decay = 1.0 - elapsed / this.glitch.duration
+        const maxOffset = 18 * this.glitch.intensity * decay
+        this.glitch.jitterX = (Math.random() - 0.5) * maxOffset
+        this.glitch.jitterY = (Math.random() - 0.5) * (maxOffset * 0.5)
+      }
+    }
+  }
+
+  /**
+   * 1. Background & Atmosphere
+   */
+  private renderBackground(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    config: VintageCassetteStudioConfig,
+    bands: NormalizedAudioBands | undefined,
+    currentTime: number
+  ) {
+    // Check if user has custom background or generated retro background
+    const bgImg = this.getCachedImage(config.customBackgroundUrl) ||
+                  this.getCachedImage('/images/cassette/retro-background.jpg')
+
+    if (bgImg) {
+      ctx.drawImage(bgImg, 0, 0, width, height)
+    } else {
+      // Procedural Studio Background Preset
+      const grad = ctx.createRadialGradient(
+        width * 0.5,
+        height * 0.45,
+        Math.min(width, height) * 0.1,
+        width * 0.5,
+        height * 0.5,
+        Math.max(width, height) * 0.75
+      )
+
+      const bassPulse = (bands?.bass ?? 0.2) * 0.15
+
+      switch (config.backgroundPreset) {
+        case 'warm-nostalgia':
+          grad.addColorStop(0, `rgba(${Math.round(48 + bassPulse * 30)}, 24, 12, 1)`)
+          grad.addColorStop(0.55, 'rgba(18, 10, 6, 1)')
+          grad.addColorStop(1, 'rgba(6, 4, 3, 1)')
+          break
+        case 'neon-cyberpunk':
+          grad.addColorStop(0, `rgba(${Math.round(40 + bassPulse * 35)}, 12, 55, 1)`)
+          grad.addColorStop(0.55, 'rgba(10, 8, 28, 1)')
+          grad.addColorStop(1, 'rgba(3, 4, 12, 1)')
+          break
+        case 'deep-charcoal':
+          grad.addColorStop(0, `rgba(${Math.round(28 + bassPulse * 20)}, 30, 34, 1)`)
+          grad.addColorStop(0.6, 'rgba(14, 16, 18, 1)')
+          grad.addColorStop(1, 'rgba(5, 6, 8, 1)')
+          break
+        case 'midnight-studio':
+        default:
+          grad.addColorStop(0, `rgba(${Math.round(18 + bassPulse * 25)}, 24, 45, 1)`)
+          grad.addColorStop(0.55, 'rgba(8, 10, 22, 1)')
+          grad.addColorStop(1, 'rgba(3, 4, 8, 1)')
+          break
+      }
+
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, width, height)
+    }
+
+    // Soft warm studio spotlight cone behind cassette
+    const spotlightGrad = ctx.createRadialGradient(
+      width * 0.5,
+      height * 0.45,
+      10,
+      width * 0.5,
+      height * 0.45,
+      width * 0.42
+    )
+    spotlightGrad.addColorStop(0, 'rgba(255, 180, 100, 0.08)')
+    spotlightGrad.addColorStop(0.6, 'rgba(255, 140, 60, 0.02)')
+    spotlightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    ctx.fillStyle = spotlightGrad
+    ctx.fillRect(0, 0, width, height)
+  }
+
+  /**
+   * 2. Unraveling Magnetic Tape Ribbon (Audio-Reactive Flow)
+   */
+  private renderMagneticRibbon(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    cX: number,
+    cY: number,
+    cW: number,
+    cH: number,
+    config: VintageCassetteStudioConfig,
+    timeData: Uint8Array | undefined,
+    currentTime: number
+  ) {
+    ctx.save()
+
+    // Tape guide roller exits on cassette bottom edge
+    const leftGuideX = cX + cW * 0.28
+    const rightGuideX = cX + cW * 0.72
+    const exitY = cY + cH * 0.96
+
+    const amp = (config.waveformIntensity / 100) * 45
+    const thickness = config.ribbonThickness
+    const style = config.tapeRibbonStyle
+
+    // Time domain waveform sample extraction
+    const sampleCount = 64
+    const waveOffsets: number[] = []
+    if (timeData && timeData.length > 0) {
+      const step = Math.floor(timeData.length / sampleCount)
+      for (let i = 0; i < sampleCount; i++) {
+        const val = (timeData[i * step] - 128) / 128
+        waveOffsets.push(val * amp)
+      }
+    } else {
+      // Gentle synthetic breathing sway when paused
+      for (let i = 0; i < sampleCount; i++) {
+        waveOffsets.push(Math.sin(currentTime * 2.0 + i * 0.2) * 6)
+      }
+    }
+
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+
+    if (style === 'loose-flowing') {
+      // Natural loose S-curves looping organically below the cassette
+      const p1X = leftGuideX - cW * 0.12 + (waveOffsets[8] || 0)
+      const p1Y = exitY + cH * 0.35 + (waveOffsets[12] || 0) * 0.5
+
+      const p2X = cX + cW * 0.5 + Math.sin(currentTime * 1.5) * 40 + (waveOffsets[24] || 0)
+      const p2Y = exitY + cH * 0.55 + (waveOffsets[32] || 0)
+
+      const p3X = rightGuideX + cW * 0.14 + (waveOffsets[44] || 0)
+      const p3Y = exitY + cH * 0.32 + (waveOffsets[48] || 0) * 0.5
+
+      // Outer glow
+      if (config.ribbonGlow > 0) {
+        ctx.strokeStyle = config.ribbonColor === '#3A281E' ? 'rgba(217, 119, 6, 0.25)' : config.ribbonColor
+        ctx.lineWidth = thickness + 8
+        ctx.shadowColor = config.ribbonColor
+        ctx.shadowBlur = config.ribbonGlow * 0.2
+        ctx.beginPath()
+        ctx.moveTo(leftGuideX, exitY)
+        ctx.bezierCurveTo(p1X, p1Y, p2X, p2Y, rightGuideX, exitY)
+        ctx.stroke()
+        ctx.shadowBlur = 0
+      }
+
+      // Base magnetic tape ribbon (dark oxide brown)
+      ctx.strokeStyle = config.ribbonColor
+      ctx.lineWidth = thickness
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX, exitY)
+      ctx.bezierCurveTo(p1X, p1Y, p2X, p2Y, rightGuideX, exitY)
+      ctx.stroke()
+
+      // Subtle specular line along ribbon edge
+      ctx.strokeStyle = 'rgba(255, 230, 200, 0.45)'
+      ctx.lineWidth = Math.max(1.2, thickness * 0.18)
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX, exitY)
+      ctx.bezierCurveTo(p1X - 2, p1Y - 2, p2X - 2, p2Y - 2, rightGuideX, exitY)
+      ctx.stroke()
+    } else if (style === 'symmetrical-ribbon') {
+      // Twin looping ribbons branching left and right
+      const midY = exitY + cH * 0.42
+
+      // Left branch loop
+      ctx.strokeStyle = config.ribbonColor
+      ctx.lineWidth = thickness
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX, exitY)
+      ctx.bezierCurveTo(
+        leftGuideX - cW * 0.22 + (waveOffsets[10] || 0),
+        midY + (waveOffsets[14] || 0),
+        cX + cW * 0.35 + (waveOffsets[20] || 0),
+        midY + cH * 0.25,
+        cX + cW * 0.5,
+        exitY + cH * 0.35
+      )
+      ctx.stroke()
+
+      // Right branch loop
+      ctx.beginPath()
+      ctx.moveTo(rightGuideX, exitY)
+      ctx.bezierCurveTo(
+        rightGuideX + cW * 0.22 - (waveOffsets[30] || 0),
+        midY + (waveOffsets[34] || 0),
+        cX + cW * 0.65 - (waveOffsets[40] || 0),
+        midY + cH * 0.25,
+        cX + cW * 0.5,
+        exitY + cH * 0.35
+      )
+      ctx.stroke()
+    } else {
+      // Cinematic Trail: Continuous wave undulating across bottom frame
+      ctx.strokeStyle = config.ribbonColor
+      ctx.lineWidth = thickness
+      ctx.beginPath()
+      const startX = width * 0.1
+      const endX = width * 0.9
+      const baseWaveY = exitY + cH * 0.28
+
+      ctx.moveTo(startX, baseWaveY + (waveOffsets[0] || 0))
+      for (let i = 1; i < sampleCount; i++) {
+        const x = startX + (i / (sampleCount - 1)) * (endX - startX)
+        const y = baseWaveY + (waveOffsets[i] || 0)
+        ctx.lineTo(x, y)
+      }
+      ctx.stroke()
+
+      // Feed lines from cassette guide holes to waveform trail
+      ctx.lineWidth = thickness * 0.75
+      ctx.beginPath()
+      ctx.moveTo(leftGuideX, exitY)
+      ctx.lineTo(startX + (endX - startX) * 0.25, baseWaveY + (waveOffsets[16] || 0))
+      ctx.moveTo(rightGuideX, exitY)
+      ctx.lineTo(startX + (endX - startX) * 0.75, baseWaveY + (waveOffsets[48] || 0))
+      ctx.stroke()
+    }
+
+    ctx.restore()
+  }
+
+  /**
+   * 3. Cassette Body Chassis
+   */
+  private renderCassetteBody(
+    ctx: CanvasRenderingContext2D,
+    cX: number,
+    cY: number,
+    cW: number,
+    cH: number,
+    config: VintageCassetteStudioConfig
+  ) {
+    ctx.save()
+
+    const cornerRadius = cW * 0.024
+    const opacity = config.shellOpacity / 100
+
+    // Try rendering photo-realistic body asset if available
+    const bodyImg = this.getCachedImage('/images/cassette/cassette-body.png')
+    if (bodyImg) {
+      ctx.globalAlpha = opacity
+      ctx.drawImage(bodyImg, cX, cY, cW, cH)
+      ctx.globalAlpha = 1.0
+      ctx.restore()
+      return
+    }
+
+    // Procedural Vector Cassette Shell (Crisp, High-Detail 1990s Polycarbonate)
+    // 1. Soft Drop Shadow behind the cassette
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'
+    ctx.shadowBlur = 35
+    ctx.shadowOffsetY = 16
+
+    // 2. Outer Chassis Bevel
+    this.drawRoundedRect(ctx, cX, cY, cW, cH, cornerRadius)
+
+    switch (config.cassetteStyle) {
+      case 'classic-retro':
+        // Vintage 1980s Ivory / Warm Beige Studio Plastic
+        ctx.fillStyle = `rgba(224, 216, 198, ${opacity})`
+        break
+      case 'golden-edition':
+        // Metallic Gold Anodized Chassis
+        const goldGrad = ctx.createLinearGradient(cX, cY, cX + cW, cY + cH)
+        goldGrad.addColorStop(0, `rgba(180, 130, 45, ${opacity})`)
+        goldGrad.addColorStop(0.5, `rgba(240, 200, 110, ${opacity})`)
+        goldGrad.addColorStop(1, `rgba(140, 95, 30, ${opacity})`)
+        ctx.fillStyle = goldGrad
+        break
+      case 'transparent-clear':
+        // High-clarity clear acrylic shell
+        ctx.fillStyle = `rgba(240, 245, 255, ${opacity * 0.32})`
+        break
+      case 'smoked-black':
+      default:
+        // Authentic 1990s Smoked-Black Translucent Polycarbonate
+        const smokeGrad = ctx.createLinearGradient(cX, cY, cX, cY + cH)
+        smokeGrad.addColorStop(0, `rgba(32, 34, 40, ${opacity})`)
+        smokeGrad.addColorStop(0.5, `rgba(18, 20, 24, ${opacity})`)
+        smokeGrad.addColorStop(1, `rgba(10, 12, 15, ${opacity})`)
+        ctx.fillStyle = smokeGrad
+        break
+    }
+    ctx.fill()
+    ctx.shadowBlur = 0
+    ctx.shadowOffsetY = 0
+
+    // 3. Subtle Outer Border Stroke
+    ctx.strokeStyle = config.cassetteStyle === 'golden-edition'
+      ? 'rgba(255, 220, 140, 0.45)'
+      : 'rgba(255, 255, 255, 0.16)'
+    ctx.lineWidth = Math.max(1.5, cW * 0.003)
+    ctx.stroke()
+
+    // 4. Authentic lower trapezoid head-access notch
+    const trapW = cW * 0.62
+    const trapH = cH * 0.22
+    const trapX = cX + (cW - trapW) / 2
+    const trapY = cY + cH - trapH
+
+    ctx.beginPath()
+    ctx.moveTo(trapX + trapW * 0.06, trapY)
+    ctx.lineTo(trapX + trapW * 0.94, trapY)
+    ctx.lineTo(trapX + trapW, trapY + trapH)
+    ctx.lineTo(trapX, trapY + trapH)
+    ctx.closePath()
+
+    ctx.fillStyle = config.cassetteStyle === 'classic-retro'
+      ? 'rgba(200, 192, 175, 0.95)'
+      : 'rgba(12, 13, 16, 0.85)'
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)'
+    ctx.stroke()
+
+    // 5. Tape head access window holes (guide rollers and capstan holes)
+    const holeRadius = cW * 0.016
+    const holeY = trapY + trapH * 0.55
+    const holePositions = [
+      trapX + trapW * 0.18,
+      trapX + trapW * 0.38,
+      trapX + trapW * 0.62,
+      trapX + trapW * 0.82,
+    ]
+    ctx.fillStyle = 'rgba(4, 5, 6, 0.95)'
+    for (const hX of holePositions) {
+      ctx.beginPath()
+      ctx.arc(hX, holeY, holeRadius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+      ctx.stroke()
+    }
+
+    // 6. Corner Assembly Screws (4 corners + 1 top center)
+    const screwRadius = cW * 0.010
+    const screwMargin = cW * 0.035
+    const screwPositions = [
+      { x: cX + screwMargin, y: cY + screwMargin },
+      { x: cX + cW - screwMargin, y: cY + screwMargin },
+      { x: cX + screwMargin, y: cY + cH - screwMargin },
+      { x: cX + cW - screwMargin, y: cY + cH - screwMargin },
+      { x: cX + cW * 0.5, y: cY + screwMargin * 0.85 },
+    ]
+
+    for (const s of screwPositions) {
+      this.drawScrew(ctx, s.x, s.y, screwRadius, config.cassetteStyle === 'golden-edition')
+    }
+
+    ctx.restore()
+  }
+
+  /**
+   * 4. Custom Photo Label with Templates
+   */
+  private renderCassetteLabel(
+    ctx: CanvasRenderingContext2D,
+    cX: number,
+    cY: number,
+    cW: number,
+    cH: number,
+    config: VintageCassetteStudioConfig
+  ) {
+    ctx.save()
+
+    // Outer Label Bounds (occupies top central portion of cassette)
+    const labelW = cW * 0.82
+    const labelH = cH * 0.56
+    const labelX = cX + (cW - labelW) / 2
+    const labelY = cY + cH * 0.11
+    const cornerRadius = cW * 0.018
+
+    // Spool Window Cutout Dimensions (center hole where spools peek through)
+    const winW = cW * 0.48
+    const winH = cH * 0.28
+    const winX = cX + (cW - winW) / 2
+    const winY = labelY + (labelH - winH) / 2 + cH * 0.03
+    const winR = winH * 0.5 // Pill shape
+
+    // 1. Clip to Outer Label Rectangle
+    ctx.beginPath()
+    this.drawRoundedRectPath(ctx, labelX, labelY, labelW, labelH, cornerRadius)
+    ctx.clip()
+
+    // 2. Base Label Paper Background based on template
+    this.renderLabelBackground(ctx, labelX, labelY, labelW, labelH, config.labelTemplate)
+
+    // 3. User Photo Mapped into Label
+    const photoImg = this.getCachedImage(config.labelPhotoUrl)
+    if (photoImg) {
+      ctx.save()
+      // Optional subtle photo opacity when transparent template selected
+      ctx.globalAlpha = config.labelTemplate === 'transparent' ? 0.45 : 0.88
+
+      // Apply crop math preserving aspect ratio
+      const zoom = config.labelPhotoZoom / 100
+      const imgAspect = photoImg.naturalWidth / photoImg.naturalHeight
+      const labelAspect = labelW / labelH
+
+      let drawW = labelW
+      let drawH = labelH
+      if (config.labelPhotoFit === 'cover') {
+        if (imgAspect > labelAspect) {
+          drawH = labelH * zoom
+          drawW = drawH * imgAspect
+        } else {
+          drawW = labelW * zoom
+          drawH = drawW / imgAspect
+        }
+      } else {
+        // Contain
+        if (imgAspect > labelAspect) {
+          drawW = labelW * zoom
+          drawH = drawW / imgAspect
+        } else {
+          drawH = labelH * zoom
+          drawW = drawH * imgAspect
+        }
+      }
+
+      const drawX = labelX + (labelW - drawW) / 2 + config.labelPhotoOffsetX
+      const drawY = labelY + (labelH - drawH) / 2 + config.labelPhotoOffsetY
+
+      ctx.drawImage(photoImg, drawX, drawY, drawW, drawH)
+      ctx.restore()
+    }
+
+    // 4. Punch out the central transparent tape window from the label
+    // Using destination-out composite mode so spools underneath are 100% visible!
+    ctx.save()
+    ctx.globalCompositeOperation = 'destination-out'
+    ctx.beginPath()
+    this.drawRoundedRectPath(ctx, winX, winY, winW, winH, winR)
+    ctx.fill()
+    ctx.restore()
+
+    // 5. Label Typography & Template Overlays
+    this.renderLabelGraphics(ctx, labelX, labelY, labelW, labelH, winX, winY, winW, winH, config)
+
+    ctx.restore()
+  }
+
+  private renderLabelBackground(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    template: VintageCassetteStudioConfig['labelTemplate']
+  ) {
+    switch (template) {
+      case 'transparent':
+        // Minimalist clear label with frosted border
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)'
+        ctx.fillRect(x, y, w, h)
+        break
+      case 'neon':
+        // Synthwave dark gradient with glowing grid
+        const neonGrad = ctx.createLinearGradient(x, y, x, y + h)
+        neonGrad.addColorStop(0, 'rgba(26, 12, 44, 0.95)')
+        neonGrad.addColorStop(1, 'rgba(8, 6, 20, 0.98)')
+        ctx.fillStyle = neonGrad
+        ctx.fillRect(x, y, w, h)
+        break
+      case 'grunge':
+        // Worn aged yellowed paper
+        ctx.fillStyle = 'rgba(235, 222, 198, 0.95)'
+        ctx.fillRect(x, y, w, h)
+        break
+      case 'classic':
+      default:
+        // Authentic 1990s white/off-white coated paper label
+        const paperGrad = ctx.createLinearGradient(x, y, x, y + h)
+        paperGrad.addColorStop(0, 'rgba(248, 248, 250, 0.96)')
+        paperGrad.addColorStop(1, 'rgba(235, 236, 240, 0.96)')
+        ctx.fillStyle = paperGrad
+        ctx.fillRect(x, y, w, h)
+        break
+    }
+  }
+
+  private renderLabelGraphics(
+    ctx: CanvasRenderingContext2D,
+    lx: number,
+    ly: number,
+    lw: number,
+    lh: number,
+    wx: number,
+    wy: number,
+    ww: number,
+    wh: number,
+    config: VintageCassetteStudioConfig
+  ) {
+    const isDark = config.labelTemplate === 'neon' || config.labelTemplate === 'transparent'
+    const textColor = isDark ? '#FFFFFF' : '#1F2937'
+    const subColor = isDark ? '#A5B4FC' : '#6B7280'
+    const accentLine = config.labelTemplate === 'neon' ? '#EC4899' : '#DC2626'
+
+    ctx.save()
+
+    // 1. Top Header Bar & Side Tag ("SIDE A" / "SIDE B")
+    const sideBoxW = lw * 0.16
+    const sideBoxH = lh * 0.18
+    const sideBoxX = lx + lw * 0.05
+    const sideBoxY = ly + lh * 0.08
+
+    ctx.fillStyle = config.labelTemplate === 'neon' ? '#8B5CF6' : accentLine
+    ctx.fillRect(sideBoxX, sideBoxY, sideBoxW, sideBoxH)
+
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = `bold ${Math.round(lh * 0.10)}px monospace, sans-serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(config.labelSideText, sideBoxX + sideBoxW / 2, sideBoxY + sideBoxH / 2)
+
+    // 2. Ruled Write-in Lines (Classic / Grunge template)
+    if (config.labelTemplate === 'classic' || config.labelTemplate === 'grunge') {
+      ctx.strokeStyle = config.labelTemplate === 'grunge' ? 'rgba(120, 80, 50, 0.25)' : 'rgba(200, 205, 215, 0.6)'
+      ctx.lineWidth = 1
+      const lineY1 = ly + lh * 0.16
+      const lineY2 = ly + lh * 0.28
+      ctx.beginPath()
+      ctx.moveTo(sideBoxX + sideBoxW + lw * 0.04, lineY1)
+      ctx.lineTo(lx + lw * 0.94, lineY1)
+      ctx.moveTo(sideBoxX + sideBoxW + lw * 0.04, lineY2)
+      ctx.lineTo(lx + lw * 0.94, lineY2)
+      ctx.stroke()
+    }
+
+    // 3. Custom Mixtape Title & Artist Name
+    if (config.labelTitle) {
+      ctx.fillStyle = textColor
+      ctx.font = `600 ${Math.round(lh * 0.11)}px sans-serif`
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText(config.labelTitle.toUpperCase(), sideBoxX + sideBoxW + lw * 0.05, ly + lh * 0.15, lw * 0.68)
+    }
+
+    if (config.labelArtist) {
+      ctx.fillStyle = subColor
+      ctx.font = `400 ${Math.round(lh * 0.085)}px sans-serif`
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText(config.labelArtist.toUpperCase(), sideBoxX + sideBoxW + lw * 0.05, ly + lh * 0.27, lw * 0.68)
+    }
+
+    // 4. Border outline around window cutout
+    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.2)'
+    ctx.lineWidth = Math.max(1, lw * 0.003)
+    this.drawRoundedRect(ctx, wx - 1, wy - 1, ww + 2, wh + 2, wh * 0.5)
+
+    // 5. Tape Length Marks (100 | 50 | 0) along window
+    ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.5)'
+    ctx.font = `${Math.round(lh * 0.065)}px sans-serif`
+    ctx.textAlign = 'center'
+    ctx.fillText('100', wx + ww * 0.25, wy + wh + lh * 0.065)
+    ctx.fillText('50', wx + ww * 0.5, wy + wh + lh * 0.065)
+    ctx.fillText('0', wx + ww * 0.75, wy + wh + lh * 0.065)
+
+    ctx.restore()
+  }
+
+  /**
+   * 5. Independently Rotating Reel Hubs & Tape Spool Cakes
+   */
+  private renderReelHubs(
+    ctx: CanvasRenderingContext2D,
+    cX: number,
+    cY: number,
+    cW: number,
+    cH: number,
+    config: VintageCassetteStudioConfig
+  ) {
+    ctx.save()
+
+    // Hub centers
+    const leftCenterX = cX + cW * 0.355
+    const rightCenterX = cX + cW * 0.645
+    const hubCenterY = cY + cH * 0.44
+
+    const maxSpoolRadius = cW * 0.115
+    const minSpoolRadius = cW * 0.062
+    const hubRadius = cW * 0.048
+
+    // Left spool unwinds (smaller), right spool winds (larger)
+    const leftSpoolRadius = minSpoolRadius + (1.0 - this.currentSpoolRatio) * (maxSpoolRadius - minSpoolRadius)
+    const rightSpoolRadius = minSpoolRadius + this.currentSpoolRatio * (maxSpoolRadius - minSpoolRadius)
+
+    // A. Draw Wound Magnetic Tape Cakes (Dark Brown Oxide Rings)
+    this.drawTapeSpoolCake(ctx, leftCenterX, hubCenterY, leftSpoolRadius, hubRadius)
+    this.drawTapeSpoolCake(ctx, rightCenterX, hubCenterY, rightSpoolRadius, hubRadius)
+
+    // B. Draw Left and Right 3-Tooth Drive Hubs
+    const reelImg = this.getCachedImage('/images/cassette/cassette-reel.png')
+
+    // Left Reel
+    ctx.save()
+    ctx.translate(leftCenterX, hubCenterY)
+    ctx.rotate(this.leftAngle)
+    if (reelImg) {
+      ctx.drawImage(reelImg, -hubRadius, -hubRadius, hubRadius * 2, hubRadius * 2)
+    } else {
+      this.drawProceduralReelHub(ctx, hubRadius, config.cassetteStyle === 'golden-edition')
+    }
+    ctx.restore()
+
+    // Right Reel
+    ctx.save()
+    ctx.translate(rightCenterX, hubCenterY)
+    ctx.rotate(this.rightAngle)
+    if (reelImg) {
+      ctx.drawImage(reelImg, -hubRadius, -hubRadius, hubRadius * 2, hubRadius * 2)
+    } else {
+      this.drawProceduralReelHub(ctx, hubRadius, config.cassetteStyle === 'golden-edition')
+    }
+    ctx.restore()
+
+    ctx.restore()
+  }
+
+  private drawTapeSpoolCake(
+    ctx: CanvasRenderingContext2D,
+    cx: number,
+    cy: number,
+    outerR: number,
+    innerR: number
+  ) {
+    if (outerR <= innerR + 1) return
+
+    ctx.save()
+    // Tape Cake Body
+    const grad = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR)
+    grad.addColorStop(0, '#261812')
+    grad.addColorStop(0.7, '#3A281E')
+    grad.addColorStop(1, '#1A100C')
+    ctx.fillStyle = grad
+
+    ctx.beginPath()
+    ctx.arc(cx, cy, outerR, 0, Math.PI * 2)
+    ctx.arc(cx, cy, innerR, 0, Math.PI * 2, true)
+    ctx.fill()
+
+    // Concentric winding lines
+    ctx.strokeStyle = 'rgba(255, 230, 200, 0.08)'
+    ctx.lineWidth = 1
+    const steps = 4
+    for (let s = 1; s <= steps; s++) {
+      const r = innerR + (outerR - innerR) * (s / (steps + 1))
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+
+    ctx.restore()
+  }
+
+  /**
+   * Procedural Authentic 3-Tooth Compact Cassette Reel Hub
+   */
+  private drawProceduralReelHub(
+    ctx: CanvasRenderingContext2D,
+    radius: number,
+    isGold: boolean
+  ) {
+    // 1. Hub Outer Ring
+    ctx.beginPath()
+    ctx.arc(0, 0, radius, 0, Math.PI * 2)
+    ctx.fillStyle = isGold ? '#D97706' : '#F3F4F6'
+    ctx.fill()
+    ctx.strokeStyle = isGold ? '#92400E' : '#9CA3AF'
+    ctx.lineWidth = 1.5
+    ctx.stroke()
+
+    // 2. Central Drive Axle Hole
+    const innerHoleRadius = radius * 0.44
+    ctx.beginPath()
+    ctx.arc(0, 0, innerHoleRadius, 0, Math.PI * 2)
+    ctx.fillStyle = '#090A0F'
+    ctx.fill()
+    ctx.strokeStyle = isGold ? '#B45309' : '#D1D5DB'
+    ctx.lineWidth = 1
+    ctx.stroke()
+
+    // 3. Three Triangular Teeth / Drive Spokes
+    const toothCount = 3
+    ctx.fillStyle = isGold ? '#F59E0B' : '#E5E7EB'
+    ctx.strokeStyle = isGold ? '#78350F' : '#6B7280'
+    ctx.lineWidth = 1
+
+    for (let i = 0; i < toothCount; i++) {
+      const angle = (i * (Math.PI * 2)) / toothCount
+      ctx.save()
+      ctx.rotate(angle)
+
+      ctx.beginPath()
+      ctx.moveTo(innerHoleRadius * 0.95, -radius * 0.14)
+      ctx.lineTo(radius * 0.88, 0)
+      ctx.lineTo(innerHoleRadius * 0.95, radius * 0.14)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+
+      ctx.restore()
+    }
+  }
+
+  /**
+   * 6. Faceplate Overlays, Screws, and Plastic Glass Sheen
+   */
+  private renderFaceplateAndGlass(
+    ctx: CanvasRenderingContext2D,
+    cX: number,
+    cY: number,
+    cW: number,
+    cH: number,
+    config: VintageCassetteStudioConfig
+  ) {
+    ctx.save()
+
+    // Diagonal Glass Specular Sheen across entire cassette
+    const sheenGrad = ctx.createLinearGradient(cX, cY, cX + cW, cY + cH)
+    sheenGrad.addColorStop(0, 'rgba(255, 255, 255, 0.10)')
+    sheenGrad.addColorStop(0.35, 'rgba(255, 255, 255, 0.03)')
+    sheenGrad.addColorStop(0.48, 'rgba(255, 255, 255, 0.14)')
+    sheenGrad.addColorStop(0.52, 'rgba(255, 255, 255, 0.02)')
+    sheenGrad.addColorStop(1, 'rgba(255, 255, 255, 0.05)')
+
+    ctx.fillStyle = sheenGrad
+    this.drawRoundedRect(ctx, cX, cY, cW, cH, cW * 0.024)
+    ctx.fill()
+
+    ctx.restore()
+  }
+
+  /**
+   * 7. Analog Finishing Overlays: Film Grain, VHS Scanlines & Climax Glitch
+   */
+  private renderAnalogOverlays(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    config: VintageCassetteStudioConfig,
+    currentTime: number
+  ) {
+    ctx.save()
+
+    // A. VHS Scanlines Overlay
+    if (config.vhsScanlines) {
+      const scanOpacity = (config.scanlineIntensity / 100) * 0.28
+      ctx.fillStyle = `rgba(0, 0, 0, ${scanOpacity})`
+      const step = 4
+      const crawl = Math.floor((currentTime * 32) % step)
+      for (let y = crawl; y < height; y += step) {
+        ctx.fillRect(0, y, width, 1.5)
+      }
+    }
+
+    // B. Analog Film Grain
+    if (config.analogGrain && this.grainCanvas) {
+      ctx.globalAlpha = (config.grainIntensity / 100) * 0.35
+      ctx.globalCompositeOperation = 'overlay'
+      const pattern = ctx.createPattern(this.grainCanvas, 'repeat')
+      if (pattern) {
+        ctx.fillStyle = pattern
+        ctx.fillRect(0, 0, width, height)
+      }
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.globalAlpha = 1.0
+    }
+
+    // C. Climax Glitch RGB Chromatic Aberration & Scan Tracking Line
+    if (this.glitch.active && config.climaxGlitchEnabled) {
+      const intensity = this.glitch.intensity
+      // Tracking distortion band across random vertical segment
+      const bandY = ((currentTime * 180) % height)
+      const bandH = Math.min(120, height * 0.15)
+
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.12 * intensity})`
+      ctx.fillRect(0, bandY, width, bandH)
+
+      // Color split bar
+      ctx.fillStyle = `rgba(0, 240, 255, ${0.15 * intensity})`
+      ctx.fillRect(0, bandY + 4, width, 2)
+      ctx.fillStyle = `rgba(255, 0, 128, ${0.15 * intensity})`
+      ctx.fillRect(0, bandY + bandH - 4, width, 2)
+    }
+
+    ctx.restore()
+  }
+
+  /**
+   * Utility: Draw Corner Screw with Slot
+   */
+  private drawScrew(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    radius: number,
+    isGold: boolean
+  ) {
+    ctx.save()
+    // Screw Head
+    ctx.beginPath()
+    ctx.arc(x, y, radius, 0, Math.PI * 2)
+    ctx.fillStyle = isGold ? '#D97706' : '#4B5563'
+    ctx.fill()
+    ctx.strokeStyle = isGold ? '#78350F' : '#1F2937'
+    ctx.lineWidth = 1
+    ctx.stroke()
+
+    // Cross / Phillips Slot
+    ctx.strokeStyle = isGold ? '#92400E' : '#111827'
+    ctx.lineWidth = Math.max(1, radius * 0.3)
+    ctx.beginPath()
+    ctx.moveTo(x - radius * 0.55, y)
+    ctx.lineTo(x + radius * 0.55, y)
+    ctx.moveTo(x, y - radius * 0.55)
+    ctx.lineTo(x, y + radius * 0.55)
+    ctx.stroke()
+    ctx.restore()
+  }
+
+  /**
+   * Utility: Rounded Rect Helpers
+   */
+  private drawRoundedRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number
+  ) {
+    ctx.beginPath()
+    this.drawRoundedRectPath(ctx, x, y, w, h, r)
+  }
+
+  private drawRoundedRectPath(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number
+  ) {
+    const radius = Math.min(r, w / 2, h / 2)
+    ctx.moveTo(x + radius, y)
+    ctx.lineTo(x + w - radius, y)
+    ctx.arcTo(x + w, y, x + w, y + radius, radius)
+    ctx.lineTo(x + w, y + h - radius)
+    ctx.arcTo(x + w, y + h, x + w - radius, y + h, radius)
+    ctx.lineTo(x + radius, y + h)
+    ctx.arcTo(x, y + h, x, y + h - radius, radius)
+    ctx.lineTo(x, y + radius)
+    ctx.arcTo(x, y, x + radius, y, radius)
+    ctx.closePath()
+  }
+}
+
+export const vintageCassetteEngine = new VintageCassetteEngine()

@@ -15,6 +15,7 @@ import { musicGrownGardenEngine } from '../garden/gardenEngine.ts'
 import { sonicCamEngine } from '../sonicCam/sonicCamEngine.ts'
 import { memoryBurstEngine } from '../memoryBurst/memoryBurstEngine.ts'
 import { photoUniverseEngine } from '../photoUniverse/universeEngine.ts'
+import { vintageCassetteEngine } from '../cassette/cassetteEngine.ts'
 
 interface Particle {
   x: number
@@ -140,7 +141,9 @@ export class AudioToVideoRenderEngine {
       config.portalVfx?.sourceImageUrl ||
       config.background.singleImageUrl
 
-    if (config.photoUniverse?.enabled) {
+    if (config.vintageCassette?.enabled) {
+      vintageCassetteEngine.render(ctx, width, height, config.vintageCassette, bands, timeData, currentTime, duration)
+    } else if (config.photoUniverse?.enabled) {
       photoUniverseEngine.render(ctx, width, height, config.photoUniverse, bands, currentTime, duration)
     } else if (config.memoryBurst?.enabled) {
       memoryBurstEngine.render(ctx, width, height, config.memoryBurst, bands, currentTime, duration)
@@ -409,6 +412,7 @@ export class AudioToVideoRenderEngine {
     timeData: Uint8Array,
     currentTime: number
   ) {
+    if (config.vintageCassette?.enabled) return
     const viz = config.visualizer
 
     // 1. Audio Spectrum Styles

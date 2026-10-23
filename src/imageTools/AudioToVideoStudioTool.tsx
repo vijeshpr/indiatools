@@ -105,6 +105,8 @@ import { MemoryBurstStudioPanel } from './audioToVideo/MemoryBurstStudioPanel'
 import { DEFAULT_MEMORY_BURST_CONFIG } from '../lib/memoryBurst/memoryBurstTypes'
 import { PhotoUniverseStudioPanel } from './audioToVideo/PhotoUniverseStudioPanel'
 import { FilmReelStudioPanel } from './audioToVideo/FilmReelStudioPanel'
+import { VintageCassetteStudioPanel } from './audioToVideo/VintageCassetteStudioPanel'
+import { DEFAULT_VINTAGE_CASSETTE_CONFIG } from '../lib/cassette/cassetteTypes'
 import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
@@ -118,6 +120,7 @@ import {
 } from '../lib/audioToVideo/audioToVideoExportEngine'
 
 type StudioTab =
+  | 'cassette'
   | 'filmreel'
   | 'photouniverse'
   | 'memoryburst'
@@ -141,7 +144,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const tabParam = params.get('tab') as StudioTab
-      if (tabParam && ['filmreel', 'photouniverse', 'memoryburst', 'soniccam', 'portal', 'photomotion', 'garden', 'background', 'visualizer', 'cinematic', 'typography', 'audio'].includes(tabParam)) {
+      if (tabParam && ['cassette', 'filmreel', 'photouniverse', 'memoryburst', 'soniccam', 'portal', 'photomotion', 'garden', 'background', 'visualizer', 'cinematic', 'typography', 'audio'].includes(tabParam)) {
         return tabParam
       }
     }
@@ -1295,6 +1298,33 @@ export const AudioToVideoStudioTool: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
+                {/* 1-Click Vintage Cassette Visualizer Mode Switch */}
+                <button
+                  onClick={() => {
+                    setActiveTab('cassette')
+                    setComposition((prev) => ({
+                      ...prev,
+                      vintageCassette: {
+                        ...(prev.vintageCassette || DEFAULT_VINTAGE_CASSETTE_CONFIG),
+                        enabled: true,
+                      },
+                      photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : undefined,
+                      memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : undefined,
+                      sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : undefined,
+                      gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : undefined,
+                    }))
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    activeTab === 'cassette'
+                      ? 'bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400 text-black shadow-lg shadow-orange-500/30 border border-amber-300 font-extrabold'
+                      : 'bg-orange-950/40 border border-orange-500/30 text-amber-300 hover:text-white hover:bg-orange-900/60'
+                  }`}
+                  title="Switch directly to Vintage Cassette Visualizer"
+                >
+                  <Disc className="w-3.5 h-3.5 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
+                  <span>📼 Cassette</span>
+                </button>
+
                 {/* 1-Click Film Reel Journey (35mm Vintage Studio) Mode Switch */}
                 <button
                   onClick={() => {
@@ -1592,8 +1622,9 @@ export const AudioToVideoStudioTool: React.FC = () => {
           {/* RIGHT 5/12: MODULAR EDITING SUITE & STUDIO DOCK */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Dock Navigation Tabs */}
-            <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-4 sm:grid-cols-7 lg:grid-cols-13 gap-1 bg-[#090A0F] p-1.5 rounded-2xl border border-white/10">
               {[
+                { id: 'cassette', label: 'Cassette', icon: Disc },
                 { id: 'filmreel', label: 'Film Reel', icon: Film },
                 { id: 'photouniverse', label: 'Universe', icon: Compass },
                 { id: 'memoryburst', label: 'Burst', icon: Zap },
@@ -1615,7 +1646,9 @@ export const AudioToVideoStudioTool: React.FC = () => {
                     onClick={() => setActiveTab(tab.id as StudioTab)}
                     className={`flex flex-col items-center justify-center py-2 rounded-xl text-[11px] font-bold transition-all relative ${
                       isActive
-                        ? tab.id === 'filmreel'
+                        ? tab.id === 'cassette'
+                          ? 'bg-gradient-to-tr from-orange-600/40 via-amber-600/30 to-yellow-500/20 text-amber-300 border border-amber-400 shadow-md shadow-amber-500/20'
+                          : tab.id === 'filmreel'
                           ? 'bg-gradient-to-tr from-amber-600/40 via-yellow-600/30 to-amber-500/20 text-amber-300 border border-amber-400 shadow-md shadow-amber-500/20'
                           : tab.id === 'photouniverse'
                           ? 'bg-gradient-to-tr from-cyan-600/30 via-blue-600/30 to-indigo-500/20 text-cyan-300 border border-cyan-400 shadow-md'
@@ -1626,6 +1659,8 @@ export const AudioToVideoStudioTool: React.FC = () => {
                           : tab.id === 'garden'
                           ? 'bg-gradient-to-tr from-emerald-600/30 via-teal-600/30 to-cyan-500/20 text-emerald-300 border border-emerald-400 shadow-md'
                           : 'bg-gradient-to-tr from-violet-600/30 via-purple-600/30 to-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-md'
+                        : tab.id === 'cassette'
+                        ? 'text-amber-300 bg-orange-950/40 border border-amber-500/40 hover:bg-orange-900/50 hover:text-white'
                         : tab.id === 'filmreel'
                         ? 'text-amber-300 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/50 hover:text-white'
                         : tab.id === 'photouniverse'
@@ -1639,9 +1674,12 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 mb-1 ${tab.id === 'filmreel' && !isActive ? 'text-amber-400' : tab.id === 'photouniverse' && !isActive ? 'text-cyan-400' : tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
+                    <Icon className={`w-3.5 h-3.5 mb-1 ${tab.id === 'cassette' && !isActive ? 'text-amber-400' : tab.id === 'filmreel' && !isActive ? 'text-amber-400' : tab.id === 'photouniverse' && !isActive ? 'text-cyan-400' : tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
                     <div className="flex items-center gap-1">
                       <span>{tab.label}</span>
+                      {tab.id === 'cassette' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                      )}
                       {tab.id === 'filmreel' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
                       )}
@@ -1665,6 +1703,19 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
             {/* TAB CONTENT PANELS */}
             <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-5 shadow-2xl max-h-[580px] overflow-y-auto space-y-5">
+              {/* TAB: VINTAGE CASSETTE VISUALIZER */}
+              {activeTab === 'cassette' && (
+                <VintageCassetteStudioPanel
+                  composition={composition}
+                  setComposition={setComposition}
+                  liveBands={liveBands}
+                  currentTime={currentTime}
+                  duration={audioTrack.duration || 30}
+                  audioUrl={audioTrack.url}
+                  showToast={showToast}
+                />
+              )}
+
               {/* TAB: FILM REEL JOURNEY 35MM VINTAGE STUDIO */}
               {activeTab === 'filmreel' && (
                 <FilmReelStudioPanel

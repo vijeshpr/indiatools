@@ -37,6 +37,13 @@ import {
 export * from '../photoUniverse/photoUniverseTypes.ts'
 export * from '../photoUniverse/photoUniversePresets.ts'
 
+import {
+  VintageCassetteStudioConfig,
+  DEFAULT_VINTAGE_CASSETTE_CONFIG,
+} from '../cassette/cassetteTypes.ts'
+export * from '../cassette/cassetteTypes.ts'
+export * from '../cassette/cassettePresets.ts'
+
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
 
@@ -205,6 +212,7 @@ export interface StudioCompositionConfig {
   sonicCam3d?: SonicCamStudioConfig
   memoryBurst?: MemoryBurstStudioConfig
   photoUniverse?: PhotoUniverseStudioConfig
+  vintageCassette?: VintageCassetteStudioConfig
   performanceMode: boolean
 }
 
@@ -284,5 +292,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
   sonicCam3d: DEFAULT_SONIC_CAM_CONFIG,
   memoryBurst: DEFAULT_MEMORY_BURST_CONFIG,
   photoUniverse: DEFAULT_PHOTO_UNIVERSE_CONFIG,
+  vintageCassette: DEFAULT_VINTAGE_CASSETTE_CONFIG,
   performanceMode: false,
 }
