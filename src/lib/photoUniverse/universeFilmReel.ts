@@ -337,22 +337,45 @@ export class UniverseFilmReelManager {
     const tEnd = 0.88
     const tRange = tEnd - tStart
 
+    const worldUp = new THREE.Vector3(0, 1, 0)
+
     for (let i = 0; i < count; i++) {
       const u = count === 1 ? 0.5 : tStart + (i / (count - 1)) * tRange
       const pos = curve.getPointAt(u)
       const tangent = curve.getTangentAt(u).normalize()
 
-      // Approximate up vector, then orthogonalize binormal and normal
-      const worldUp = new THREE.Vector3(0, 1, 0)
+      // 1. Calculate strictly upright normal (aligned with worldUp [0, 1, 0])
+      // Binormal is perpendicular to tangent and worldUp:
       let binormal = new THREE.Vector3().crossVectors(tangent, worldUp)
       if (binormal.lengthSq() < 0.001) {
         binormal = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0, 0, 1))
       }
       binormal.normalize()
+
+      // Compute normal (upright vector of the ribbon and photo)
       const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize()
 
-      // Build rotation matrix from basis (binormal = X, normal = Y, -tangent = Z)
-      const rotMatrix = new THREE.Matrix4().makeBasis(binormal, normal, tangent.clone().negate())
+      // Ensure normal points generally upwards (+Y) so photos are never upside-down
+      if (normal.y < 0) {
+        normal.negate()
+        binormal.negate()
+      }
+
+      // Ensure binormal (photo face normal) points towards positive Z (viewer/camera side)
+      // so photographs always face outward toward the camera space
+      if (binormal.z < -0.15) {
+        binormal.negate()
+      }
+
+      // Re-orthogonalize photo tangent to maintain a strictly right-handed orthonormal basis:
+      // cross(normal, binormal) gives the horizontal left-to-right axis of the photo!
+      const photoTangent = new THREE.Vector3().crossVectors(normal, binormal).normalize()
+
+      // Build rotation matrix:
+      // Column 0 (Local X: width of photo): photoTangent (horizontal left-to-right)
+      // Column 1 (Local Y: height of photo): normal (strictly upright!)
+      // Column 2 (Local Z: face normal of photo): binormal (pointing directly out toward camera!)
+      const rotMatrix = new THREE.Matrix4().makeBasis(photoTangent, normal, binormal)
       const rotation = new THREE.Euler().setFromRotationMatrix(rotMatrix, 'YXZ')
 
       stations.push({
@@ -360,7 +383,7 @@ export class UniverseFilmReelManager {
         photoId: nodes[i].photo.id,
         t: u,
         position: pos,
-        tangent,
+        tangent: photoTangent,
         normal,
         binormal,
         rotation,
@@ -631,12 +654,34 @@ export class UniverseFilmReelManager {
     }
 
     // Frame Aperture Dimensions (fits neatly within the 240-unit ribbon height)
-    const apertureHeight = 150
+    // Strictly preserve original photo aspect ratio (both landscape and portrait)
+    const maxHeight = 145
+    const maxWidth = 230
     const rawAspect = asset?.aspectRatio || node.photo.aspectRatio || 16 / 9
-    const apertureWidth = Math.min(260, Math.max(140, apertureHeight * rawAspect))
 
-    // 1. Photo Surface Quad (seated 0.5 units above film ribbon along normal)
-    const photoGeo = new THREE.PlaneGeometry(apertureWidth, apertureHeight)
+    let photoW = 200
+    let photoH = 140
+
+    if (rawAspect >= 1.0) {
+      // Landscape or square: aperture matches aspect ratio clamped to frame bounds
+      photoW = Math.min(maxWidth, maxHeight * rawAspect)
+      photoH = photoW / rawAspect
+      if (photoH > maxHeight) {
+        photoH = maxHeight
+        photoW = photoH * rawAspect
+      }
+    } else {
+      // Portrait: photo is taller than wide, keep upright and proportional
+      photoH = maxHeight
+      photoW = photoH * rawAspect
+      if (photoW > maxWidth) {
+        photoW = maxWidth
+        photoH = photoW / rawAspect
+      }
+    }
+
+    // 1. Photo Surface Quad (seated 0.6 units above film ribbon along station face normal)
+    const photoGeo = new THREE.PlaneGeometry(photoW, photoH)
     const photoMat = new THREE.MeshBasicMaterial({
       map: asset?.texture || null,
       side: THREE.DoubleSide,
@@ -651,7 +696,7 @@ export class UniverseFilmReelManager {
     group.add(photoMesh)
 
     // 2. Celluloid Backing Face (warm dark amber celluloid so the back is NEVER pitch black)
-    const backGeo = new THREE.PlaneGeometry(apertureWidth + 4, apertureHeight + 4)
+    const backGeo = new THREE.PlaneGeometry(photoW + 4, photoH + 4)
     const warmthNorm = config.warmth / 100
     const backMat = new THREE.MeshBasicMaterial({
       color: new THREE.Color(0.12 + warmthNorm * 0.08, 0.08 + warmthNorm * 0.04, 0.05),
@@ -680,7 +725,7 @@ export class UniverseFilmReelManager {
     group.add(borderLine)
 
     // 4. Subtle Projector Glint / Focus Highlight Rim
-    const rimGeo = new THREE.PlaneGeometry(apertureWidth + 12, apertureHeight + 12)
+    const rimGeo = new THREE.PlaneGeometry(photoW + 10, photoH + 10)
     const rimMat = new THREE.MeshBasicMaterial({
       color: new THREE.Color(0xffb74d),
       side: THREE.DoubleSide,
@@ -691,7 +736,7 @@ export class UniverseFilmReelManager {
     })
     const rimMesh = new THREE.Mesh(rimGeo, rimMat)
     rimMesh.name = 'rimMesh'
-    rimMesh.position.set(0, 0, 0.3)
+    rimMesh.position.set(0, 0, 0.4)
     rimMesh.renderOrder = 4
     group.add(rimMesh)
   }
@@ -763,41 +808,42 @@ export class UniverseFilmReelManager {
     let lookTarget = currStation.position.clone()
 
     // Stand-off distance in front of photo for ideal 16:9 cinematic framing
-    const framingDistance = 280
+    const framingDistance = 260
 
     if (progress < 0.35) {
-      // Approach
+      // Approach: Smoothly glide from travel position along curve to face-to-face framing
       phase = 'approach'
       const subT = progress / 0.35
       const smoothT = THREE.MathUtils.smoothstep(subT, 0, 1)
 
-      // Interpolate from outgoing travel position toward hero framing position
+      // Hero framing position directly in front of the station face normal
       const targetPos = currStation.position
         .clone()
         .addScaledVector(currStation.binormal, framingDistance)
-        .add(new THREE.Vector3(20, 15, 0))
 
       const approachStart = currStation.position
         .clone()
-        .addScaledVector(currStation.tangent, -240)
-        .addScaledVector(currStation.binormal, framingDistance * 1.35)
-        .add(new THREE.Vector3(-40, 50, 0))
+        .addScaledVector(currStation.tangent, -200)
+        .addScaledVector(currStation.binormal, framingDistance * 1.25)
+        .addScaledVector(currStation.normal, 25)
 
       camPos.lerpVectors(approachStart, targetPos, smoothT)
       lookTarget.copy(currStation.position)
       focusWeight = 0.5 + smoothT * 0.5
     } else if (progress < 0.75) {
-      // Hold: Lingering focus with gentle breathing drift
+      // Hold: Settle into majestic cinematic framing illuminated by projector
+      // Strictly face-to-face with subtle breathing drift along local tangent and normal
       phase = 'hold'
       const subT = (progress - 0.35) / 0.40
       const driftAngle = currentTime * 0.28
-      const driftX = Math.sin(driftAngle) * 14
-      const driftY = Math.cos(driftAngle * 0.8) * 8
+      const driftX = Math.sin(driftAngle) * 8
+      const driftY = Math.cos(driftAngle * 0.8) * 5
 
       camPos = currStation.position
         .clone()
-        .addScaledVector(currStation.binormal, framingDistance - subT * 18)
-        .add(new THREE.Vector3(driftX, driftY, 0))
+        .addScaledVector(currStation.binormal, framingDistance - subT * 15)
+        .addScaledVector(currStation.tangent, driftX)
+        .addScaledVector(currStation.normal, driftY)
 
       lookTarget.copy(currStation.position)
       focusWeight = 1.0
@@ -809,13 +855,13 @@ export class UniverseFilmReelManager {
 
       const departureStart = currStation.position
         .clone()
-        .addScaledVector(currStation.binormal, framingDistance - 18)
+        .addScaledVector(currStation.binormal, framingDistance - 15)
 
       const flybyTarget = currStation.position
         .clone()
-        .addScaledVector(currStation.tangent, 260)
-        .addScaledVector(currStation.binormal, framingDistance * 1.25)
-        .add(new THREE.Vector3(60, -30, 0))
+        .addScaledVector(currStation.tangent, 220)
+        .addScaledVector(currStation.binormal, framingDistance * 1.2)
+        .addScaledVector(currStation.normal, -20)
 
       camPos.lerpVectors(departureStart, flybyTarget, smoothT)
 

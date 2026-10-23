@@ -448,7 +448,9 @@ export class PhotoUniverseEngine {
           mat.needsUpdate = true
 
           // Rebuild photo surface geometry matching real image natural aspect ratio and normalized UVs
-          if (config.holographicCards?.enabled) {
+          if (config.filmReel?.enabled && filmStations[i]) {
+            universeFilmReel.mountPhotoToStation(group, node, filmStations[i], asset, config.filmReel)
+          } else if (config.holographicCards?.enabled) {
             const actualAspect = asset.aspectRatio || node.photo.aspectRatio || 16 / 9
             const cornerRadius = config.holographicCards?.cornerRadius ?? 16
             let photoW = node.worldWidth

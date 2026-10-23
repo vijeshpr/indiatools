@@ -1504,6 +1504,105 @@ describe('Floating Photo Universe Studio — 3D Music-Driven Cinematic Suite', (
       assert.ok(finaleCam.focusDistance > 500, 'Grand finale camera pulls back for wide panoramic view')
     })
 
+    it('guarantees photos are oriented upright (normal.y >= 0) and face towards camera across all path styles', () => {
+      const pathStyles = ['s-curve', 'spiral', 'infinite-tunnel'] as const
+      for (const style of pathStyles) {
+        const curve = universeFilmReel.generateSplinePath(nodes, style, 115)
+        const stations = universeFilmReel.computeStations(nodes, curve)
+        assert.strictEqual(stations.length, nodes.length)
+
+        for (const station of stations) {
+          // 1. Upright orientation: station normal vector must have normal.y >= 0
+          assert.ok(
+            station.normal.y >= -0.001,
+            `Station normal.y must be upright (>= 0), got ${station.normal.y} for style ${style}`
+          )
+
+          // 2. Camera-facing: station binormal (face normal) must point forward towards viewer (+z or non-inverted)
+          assert.ok(
+            station.binormal.z >= -0.2,
+            `Station binormal.z must face toward viewer/camera side, got ${station.binormal.z} for style ${style}`
+          )
+
+          // 3. Orthonormal basis: tangent, normal, and binormal must be mutually perpendicular unit vectors
+          const dotTN = Math.abs(station.tangent.dot(station.normal))
+          const dotNB = Math.abs(station.normal.dot(station.binormal))
+          const dotTB = Math.abs(station.tangent.dot(station.binormal))
+          assert.ok(dotTN < 0.05, `tangent and normal must be perpendicular, dot=${dotTN}`)
+          assert.ok(dotNB < 0.05, `normal and binormal must be perpendicular, dot=${dotNB}`)
+          assert.ok(dotTB < 0.05, `tangent and binormal must be perpendicular, dot=${dotTB}`)
+        }
+      }
+    })
+
+    it('correctly mounts portrait photos as upright portrait and landscape photos as widescreen without squashing', () => {
+      const curve = universeFilmReel.generateSplinePath(nodes, 's-curve', 115)
+      const stations = universeFilmReel.computeStations(nodes, curve)
+
+      // Test Landscape Photo (e.g. 16:9, node 0)
+      const landscapeGroup = new THREE.Group()
+      universeFilmReel.mountPhotoToStation(
+        landscapeGroup,
+        nodes[0], // 16:9 landscape
+        stations[0],
+        { texture: new THREE.Texture(), aspectRatio: 16 / 9, loaded: true },
+        DEFAULT_UNIVERSE_FILM_REEL_CONFIG
+      )
+      const landscapeMesh = landscapeGroup.getObjectByName('photoMesh') as THREE.Mesh
+      assert.ok(landscapeMesh)
+      const landGeo = landscapeMesh.geometry as THREE.PlaneGeometry
+      const landW = landGeo.parameters.width
+      const landH = landGeo.parameters.height
+      assert.ok(landW > landH, `Landscape photo width (${landW}) must exceed height (${landH})`)
+      assert.ok(Math.abs(landW / landH - 16 / 9) < 0.1, `Aspect ratio must remain ~16/9, got ${landW / landH}`)
+
+      // Test Portrait Photo (e.g. 9:16, node 1)
+      const portraitGroup = new THREE.Group()
+      universeFilmReel.mountPhotoToStation(
+        portraitGroup,
+        nodes[1], // 9:16 portrait
+        stations[1],
+        { texture: new THREE.Texture(), aspectRatio: 9 / 16, loaded: true },
+        DEFAULT_UNIVERSE_FILM_REEL_CONFIG
+      )
+      const portraitMesh = portraitGroup.getObjectByName('photoMesh') as THREE.Mesh
+      assert.ok(portraitMesh)
+      const portGeo = portraitMesh.geometry as THREE.PlaneGeometry
+      const portW = portGeo.parameters.width
+      const portH = portGeo.parameters.height
+      assert.ok(portH > portW, `Portrait photo height (${portH}) must exceed width (${portW})`)
+      assert.ok(Math.abs(portW / portH - 9 / 16) < 0.05, `Aspect ratio must remain ~9/16, got ${portW / portH}`)
+    })
+
+    it('aligns camera squarely face-to-face with photo during hold phase without edge-on tilt', () => {
+      const curve = universeFilmReel.generateSplinePath(nodes, 's-curve', 115)
+      const stations = universeFilmReel.computeStations(nodes, curve)
+      const totalDuration = 30
+      const activeConfig = {
+        ...DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
+        enabled: true,
+      }
+
+      // Evaluate camera at midpoint of first photo's hold phase
+      // Station 0: duration per photo = 30 / 4 = 7.5s.
+      // Hold phase is from progress 0.35 to 0.75 -> t = 7.5 * 0.55 = ~4.125s
+      const holdCam = universeFilmReel.evaluateFilmReelCamera(4.125, totalDuration, activeConfig)
+      assert.ok(holdCam)
+      assert.strictEqual(holdCam.travelPhase, 'hold')
+
+      const station0 = stations[0]
+      const camPos = new THREE.Vector3(holdCam.position.x, holdCam.position.y, holdCam.position.z)
+      const toCamera = camPos.clone().sub(station0.position).normalize()
+
+      // The vector from the photo to the camera must be pointing along the station's face normal (binormal)
+      // Dot product between toCamera and station0.binormal should be very close to 1.0 (straight on!)
+      const dotWithFaceNormal = toCamera.dot(station0.binormal)
+      assert.ok(
+        dotWithFaceNormal > 0.98,
+        `Camera during hold must squarely face the photo front surface, dot=${dotWithFaceNormal}`
+      )
+    })
+
     it('disposes film reel meshes and textures cleanly', () => {
       assert.doesNotThrow(() => {
         universeFilmReel.dispose()
