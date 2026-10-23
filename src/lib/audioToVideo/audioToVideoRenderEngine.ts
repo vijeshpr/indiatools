@@ -158,8 +158,16 @@ export class AudioToVideoRenderEngine {
     } else if (config.portalVfx && (hasPortalActive || (portalPhotoUrl && !config.photoMotion?.enabled && config.background.mode === 'single-image'))) {
       const baseImg = portalPhotoUrl ? portalVfxEngine.getCachedImage(portalPhotoUrl) : null
       portalVfxEngine.render(ctx, width, height, config.portalVfx, baseImg, bands, currentTime, duration)
-    } else if (config.photoMotion?.enabled && config.photoMotion.sourceImageUrl) {
-      studioPhotoMotionEngine.render(ctx, width, height, config.photoMotion, bands, currentTime, duration)
+    } else if (config.photoMotion?.enabled) {
+      const motionImageUrl =
+        config.photoMotion.sourceImageUrl ||
+        config.background.singleImageUrl ||
+        '/images/garden/golden-hour-meadow.jpg'
+      const activePhotoMotionConfig = {
+        ...config.photoMotion,
+        sourceImageUrl: motionImageUrl,
+      }
+      studioPhotoMotionEngine.render(ctx, width, height, activePhotoMotionConfig, bands, currentTime, duration)
     } else {
       this.renderBackground(ctx, width, height, config, bands, currentTime, duration)
       this.renderCinematicEffects(ctx, width, height, config, bands, currentTime)

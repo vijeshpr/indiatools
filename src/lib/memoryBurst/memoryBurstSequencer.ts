@@ -8,9 +8,9 @@ import {
   MemoryBurstStudioConfig,
   MemoryBurstTransitionStyle,
   MemoryBurstBeatMarker,
-} from './memoryBurstTypes'
-import { NormalizedAudioBands } from '../audioToVideo/types'
-import { memoryBurstBeatDetector } from './memoryBurstBeatDetector'
+} from './memoryBurstTypes.ts'
+import { NormalizedAudioBands } from '../audioToVideo/types.ts'
+import { memoryBurstBeatDetector } from './memoryBurstBeatDetector.ts'
 
 export interface MemoryBurstCropRect {
   sx: number

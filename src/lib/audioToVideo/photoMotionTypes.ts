@@ -122,7 +122,8 @@ export interface PhotoMotionStudioConfig {
 
 export const DEFAULT_PHOTO_MOTION_CONFIG: PhotoMotionStudioConfig = {
   enabled: false,
-  sourceImageUrl: null,
+  sourceImageUrl: '/images/garden/golden-hour-meadow.jpg',
+  sourceImageName: 'Golden_Hour_Meadow_1080p.jpg',
   camera: {
     preset: 'slow-push-in',
     zoomStart: 1.05,

@@ -4,7 +4,7 @@
  * Low/Low-Mid Spectral Energy & Adaptive Baseline Detector
  */
 
-import { MemoryBurstBeatMarker } from './memoryBurstTypes'
+import { MemoryBurstBeatMarker } from './memoryBurstTypes.ts'
 
 export class MemoryBurstBeatDetector {
   /**

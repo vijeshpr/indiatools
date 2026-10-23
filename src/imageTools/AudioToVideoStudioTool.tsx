@@ -248,6 +248,119 @@ export const AudioToVideoStudioTool: React.FC = () => {
     }
   }, [])
 
+  // Centralized Tab & Mode Switcher with Engine Synchronization
+  const handleTabChange = useCallback((tabId: StudioTab) => {
+    setActiveTab(tabId)
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('tab', tabId)
+      window.history.replaceState({}, '', url.toString())
+    }
+
+    if (tabId === 'photomotion') {
+      setComposition((prev) => ({
+        ...prev,
+        photoMotion: {
+          ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+          enabled: true,
+          sourceImageUrl:
+            prev.photoMotion?.sourceImageUrl ||
+            prev.background.singleImageUrl ||
+            '/images/garden/golden-hour-meadow.jpg',
+          sourceImageName: prev.photoMotion?.sourceImageName || 'Golden_Hour_Meadow_1080p.jpg',
+        },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+      }))
+    } else if (tabId === 'cassette') {
+      setComposition((prev) => ({
+        ...prev,
+        vintageCassette: {
+          ...(prev.vintageCassette || DEFAULT_VINTAGE_CASSETTE_CONFIG),
+          enabled: true,
+        },
+        photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+      }))
+    } else if (tabId === 'filmreel') {
+      setComposition((prev) => ({
+        ...prev,
+        photoUniverse: {
+          ...(prev.photoUniverse || DEFAULT_PHOTO_UNIVERSE_CONFIG),
+          enabled: true,
+          filmReel: {
+            ...(prev.photoUniverse?.filmReel || DEFAULT_UNIVERSE_FILM_REEL_CONFIG),
+            enabled: true,
+          },
+        },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+      }))
+    } else if (tabId === 'photouniverse') {
+      setComposition((prev) => ({
+        ...prev,
+        photoUniverse: {
+          ...(prev.photoUniverse || DEFAULT_PHOTO_UNIVERSE_CONFIG),
+          enabled: true,
+          filmReel: prev.photoUniverse?.filmReel ? { ...prev.photoUniverse.filmReel, enabled: false } : undefined,
+        },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+      }))
+    } else if (tabId === 'memoryburst') {
+      setComposition((prev) => ({
+        ...prev,
+        memoryBurst: {
+          ...(prev.memoryBurst || DEFAULT_MEMORY_BURST_CONFIG),
+          enabled: true,
+        },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+      }))
+    } else if (tabId === 'soniccam') {
+      setComposition((prev) => ({
+        ...prev,
+        sonicCam3d: {
+          ...(prev.sonicCam3d || DEFAULT_SONIC_CAM_CONFIG),
+          enabled: true,
+        },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+      }))
+    } else if (tabId === 'garden') {
+      setComposition((prev) => ({
+        ...prev,
+        gardenStudio: {
+          ...(prev.gardenStudio || DEFAULT_GARDEN_CONFIG),
+          enabled: true,
+        },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+      }))
+    }
+  }, [])
+
   // Initialize Web Audio & Render Engines once on mount
   useEffect(() => {
     const audio = new AudioToVideoAudioEngine()
@@ -257,6 +370,28 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
     // Auto-preload the default studio anthem so playback is instantly ready
     if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const tabParam = params.get('tab')
+      if (tabParam === 'photomotion') {
+        setComposition((prev) => ({
+          ...prev,
+          photoMotion: {
+            ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+            enabled: true,
+            sourceImageUrl:
+              prev.photoMotion?.sourceImageUrl ||
+              prev.background.singleImageUrl ||
+              '/images/garden/golden-hour-meadow.jpg',
+            sourceImageName: prev.photoMotion?.sourceImageName || 'Golden_Hour_Meadow_1080p.jpg',
+          },
+          vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+          photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+          memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+          sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+          gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        }))
+      }
+
       audio
         .loadAudio('/audio/default-studio-track.mp3')
         .then(({ duration, name }) => {
@@ -818,8 +953,32 @@ export const AudioToVideoStudioTool: React.FC = () => {
         sourceImageUrl: url,
         sourceImageName: file.name,
       },
+      vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+      photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+      memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+      sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+      gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
     }))
     showToast(`Loaded ${file.name} into 2.5D Motion Studio`, 'success')
+  }
+
+  // Handle Select Sample Landscape Photo
+  const handleSelectSamplePhoto = (url: string, name: string) => {
+    setComposition((prev) => ({
+      ...prev,
+      photoMotion: {
+        ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+        enabled: true,
+        sourceImageUrl: url,
+        sourceImageName: name,
+      },
+      vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+      photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+      memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+      sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+      gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+    }))
+    showToast(`Loaded ${name} into 2.5D Motion Studio`, 'success')
   }
 
   // Handle Foreground Layer Upload (Dual-Layer Parallax Mode)
@@ -840,6 +999,11 @@ export const AudioToVideoStudioTool: React.FC = () => {
           foregroundUrl: url,
         },
       },
+      vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+      photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+      memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+      sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+      gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
     }))
     showToast('Foreground parallax layer loaded', 'success')
   }
@@ -944,6 +1108,11 @@ export const AudioToVideoStudioTool: React.FC = () => {
             ambientGlow: 40,
           },
         },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
       }))
       showToast('Loaded 1080p Cozy Cabin Scene into 2.5D Motion Studio', 'success')
     } catch {
@@ -1404,6 +1573,12 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         <span>🌸 Garden Studio</span>
                       </span>
                     )}
+                    {composition.photoMotion?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                        <span>🎥 2.5D Motion Studio</span>
+                      </span>
+                    )}
                   </div>
 
                   <button
@@ -1553,7 +1728,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as StudioTab)}
+                      onClick={() => handleTabChange(tab.id as StudioTab)}
                       className={`whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                         isActive
                           ? tab.id === 'audio'
@@ -1604,6 +1779,9 @@ export const AudioToVideoStudioTool: React.FC = () => {
                       )}
                       {tab.id === 'soniccam' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse shrink-0" />
+                      )}
+                      {tab.id === 'photomotion' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
                       )}
                       {tab.id === 'garden' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
@@ -3134,15 +3312,29 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
                     <button
                       onClick={() =>
-                        setComposition((prev) => ({
-                          ...prev,
-                          photoMotion: {
-                            ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
-                            enabled: !(prev.photoMotion?.enabled ?? false),
-                          },
-                        }))
+                        setComposition((prev) => {
+                          const nextEnabled = !(prev.photoMotion?.enabled ?? false)
+                          return {
+                            ...prev,
+                            photoMotion: {
+                              ...(prev.photoMotion || DEFAULT_PHOTO_MOTION_CONFIG),
+                              enabled: nextEnabled,
+                              sourceImageUrl:
+                                prev.photoMotion?.sourceImageUrl ||
+                                prev.background.singleImageUrl ||
+                                '/images/garden/golden-hour-meadow.jpg',
+                              sourceImageName:
+                                prev.photoMotion?.sourceImageName || 'Golden_Hour_Meadow_1080p.jpg',
+                            },
+                            vintageCassette: nextEnabled && prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+                            photoUniverse: nextEnabled && prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+                            memoryBurst: nextEnabled && prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+                            sonicCam3d: nextEnabled && prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+                            gardenStudio: nextEnabled && prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+                          }
+                        })
                       }
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                         composition.photoMotion?.enabled
                           ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
                           : 'bg-slate-800 text-slate-400 hover:text-white border border-white/10'
@@ -3237,6 +3429,38 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         </button>
                       </div>
                     )}
+
+                    {/* Curated 1080p Preset Scenes Picker */}
+                    <div className="space-y-1.5 pt-1">
+                      <div className="text-[11px] font-semibold text-slate-400 flex items-center justify-between">
+                        <span>Curated 1080p Preset Scenes</span>
+                        <span className="text-[10px] text-cyan-400">1-Click Instant Preview</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {[
+                          { name: 'Golden Hour Meadow', url: '/images/garden/golden-hour-meadow.jpg', icon: '🌅' },
+                          { name: 'Calm Garden Dawn', url: '/images/garden/calm-garden-dawn.jpg', icon: '🌄' },
+                          { name: 'Rain-Kissed Botanical', url: '/images/garden/rain-kissed-botanical.jpg', icon: '🌧️' },
+                          { name: 'Moonlit Rose Garden', url: '/images/garden/moonlit-rose-garden.jpg', icon: '🌹' },
+                          { name: 'Dreamlike Glowing', url: '/images/garden/dreamlike-glowing-garden.jpg', icon: '✨' },
+                          { name: 'Vintage Film Strip', url: '/images/filmReel/hero-film-strip.jpg', icon: '🎞️' },
+                        ].map((sample) => (
+                          <button
+                            key={sample.url}
+                            type="button"
+                            onClick={() => handleSelectSamplePhoto(sample.url, sample.name)}
+                            className={`p-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                              composition.photoMotion?.sourceImageUrl === sample.url
+                                ? 'bg-cyan-950/60 border-cyan-400/80 text-cyan-200 shadow-md shadow-cyan-500/20'
+                                : 'bg-slate-900/60 border-white/10 text-slate-300 hover:bg-slate-800 hover:text-white'
+                            }`}
+                          >
+                            <span className="text-base shrink-0">{sample.icon}</span>
+                            <span className="text-[11px] font-medium truncate">{sample.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {/* SECTION 2: DEPTH & PARALLAX MODE */}

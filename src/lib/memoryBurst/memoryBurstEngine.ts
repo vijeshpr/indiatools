@@ -6,9 +6,9 @@
 import {
   MemoryBurstStudioConfig,
   MemoryBurstPhoto,
-} from './memoryBurstTypes'
-import { memoryBurstSequencer, MemoryBurstFrameState } from './memoryBurstSequencer'
-import { NormalizedAudioBands } from '../audioToVideo/types'
+} from './memoryBurstTypes.ts'
+import { memoryBurstSequencer, MemoryBurstFrameState } from './memoryBurstSequencer.ts'
+import { NormalizedAudioBands } from '../audioToVideo/types.ts'
 
 export class MemoryBurstEngine {
   private imageCache = new Map<string, HTMLImageElement>()
