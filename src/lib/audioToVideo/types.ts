@@ -1,48 +1,55 @@
 import {
-  PhotoMotionStudioConfig,
+  type PhotoMotionStudioConfig,
   DEFAULT_PHOTO_MOTION_CONFIG,
 } from './photoMotionTypes.ts'
 export * from './photoMotionTypes.ts'
 
 import {
-  CinematicPortalStudioConfig,
+  type CinematicPortalStudioConfig,
   DEFAULT_PORTAL_VFX_CONFIG,
 } from '../portalVfx/portalTypes.ts'
 export * from '../portalVfx/portalTypes.ts'
 
 import {
-  MusicGrownGardenConfig,
+  type MusicGrownGardenConfig,
   DEFAULT_GARDEN_CONFIG,
 } from '../garden/gardenTypes.ts'
 export * from '../garden/gardenTypes.ts'
 
 import {
-  SonicCamStudioConfig,
+  type SonicCamStudioConfig,
   DEFAULT_SONIC_CAM_CONFIG,
 } from '../sonicCam/sonicCamTypes.ts'
 export * from '../sonicCam/sonicCamTypes.ts'
 export * from '../sonicCam/sonicCamPresets.ts'
 
 import {
-  MemoryBurstStudioConfig,
+  type MemoryBurstStudioConfig,
   DEFAULT_MEMORY_BURST_CONFIG,
 } from '../memoryBurst/memoryBurstTypes.ts'
 export * from '../memoryBurst/memoryBurstTypes.ts'
 export * from '../memoryBurst/memoryBurstPresets.ts'
 
 import {
-  PhotoUniverseStudioConfig,
+  type PhotoUniverseStudioConfig,
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
 } from '../photoUniverse/photoUniverseTypes.ts'
 export * from '../photoUniverse/photoUniverseTypes.ts'
 export * from '../photoUniverse/photoUniversePresets.ts'
 
 import {
-  VintageCassetteStudioConfig,
+  type VintageCassetteStudioConfig,
   DEFAULT_VINTAGE_CASSETTE_CONFIG,
 } from '../cassette/cassetteTypes.ts'
 export * from '../cassette/cassetteTypes.ts'
 export * from '../cassette/cassettePresets.ts'
+
+import {
+  type NeonEnergyStudioConfig,
+  DEFAULT_NEON_ENERGY_CONFIG,
+} from '../neonEnergy/neonEnergyTypes.ts'
+export * from '../neonEnergy/neonEnergyTypes.ts'
+export * from '../neonEnergy/neonEnergyPresets.ts'
 
 export type AspectRatio = '16:9' | '9:16' | '1:1'
 export type VideoResolution = '1080p' | '720p'
@@ -213,6 +220,7 @@ export interface StudioCompositionConfig {
   memoryBurst?: MemoryBurstStudioConfig
   photoUniverse?: PhotoUniverseStudioConfig
   vintageCassette?: VintageCassetteStudioConfig
+  neonEnergy?: NeonEnergyStudioConfig
   performanceMode: boolean
 }
 
@@ -293,5 +301,6 @@ export const DEFAULT_STUDIO_COMPOSITION: StudioCompositionConfig = {
   memoryBurst: DEFAULT_MEMORY_BURST_CONFIG,
   photoUniverse: DEFAULT_PHOTO_UNIVERSE_CONFIG,
   vintageCassette: DEFAULT_VINTAGE_CASSETTE_CONFIG,
+  neonEnergy: DEFAULT_NEON_ENERGY_CONFIG,
   performanceMode: false,
 }

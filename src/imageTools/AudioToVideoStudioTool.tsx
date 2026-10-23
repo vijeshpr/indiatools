@@ -109,7 +109,9 @@ import { DEFAULT_MEMORY_BURST_CONFIG } from '../lib/memoryBurst/memoryBurstTypes
 import { PhotoUniverseStudioPanel } from './audioToVideo/PhotoUniverseStudioPanel'
 import { FilmReelStudioPanel } from './audioToVideo/FilmReelStudioPanel'
 import { VintageCassetteStudioPanel } from './audioToVideo/VintageCassetteStudioPanel'
+import { NeonEnergyStudioPanel } from './audioToVideo/NeonEnergyStudioPanel'
 import { DEFAULT_VINTAGE_CASSETTE_CONFIG } from '../lib/cassette/cassetteTypes'
+import { DEFAULT_NEON_ENERGY_CONFIG } from '../lib/neonEnergy/neonEnergyTypes'
 import {
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_FILM_REEL_CONFIG,
@@ -123,6 +125,7 @@ import {
 } from '../lib/audioToVideo/audioToVideoExportEngine'
 
 type StudioTab =
+  | 'neon'
   | 'cassette'
   | 'filmreel'
   | 'photouniverse'
@@ -147,7 +150,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const tabParam = params.get('tab') as StudioTab
-      if (tabParam && ['cassette', 'filmreel', 'photouniverse', 'memoryburst', 'soniccam', 'portal', 'photomotion', 'garden', 'background', 'visualizer', 'cinematic', 'typography', 'audio'].includes(tabParam)) {
+      if (tabParam && ['neon', 'cassette', 'filmreel', 'photouniverse', 'memoryburst', 'soniccam', 'portal', 'photomotion', 'garden', 'background', 'visualizer', 'cinematic', 'typography', 'audio'].includes(tabParam)) {
         return tabParam
       }
     }
@@ -257,7 +260,21 @@ export const AudioToVideoStudioTool: React.FC = () => {
       window.history.replaceState({}, '', url.toString())
     }
 
-    if (tabId === 'photomotion') {
+    if (tabId === 'neon') {
+      setComposition((prev) => ({
+        ...prev,
+        neonEnergy: {
+          ...(prev.neonEnergy || DEFAULT_NEON_ENERGY_CONFIG),
+          enabled: true,
+        },
+        vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+        photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+        memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+        sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+        gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+      }))
+    } else if (tabId === 'photomotion') {
       setComposition((prev) => ({
         ...prev,
         photoMotion: {
@@ -274,6 +291,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
         memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
         sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
         gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+        neonEnergy: prev.neonEnergy ? { ...prev.neonEnergy, enabled: false } : prev.neonEnergy,
       }))
     } else if (tabId === 'cassette') {
       setComposition((prev) => ({
@@ -287,6 +305,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
         sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
         gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
         photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+        neonEnergy: prev.neonEnergy ? { ...prev.neonEnergy, enabled: false } : prev.neonEnergy,
       }))
     } else if (tabId === 'filmreel') {
       setComposition((prev) => ({
@@ -304,6 +323,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
         sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
         gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
         photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+        neonEnergy: prev.neonEnergy ? { ...prev.neonEnergy, enabled: false } : prev.neonEnergy,
       }))
     } else if (tabId === 'photouniverse') {
       setComposition((prev) => ({
@@ -318,6 +338,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
         sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
         gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
         photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+        neonEnergy: prev.neonEnergy ? { ...prev.neonEnergy, enabled: false } : prev.neonEnergy,
       }))
     } else if (tabId === 'memoryburst') {
       setComposition((prev) => ({
@@ -331,6 +352,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
         sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
         gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
         photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+        neonEnergy: prev.neonEnergy ? { ...prev.neonEnergy, enabled: false } : prev.neonEnergy,
       }))
     } else if (tabId === 'soniccam') {
       setComposition((prev) => ({
@@ -344,6 +366,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
         memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
         gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
         photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+        neonEnergy: prev.neonEnergy ? { ...prev.neonEnergy, enabled: false } : prev.neonEnergy,
       }))
     } else if (tabId === 'garden') {
       setComposition((prev) => ({
@@ -357,6 +380,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
         memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
         sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
         photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+        neonEnergy: prev.neonEnergy ? { ...prev.neonEnergy, enabled: false } : prev.neonEnergy,
       }))
     }
   }, [])
@@ -372,7 +396,21 @@ export const AudioToVideoStudioTool: React.FC = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const tabParam = params.get('tab')
-      if (tabParam === 'photomotion') {
+      if (tabParam === 'neon') {
+        setComposition((prev) => ({
+          ...prev,
+          neonEnergy: {
+            ...(prev.neonEnergy || DEFAULT_NEON_ENERGY_CONFIG),
+            enabled: true,
+          },
+          vintageCassette: prev.vintageCassette ? { ...prev.vintageCassette, enabled: false } : prev.vintageCassette,
+          photoUniverse: prev.photoUniverse ? { ...prev.photoUniverse, enabled: false } : prev.photoUniverse,
+          memoryBurst: prev.memoryBurst ? { ...prev.memoryBurst, enabled: false } : prev.memoryBurst,
+          sonicCam3d: prev.sonicCam3d ? { ...prev.sonicCam3d, enabled: false } : prev.sonicCam3d,
+          gardenStudio: prev.gardenStudio ? { ...prev.gardenStudio, enabled: false } : prev.gardenStudio,
+          photoMotion: prev.photoMotion ? { ...prev.photoMotion, enabled: false } : prev.photoMotion,
+        }))
+      } else if (tabParam === 'photomotion') {
         setComposition((prev) => ({
           ...prev,
           photoMotion: {
@@ -1537,6 +1575,12 @@ export const AudioToVideoStudioTool: React.FC = () => {
                     <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-black/60 backdrop-blur-md text-cyan-300 border border-cyan-500/20 shadow-sm">
                       {composition.resolution}
                     </span>
+                    {composition.neonEnergy?.enabled && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-pink-500/15 border border-pink-500/30 text-pink-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                        <span>⚡ Neon Energy</span>
+                      </span>
+                    )}
                     {composition.vintageCassette?.enabled && (
                       <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-sm flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
@@ -1710,6 +1754,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
               >
                 {[
                   { id: 'audio', label: 'Audio', icon: Music },
+                  { id: 'neon', label: 'Neon Glow', icon: Zap },
                   { id: 'cassette', label: 'Cassette', icon: Disc },
                   { id: 'filmreel', label: 'Film Reel', icon: Film },
                   { id: 'photouniverse', label: 'Universe', icon: Compass },
@@ -1733,6 +1778,8 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         isActive
                           ? tab.id === 'audio'
                             ? 'bg-gradient-to-tr from-cyan-600/40 via-blue-600/30 to-indigo-500/20 text-cyan-300 border border-cyan-400 shadow-md shadow-cyan-500/20'
+                            : tab.id === 'neon'
+                            ? 'bg-gradient-to-tr from-cyan-600/40 via-pink-600/30 to-yellow-500/20 text-cyan-300 border border-cyan-400 shadow-md shadow-cyan-500/20'
                             : tab.id === 'cassette'
                             ? 'bg-gradient-to-tr from-orange-600/40 via-amber-600/30 to-yellow-500/20 text-amber-300 border border-amber-400 shadow-md shadow-amber-500/20'
                             : tab.id === 'filmreel'
@@ -1748,6 +1795,8 @@ export const AudioToVideoStudioTool: React.FC = () => {
                             : 'bg-gradient-to-tr from-violet-600/30 via-purple-600/30 to-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-md'
                           : tab.id === 'audio'
                           ? 'text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 hover:bg-cyan-900/50 hover:text-white'
+                          : tab.id === 'neon'
+                          ? 'text-pink-300 bg-pink-950/40 border border-pink-500/40 hover:bg-pink-900/50 hover:text-white'
                           : tab.id === 'cassette'
                           ? 'text-amber-300 bg-orange-950/40 border border-amber-500/40 hover:bg-orange-900/50 hover:text-white'
                           : tab.id === 'filmreel'
@@ -1763,8 +1812,11 @@ export const AudioToVideoStudioTool: React.FC = () => {
                           : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
                       }`}
                     >
-                      <Icon className={`w-3.5 h-3.5 shrink-0 ${tab.id === 'audio' && !isActive ? 'text-cyan-400' : tab.id === 'cassette' && !isActive ? 'text-amber-400' : tab.id === 'filmreel' && !isActive ? 'text-amber-400' : tab.id === 'photouniverse' && !isActive ? 'text-cyan-400' : tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
+                      <Icon className={`w-3.5 h-3.5 shrink-0 ${tab.id === 'audio' && !isActive ? 'text-cyan-400' : tab.id === 'neon' && !isActive ? 'text-pink-400' : tab.id === 'cassette' && !isActive ? 'text-amber-400' : tab.id === 'filmreel' && !isActive ? 'text-amber-400' : tab.id === 'photouniverse' && !isActive ? 'text-cyan-400' : tab.id === 'memoryburst' && !isActive ? 'text-amber-400' : tab.id === 'soniccam' && !isActive ? 'text-sky-400' : tab.id === 'garden' && !isActive ? 'text-emerald-400' : ''}`} />
                       <span>{tab.label}</span>
+                      {tab.id === 'neon' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse shrink-0" />
+                      )}
                       {tab.id === 'cassette' && (
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
                       )}
@@ -1804,6 +1856,18 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
             {/* TAB CONTENT PANELS */}
             <div className="bg-[#090A0F] border border-white/10 rounded-2xl p-5 shadow-2xl max-h-[580px] overflow-y-auto space-y-5">
+              {/* TAB: NEON ENERGY / ELECTRIC GLOW VISUALIZER */}
+              {activeTab === 'neon' && (
+                <NeonEnergyStudioPanel
+                  composition={composition}
+                  setComposition={setComposition}
+                  liveBands={liveBands}
+                  currentTime={currentTime}
+                  duration={audioTrack.duration || 30}
+                  showToast={showToast}
+                />
+              )}
+
               {/* TAB: VINTAGE CASSETTE VISUALIZER */}
               {activeTab === 'cassette' && (
                 <VintageCassetteStudioPanel

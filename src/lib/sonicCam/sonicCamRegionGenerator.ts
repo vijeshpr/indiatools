@@ -3,7 +3,7 @@
  * Multi-Region Algorithmic Layout Generator
  */
 
-import { ImageRegion, RegionLayoutMode, REGION_COLORS } from './sonicCamTypes.ts'
+import { type ImageRegion, type RegionLayoutMode, REGION_COLORS } from './sonicCamTypes.ts'
 
 export function generateAutoRegions(
   mode: RegionLayoutMode,

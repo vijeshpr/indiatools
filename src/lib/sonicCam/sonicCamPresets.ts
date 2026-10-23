@@ -4,9 +4,9 @@
  */
 
 import {
-  SonicCamPresetMetadata,
+  type SonicCamPresetMetadata,
   DEFAULT_SONIC_CAM_CONFIG,
-  SonicCamPresetId,
+  type SonicCamPresetId,
 } from './sonicCamTypes.ts'
 import { generateCinematicGrid, generateUniformGrid, generateRandomRectangles } from './sonicCamRegionGenerator.ts'
 

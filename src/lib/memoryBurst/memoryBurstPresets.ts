@@ -3,7 +3,7 @@
  * Curated cinematic rhythm and transition presets
  */
 
-import { MemoryBurstStudioConfig, DEFAULT_MEMORY_BURST_CONFIG } from './memoryBurstTypes.ts'
+import { type MemoryBurstStudioConfig, DEFAULT_MEMORY_BURST_CONFIG } from './memoryBurstTypes.ts'
 
 export interface MemoryBurstPreset {
   id: string

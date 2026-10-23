@@ -5,7 +5,7 @@
  * Generates 100% client-side resolution-independent visuals with zero external network requests.
  */
 
-import { BackgroundPreset, BackgroundCategory } from './types.ts'
+import type { BackgroundPreset, BackgroundCategory } from './types.ts'
 
 export const BACKGROUND_PRESETS: BackgroundPreset[] = [
   {

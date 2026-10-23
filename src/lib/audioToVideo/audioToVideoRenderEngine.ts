@@ -16,6 +16,7 @@ import { sonicCamEngine } from '../sonicCam/sonicCamEngine.ts'
 import { memoryBurstEngine } from '../memoryBurst/memoryBurstEngine.ts'
 import { photoUniverseEngine } from '../photoUniverse/universeEngine.ts'
 import { vintageCassetteEngine } from '../cassette/cassetteEngine.ts'
+import { neonEnergyEngine } from '../neonEnergy/neonEnergyEngine.ts'
 
 interface Particle {
   x: number
@@ -141,7 +142,9 @@ export class AudioToVideoRenderEngine {
       config.portalVfx?.sourceImageUrl ||
       config.background.singleImageUrl
 
-    if (config.vintageCassette?.enabled) {
+    if (config.neonEnergy?.enabled) {
+      neonEnergyEngine.render(ctx, width, height, config.neonEnergy, bands, currentTime, duration)
+    } else if (config.vintageCassette?.enabled) {
       vintageCassetteEngine.render(ctx, width, height, config.vintageCassette, bands, timeData, currentTime, duration)
     } else if (config.photoUniverse?.enabled) {
       photoUniverseEngine.render(ctx, width, height, config.photoUniverse, bands, currentTime, duration)
@@ -174,10 +177,14 @@ export class AudioToVideoRenderEngine {
     }
 
     // 4. Visualizer Layer
-    this.renderVisualizer(ctx, width, height, config, bands, freqData, timeData, currentTime)
+    if (!config.neonEnergy?.enabled) {
+      this.renderVisualizer(ctx, width, height, config, bands, freqData, timeData, currentTime)
+    }
 
     // 5. Typography & Title Overlay Layer
-    this.renderTypography(ctx, width, height, config, currentTime, duration)
+    if (!config.neonEnergy?.enabled) {
+      this.renderTypography(ctx, width, height, config, currentTime, duration)
+    }
 
     ctx.restore()
   }

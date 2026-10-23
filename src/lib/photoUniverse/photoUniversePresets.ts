@@ -4,7 +4,7 @@
  */
 
 import {
-  PhotoUniverseStudioConfig,
+  type PhotoUniverseStudioConfig,
   DEFAULT_PHOTO_UNIVERSE_CONFIG,
   DEFAULT_UNIVERSE_BACKGROUND,
   DEFAULT_UNIVERSE_BASS_SHAKE,

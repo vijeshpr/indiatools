@@ -3,7 +3,7 @@
  * Curated Style Presets
  */
 
-import { VintageCassetteStudioConfig, DEFAULT_VINTAGE_CASSETTE_CONFIG } from './cassetteTypes.ts'
+import { type VintageCassetteStudioConfig, DEFAULT_VINTAGE_CASSETTE_CONFIG } from './cassetteTypes.ts'
 
 export interface CassettePreset {
   id: string
