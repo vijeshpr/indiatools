@@ -220,6 +220,38 @@ export const AudioToVideoStudioTool: React.FC = () => {
   const tabScrollRef = useRef<HTMLDivElement | null>(null)
   const playerContainerRef = useRef<HTMLDivElement | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showControls, setShowControls] = useState(true)
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const resetControlsTimer = useCallback(() => {
+    setShowControls(true)
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current)
+      controlsTimeoutRef.current = null
+    }
+    if (isPlaying) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false)
+      }, 2500)
+    }
+  }, [isPlaying])
+
+  useEffect(() => {
+    if (!isPlaying) {
+      setShowControls(true)
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current)
+        controlsTimeoutRef.current = null
+      }
+    } else {
+      resetControlsTimer()
+    }
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current)
+      }
+    }
+  }, [isPlaying, resetControlsTimer])
 
   const toggleFullscreen = useCallback(() => {
     if (!playerContainerRef.current) return
@@ -237,6 +269,7 @@ export const AudioToVideoStudioTool: React.FC = () => {
   useEffect(() => {
     const handleFsChange = () => {
       setIsFullscreen(!!document.fullscreenElement)
+      setShowControls(true)
     }
     document.addEventListener('fullscreenchange', handleFsChange)
     return () => document.removeEventListener('fullscreenchange', handleFsChange)
@@ -687,6 +720,32 @@ export const AudioToVideoStudioTool: React.FC = () => {
         .catch(() => showToast('Click to allow audio playback', 'info'))
     }
   }
+
+  // Global Keyboard Shortcuts (Space for Play/Pause, 'F' for Fullscreen)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault()
+        togglePlayPause()
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault()
+        toggleFullscreen()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isPlaying, audioTrack.url, toggleFullscreen])
 
   // Restore / Play Studio Default Track
   const handleResetToDefaultAudio = async () => {
@@ -1512,16 +1571,34 @@ export const AudioToVideoStudioTool: React.FC = () => {
           <div className="lg:col-span-7 flex flex-col gap-4">
             <div
               ref={playerContainerRef}
+              onMouseMove={resetControlsTimer}
+              onClick={resetControlsTimer}
+              onMouseEnter={resetControlsTimer}
+              onMouseLeave={() => {
+                if (isPlaying) {
+                  setShowControls(false)
+                }
+              }}
               className={`w-full bg-[#07080D] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col transition-all group select-none ${
-                isFullscreen ? 'fixed inset-0 z-50 rounded-none border-none bg-black justify-between' : ''
+                isFullscreen
+                  ? `fixed inset-0 z-50 rounded-none border-none bg-black justify-between ${
+                      !showControls && isPlaying ? 'cursor-none' : ''
+                    }`
+                  : ''
               }`}
             >
               {/* Canvas Viewport */}
               <div
                 className={`relative w-full ${
                   isFullscreen ? 'flex-1' : 'aspect-video'
-                } bg-[#030408] flex items-center justify-center overflow-hidden`}
+                } bg-[#030408] flex items-center justify-center overflow-hidden cursor-pointer`}
+                onClick={(e) => {
+                  if (!isDraggingPortal) {
+                    togglePlayPause()
+                  }
+                }}
                 onMouseMove={(e) => {
+                  resetControlsTimer()
                   if (!isDraggingPortal || !composition.portalVfx?.ring.enabled) return
                   const rect = e.currentTarget.getBoundingClientRect()
                   const newX = Math.max(5, Math.min(95, ((e.clientX - rect.left) / rect.width) * 100))
@@ -1555,7 +1632,10 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         left: `${composition.portalVfx.ring.posX}%`,
                         top: `${composition.portalVfx.ring.posY}%`,
                       }}
-                      onMouseDown={() => setIsDraggingPortal(true)}
+                      onMouseDown={(e) => {
+                        e.stopPropagation()
+                        setIsDraggingPortal(true)
+                      }}
                       className="absolute z-10 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-cyan-400 bg-black/60 backdrop-blur-md cursor-move flex items-center justify-center hover:scale-125 transition-transform shadow-lg shadow-cyan-500/40 group/handle"
                       title="Click and drag to position portal"
                     >
@@ -1567,7 +1647,13 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   )}
 
                 {/* Top Floating Glass Header (Aspect, Resolution, Active Effect Badge & Fullscreen Icon) */}
-                <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none z-20">
+                <div
+                  className={`absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none z-20 transition-all duration-300 ${
+                    !showControls && isPlaying
+                      ? 'opacity-0 -translate-y-4'
+                      : 'opacity-100 translate-y-0'
+                  }`}
+                >
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-black/60 backdrop-blur-md text-white border border-white/10 shadow-sm">
                       {composition.aspectRatio}
@@ -1627,28 +1713,57 @@ export const AudioToVideoStudioTool: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={toggleFullscreen}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleFullscreen()
+                    }}
                     className="pointer-events-auto p-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/15 text-slate-300 hover:text-white transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer"
-                    title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                    title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen (F)'}
                   >
                     {isFullscreen ? <Minimize2 className="w-4 h-4 text-cyan-400" /> : <Maximize2 className="w-4 h-4" />}
                   </button>
                 </div>
 
-                {/* Big Central Play/Pause Hover Trigger */}
+                {/* Big Central Play/Pause Trigger */}
                 <button
-                  onClick={togglePlayPause}
-                  className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-xl border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer z-20"
-                  title={isPlaying ? 'Pause' : 'Play'}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    togglePlayPause()
+                  }}
+                  className={`absolute inset-0 m-auto w-20 h-20 rounded-full bg-black/75 hover:bg-black/90 backdrop-blur-xl border border-white/25 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-2xl cursor-pointer z-20 ${
+                    !isPlaying
+                      ? 'opacity-100 scale-100 pointer-events-auto shadow-cyan-500/25 ring-2 ring-cyan-400/40'
+                      : showControls
+                        ? 'opacity-0 hover:opacity-95 scale-95 hover:scale-100 pointer-events-auto'
+                        : 'opacity-0 scale-90 pointer-events-none'
+                  }`}
+                  title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
                 >
-                  {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1 text-cyan-400" />}
+                  {isPlaying ? (
+                    <Pause className="w-9 h-9 text-white drop-shadow" />
+                  ) : (
+                    <Play className="w-9 h-9 ml-1.5 text-cyan-400 drop-shadow-[0_0_12px_rgba(0,240,255,0.7)]" />
+                  )}
                 </button>
               </div>
 
               {/* Integrated Bottom Cinematic Control Deck */}
-              <div className="p-4 bg-gradient-to-t from-black via-[#08090E] to-[#0D0F17] border-t border-white/10 flex flex-col gap-3">
+              <div
+                className={`p-4 bg-gradient-to-t from-black via-[#08090E]/95 to-[#0D0F17]/90 border-t border-white/10 flex flex-col gap-3 transition-all duration-300 z-30 ${
+                  isFullscreen
+                    ? (!showControls && isPlaying
+                        ? 'opacity-0 translate-y-6 pointer-events-none'
+                        : 'opacity-100 translate-y-0 pointer-events-auto')
+                    : ''
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* Timeline Seek Bar */}
-                <div className="relative flex items-center group/scrubber cursor-pointer">
+                <div
+                  className="relative flex items-center group/scrubber cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <input
                     type="range"
                     min="0"
@@ -1661,19 +1776,28 @@ export const AudioToVideoStudioTool: React.FC = () => {
                 </div>
 
                 {/* Player Controls Row */}
-                <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+                <div
+                  className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {/* Left Controls: Play/Pause, Restart, Time readout */}
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={togglePlayPause}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        togglePlayPause()
+                      }}
                       className="w-10 h-10 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-cyan-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                      title={isPlaying ? 'Pause' : 'Play'}
+                      title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
                     >
                       {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                     </button>
 
                     <button
-                      onClick={() => {
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
                         if (audioEngineRef.current) {
                           audioEngineRef.current.seek(0)
                           setCurrentTime(0)
@@ -1704,7 +1828,14 @@ export const AudioToVideoStudioTool: React.FC = () => {
                   <div className="flex items-center gap-3">
                     {/* Volume slider */}
                     <div className="hidden sm:flex items-center gap-2">
-                      <button onClick={toggleMute} className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleMute()
+                        }}
+                        className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                      >
                         {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
                       </button>
                       <input
@@ -1715,14 +1846,19 @@ export const AudioToVideoStudioTool: React.FC = () => {
                         value={isMuted ? 0 : volume}
                         onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
                         className="w-16 md:w-20 accent-cyan-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
 
                     {/* Fullscreen Button */}
                     <button
-                      onClick={toggleFullscreen}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleFullscreen()
+                      }}
                       className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-cyan-300 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                      title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen'}
+                      title={isFullscreen ? 'Exit Fullscreen (Esc or F)' : 'Enter Fullscreen (F)'}
                     >
                       {isFullscreen ? <Minimize2 className="w-4 h-4 text-cyan-400" /> : <Maximize2 className="w-4 h-4" />}
                     </button>

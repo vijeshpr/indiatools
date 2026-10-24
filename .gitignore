@@ -26,3 +26,4 @@ dist-ssr
 # Agent and temporary brag folders
 .agents/
 brag/
+brag-output*/
